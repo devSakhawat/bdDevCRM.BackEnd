@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\bdDevCRM.Entities\bdDevCRM.Entities.csproj" />
+    <ProjectReference Include="..\bdDevCRM.RepositoriesContracts\bdDevCRM.RepositoriesContracts.csproj" />
+    <ProjectReference Include="..\bdDevCRM.ServiceContract\bdDevCRM.ServiceContract.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Utilities\bdDevCRM.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>

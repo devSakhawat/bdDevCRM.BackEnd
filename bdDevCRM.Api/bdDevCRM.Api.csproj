@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\bdDevCRM.LoggerSevice\bdDevCRM.LoggerSevice.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Presentation\bdDevCRM.Presentation.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Repositories\bdDevCRM.Repositories.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Service\bdDevCRM.Service.csproj" />
+  </ItemGroup>
+
+</Project>

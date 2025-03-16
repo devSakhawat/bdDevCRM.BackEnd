@@ -1,0 +1,19 @@
+﻿using bdDevCRM.Entities.Entities;
+
+namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
+
+public interface ICompanyRepository : IRepositoryBase<Company>
+{
+  IEnumerable<Company> GetAllCompanies(bool trackChanges);
+  Company GetCompany(int companyId, bool trackChanges);
+  void CreateCompany(Company Company);
+
+  IEnumerable<Company> GetByIds(IEnumerable<int> ids, bool trackChanges);
+
+
+  Task<IEnumerable<Company>> GetCompaniesAsync(bool trackChanges);
+  Task<Company> GetCompanyAsync(int companyId, bool trackChanges);
+  Task<Company?> CompanyByCompanyIdWithAdditionalCondition(int companyId, string additionalCondition);
+  void UpdateCompany(Company Company);
+  void DeleteCompany(Company Company);
+}

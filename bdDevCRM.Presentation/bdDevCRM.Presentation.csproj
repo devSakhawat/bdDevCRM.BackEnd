@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\bdDevCRM.LoggerSevice\bdDevCRM.LoggerSevice.csproj" />
+    <ProjectReference Include="..\bdDevCRM.ServiceContract\bdDevCRM.ServiceContract.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Utilities\bdDevCRM.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\HR\" />
+  </ItemGroup>
+
+</Project>
