@@ -87,7 +87,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     return await _dbSet.ToListAsync();
   }
 
-  public async Task<IEnumerable<T>> FindByConditionAsync(Expression<Func<T, bool>> expression) => await _dbSet.Where(expression).ToListAsync();
+  public async Task<IEnumerable<T>> FindByConditionAsync(Expression<Func<T, bool>> expression) => await _dbSet.AsNoTracking().Where(expression).ToListAsync();
   #endregion Basic Crud Operation  with async
 
   #region Advanced Crud Operation
@@ -475,6 +475,75 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     }
   }
   #endregion Query Execute by TDT
+
+
+  //public async Task<List<T>> ExecuteQueryAsync<T>(string query) where T : new()
+  //{
+  //  var dataList = new List<T>();
+  //  using (var connection = _context.Database.GetDbConnection())
+  //  {
+  //    try
+  //    {
+  //      await connection.OpenAsync();
+  //      using (var command = connection.CreateCommand())
+  //      {
+  //        command.CommandText = query;
+  //        using (var reader = await command.ExecuteReaderAsync())
+  //        {
+  //          while (await reader.ReadAsync())
+  //          {
+  //            var entity = new T();
+  //            var properties = typeof(T).GetProperties();
+
+  //            for (int i = 0; i < reader.FieldCount; i++)
+  //            {
+  //              if (reader.IsDBNull(i)) continue;
+
+  //              var columnName = reader.GetName(i);
+  //              var property = properties.FirstOrDefault(p =>
+  //                  p.Name.Equals(columnName, StringComparison.OrdinalIgnoreCase));
+
+  //              if (property != null && property.CanWrite)
+  //              {
+  //                var value = reader.GetValue(i);
+  //                try
+  //                {
+  //                  if (property.PropertyType.IsGenericType &&
+  //                      property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+  //                  {
+  //                    var underlyingType = Nullable.GetUnderlyingType(property.PropertyType);
+  //                    value = Convert.ChangeType(value, underlyingType);
+  //                  }
+  //                  else
+  //                  {
+  //                    value = Convert.ChangeType(value, property.PropertyType);
+  //                  }
+
+  //                  property.SetValue(entity, value);
+  //                }
+  //                catch (Exception ex)
+  //                {
+  //                  Console.Error.WriteLine($"Error setting property {property.Name}: {ex.Message}");
+  //                }
+  //              }
+  //            }
+
+  //            dataList.Add(entity);
+  //          }
+  //        }
+  //      }
+  //    }
+  //    catch (Exception ex)
+  //    {
+  //      Console.Error.WriteLine($"Database error: {ex.Message}");
+  //      Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
+  //      throw; // রি-থ্রো করা গুরুত্বপূর্ণ যাতে এটি কলিং কোডে প্রচার হয়
+  //    }
+  //  }
+
+  //  return dataList;
+  //}
+
 
 
   public async Task<List<T>> ExecuteQueryAsync<T>(string query)

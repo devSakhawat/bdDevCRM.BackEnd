@@ -46,6 +46,12 @@ public class MenuRepository : RepositoryBase<Menu>, IMenuRepository
     return menusDto;
   }
 
+  public async Task<List<MenuRepositoryDto>> MenuSummary(bool trackChanges)
+  {
+    string menuSummaryQuery = $"Select MenuId,Menu.ModuleId, MenuName, MenuPath, ISNULL(ParentMenu, 0) as ParentMenu ,ModuleName,ToDo,SORORDER\r\n,(Select MenuName from Menu mn where mn.MenuId = menu.ParentMenu) as ParentMenuName \r\nfrom Menu \r\nleft outer join Module on module.ModuleId = menu.ModuleId\r\norder by ModuleName asc,ParentMenu asc, MenuName";
+    List<MenuRepositoryDto> menusDto = await ExecuteQueryAsync<MenuRepositoryDto>(menuSummaryQuery);
+    return menusDto;
+  }
 
 
   public IEnumerable<Menu> GetAllMenus(bool trackChanges) => FindAll(trackChanges).OrderBy(c => c.MenuName).ToList();
@@ -68,6 +74,9 @@ public class MenuRepository : RepositoryBase<Menu>, IMenuRepository
     return objMenu;
   }
 
+
+
+  public async Task<IEnumerable<Menu>> MenusByModuleId(int moduleId, bool trackChanges) => await FindByConditionAsync(c => c.ModuleId.Equals(moduleId));
 
 
   // Add a new Menu

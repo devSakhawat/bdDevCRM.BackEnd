@@ -6,13 +6,14 @@ namespace bdDevCRM.ServicesContract;
 
 public interface IServiceManager
 {
+  ITokenBlacklistService TokenBlacklist { get; }
   ICountryService Countries { get; }
   ICompanyService Companies { get; }
   ISystemSettingsService SystemSettings { get; }
   IUsersService Users { get; }
   IAuthenticationService CustomAuthentication { get; }
   IMenuService Menus { get; }
-  ITokenBlacklistService TokenBlacklist { get; }
+  IModuleService Modules { get; }
 
 }
 

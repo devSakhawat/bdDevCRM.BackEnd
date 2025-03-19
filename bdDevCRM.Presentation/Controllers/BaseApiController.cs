@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 
 [Route(RouteConstants.BaseRoute)]
 [ApiController]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[ServiceFilter(typeof(LogActionAttribute))]
-[ServiceFilter(typeof(ValidateMediaTypeAttribute))]
+//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+//[ServiceFilter(typeof(LogActionAttribute))]
+//[ServiceFilter(typeof(ValidateMediaTypeAttribute))]
 [EnableCors]
 public class BaseApiController : ControllerBase
 {

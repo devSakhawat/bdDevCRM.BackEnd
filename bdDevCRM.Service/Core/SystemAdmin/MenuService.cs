@@ -1,6 +1,7 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
+using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -58,9 +59,6 @@ internal sealed class MenuService : IMenuService
   }
 
 
-
-
-
   /// <summary>
   /// Menu crud
   /// </summary>
@@ -68,29 +66,12 @@ internal sealed class MenuService : IMenuService
   /// <param name="options"></param>
   /// <returns></returns>
 
-  public GridEntity<MenuDto> MenuSummary(bool trackChanges, GridOptions options)
+  public async Task<GridEntity<MenuDto>> MenuSummary(bool trackChanges, GridOptions options)
   {
-    var menus = _repository.Menus.GetAllMenus(trackChanges).ToList().OrderBy(m => m.ParentMenu);
-    var menusDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuDto>(menus);
-    var modules = _repository.Modules.GetAllModules(trackChanges).ToList();
+    var menus = await _repository.Menus.MenuSummary(trackChanges);
+    var menusDto = MyMapper.JsonCloneIEnumerableToList<MenuRepositoryDto, MenuDto>(menus);
+    //var modules = _repository.Modules.GetAllModules(trackChanges).ToList();
     var gridData = GridResult<MenuDto>.Data(menusDto, options);
-
-    if (gridData.Items == null)
-    {
-      gridData.Items = new List<MenuDto>();
-    }
-    else
-    {
-      foreach (var item in gridData.Items)
-      {
-        var objPrimaryMenu = menusDto.FirstOrDefault(m => m.MenuId == item.ModuleId);
-        if (objPrimaryMenu != null) item.ParentMenuName = objPrimaryMenu.MenuName;
-
-        var objModule = modules.FirstOrDefault(m => m.ModuleId == item.ModuleId);
-        if (objModule != null) item.ModuleName = objModule.ModuleName;
-      }
-    }
-
     return gridData;
   }
 
@@ -185,4 +166,17 @@ internal sealed class MenuService : IMenuService
   {
     throw new NotImplementedException();
   }
+
+  public async Task<IEnumerable<MenuDto>> MenusByModuleId(int moduleId, bool trackChanges)
+  {
+    if (moduleId < 0) throw new ArgumentOutOfRangeException(nameof(moduleId), "Module ID must be a positive integer.");
+
+    IEnumerable<Menu> menus = await _repository.Menus.MenusByModuleId(moduleId, trackChanges);
+    //if (menus.Count() = 0) throw new GenericNotFoundException("Menu", "MenuId", moduleId.ToString());
+    if (menus.Count() == 0) return new List<MenuDto>();
+
+    List<MenuDto> menusDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuDto>(menus);
+    return menusDto;
+  }
+
 }

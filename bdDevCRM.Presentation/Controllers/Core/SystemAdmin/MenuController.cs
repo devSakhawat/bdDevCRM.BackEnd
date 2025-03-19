@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
@@ -6,8 +7,10 @@ using bdDevCRM.Utilities.KendoGrid;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
@@ -93,11 +96,39 @@ public class MenuController : BaseApiController
   }
 
 
-  [HttpGet(RouteConstants.MenuSummary)]
-  public IActionResult GetMenuSummary([FromBody] GridOptions options)
+  [HttpPost(RouteConstants.MenuSummary)]
+  //[IgnoreMediaTypeValidation]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> GetMenuSummary([FromBody] GridOptions options)
   {
-    var menuSummary = _serviceManager.Menus.MenuSummary(trackChanges: false , options);
-    return menuSummary.Items.Any() ? Ok(menuSummary) : NoContent();
+    var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false , options);
+    return (menuSummary != null ) ? Ok(menuSummary) : NoContent();
+  }
+
+
+  [HttpGet(RouteConstants.GetMenus)]
+  [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
+  //[IgnoreMediaTypeValidation]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> GetMenus()
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    IEnumerable<MenuDto> menusDto = await _serviceManager.Menus.GetMenusAsync(trackChanges: false);
+    //return (menuSummary != null ) ? Ok(menuSummary) : NoContent();
+    return Ok(menusDto.ToList());
+  }
+
+
+  [HttpGet(RouteConstants.MenusByModuleId)]
+  [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
+  //[IgnoreMediaTypeValidation]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> MenusByModuleId(int moduleId)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    IEnumerable<MenuDto> menusDto = await _serviceManager.Menus.MenusByModuleId(moduleId,trackChanges: false);
+    //return (menuSummary != null ) ? Ok(menuSummary) : NoContent();
+    return Ok(menusDto.ToList());
   }
 
 

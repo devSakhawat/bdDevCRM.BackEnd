@@ -29,6 +29,7 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
   public IEnumerable<Module> GetByIds(IEnumerable<int> ids, bool trackChanges) => FindByCondition(x => ids.Contains(x.ModuleId), trackChanges).ToList();
 
 
+
   // Get all Modules
   public async Task<IEnumerable<Module>> GetModulesAsync(bool trackChanges) => await FindAll(trackChanges).OrderBy(c => c.ModuleId).ToListAsync();
 
@@ -52,5 +53,15 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
 
   // Delete a Module by ID
   public void DeleteModule(Module Module) => Delete(Module);
+
+
+
+  public async Task<List<ModuleRepositoryDto>> ModuleSummary(bool trackChanges)
+  {
+    string moduleSummaryQuery = $"select ModuleId, ModuleName from Module order by ModuleId";
+    List<ModuleRepositoryDto> modulesDto = await ExecuteQueryAsync<ModuleRepositoryDto>(moduleSummaryQuery);
+    return modulesDto;
+  }
+
 
 }

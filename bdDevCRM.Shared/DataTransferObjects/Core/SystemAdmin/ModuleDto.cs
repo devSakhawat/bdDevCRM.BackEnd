@@ -1,6 +1,8 @@
-﻿namespace bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+﻿using bdDevCRM.Shared.DataTransferObjects.Conmon;
 
-public class ModuleDto
+namespace bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+
+public class ModuleDto : CommonDto
 {
   public int ModuleId { get; set; }
 
