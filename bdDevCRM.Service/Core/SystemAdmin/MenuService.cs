@@ -192,7 +192,7 @@ internal sealed class MenuService : IMenuService
   public async Task<MenuDto> UpdateAsync(int key, MenuDto modelDto)
   {
     if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
-    if (key != modelDto.ModuleId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
+    if (key != modelDto.MenuId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
 
     Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == modelDto.MenuId, trackChanges: false);
     if (entity.MenuName == modelDto.MenuName) throw new DuplicateRecordException();
