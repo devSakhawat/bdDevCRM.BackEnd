@@ -4,6 +4,7 @@ using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json;
 using System.Data;
 using System.Data.Common;
@@ -54,7 +55,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   #endregion Basic CRUD Operations without async
 
   #region Basic Crud Operation with async
-  public async Task AddAsync(T entity)
+  public async Task CreateAsync(T entity)
   {
     await _dbSet.AddAsync(entity);
   }
@@ -67,20 +68,17 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     //await _context.SaveChangesAsync();
   }
 
-  public async Task DeleteAsync(int id)
+  public async Task DeleteAsync(Expression<Func<T, bool>> predicate, bool trackChanges)
   {
-    var entity = await _dbSet.FindAsync(id);
-    if (entity != null)
+    var enitytData = (trackChanges) ? await _dbSet.Where(predicate).AsNoTracking().FirstOrDefaultAsync() : await _dbSet.Where(predicate).FirstOrDefaultAsync();
+    if (enitytData != null)
     {
-      _dbSet.Remove(entity);
-      //await _context.SaveChangesAsync();
+      _dbSet.Remove(enitytData);
     }
   }
 
-  public async Task<T> GetByIdAsync(int id)
-  {
-    return await _dbSet.FindAsync(id);
-  }
+  public async Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges)
+    => !trackChanges ? await _dbSet.Where(predicate).AsNoTracking().FirstOrDefaultAsync() : await _dbSet.Where(predicate).FirstOrDefaultAsync();
 
   public async Task<IEnumerable<T>> GetAllAsync()
   {

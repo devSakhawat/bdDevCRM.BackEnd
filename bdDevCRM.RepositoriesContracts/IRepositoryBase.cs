@@ -30,11 +30,11 @@ public interface IRepositoryBase<T>
 
   #region Basic Generic Crud
   // Generic Crud Operation
-  Task AddAsync(T entity);
+  Task CreateAsync(T entity);
   void UpdateAsync(T entity);
-  Task DeleteAsync(int id);
+  Task DeleteAsync(Expression<Func<T, bool>> predicate, bool trackChanges);
 
-  Task<T> GetByIdAsync(int id);
+  Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges);
   Task<IEnumerable<T>> GetAllAsync();
 
   Task<IEnumerable<T>> FindByConditionAsync(Expression<Func<T, bool>> expression);

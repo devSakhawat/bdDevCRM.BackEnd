@@ -1,16 +1,14 @@
-﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.Presentation.ActionFIlters;
-using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.KendoGrid;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
@@ -40,11 +38,8 @@ public class MenuController : BaseApiController
     string cacheKey = $"menu_permissions_{userId}";
     if (_cache.TryGetValue(cacheKey, out IEnumerable<MenuDto> cachedMenus))
     {
-      //_logger.LogInformation("Menu returned from cache for user {UserId}", userId);
       return Ok(cachedMenus);
     }
-
-
     var menusDtoTask = _serviceManager.Menus.SelectMenuByUserPermission(userId, trackChanges: false);
 
     // Add timeout to prevent long-running queries
@@ -62,9 +57,7 @@ public class MenuController : BaseApiController
       return NoContent();
 
     // Cache the result
-    var cacheOptions = new MemoryCacheEntryOptions()
-        .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
-        .SetPriority(CacheItemPriority.High);
+    var cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(5)).SetPriority(CacheItemPriority.High);
 
     _cache.Set(cacheKey, menusDto, cacheOptions);
 
@@ -78,33 +71,15 @@ public class MenuController : BaseApiController
     return menusDto.Any() ? Ok(menusDto) : NoContent();
   }
 
-
-
   // After login to system
-  [HttpPost(RouteConstants.CreateMenu)]
-  public IActionResult SaveMenu([FromBody] MenuDto model)
-  {
-    try
-    {
-      var res = _serviceManager.Menus.CreateMenu(model);
-      return StatusCode(StatusCodes.Status200OK, res);
-    }
-    catch (Exception ex)
-    {
-      return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
-    }
-  }
-
-
   [HttpPost(RouteConstants.MenuSummary)]
   //[IgnoreMediaTypeValidation]
   [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> GetMenuSummary([FromBody] GridOptions options)
   {
-    var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false , options);
-    return (menuSummary != null ) ? Ok(menuSummary) : NoContent();
+    var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
+    return (menuSummary != null) ? Ok(menuSummary) : NoContent();
   }
-
 
   [HttpGet(RouteConstants.GetMenus)]
   [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
@@ -118,7 +93,6 @@ public class MenuController : BaseApiController
     return Ok(menusDto.ToList());
   }
 
-
   [HttpGet(RouteConstants.MenusByModuleId)]
   [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
   //[IgnoreMediaTypeValidation]
@@ -126,10 +100,40 @@ public class MenuController : BaseApiController
   public async Task<IActionResult> MenusByModuleId(int moduleId)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    IEnumerable<MenuDto> menusDto = await _serviceManager.Menus.MenusByModuleId(moduleId,trackChanges: false);
+    IEnumerable<MenuDto> menusDto = await _serviceManager.Menus.MenusByModuleId(moduleId, trackChanges: false);
     //return (menuSummary != null ) ? Ok(menuSummary) : NoContent();
     return Ok(menusDto.ToList());
   }
+
+  [HttpPost(RouteConstants.CreateMenu)]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> SaveMenu([FromBody] MenuDto modelDto)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    var model = await _serviceManager.Menus.CreateAsync(modelDto);
+    return (model != null) ? Ok(model) : NoContent();
+  }
+
+  [HttpPut(RouteConstants.UpdateMenu)]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> UpdateModule([FromRoute] int key, [FromBody] MenuDto modelDto)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    MenuDto returnData = await _serviceManager.Menus.UpdateAsync(key, modelDto);
+    return (returnData != null) ? Ok(returnData) : NoContent();
+  }
+
+  [HttpDelete(RouteConstants.DeleteMenu)]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> DeleteModule([FromRoute] int key, [FromBody] MenuDto modelDto)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    await _serviceManager.Menus.DeleteAsync(key, modelDto);
+    return Ok("Success");
+  }
+
 
 
 }

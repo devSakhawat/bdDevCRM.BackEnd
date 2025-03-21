@@ -58,7 +58,6 @@ internal sealed class MenuService : IMenuService
     return menusDto;
   }
 
-
   /// <summary>
   /// Menu crud
   /// </summary>
@@ -107,15 +106,24 @@ internal sealed class MenuService : IMenuService
     return MenusToReturn;
   }
 
-
-
-
   public async Task<MenuDto> CreateMenuAsync(MenuDto entityForCreate)
   {
     Menu Menu = MyMapper.JsonClone<MenuDto, Menu>(entityForCreate);
     _repository.Menus.CreateMenu(Menu);
     await _repository.SaveAsync();
     return entityForCreate;
+  }
+
+  public async Task<MenuDto> CreateAsync(MenuDto modelDto)
+  {
+    if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
+    bool isModuleExists = await _repository.Menus.HasAnyAsync(m => m.MenuName == modelDto.MenuName);
+    if (isModuleExists) throw new DuplicateRecordException("Module", "ModuleName");
+
+    Menu entity = MyMapper.JsonClone<MenuDto, Menu>(modelDto);
+    await _repository.Menus.CreateAsync(entity);
+    await _repository.SaveAsync();
+    return modelDto;
   }
 
   public async Task UpdateMenuAsync(int MenuId, MenuDto MenuForUpdate, bool trackChanges)
@@ -177,6 +185,35 @@ internal sealed class MenuService : IMenuService
 
     List<MenuDto> menusDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuDto>(menus);
     return menusDto;
+  }
+
+
+
+  public async Task<MenuDto> UpdateAsync(int key, MenuDto modelDto)
+  {
+    if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
+    if (key != modelDto.ModuleId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
+
+    Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == modelDto.MenuId, trackChanges: false);
+    if (entity.MenuName == modelDto.MenuName) throw new DuplicateRecordException();
+
+    entity = MyMapper.JsonClone<MenuDto, Menu>(modelDto);
+    _repository.Menus.UpdateAsync(entity);
+    await _repository.SaveAsync();
+    modelDto = MyMapper.JsonClone<Menu, MenuDto>(entity);
+    return modelDto;
+  }
+
+  public async Task DeleteAsync(int key, MenuDto modelDto)
+  {
+    if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
+    if (key != modelDto.MenuId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
+
+    Menu entity= await _repository.Menus.GetByIdAsync(m => m.MenuId == key, trackChanges: false);
+    if (entity == null) throw new GenericNotFoundException(new MenuDto().GetType().Name.ToString(), "MenuId", key.ToString());
+
+    await _repository.Menus.DeleteAsync(x => x.MenuId == modelDto.MenuId, trackChanges: true);
+    await _repository.SaveAsync();
   }
 
 }

@@ -27,6 +27,17 @@ public class MyMapper
     return destination;
   }
 
+  // how to use
+  // var source = new Source { Name = "Name", Age = 10 };
+  // var destination = MyMapper.Map<Destination>(source);
+  // example : var clonedObjectJson = MyClone.ModelMapping<Module, ModuleHistory>(oldData);
+  public static TDestination ModelMapping<TSource, TDestination>(TSource source)
+  {
+    string text = JsonConvert.SerializeObject((object)source);
+    return JsonConvert.DeserializeObject<TDestination>(text);
+  }
+
+
   public static TTarget JsonClone<TSource, TTarget>(TSource source) where TTarget : new()
   {
     if (source == null) throw new ArgumentNullException(nameof(source));

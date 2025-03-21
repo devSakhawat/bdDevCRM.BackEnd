@@ -1,4 +1,6 @@
-﻿namespace bdDevCRM.Entities.Exceptions.Company;
+﻿using bdDevCRM.Entities.Exceptions.BaseException;
+
+namespace bdDevCRM.Entities.Exceptions.Company;
 
 public sealed class CompanyNotFoundException : NotFoundException
 {

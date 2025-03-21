@@ -1,4 +1,4 @@
-﻿namespace bdDevCRM.Entities.Exceptions;
+﻿namespace bdDevCRM.Entities.Exceptions.BaseException;
 
 public abstract class BadRequestException : Exception
 {

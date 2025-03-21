@@ -1,16 +1,16 @@
-﻿using bdDevCRM.Api.ContentFormatter;
+﻿using bdDevCRM.Api.ApiResponseError;
+using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.LoggerSevice;
 using bdDevCRM.Repositories;
 using bdDevCRM.RepositoriesContracts;
-using bdDevCRM.ServiceContract.Authentication;
 using bdDevCRM.Services;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Sql.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 namespace bdDevCRM.Api.Extensions;
@@ -95,6 +95,27 @@ public static class ServiceExtensions
       //    }
       //  }
       //};
+    });
+  }
+
+  public static void ConfigureApiBehaviorOptions(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.Configure<ApiBehaviorOptions>(options =>
+    {
+      options.SuppressModelStateInvalidFilter = true;
+      options.InvalidModelStateResponseFactory = actionContext =>
+      {
+        var errors = actionContext.ModelState
+           .Where(e => e.Value.Errors.Count() > 0)
+           .SelectMany(x => x.Value.Errors)
+           .Select(y => y.ErrorMessage).ToArray();
+
+        var errorResponse = new ApiValidationErrorResponse
+        {
+          Errors = errors
+        };
+        return new BadRequestObjectResult(errorResponse);
+      };
     });
   }
 

@@ -1,6 +1,7 @@
 using bdDevCRM.Api;
 using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Api.Extensions;
+using bdDevCRM.Api.Middleware;
 using bdDevCRM.Presentation;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Service.Authentication;
@@ -24,7 +25,6 @@ builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.ConfigureResponseCompression();
 builder.Services.ConfigureGzipCompression();
 
@@ -84,7 +84,7 @@ builder.Services.ConfigureAuthorization();
 
 var app = builder.Build();
 
-app.UseExceptionHandler(opt => { });
+//app.UseExceptionHandler(opt => { });
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -92,6 +92,8 @@ if (app.Environment.IsDevelopment())
   app.UseSwagger();
   app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Enable compression middleware (must be at the top of the pipeline)
 app.UseResponseCompression();

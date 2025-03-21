@@ -1,12 +1,9 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
-using bdDevCRM.RepositoryDtos;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using System.Reflection.Metadata;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 

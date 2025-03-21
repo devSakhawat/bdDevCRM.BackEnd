@@ -29,4 +29,13 @@ public static class MessageConstants
   public const string IfDeleteReffereceRecord = "Foreign key refference in other table";
   public const string IfInvalidUserPassword = "Invalid Username or password";
   public const string RecordUpdated = "Record updated successfully";
+  public const string SaveFailed = "Record save failed";
+  public const string UpdateFailed = "Record updated failed";
+  public const string DeleteFailed = "Record deleted failed";
+  public const string ModelStateInvalid = "Model state invalid. Fillup all the field value.";
+  public const string MappingFailed = "Mapping Failed!";
+  public const string NoRecordError = "No record found!";
+  public const string UnauthorizedAttemptOfRecordDeleteError = "Unauthorized attempt of deleting record!";
+  public const string UnauthorizedAttemptOfRecordInsert = "Unauthorized attempt of inserting record!";
+  public static string ExceptionError = "";
 }

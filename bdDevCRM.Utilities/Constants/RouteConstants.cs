@@ -18,6 +18,9 @@ public static class RouteConstants
   #region Module
   public const string ModuleSummary = "module-summary";
   public const string Modules = "modules";
+  public const string CreateModule = "module";
+  public const string UpdateModule = "module/{key}";
+  public const string DeleteModule = "module/{key}";
 
   #endregion Module
 

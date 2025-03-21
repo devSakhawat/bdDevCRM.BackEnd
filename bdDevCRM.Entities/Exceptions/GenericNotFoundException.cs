@@ -1,4 +1,6 @@
-﻿namespace bdDevCRM.Entities.Exceptions;
+﻿using bdDevCRM.Entities.Exceptions.BaseException;
+
+namespace bdDevCRM.Entities.Exceptions;
 
 public sealed class GenericNotFoundException : NotFoundException
 {

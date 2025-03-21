@@ -1,5 +1,5 @@
 ﻿using bdDevCRM.Entities.ExceptionEntities;
-using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Entities.Exceptions.BaseException;
 using bdDevCRM.RepositoriesContracts;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;

@@ -138,7 +138,7 @@ internal sealed class UsersService : IUsersService
     Users user = await _repository.Users.GetUserAsync(userId, trackChanges);
     if (user == null) throw new GenericNotFoundException("Users", "UserId", userId.ToString());
 
-    await _repository.Users.DeleteAsync(userId);
+    await _repository.Users.DeleteAsync(x => x.UserId == userId, trackChanges:true);
     await _repository.SaveAsync();
   }
 

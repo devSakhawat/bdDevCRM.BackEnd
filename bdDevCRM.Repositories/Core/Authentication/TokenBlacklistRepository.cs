@@ -14,7 +14,7 @@ public class TokenBlacklistRepository : RepositoryBase<TokenBlacklist>, ITokenBl
 
   public async Task AddToBlacklistAsync(TokenBlacklist token)
   {
-    await AddAsync(token);
+    await CreateAsync(token);
   }
 
   public async Task<bool> IsTokenBlacklistedAsync(string token)

@@ -1,4 +1,5 @@
-﻿using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.KendoGrid;
@@ -49,6 +50,37 @@ public class ModuleController : BaseApiController
     var modulesDto = await _serviceManager.Modules.GetModulesAsync(false);
     return Ok(modulesDto.ToList());
   }
+
+  [HttpPost(RouteConstants.CreateModule)]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> SaveModule([FromBody] ModuleDto moduleDto)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    var module = await _serviceManager.Modules.CreateModuleAsync(moduleDto);
+    return (module != null) ? Ok(module) : NoContent();
+  }
+
+  [HttpPost(RouteConstants.UpdateModule)]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> UpdateModule([FromRoute] int key, [FromBody] ModuleDto moduleDto)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    ModuleDto returnData = await _serviceManager.Modules.UpdateModuleAsync(key,moduleDto);
+    return (returnData != null) ? Ok(returnData) : NoContent();
+  }
+
+  [HttpDelete(RouteConstants.DeleteModule)]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> DeleteModule([FromRoute] int key, [FromBody] ModuleDto moduleDto)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    await _serviceManager.Modules.DeleteModuleAsync(key,moduleDto);
+    return  Ok("Success");
+  }
+
 
 
 }
