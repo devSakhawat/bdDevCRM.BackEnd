@@ -1,6 +1,6 @@
-﻿using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
+﻿using bdDevCRM.Entities.CRMGrid;
+using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.KendoGrid;
 
 namespace bdDevCRM.ServicesContract.Core.SystemAdmin;
 
@@ -10,7 +10,8 @@ public interface IMenuService
   Task<IEnumerable<MenuDto>> SelectMenuByUserPermission(int userId, bool trackChanges);
   Task<List<MenuDto>> GetParentMenuByMenu(int parentMenuId, bool trackChanges);
 
-  Task<GridEntity<MenuDto>> MenuSummary(bool trackChanges, GridOptions options);
+  //Task<GridEntity<MenuDto>> MenuSummary(bool trackChanges, CRMGridOptions options);
+  Task<GridEntity<MenuDto>> MenuSummary(bool trackChanges, CRMGridOptions options);
 
 
 

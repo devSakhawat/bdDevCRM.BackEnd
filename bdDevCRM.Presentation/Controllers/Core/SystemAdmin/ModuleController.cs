@@ -1,20 +1,15 @@
-﻿using bdDevCRM.Entities.Exceptions;
+﻿//using bdDevCRM.Entities.CRMGrid;
+using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.KendoGrid;
+//using bdDevCRM.Utilities.KendoGrid;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
-
-
-
 
 public class ModuleController : BaseApiController
 {
@@ -31,7 +26,7 @@ public class ModuleController : BaseApiController
   //[Produces("application/json")]
   //[ResponseCache(Duration = 300)]
   [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  public async Task<IActionResult> ModuleSummary([FromBody] GridOptions options)
+  public async Task<IActionResult> ModuleSummary([FromBody] CRMGridOptions options)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
     var moduleSummary = await _serviceManager.Modules.ModuleSummary(false, options);
@@ -67,7 +62,7 @@ public class ModuleController : BaseApiController
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
 
-    ModuleDto returnData = await _serviceManager.Modules.UpdateModuleAsync(key,moduleDto);
+    ModuleDto returnData = await _serviceManager.Modules.UpdateModuleAsync(key, moduleDto);
     return (returnData != null) ? Ok(returnData) : NoContent();
   }
 
@@ -77,8 +72,8 @@ public class ModuleController : BaseApiController
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
 
-    await _serviceManager.Modules.DeleteModuleAsync(key,moduleDto);
-    return  Ok("Success");
+    await _serviceManager.Modules.DeleteModuleAsync(key, moduleDto);
+    return Ok("Success");
   }
 
 

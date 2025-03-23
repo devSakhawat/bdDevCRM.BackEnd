@@ -36,6 +36,17 @@ public static class RouteConstants
   public const string DeleteMenu = "menu/{key}";
   #endregion Menu
 
+  #region Group
+  public const string Groups = "groups";
+  public const string GroupById = "group/key/{key}";
+  public const string GroupSummary = "group-summary";
+  //public const string GroupsByModuleId = "groups-by-moduleId";
+  public const string CreateGroup = "group";
+  public const string ReadGroup = "group/key/{key}";
+  public const string UpdateGroup = "group/{key}";
+  public const string DeleteGroup = "group/{key}";
+  #endregion Group
+
 
 
 }

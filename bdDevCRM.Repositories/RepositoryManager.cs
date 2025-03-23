@@ -21,6 +21,7 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<IMenuRepository> _menuRepository;
   private readonly Lazy<ITokenBlacklistRepository> _tokenBlacklistRepository;
   private readonly Lazy<IModuleRepository> _moduleRepository;
+  private readonly Lazy<IGroupsRepository> _groupsRepository;
 
   public RepositoryManager(CRMContext repositoryContext)
   {
@@ -34,6 +35,7 @@ public class RepositoryManager : IRepositoryManager
     _menuRepository = new Lazy<IMenuRepository>(() => new MenuRepository(_repositoryContext));
     _tokenBlacklistRepository = new Lazy<ITokenBlacklistRepository>(() => new TokenBlacklistRepository(_repositoryContext));
     _moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(_repositoryContext));
+    _groupsRepository = new Lazy<IGroupsRepository>(() => new GroupRepository(_repositoryContext));
   }
 
   public ICountryRepository Countries => _countries.Value;
@@ -45,8 +47,7 @@ public class RepositoryManager : IRepositoryManager
   public IMenuRepository Menus => _menuRepository.Value;
   public ITokenBlacklistRepository TokenBlacklist => _tokenBlacklistRepository.Value;
   public IModuleRepository Modules => _moduleRepository.Value;
-
-
+  public IGroupsRepository Groups => _groupsRepository.Value;
 
 
   public async Task SaveAsync() => await _repositoryContext.SaveChangesAsync();

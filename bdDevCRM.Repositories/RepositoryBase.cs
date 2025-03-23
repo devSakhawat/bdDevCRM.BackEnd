@@ -1,10 +1,10 @@
-﻿using bdDevCRM.Entities.Exceptions;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
-using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using System.Data;
 using System.Data.Common;
@@ -474,6 +474,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   }
   #endregion Query Execute by TDT
 
+  #region OldCode
 
   //public async Task<List<T>> ExecuteQueryAsync<T>(string query) where T : new()
   //{
@@ -541,6 +542,105 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
   //  return dataList;
   //}
+  #endregion OldCode
+
+
+  public async Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy ,string condition)
+  {
+    var connection = _context.Database.GetDbConnection();
+    var sqlCount = "SELECT COUNT(*) FROM (" + query + " ) As tbl ";
+    query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, "");
+    var dataList = new List<T>();
+    int totalCount = 0;
+    try
+    {
+      await connection.OpenAsync();
+
+      using (var countCommand = connection.CreateCommand())
+      {
+        countCommand.CommandText = sqlCount;
+        totalCount = Convert.ToInt32(await countCommand.ExecuteScalarAsync());
+      }
+
+      using (var command = connection.CreateCommand())
+      {
+        command.CommandText = query;
+        using (var reader = await command.ExecuteReaderAsync())
+        {
+          if (!reader.HasRows) return new GridEntity<T> { Items = dataList, TotalCount = 0 };
+
+          var columnMap = new Dictionary<string, int>();
+          for (int i = 0; i < reader.FieldCount; i++)
+          {
+            columnMap[reader.GetName(i)] = i;
+          }
+
+          var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+          while (await reader.ReadAsync())
+          {
+            var entity = Activator.CreateInstance<T>();
+
+            foreach (var property in properties)
+            {
+              // কলাম নাম এবং প্রপার্টি নাম মিলে গেলে
+              if (!columnMap.ContainsKey(property.Name)) continue;
+
+              var columnIndex = columnMap[property.Name];
+              if (reader.IsDBNull(columnIndex)) continue; // null ভ্যালু হ্যান্ডেল করা
+
+              var value = reader.GetValue(columnIndex);
+
+              try
+              {
+                // নালবল টাইপ হ্যান্ডেল করা
+                Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+                // স্পেশাল টাইপের জন্য কাস্টম কনভার্শন
+                if (propertyType == typeof(Guid) && value is string)
+                {
+                  property.SetValue(entity, Guid.Parse((string)value));
+                }
+                else if (propertyType.IsEnum && value is string)
+                {
+                  property.SetValue(entity, Enum.Parse(propertyType, (string)value));
+                }
+                else
+                {
+                  property.SetValue(entity, Convert.ChangeType(value, propertyType));
+                }
+              }
+              catch (Exception ex)
+              {
+                Console.Error.WriteLine($"Error converting value '{value}' to type {property.PropertyType.Name} for property {property.Name}: {ex.Message}");
+              }
+            }
+
+            dataList.Add(entity);
+          }
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      Console.Error.WriteLine($"Error in ExecuteQueryAsync: {ex.Message}");
+    }
+    finally
+    {
+      if (connection.State == ConnectionState.Open)
+      {
+        await connection.CloseAsync();
+      }
+    }
+
+    var dbEntity = new GridEntity<T>();
+    dbEntity.Items = dataList ?? new List<T>();
+    dbEntity.TotalCount = totalCount;
+    dbEntity.Columnses = new List<GridColumns>();
+
+    //var result = new GridResult<T>().Data(dataList, dataList.Count);
+    return dbEntity;
+  }
 
 
 
@@ -702,3 +802,10 @@ public static class DbDataReaderExtensions
   }
 }
 
+
+
+
+// DataTable dataTable = _connection.GetDataTable(sqlQuery + orderby);
+//int totalCount = _connection.GetScaler(sqlCount);
+//var dataList = (List<T>)ListConversion.ConvertTo<T>(dataTable);
+//var result = new GridResult<T>().Data(dataList, totalCount);

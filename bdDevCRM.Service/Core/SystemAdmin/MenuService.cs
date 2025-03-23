@@ -1,15 +1,13 @@
-﻿using bdDevCRM.Entities.Entities;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
-using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.KendoGrid;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
@@ -30,7 +28,7 @@ internal sealed class MenuService : IMenuService
   public async Task<IEnumerable<MenuDto>> SelectAllMenuByModuleId(int moduleId, bool trackChanges)
   {
     var menuRepositoryDtos = await _repository.Menus.SelectAllMenuByModuleId(moduleId, trackChanges);
-    if(menuRepositoryDtos.Count() == 0) throw new GenericListNotFoundException("Menu");
+    if (menuRepositoryDtos.Count() == 0) throw new GenericListNotFoundException("Menu");
     var menuDtos = MyMapper.JsonCloneIEnumerableToList<MenuRepositoryDto, MenuDto>(menuRepositoryDtos);
     return menuDtos;
   }
@@ -65,13 +63,31 @@ internal sealed class MenuService : IMenuService
   /// <param name="options"></param>
   /// <returns></returns>
 
-  public async Task<GridEntity<MenuDto>> MenuSummary(bool trackChanges, GridOptions options)
+  public async Task<GridEntity<MenuDto>> MenuSummary(bool trackChanges, CRMGridOptions options)
   {
-    var menus = await _repository.Menus.MenuSummary(trackChanges);
-    var menusDto = MyMapper.JsonCloneIEnumerableToList<MenuRepositoryDto, MenuDto>(menus);
-    //var modules = _repository.Modules.GetAllModules(trackChanges).ToList();
-    var gridData = GridResult<MenuDto>.Data(menusDto, options);
-    return gridData;
+    //var menus = await _repository.Menus.MenuSummary(trackChanges);
+    //var menusDto = MyMapper.JsonCloneIEnumerableToList<MenuRepositoryDto, MenuDto>(menus);
+    string menuSummaryQuery = $"Select MenuId,Menu.ModuleId, MenuName, MenuPath, ISNULL(ParentMenu, 0) as ParentMenu ,ModuleName,ToDo,SORORDER\r\n,(Select MenuName from Menu mn where mn.MenuId = menu.ParentMenu) as ParentMenuName \r\nfrom Menu \r\nleft outer join Module on module.ModuleId = menu.ModuleId";
+    string orderBy = "ModuleName asc,ParentMenu asc, MenuName";
+
+    var gridEntity = await _repository.Menus.GridData<MenuDto>(menuSummaryQuery, options, orderBy, "");
+
+
+
+    //if (gridEntity.Items.Count == 0) throw new GenericListNotFoundException("Group");
+    ////return gridEntity;
+    ///
+
+
+    //IEnumerable<Menu> menus = await _repository.Menus.GetMenusAsync(trackChanges: false);
+    //List<MenuDto> menusDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuDto>(menus);
+    //GridOptions gridOption = MyMapper.JsonClone<CRMGridOptions, GridOptions>(options);
+
+    //var gridData = Utilities.KendoGrid.GridResult<MenuDto>.Data(menusDto, gridOption);
+
+    return gridEntity;
+
+    //return new GridEntity<MenuDto>();
   }
 
   public MenuDto GetMenu(int id, bool trackChanges)
@@ -209,7 +225,7 @@ internal sealed class MenuService : IMenuService
     if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
     if (key != modelDto.MenuId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
 
-    Menu entity= await _repository.Menus.GetByIdAsync(m => m.MenuId == key, trackChanges: false);
+    Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == key, trackChanges: false);
     if (entity == null) throw new GenericNotFoundException(new MenuDto().GetType().Name.ToString(), "MenuId", key.ToString());
 
     await _repository.Menus.DeleteAsync(x => x.MenuId == modelDto.MenuId, trackChanges: true);

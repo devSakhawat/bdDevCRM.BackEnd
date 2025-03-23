@@ -1,12 +1,16 @@
-﻿using bdDevCRM.Entities.Entities;
+﻿//using bdDevCRM.Entities.CRMGrid;
+using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.KendoGrid;
+//using bdDevCRM.Utilities.KendoGrid;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
@@ -24,19 +28,25 @@ internal sealed class ModuleService : IModuleService
     _configuration = configuration;
   }
 
-  public async Task<GridEntity<ModuleDto>> ModuleSummary(bool trackChanges, GridOptions options)
+  public async Task<GridEntity<ModuleDto>> ModuleSummary(bool trackChanges, CRMGridOptions options)
   {
     //var stopwatch = System.Diagnostics.Stopwatch.StartNew();
     var menuRepositoryDtos = await _repository.Modules.ModuleSummary(trackChanges);
     var modulesDto = MyMapper.JsonCloneIEnumerableToList<ModuleRepositoryDto, ModuleDto>(menuRepositoryDtos);
-    var gridData = GridResult<ModuleDto>.Data(modulesDto, options);
+    var gridentity = new GridResult<ModuleDto>().Data(modulesDto, modulesDto.Count);
 
-    if (gridData.Items == null) gridData.Items = new List<ModuleDto>();
+    //var source = modulesDto.AsQueryable();
+    //var source2 = source.Skip(options.skip).Take(options.pageSize);
+    //var gridentity = new GridEntity<ModuleDto>();
+    //gridentity.Items = source2.ToList();
+    //gridentity.TotalCount = (int)source.LongCount();
+
+    if (gridentity.Items == null) gridentity.Items = new List<ModuleDto>();
 
     //stopwatch.Stop();
     //_logger.LogInfo($"Menu query execution time: {stopwatch.ElapsedMilliseconds}ms");
 
-    return gridData;
+    return gridentity;
   }
 
   public async Task<List<ModuleDto>> GetModulesAsync(bool trackChanges)
@@ -66,7 +76,7 @@ internal sealed class ModuleService : IModuleService
     if (key != moduleDto.ModuleId) throw new IdMismatchBadRequestException(key.ToString(), new ModuleDto().GetType().Name.ToString());
 
     Module moduleData = await _repository.Modules.GetByIdAsync(m => m.ModuleId == moduleDto.ModuleId, trackChanges: false);
-    if(moduleDto.ModuleName == moduleData.ModuleName) throw new DuplicateRecordException();
+    if (moduleDto.ModuleName == moduleData.ModuleName) throw new DuplicateRecordException();
 
     moduleData = MyMapper.JsonClone<ModuleDto, Module>(moduleDto);
     _repository.Modules.UpdateAsync(moduleData);
@@ -83,7 +93,7 @@ internal sealed class ModuleService : IModuleService
     Module moduleData = await _repository.Modules.GetByIdAsync(m => m.ModuleId == key, trackChanges: false);
     if (moduleData == null) throw new GenericNotFoundException("Module", "ModuleId", key.ToString());
 
-    await _repository.Modules.DeleteAsync(x => x.ModuleId == moduleData.ModuleId ,trackChanges:true);
+    await _repository.Modules.DeleteAsync(x => x.ModuleId == moduleData.ModuleId, trackChanges: true);
     await _repository.SaveAsync();
   }
 

@@ -2,6 +2,8 @@
 using System.Data;
 using System.Linq.Expressions;
 using Microsoft.Data.SqlClient;
+using bdDevCRM.Entities.CRMGrid;
+using bdDevCRM.Entities.CRMGrid.GRID;
 
 namespace bdDevCRM.RepositoriesContracts;
 
@@ -87,6 +89,7 @@ public interface IRepositoryBase<T>
   #endregion  Query Execute by TDT
 
 
+  Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy, string condition);
   Task<List<T>> ExecuteQueryAsync<T>(string query);
 
   #region clde

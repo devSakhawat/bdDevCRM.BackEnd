@@ -1,14 +1,11 @@
-﻿using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.KendoGrid;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.Caching.Memory;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
@@ -71,16 +68,6 @@ public class MenuController : BaseApiController
     return menusDto.Any() ? Ok(menusDto) : NoContent();
   }
 
-  // After login to system
-  [HttpPost(RouteConstants.MenuSummary)]
-  //[IgnoreMediaTypeValidation]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  public async Task<IActionResult> GetMenuSummary([FromBody] GridOptions options)
-  {
-    var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
-    return (menuSummary != null) ? Ok(menuSummary) : NoContent();
-  }
-
   [HttpGet(RouteConstants.GetMenus)]
   [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
   //[IgnoreMediaTypeValidation]
@@ -104,6 +91,35 @@ public class MenuController : BaseApiController
     //return (menuSummary != null ) ? Ok(menuSummary) : NoContent();
     return Ok(menusDto.ToList());
   }
+
+  ///// <summary>
+  ///// After login to system
+  ///// </summary>
+  ///// <param name="options"></param>
+  ///// <returns></returns>
+  //[HttpPost(RouteConstants.MenuSummary)]
+  ////[IgnoreMediaTypeValidation]
+  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  //public async Task<IActionResult> GetMenuSummary([FromBody] CRMGridOptions options)
+  //{
+  //  var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
+  //  return (menuSummary != null) ? Ok(menuSummary) : NoContent();
+  //}
+
+  /// <summary>
+  /// After login to system
+  /// </summary>
+  /// <param name="options"></param>
+  /// <returns></returns>
+  [HttpPost(RouteConstants.MenuSummary)]
+  //[IgnoreMediaTypeValidation]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> GetMenuSummary([FromBody] CRMGridOptions options)
+  {
+    var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
+    return (menuSummary != null) ? Ok(menuSummary) : NoContent();
+  }
+
 
   [HttpPost(RouteConstants.CreateMenu)]
   [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

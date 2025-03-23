@@ -23,6 +23,7 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<IAuthenticationService> _authenticationService;
   private readonly Lazy<IMenuService> _menuService;
   private readonly Lazy<IModuleService> _moduleService;
+  private readonly Lazy<IGroupService> _groupService;
 
   public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
@@ -35,6 +36,7 @@ public sealed class ServiceManager : IServiceManager
     _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(repository, logger, configuration));
     _menuService = new Lazy<IMenuService>(() => new MenuService(repository, logger, configuration));
     _moduleService = new Lazy<IModuleService>(() => new ModuleService(repository, logger, configuration));
+    _groupService = new Lazy<IGroupService>(() => new GroupService(repository, logger, configuration));
   }
 
   public ITokenBlacklistService TokenBlacklist => _tokenBlackListService.Value;
@@ -46,4 +48,5 @@ public sealed class ServiceManager : IServiceManager
   public IAuthenticationService CustomAuthentication => _authenticationService.Value;
   public IMenuService Menus => _menuService.Value;
   public IModuleService Modules => _moduleService.Value;
+  public IGroupService Groups => _groupService.Value;
 }

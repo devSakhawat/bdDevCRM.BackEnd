@@ -16,7 +16,7 @@ public class MenuDto : CommonDto
   public int? ToDo { get; set; }
   public int? SortOrder { get; set; }
   public int IsQuickLink { get; set; }
-  public int MenuType { get; set; }
+  public int? MenuType { get; set; }
   public string? MenuCode { get; set; }
-  public int IsActive { get; set; }
+  public int? IsActive { get; set; }
 }

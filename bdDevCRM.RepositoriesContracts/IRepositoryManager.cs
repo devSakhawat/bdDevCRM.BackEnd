@@ -15,6 +15,7 @@ public interface IRepositoryManager : IDisposable
   IAuthenticationRepository CustomAuthentication { get; }
   IMenuRepository Menus { get; }
   IModuleRepository Modules { get; }
+  IGroupsRepository Groups { get; }
 
 
   Task SaveAsync();

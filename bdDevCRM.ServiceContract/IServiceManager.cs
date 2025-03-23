@@ -14,6 +14,7 @@ public interface IServiceManager
   IAuthenticationService CustomAuthentication { get; }
   IMenuService Menus { get; }
   IModuleService Modules { get; }
+  IGroupService Groups { get; }
 
 }
 
