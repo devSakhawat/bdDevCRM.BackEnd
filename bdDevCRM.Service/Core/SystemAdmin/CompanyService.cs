@@ -71,21 +71,21 @@ internal sealed class CompanyService : ICompanyService
     return entityForCreate;
   }
 
-  public async Task UpdateCompanyAsync(int CompanyId, CompanyDto CompanyForUpdate, bool trackChanges)
+  public async Task UpdateCompanyAsync(int companyId, CompanyDto companyForUpdate, bool trackChanges)
   {
-    Expression<Func<Company, bool>> expression = e => e.CompanyId == CompanyId;
+    Expression<Func<Company, bool>> expression = e => e.CompanyId == companyId;
     bool exists = await _repository.Companies.ExistsAsync(expression);
-    if (!exists) throw new GenericNotFoundException("Company", "CompanyId", CompanyId.ToString());
+    if (!exists) throw new GenericNotFoundException("Company", "CompanyId", companyId.ToString());
 
-    Company Company = MyMapper.JsonClone<CompanyDto, Company>(CompanyForUpdate);
+    Company Company = MyMapper.JsonClone<CompanyDto, Company>(companyForUpdate);
     _repository.Companies.UpdateCompany(Company);
     await _repository.SaveAsync();
   }
 
-  public async Task DeleteCompanyAsync(int CompanyId, bool trackChanges)
+  public async Task DeleteCompanyAsync(int companyId, bool trackChanges)
   {
-    var Company = await _repository.Companies.GetByIdWithNotFoundException(CompanyId);
-    _logger.LogWarn($"Company with Id: {CompanyId} is about to be deleted from the database.");
+    var Company = await _repository.Companies.FirstOrDefaultAsync(x => x.CompanyId.Equals(companyId), trackChanges);
+    _logger.LogWarn($"Company with Id: {companyId} is about to be deleted from the database.");
     _repository.Companies.DeleteCompany(Company);
     await _repository.SaveAsync();
 
@@ -99,12 +99,12 @@ internal sealed class CompanyService : ICompanyService
     return CompanyDtos;
   }
 
-  public async Task<CompanyDto> GetCompanyAsync(int CompanyId, bool trackChanges)
+  public async Task<CompanyDto> GetCompanyAsync(int companyId, bool trackChanges)
   {
-    if (CompanyId <= 0) throw new ArgumentOutOfRangeException(nameof(CompanyId), "Company ID must be be zero or non-negative integer.");
+    if (companyId <= 0) throw new ArgumentOutOfRangeException(nameof(companyId), "Company ID must be be zero or non-negative integer.");
 
-    Company Company = await _repository.Companies.GetCompanyAsync(CompanyId, trackChanges);
-    if (Company == null) throw new GenericNotFoundException("Company", "CompanyId", CompanyId.ToString());
+    Company Company = await _repository.Companies.GetCompanyAsync(companyId, trackChanges);
+    if (Company == null) throw new GenericNotFoundException("Company", "CompanyId", companyId.ToString());
 
     CompanyDto CompanyDto = MyMapper.JsonClone<Company, CompanyDto>(Company);
     return CompanyDto;

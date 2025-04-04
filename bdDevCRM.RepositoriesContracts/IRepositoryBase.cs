@@ -1,9 +1,9 @@
-﻿using System.Data.Common;
-using System.Data;
-using System.Linq.Expressions;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities;
 using Microsoft.Data.SqlClient;
-using bdDevCRM.Entities.CRMGrid;
-using bdDevCRM.Entities.CRMGrid.GRID;
+using System.Data;
+using System.Data.Common;
+using System.Linq.Expressions;
 
 namespace bdDevCRM.RepositoriesContracts;
 
@@ -11,89 +11,61 @@ namespace bdDevCRM.RepositoriesContracts;
 
 public interface IRepositoryBase<T>
 {
-  #region Basic CRUD Operations without async
-  // Generic Crud Operation
+  #region Basic CRUD Operations
   void Create(T entity);
+  Task CreateAsync(T entity);
+  Task<int> CreateAndGetIdAsync(T entity);
+  Task BulkInsertAsync(IEnumerable<T> entities);
+
+  #region Transaction Management Methods
+  Task TransactionBeginAsync();
+  Task TransactionCommitAsync();
+  Task TransactionRollbackAsync();
+  Task TransactionDisposeAsync();
+  #endregion Transaction Management Methods
 
   void Update(T entity);
+  void UpdateByState(T entity);
 
   void Delete(T entity);
-
-  T GetById(int id);
-
-  Task<T> GetByIdWithNotFoundException(int id);
-
-  IEnumerable<T> GetAll();
-
-  IQueryable<T> FindAll(bool trackChanges);
-
-  IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges);
-  #endregion Basic CRUD Operations without async
-
-  #region Basic Generic Crud
-  // Generic Crud Operation
-  Task CreateAsync(T entity);
-  void UpdateAsync(T entity);
   Task DeleteAsync(Expression<Func<T, bool>> predicate, bool trackChanges);
 
-  Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges);
-  Task<IEnumerable<T>> GetAllAsync();
+  void BulkDelete(IEnumerable<T> entities);
 
-  Task<IEnumerable<T>> FindByConditionAsync(Expression<Func<T, bool>> expression);
-  #endregion Basic Generic Crud
 
-  #region Advanced Crud Operation
+  T GetById(Expression<Func<T, bool>> predicate, bool trackChanges = false);
+  Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges = false);
+  T FirstOrDefault(Expression<Func<T, bool>>? expression= null ,bool trackChanges = false);
+  Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression ,bool trackChanges = false);
+
+  IEnumerable<T> GetListByIds(Expression<Func<T, bool>> expression, bool trackChanges = false);
+  Task<IEnumerable<T>> GetListByIdsAsync(Expression<Func<T, bool>> expression, bool trackChanges = false);
+
+  IEnumerable<T> List(Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
+  Task<IEnumerable<T>> ListAsync(Expression<Func<T, object>>? orderBy = null,  bool trackChanges = false);
+  IEnumerable<T> ListByCondition(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
+  Task<IEnumerable<T>> ListByConditionAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
+
+
   Task<int> CountAsync();
   Task<bool> ExistsAsync(Expression<Func<T, bool>> expression);
-  Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression);
-  Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize);
-  #endregion Advanced Crud Operation
-
-  #region Data By Generic
-  public T FindById(int id);
-  Task<IEnumerable<T>> GetListOfResultByQuery(string query);
-  Task<bool> CheckIfExists(string fieldName, string fieldValue);
-  #endregion Data By Generic
-
-  #region Data By Query
-  /// <summary>
-  /// Retrieves multiple records from a query when the query column and Entities property differ
-  /// </summary>
-  /// <typeparam name="TResult">The type to deserialize the results to</typeparam>
-  /// <param name="query">The SQL query to execute</param>
-  /// <returns>A collection of the specified type</returns>
-  Task<IEnumerable<TResult>> GetListOfDataByQuery<TResult>(string query) where TResult : class, new();
-
-  /// <summary>
-  /// Retrieves a single record from a query when the query column and Entities property differ
-  /// </summary>
-  /// <typeparam name="TResult">The type to deserialize the result to</typeparam>
-  /// <param name="query">The SQL query to execute</param>
-  /// <returns>A single object of the specified type or null if not found</returns>
-  Task<TResult?> GetSingleDataByQuery<TResult>(string query) where TResult : class, new();
-
-
-  Task<IEnumerable<TResult>> GetGenericResultByQuery<TResult>(string query) where TResult : class, new();
-
-  Task<TResult?> GetSingleGenericResultByQuery<TResult>(string query) where TResult : class, new();
-  Task<List<TResult>> GetListGenericResultByQuery<TResult>(string query) where TResult : class, new();
-
-  Task<bool> HasAnyAsync(Expression<Func<T, bool>> predicate);
-  #endregion  Data By Query
+  #endregion  Basic CRUD Operations
 
   #region  Query Execute by TDT
   string ExecuteNonQuery(string query);
   Task<IEnumerable<T>?> ExecuteListSql(string query);
   Task<T?> ExecuteSingleSql(string query);
+
   DataTable DataTable(string sqlQuery, params DbParameter[] parameters);
   #endregion  Query Execute by TDT
 
 
-  Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy, string condition);
-  Task<List<T>> ExecuteQueryAsync<T>(string query);
 
-  #region clde
-  Task<IEnumerable<TResult>> ExecuteOptimizedQuery<TResult>(string query, SqlParameter[] parameters) where TResult : class, new();
-  #endregion clde
+  #region Get Data using ado.net
+  Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy, string condition);
+  Task<TResult> ExecuteSingleData<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new();
+  TResult ExecuteSingleDataSyncronous<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new();
+  Task<IEnumerable<TResult>> ExecuteListQuery<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new();
+  #endregion Get Data using ado.net
 
 }

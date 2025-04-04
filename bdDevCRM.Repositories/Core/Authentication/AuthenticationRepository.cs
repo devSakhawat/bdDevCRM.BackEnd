@@ -14,8 +14,7 @@ public class AuthenticationRepository : RepositoryBase<Users>, IAuthenticationRe
   {
     if (string.IsNullOrEmpty(loginId)) return null;
 
-
-    Users user = FindByCondition(u => u.LoginId == loginId, true).SingleOrDefault();
+    Users user = FirstOrDefault(u => u.LoginId == loginId, true);
 
     if (user == null )
       return null;
@@ -30,7 +29,7 @@ public class AuthenticationRepository : RepositoryBase<Users>, IAuthenticationRe
       return null;
 
 
-    Users user = FindByCondition(u => u.LoginId == loginId, true).SingleOrDefault();
+    Users user = FirstOrDefault(u => u.LoginId == loginId, true);
     return user;
   }
 }

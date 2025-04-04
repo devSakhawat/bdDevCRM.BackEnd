@@ -15,6 +15,11 @@ public interface IServiceManager
   IMenuService Menus { get; }
   IModuleService Modules { get; }
   IGroupService Groups { get; }
+  IQueryAnalyzerService QueryAnalyzer { get; }
+  IStatusService WfState { get; }
+  IAccessControlService AccessControl { get; }
 
+
+  T GetCache<T>(string key);
 }
 

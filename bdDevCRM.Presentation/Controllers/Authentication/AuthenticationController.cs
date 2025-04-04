@@ -1,6 +1,8 @@
-﻿using bdDevCRM.Presentation.ActionFIlters;
+﻿using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Authentication;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -31,11 +33,11 @@ public class AuthenticationController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   [AllowAnonymous]
   [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> Authenticate([FromBody] UserForAuthenticationDto user)
+  public IActionResult Authenticate([FromBody] UserForAuthenticationDto user)
   {
-    if (!_serviceManager.CustomAuthentication.ValidateUser(user)) return Unauthorized();
+    if (!_serviceManager.CustomAuthentication.ValidateUser(user)) throw new UsernamePasswordMismatchException();
 
-    var token = await _serviceManager.CustomAuthentication.CreateToken(user);
+    var token = _serviceManager.CustomAuthentication.CreateToken(user);
     return Ok(token);
   }
 
@@ -241,10 +243,9 @@ public class AuthenticationController : BaseApiController
   //}
   #endregion LoginFrom mvc
 
-
   //[HttpGet("getUserInfo")]
   [HttpGet(RouteConstants.GetUserInfo)]
-  public async Task<IActionResult> GetUserInfo()
+  public IActionResult GetUserInfo()
   {
     var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
     var loginId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -253,7 +254,8 @@ public class AuthenticationController : BaseApiController
       return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
     }
 
-    var user = await _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
+    // UsersDto
+    UsersDto user =  _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
     if (user == null)
     {
       return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });

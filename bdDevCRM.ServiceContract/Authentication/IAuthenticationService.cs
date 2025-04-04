@@ -7,7 +7,7 @@ public interface IAuthenticationService
 {
   //Task<bool> ValidateUser(UserForAuthenticationDto userForAuth);
   bool ValidateUser(UserForAuthenticationDto userForAuth);
-  Task<string> CreateToken(UserForAuthenticationDto users);
+  string CreateToken(UserForAuthenticationDto users);
 
   string GenerateToken(Users user);
 }

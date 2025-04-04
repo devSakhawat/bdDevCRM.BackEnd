@@ -3,6 +3,7 @@ using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
@@ -16,30 +17,36 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
   public async Task<IEnumerable<ModuleRepositoryDto>> SelectAllModuleByModuleId(int moduleId, bool trackChanges)
   {
     string quary = string.Format(SELECT_ALL_Module_BY_MODULEID, moduleId);
-    IEnumerable<ModuleRepositoryDto> ModuleRepositoryDto = await GetListOfDataByQuery<ModuleRepositoryDto>(quary);
+    IEnumerable<ModuleRepositoryDto> ModuleRepositoryDto = await ExecuteListQuery<ModuleRepositoryDto>(quary);
 
-    return ModuleRepositoryDto.AsQueryable();
+    return ModuleRepositoryDto.AsEnumerable();
   }
 
 
-  public IEnumerable<Module> GetAllModules(bool trackChanges) => FindAll(trackChanges).OrderBy(c => c.ModuleName).ToList();
+  public async Task<IEnumerable<Module>> GetAllModules(bool trackChanges)
+  {
+    IEnumerable<Module> modules = await ListAsync(m => m.ModuleId, trackChanges);
+    return modules;
+  }
 
-  public Module GetModule(int ModuleId, bool trackChanges) => FindByCondition(c => c.ModuleId.Equals(ModuleId), trackChanges).SingleOrDefault();
 
-  public IEnumerable<Module> GetByIds(IEnumerable<int> ids, bool trackChanges) => FindByCondition(x => ids.Contains(x.ModuleId), trackChanges).ToList();
+
+  public Module GetModule(int ModuleId, bool trackChanges) => FirstOrDefault(c => c.ModuleId.Equals(ModuleId), trackChanges);
+
+  public IEnumerable<Module> GetByIds(IEnumerable<int> ids, bool trackChanges) => GetListByIds(x => ids.Contains(x.ModuleId), trackChanges);
 
 
 
   // Get all Modules
-  public async Task<IEnumerable<Module>> GetModulesAsync(bool trackChanges) => await FindAll(trackChanges).OrderBy(c => c.ModuleId).ToListAsync();
+  public async Task<IEnumerable<Module>> GetModulesAsync(bool trackChanges) => await ListAsync(m => m.ModuleId ,trackChanges);
 
   // Get a single Module by ID
-  public async Task<Module> GetModuleAsync(int ModuleId, bool trackChanges) => await FindByCondition(c => c.ModuleId.Equals(ModuleId), trackChanges).FirstOrDefaultAsync();
+  public async Task<Module> GetModuleAsync(int ModuleId, bool trackChanges) => await FirstOrDefaultAsync(c => c.ModuleId.Equals(ModuleId), trackChanges);
 
   public async Task<Module?> ModuleByModuleIdWithAdditionalCondition(int ModuleId, string additionalCondition)
   {
     var quary = string.Format("Select * from Module where ModuleId = {0} {1}", ModuleId, additionalCondition);
-    Module? objModule = await GetSingleGenericResultByQuery<Module>(quary);
+    Module? objModule = await ExecuteSingleData<Module>(quary);
     return objModule;
   }
 
@@ -49,7 +56,7 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
   public void CreateModule(Module Module) => Create(Module);
 
   // Update an existing Module
-  public void UpdateModule(Module Module) => UpdateAsync(Module);
+  public void UpdateModule(Module Module) => UpdateByState(Module);
 
   // Delete a Module by ID
   public void DeleteModule(Module Module) => Delete(Module);
@@ -59,9 +66,7 @@ public class ModuleRepository : RepositoryBase<Module>, IModuleRepository
   public async Task<List<ModuleRepositoryDto>> ModuleSummary(bool trackChanges)
   {
     string moduleSummaryQuery = $"select ModuleId, ModuleName from Module order by ModuleId";
-    List<ModuleRepositoryDto> modulesDto = await ExecuteQueryAsync<ModuleRepositoryDto>(moduleSummaryQuery);
-    return modulesDto;
+    IEnumerable<ModuleRepositoryDto> modulesDto = await ExecuteListQuery<ModuleRepositoryDto>(moduleSummaryQuery);
+    return modulesDto.ToList();
   }
-
-
 }

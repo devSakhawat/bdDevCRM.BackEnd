@@ -1,5 +1,8 @@
-﻿using bdDevCRM.Entities.CRMGrid;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -17,13 +20,53 @@ public class GroupController : BaseApiController
     _cache = cache;
   }
 
-  //[HttpPost(RouteConstants.GroupSummary)]
-  ////[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  //public async Task<IActionResult> GroupSummary([FromBody] CRMGridOptions options)
-  //{
-  //  var groupSummary = await _serviceManager.Groups.GroupSummary(trackChanges: false, options);
-  //  return (groupSummary != null) ? Ok(groupSummary) : NoContent();
-  //}
+  [HttpPost(RouteConstants.GroupSummary)]
+  public async Task<IActionResult> GroupSummary([FromBody] CRMGridOptions options)
+  {
+    var groupSummary = await _serviceManager.Groups.GroupSummary(trackChanges: false, options);
+    return (groupSummary != null) ? Ok(groupSummary) : NoContent();
+  }
+
+  [HttpGet(RouteConstants.GroupPermisionsbyGroupId)]
+  public async Task<IActionResult> GroupPermisionsbyGroupId([FromQuery] int groupId)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    if (groupId == 0 || groupId == null) throw new IdParametersBadRequestException();
+
+    IEnumerable<GroupPermissionDto> groupPermissions = await _serviceManager.Groups.GroupPermisionsbyGroupId(groupId);
+    return Ok(groupPermissions);
+  }
+
+  [HttpGet(RouteConstants.GetAccesses)]
+  public async Task<IActionResult> GetAccesses()
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    IEnumerable<AccessControlDto> accessControlls = await _serviceManager.Groups.GetAccesses();
+    return Ok(accessControlls);
+  }
+
+
+  [HttpPost(RouteConstants.CreateGroup)]
+  public async Task<IActionResult> SaveGroup([FromBody] GroupDto objGroup)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    //var strGroup = strGroupInfo.Replace("^", "&");
+    //var objGroup = Newtonsoft.Json.JsonConvert.DeserializeObject<GroupDto>(strGroup);
+    if (objGroup == null) throw new ArgumentNullException(nameof(objGroup));
+
+    var model = await _serviceManager.Groups.CreateAsync(objGroup);
+    return (model != null) ? Ok(model) : NoContent();
+  }
+
+  [HttpPut(RouteConstants.UpdateGroup)]
+  public async Task<IActionResult> UpdateGroup([FromRoute] int key, [FromBody] GroupDto modelDto)
+  {
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    GroupDto returnData = await _serviceManager.Groups.UpdateAsync(key, modelDto);
+    return (returnData != null) ? Ok(returnData) : NoContent();
+  }
 
 
   //[HttpGet(RouteConstants.Groups)]
@@ -46,17 +89,6 @@ public class GroupController : BaseApiController
   //  return Ok(groupsDto.ToList());
   //}
 
-
-
-  //[HttpPost(RouteConstants.CreateGroup)]
-  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  //public async Task<IActionResult> SaveGroup([FromBody] GroupDto modelDto)
-  //{
-  //  var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-  //  var model = await _serviceManager.Groups.CreateAsync(modelDto);
-  //  return (model != null) ? Ok(model) : NoContent();
-  //}
-
   //[HttpPut(RouteConstants.UpdateGroup)]
   //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   //public async Task<IActionResult> UpdateGroup([FromRoute] int key, [FromBody] GroupDto modelDto)
@@ -76,4 +108,5 @@ public class GroupController : BaseApiController
   //  await _serviceManager.Groups.DeleteAsync(key, modelDto);
   //  return Ok("Success");
   //}
+
 }

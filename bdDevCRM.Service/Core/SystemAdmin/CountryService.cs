@@ -41,7 +41,7 @@ internal sealed class CountryService : ICountryService
 
   public async Task DeleteCountryAsync(int countryId, bool trackChanges)
   {
-    var country = await _repository.Countries.GetByIdWithNotFoundException(countryId);
+    var country = await _repository.Countries.FirstOrDefaultAsync(c => c.CountryId.Equals(countryId));
     _logger.LogWarn($"Country with Id: {countryId} is about to be deleted from the database.");
     _repository.Countries.DeleteCountry(country);
     await _repository.SaveAsync();

@@ -7,17 +7,17 @@ public class GroupDto
   public string GroupName { get; set; }
   public int IsDefault { get; set; }
 
-  public List<GroupPermissionDto> ModuleList { get; set; }
+  public List<GroupPermissionDto>? ModuleList { get; set; }
 
-  public List<GroupPermissionDto> MenuList { get; set; }
+  public List<GroupPermissionDto>? MenuList { get; set; }
 
-  public List<GroupPermissionDto> AccessList { get; set; }
+  public List<GroupPermissionDto>? AccessList { get; set; }
 
-  public List<GroupPermissionDto> StatusList { get; set; }
+  public List<GroupPermissionDto>? StatusList { get; set; }
 
-  public List<GroupPermissionDto> ActionList { get; set; }
+  public List<GroupPermissionDto>? ActionList { get; set; }
 
-  public List<GroupPermissionDto> ReportList { get; set; }
+  public List<GroupPermissionDto>? ReportList { get; set; }
 
-  public int TotalCount { get; set; }
+  public int? TotalCount { get; set; }
 }

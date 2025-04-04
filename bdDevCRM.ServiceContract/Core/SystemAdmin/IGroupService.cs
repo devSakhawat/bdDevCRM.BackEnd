@@ -5,5 +5,12 @@ namespace bdDevCRM.ServicesContract.Core.SystemAdmin;
 
 public interface IGroupService
 {
-  Task<GridEntity<GroupDto>> GroupSummary(bool trackChanges, CRMGridOptions options);
+  Task<GroupDto> CreateAsync(GroupDto modelDto);
+  Task<GroupDto> UpdateAsync(int key, GroupDto modelDto);
+
+  Task<GridEntity<GroupSummaryDto>> GroupSummary(bool trackChanges, CRMGridOptions options);
+
+  Task<IEnumerable<GroupPermissionDto>> GroupPermisionsbyGroupId(int groupId);
+
+  Task<IEnumerable<AccessControlDto>> GetAccesses();
 }

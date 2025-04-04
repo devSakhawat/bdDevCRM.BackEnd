@@ -10,6 +10,7 @@ using bdDevCRM.Utilities.Common;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -51,23 +52,25 @@ public class AuthenticationService : IAuthenticationService
     return true;
   }
 
-  public async Task<string> CreateToken(UserForAuthenticationDto user)
+  public string CreateToken(UserForAuthenticationDto user)
   {
-    UsersRepositoryDto users = await _repository.Users.GetUserByLoginIdAsync(user.LoginId, false);
+    UsersRepositoryDto users = _repository.Users.GetUserByLoginIdAsync(user.LoginId, false);
 
     var signingCredentials = GetSigningCredentials();
-    var claims = await GetClaims(users);
+    var claims = GetClaims(users);
     var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
+    string token = string.Empty;
     try
     {
-      var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+      token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
     }
     catch (Exception ex)
     {
       throw new Exception(ex.Message, ex);
     }
 
-    return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+    //return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+    return token;
   }
 
   private SigningCredentials GetSigningCredentials()
@@ -77,7 +80,7 @@ public class AuthenticationService : IAuthenticationService
     return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
   }
 
-  private async Task<List<Claim>> GetClaims(UsersRepositoryDto user)
+  private List<Claim> GetClaims(UsersRepositoryDto user)
   {
     var claims = new List<Claim> {
         new Claim(ClaimTypes.NameIdentifier, user.LoginId ?? ""),

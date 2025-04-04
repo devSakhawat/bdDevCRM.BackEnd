@@ -19,6 +19,6 @@ public class TokenBlacklistRepository : RepositoryBase<TokenBlacklist>, ITokenBl
 
   public async Task<bool> IsTokenBlacklistedAsync(string token)
   {
-    return await HasAnyAsync(tb => tb.Token == token && tb.ExpiryDate > DateTime.UtcNow);
+    return await ExistsAsync(tb => tb.Token == token && tb.ExpiryDate > DateTime.UtcNow);
   }
 }

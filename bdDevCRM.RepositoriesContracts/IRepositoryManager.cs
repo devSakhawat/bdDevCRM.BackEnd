@@ -15,9 +15,14 @@ public interface IRepositoryManager : IDisposable
   IAuthenticationRepository CustomAuthentication { get; }
   IMenuRepository Menus { get; }
   IModuleRepository Modules { get; }
-  IGroupsRepository Groups { get; }
+  IGroupRepository Groups { get; }
+  IQueryAnalyzerRepository QueryAnalyzer { get; }
+  IStatusRepository WfState { get; }
+  IGroupPermissionRepository GroupPermission { get; }
+  IAccessControlRepository AccessControl { get; }
+  IAccessRestrictionRepository AccessRestriction { get; }
 
-
+  // Save changes to the database
   Task SaveAsync();
   void Save();
 }

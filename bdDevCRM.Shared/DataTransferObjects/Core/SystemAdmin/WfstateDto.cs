@@ -7,7 +7,7 @@ public class WfstateDto
   public string StateName { get; set; }
   public int MenuID { get; set; }
   public bool IsDefaultStart { get; set; }
-  public string MenuName { get; set; }
   public int IsClosed { get; set; }
   public int TotalCount { get; set; }
+  public string MenuName { get; set; }
 }

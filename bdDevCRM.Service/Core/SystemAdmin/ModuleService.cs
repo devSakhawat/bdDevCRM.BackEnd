@@ -8,6 +8,7 @@ using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 //using bdDevCRM.Utilities.KendoGrid;
 using bdDevCRM.Utilities.OthersLibrary;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,15 +59,28 @@ internal sealed class ModuleService : IModuleService
 
   public async Task<ModuleDto> CreateModuleAsync(ModuleDto moduleDto)
   {
-    if (moduleDto == null) throw new NullModelBadRequestException(new ModuleDto().GetType().Name.ToString());
+   
 
-    bool isModuleExists = await _repository.Modules.HasAnyAsync(m => m.ModuleName == moduleDto.ModuleName);
-    if (isModuleExists) throw new DuplicateRecordException("Module", "ModuleName");
+      try
+      {
+         if (moduleDto == null) throw new NullModelBadRequestException(new ModuleDto().GetType().Name.ToString());
 
-    Module module = MyMapper.JsonClone<ModuleDto, Module>(moduleDto);
+         bool isModuleExists = await _repository.Modules.ExistsAsync(m => m.ModuleName == moduleDto.ModuleName);
+         if (isModuleExists) throw new DuplicateRecordException("Module", "ModuleName");
 
-    await _repository.Modules.CreateAsync(module);
-    await _repository.SaveAsync();
+         Module module = MyMapper.JsonClone<ModuleDto, Module>(moduleDto);
+
+         await _repository.Modules.CreateAsync(module);
+
+         await _repository.SaveAsync();
+      }
+      catch (DbUpdateException ex)
+      {
+         // Log the detailed inner exception
+         throw new Exception("Save failed", ex.InnerException);
+      }
+
+      await _repository.SaveAsync();
     return moduleDto;
   }
 
@@ -79,7 +93,7 @@ internal sealed class ModuleService : IModuleService
     if (moduleDto.ModuleName == moduleData.ModuleName) throw new DuplicateRecordException();
 
     moduleData = MyMapper.JsonClone<ModuleDto, Module>(moduleDto);
-    _repository.Modules.UpdateAsync(moduleData);
+    _repository.Modules.UpdateByState(moduleData);
     await _repository.SaveAsync();
     moduleDto = MyMapper.JsonClone<Module, ModuleDto>(moduleData);
     return moduleDto;

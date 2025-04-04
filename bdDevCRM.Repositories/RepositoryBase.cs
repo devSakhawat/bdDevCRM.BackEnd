@@ -1,15 +1,17 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Entities.Entities;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Sql.Context;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Options;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories;
 
@@ -17,6 +19,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 {
   private readonly CRMContext _context;
   private readonly DbSet<T> _dbSet;
+  private IDbContextTransaction _currentTransaction;
 
   public RepositoryBase(CRMContext context)
   {
@@ -28,47 +31,112 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
   public void Create(T entity) => _dbSet.Add(entity);
 
+  public async Task CreateAsync(T entity) => await _dbSet.AddAsync(entity);
+
+  public async Task<int> CreateAndGetIdAsync(T entity)
+  {
+    await _dbSet.AddAsync(entity);
+    await _context.SaveChangesAsync();
+    // Get the primary key property
+    var keyProperty = _context.Model.FindEntityType(typeof(T)).FindPrimaryKey().Properties[0];
+
+    // Return the primary key value
+    return (int)keyProperty.GetGetter().GetClrValue(entity);
+  }
+
+
+  public async Task BulkInsertAsync(IEnumerable<T> entities)
+  {
+    if (entities == null || !entities.Any()) throw new ArgumentNullException(nameof(entities), "Entities list cannot be null or empty.");
+
+    await _dbSet.AddRangeAsync(entities);
+  }
+
+  #region Transaction Management Methods
+
+  public async Task TransactionBeginAsync()
+  {
+    if (_currentTransaction != null)
+      throw new InvalidOperationException("A transaction is already in progress.");
+
+    _currentTransaction = await _context.Database.BeginTransactionAsync();
+  }
+
+  public async Task TransactionCommitAsync()
+  {
+    if (_currentTransaction == null)
+      throw new InvalidOperationException("No active transaction to commit.");
+
+    try
+    {
+      await _context.SaveChangesAsync();
+      await _currentTransaction.CommitAsync();
+    }
+    finally
+    {
+      _currentTransaction.Dispose();
+      _currentTransaction = null;
+    }
+  }
+
+  public async Task TransactionRollbackAsync()
+  {
+    if (_currentTransaction == null)
+      throw new InvalidOperationException("No active transaction to rollback.");
+
+    try
+    {
+      await _currentTransaction.RollbackAsync();
+    }
+    finally
+    {
+      _currentTransaction.Dispose();
+      _currentTransaction = null;
+    }
+  }
+
+  public async Task TransactionDisposeAsync()
+  {
+    if (_currentTransaction != null)
+    {
+      try
+      {
+        await _currentTransaction.RollbackAsync();
+      }
+      finally
+      {
+        _currentTransaction.Dispose();
+        _currentTransaction = null;
+      }
+    }
+  }
+
+  #endregion transaction end
+
+
+
+
   public void Update(T entity) => _dbSet.Update(entity);
+
+  public void UpdateByState(T entity)
+  {
+    _dbSet.Attach(entity);
+    _context.Entry(entity).State = EntityState.Modified;
+  }
 
   public void Delete(T entity) => _dbSet.Remove(entity);
 
-  public T GetById(int id) => _dbSet.Find(id);
-
-  public async Task<T> GetByIdWithNotFoundException(int id)
+  public void BulkDelete(IEnumerable<T> entities)
   {
-    var entity = await _dbSet.FindAsync(id);
-    if (entity == null) throw new GenericNotFoundException(typeof(T).Name, "Id", id.ToString());
-    return entity;
+    if (entities == null || !entities.Any()) throw new ArgumentNullException(nameof(entities), "Entities list cannot be null or empty.");
+
+     _dbSet.RemoveRange(entities);
   }
 
-  public IEnumerable<T> GetAll() => _dbSet.ToList();
 
-  public IQueryable<T> FindAll(bool trackChanges) => !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
 
-  public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges)
-    => !trackChanges ? _dbSet.Where(expression).AsNoTracking() : _dbSet.Where(expression);
 
-  public async Task<bool> HasAnyAsync(Expression<Func<T, bool>> predicate)
-  {
-    return await _dbSet.AnyAsync(predicate);
-  }
-  #endregion Basic CRUD Operations without async
-
-  #region Basic Crud Operation with async
-  public async Task CreateAsync(T entity)
-  {
-    await _dbSet.AddAsync(entity);
-  }
-
-  public void UpdateAsync(T entity)
-  {
-    //_dbSet.Update(entity);
-    _dbSet.Attach(entity);
-    _context.Entry(entity).State = EntityState.Modified;
-    //await _context.SaveChangesAsync();
-  }
-
-  public async Task DeleteAsync(Expression<Func<T, bool>> predicate, bool trackChanges)
+  public async Task DeleteAsync(Expression<Func<T, bool>> predicate, bool trackChanges = false)
   {
     var enitytData = (trackChanges) ? await _dbSet.Where(predicate).AsNoTracking().FirstOrDefaultAsync() : await _dbSet.Where(predicate).FirstOrDefaultAsync();
     if (enitytData != null)
@@ -77,324 +145,77 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     }
   }
 
-  public async Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges)
+  public T GetById(Expression<Func<T, bool>> predicate, bool trackChanges = false)
+    => !trackChanges ? _dbSet.Where(predicate).AsNoTracking().FirstOrDefault() : _dbSet.Where(predicate).FirstOrDefault();
+
+  public async Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges = false)
     => !trackChanges ? await _dbSet.Where(predicate).AsNoTracking().FirstOrDefaultAsync() : await _dbSet.Where(predicate).FirstOrDefaultAsync();
 
-  public async Task<IEnumerable<T>> GetAllAsync()
+
+  public T FirstOrDefault(Expression<Func<T, bool>>? expression = null, bool trackChanges = false)
+    => !trackChanges ? _dbSet.AsNoTracking().FirstOrDefault(expression) : _dbSet.FirstOrDefault(expression);
+  public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression, bool trackChanges = false)
+    => !trackChanges ? await _dbSet.AsNoTracking().FirstOrDefaultAsync(expression) : await _dbSet.FirstOrDefaultAsync(expression);
+
+
+  public IEnumerable<T> GetListByIds(Expression<Func<T, bool>> expression, bool trackChanges = false)
   {
-    return await _dbSet.ToListAsync();
+    IQueryable<T> query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
+    query = query.Where(expression);
+    return query.ToList();
   }
 
-  public async Task<IEnumerable<T>> FindByConditionAsync(Expression<Func<T, bool>> expression) => await _dbSet.AsNoTracking().Where(expression).ToListAsync();
-  #endregion Basic Crud Operation  with async
-
-  #region Advanced Crud Operation
-  public async Task<int> CountAsync()
+  public async Task<IEnumerable<T>> GetListByIdsAsync(Expression<Func<T, bool>> expression, bool trackChanges = false)
   {
-    return await _dbSet.CountAsync();
+    IQueryable<T> query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
+    query = query.Where(expression);
+    return await query.ToListAsync();
   }
 
-  public async Task<bool> ExistsAsync(Expression<Func<T, bool>> expression)
+
+
+
+  public IEnumerable<T> List(Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
   {
-    return await _dbSet.AnyAsync(expression);
+    IQueryable<T> query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
+    if (orderBy != null)
+    {
+      query = query.OrderBy(orderBy);
+    }
+    return query.ToList();
   }
 
-  public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression)
+  public async Task<IEnumerable<T>> ListAsync(Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
   {
-    return await _dbSet.FirstOrDefaultAsync(expression);
+    IQueryable<T> query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
+    if (orderBy != null)
+    {
+      query = query.OrderBy(orderBy);
+    }
+    return await query.ToListAsync();
+  }
+  
+  public IEnumerable<T> ListByCondition(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
+  {
+
+    IQueryable<T> query = !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
+    query = (orderBy != null) ? query.Where(expression).OrderBy(orderBy) : query.Where(expression);
+    return query.ToList(); ;
   }
 
-  public async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize)
+  public async Task<IEnumerable<T>> ListByConditionAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
   {
-    return await _dbSet.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+    IQueryable<T> query = !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
+    query = (orderBy != null) ? query.Where(expression).OrderBy(orderBy) : query.Where(expression);
+    return await query.ToListAsync(); ;
   }
+
+
+  public async Task<int> CountAsync() => await _dbSet.AsNoTracking().CountAsync();
+
+  public async Task<bool> ExistsAsync(Expression<Func<T, bool>> expression) => await _dbSet.AsNoTracking().AnyAsync(expression);
   #endregion Advanced Crud Operation
-
-  #region Data By Generic
-  public T FindById(int id) => _context.Set<T>().Find(id) ?? throw new InvalidOperationException($"Entity of type {typeof(T).Name} with id {id} not found.");
-
-  public async Task<IEnumerable<T>> GetListOfResultByQuery(string query) => await _context.Set<T>().FromSqlRaw(query).ToListAsync();
-
-  /// <summary>
-  /// Check if data exists for a specific field and value.
-  /// </summary>
-  public async Task<bool> CheckIfExists(string fieldName, string fieldValue)
-  {
-    // Validate the input
-    if (string.IsNullOrWhiteSpace(fieldName))
-      throw new ArgumentException("Field name cannot be null or empty.", nameof(fieldName));
-
-    // Get the property info for the given field name
-    var property = typeof(T).GetProperty(fieldName);
-    if (property == null)
-      throw new ArgumentException($"Field '{fieldName}' does not exist on type '{typeof(T).Name}'.");
-
-    // Convert the string value to the property's type
-    var parameter = Expression.Parameter(typeof(T), "x");
-    var propertyAccess = Expression.Property(parameter, property);
-
-    // Parse the field value into the appropriate type
-    object convertedValue;
-    try
-    {
-      convertedValue = Convert.ChangeType(fieldValue, property.PropertyType);
-    }
-    catch (Exception)
-    {
-      throw new ArgumentException($"The value '{fieldValue}' cannot be converted to type '{property.PropertyType.Name}'.");
-    }
-
-    // Build the lambda expression: x => x.FieldName == convertedValue
-    var equalsExpression = Expression.Equal(propertyAccess, Expression.Constant(convertedValue));
-    var lambda = Expression.Lambda<Func<T, bool>>(equalsExpression, parameter);
-
-    // Query the database
-    var exists = await _context.Set<T>().AnyAsync(lambda);
-    if (!exists) throw new GenericNotFoundException(typeof(T).Name, fieldName, fieldValue);
-
-    return exists;
-  }
-  #endregion Data By Generic
-
-  #region Data By Query
-
-  // <summary> If the query column and Entities property different then use this method </summary>
-  /// Json Approch : Converting dynamic query result to the generic type result
-  public async Task<IEnumerable<TResult>> GetListOfDataByQuery<TResult>(string query) where TResult : class, new()
-  {
-    var connection = _context.Database.GetDbConnection();
-    try
-    {
-      await connection.OpenAsync();
-
-      using (var command = connection.CreateCommand())
-      {
-        command.CommandText = query;
-
-        using (var result = await command.ExecuteReaderAsync())
-        {
-          if (result == null) return new List<TResult>();
-
-          var data = new List<TResult>();
-          while (await result.ReadAsync())
-          {
-            var json = await result.GetFieldValueAsync<string>(0);
-            var item = JsonConvert.DeserializeObject<TResult>(json);
-            if (item != null) data.Add(item);
-          }
-          return data;
-        }
-      }
-    }
-    finally
-    {
-      await connection.CloseAsync();
-    }
-  }
-
-  /// <summary> Retrieves a single record from a query when the query column and Entities property differ </summary>
-  /// <remarks> Json Approach: Converting dynamic query result to the generic type result </remarks>
-  public async Task<TResult?> GetSingleDataByQuery<TResult>(string query) where TResult : class, new()
-  {
-    var connection = _context.Database.GetDbConnection();
-    try
-    {
-      await connection.OpenAsync();
-      using (var command = connection.CreateCommand())
-      {
-        command.CommandText = query;
-        using (var result = await command.ExecuteReaderAsync())
-        {
-          if (result == null || !await result.ReadAsync())
-            return null;
-
-          var json = await result.GetFieldValueAsync<string>(0);
-          return JsonConvert.DeserializeObject<TResult>(json);
-        }
-      }
-    }
-    finally
-    {
-      await connection.CloseAsync();
-    }
-  }
-
-  /// <summary> .Net Approch : Converting dynamic query result to the generic type result </summary>
-  public async Task<IEnumerable<TResult>> GetGenericResultByQuery<TResult>(string query) where TResult : class, new()
-  {
-    var connection = _context.Database.GetDbConnection();
-    try
-    {
-      await connection.OpenAsync();
-
-      using (var command = connection.CreateCommand())
-      {
-        command.CommandText = query;
-
-        using (var result = await command.ExecuteReaderAsync())
-        {
-          var data = new List<TResult>();
-          var properties = typeof(TResult).GetProperties();
-
-          // Dynamically map only matching columns
-          while (await result.ReadAsync())
-          {
-            var item = new TResult();
-
-            foreach (var prop in properties)
-            {
-              // Check if the column exists in the result set
-              int ordinal;
-              try
-              {
-                ordinal = result.GetOrdinal(prop.Name);
-              }
-              catch (IndexOutOfRangeException)
-              {
-                // Skip this property if the column is missing
-                continue;
-              }
-
-              object value = null;
-
-              // Check if the column value is DBNull
-              if (!await result.IsDBNullAsync(ordinal))
-              {
-                value = await result.GetFieldValueAsync<object>(ordinal);
-              }
-
-              // Assign the value to the property
-              prop.SetValue(item, value);
-            }
-
-            data.Add(item);
-          }
-
-          return data;
-        }
-      }
-    }
-    finally
-    {
-      await connection.CloseAsync();
-    }
-  }
-
-  /// <summary> .Net Approch : Converting dynamic query result to the generic type result </summary>
-  public async Task<TResult?> GetSingleGenericResultByQuery<TResult>(string query) where TResult : class, new()
-  {
-    var connection = _context.Database.GetDbConnection();
-    try
-    {
-      await connection.OpenAsync();
-      using (var command = connection.CreateCommand())
-      {
-        command.CommandText = query;
-        using (var result = await command.ExecuteReaderAsync())
-        {
-          if (!await result.ReadAsync())
-            return null;
-
-          // Create an instance of the result type
-          var item = new TResult();
-
-          // Get all properties of the result type
-          var properties = typeof(TResult).GetProperties();
-
-          // Get the column names from the query result
-          var columnNames = Enumerable.Range(0, result.FieldCount)
-                                       .Select(result.GetName)
-                                       .ToList();
-
-          // Map query result columns to DTO properties
-          foreach (var columnName in columnNames)
-          {
-            // Find a matching property in the DTO (case-insensitive)
-            var matchingProperty = properties.FirstOrDefault(p =>
-                string.Equals(p.Name, columnName, StringComparison.OrdinalIgnoreCase));
-
-            if (matchingProperty != null)
-            {
-              // Get the value from the query result
-              var value = await result.GetFieldValueAsync<object>(result.GetOrdinal(columnName));
-
-              // Set the value to the DTO property
-              matchingProperty.SetValue(item, value);
-            }
-          }
-
-          return item;
-        }
-      }
-    }
-    finally
-    {
-      await connection.CloseAsync();
-    }
-  }
-
-  public async Task<List<TResult>> GetListGenericResultByQuery<TResult>(string query) where TResult : class, new()
-  {
-    var connection = _context.Database.GetDbConnection();
-    var resultList = new List<TResult>();
-
-    try
-    {
-      await connection.OpenAsync();
-      using (var command = connection.CreateCommand())
-      {
-        command.CommandText = query;
-        using (var result = await command.ExecuteReaderAsync())
-        {
-          // Get all properties of the result type
-          var properties = typeof(TResult).GetProperties();
-
-          // Get the column names from the query result
-          var columnNames = Enumerable.Range(0, result.FieldCount)
-                                       .Select(result.GetName)
-                                       .ToList();
-
-          // Iterate through all rows in the query result
-          while (await result.ReadAsync())
-          {
-            // Create an instance of the result type
-            var item = new TResult();
-
-            // Map query result columns to DTO properties
-            foreach (var columnName in columnNames)
-            {
-              // Find a matching property in the DTO (case-insensitive)
-              var matchingProperty = properties.FirstOrDefault(p =>
-                  string.Equals(p.Name, columnName, StringComparison.OrdinalIgnoreCase));
-
-              if (matchingProperty != null)
-              {
-                // Get the value from the query result
-                var value = await result.GetFieldValueAsync<object>(result.GetOrdinal(columnName));
-
-                // Set the value to the DTO property
-                matchingProperty.SetValue(item, value);
-              }
-            }
-
-            // Add the populated DTO object to the result list
-            resultList.Add(item);
-          }
-        }
-      }
-    }
-    finally
-    {
-      await connection.CloseAsync();
-    }
-
-    return resultList;
-  }
-
-
-  #endregion Data By Query
-
-
 
 
   #region Query Execute by TDT
@@ -474,78 +295,11 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   }
   #endregion Query Execute by TDT
 
-  #region OldCode
 
-  //public async Task<List<T>> ExecuteQueryAsync<T>(string query) where T : new()
-  //{
-  //  var dataList = new List<T>();
-  //  using (var connection = _context.Database.GetDbConnection())
-  //  {
-  //    try
-  //    {
-  //      await connection.OpenAsync();
-  //      using (var command = connection.CreateCommand())
-  //      {
-  //        command.CommandText = query;
-  //        using (var reader = await command.ExecuteReaderAsync())
-  //        {
-  //          while (await reader.ReadAsync())
-  //          {
-  //            var entity = new T();
-  //            var properties = typeof(T).GetProperties();
-
-  //            for (int i = 0; i < reader.FieldCount; i++)
-  //            {
-  //              if (reader.IsDBNull(i)) continue;
-
-  //              var columnName = reader.GetName(i);
-  //              var property = properties.FirstOrDefault(p =>
-  //                  p.Name.Equals(columnName, StringComparison.OrdinalIgnoreCase));
-
-  //              if (property != null && property.CanWrite)
-  //              {
-  //                var value = reader.GetValue(i);
-  //                try
-  //                {
-  //                  if (property.PropertyType.IsGenericType &&
-  //                      property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-  //                  {
-  //                    var underlyingType = Nullable.GetUnderlyingType(property.PropertyType);
-  //                    value = Convert.ChangeType(value, underlyingType);
-  //                  }
-  //                  else
-  //                  {
-  //                    value = Convert.ChangeType(value, property.PropertyType);
-  //                  }
-
-  //                  property.SetValue(entity, value);
-  //                }
-  //                catch (Exception ex)
-  //                {
-  //                  Console.Error.WriteLine($"Error setting property {property.Name}: {ex.Message}");
-  //                }
-  //              }
-  //            }
-
-  //            dataList.Add(entity);
-  //          }
-  //        }
-  //      }
-  //    }
-  //    catch (Exception ex)
-  //    {
-  //      Console.Error.WriteLine($"Database error: {ex.Message}");
-  //      Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
-  //      throw; // রি-থ্রো করা গুরুত্বপূর্ণ যাতে এটি কলিং কোডে প্রচার হয়
-  //    }
-  //  }
-
-  //  return dataList;
-  //}
-  #endregion OldCode
+  #region Get Data using ado.net
 
 
-  public async Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy ,string condition)
+  public async Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy, string condition)
   {
     var connection = _context.Database.GetDbConnection();
     var sqlCount = "SELECT COUNT(*) FROM (" + query + " ) As tbl ";
@@ -583,20 +337,17 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
             foreach (var property in properties)
             {
-              // কলাম নাম এবং প্রপার্টি নাম মিলে গেলে
               if (!columnMap.ContainsKey(property.Name)) continue;
 
               var columnIndex = columnMap[property.Name];
-              if (reader.IsDBNull(columnIndex)) continue; // null ভ্যালু হ্যান্ডেল করা
+              if (reader.IsDBNull(columnIndex)) continue;
 
               var value = reader.GetValue(columnIndex);
 
               try
               {
-                // নালবল টাইপ হ্যান্ডেল করা
                 Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
 
-                // স্পেশাল টাইপের জন্য কাস্টম কনভার্শন
                 if (propertyType == typeof(Guid) && value is string)
                 {
                   property.SetValue(entity, Guid.Parse((string)value));
@@ -638,67 +389,149 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     dbEntity.TotalCount = totalCount;
     dbEntity.Columnses = new List<GridColumns>();
 
-    //var result = new GridResult<T>().Data(dataList, dataList.Count);
     return dbEntity;
   }
 
-
-
-  public async Task<List<T>> ExecuteQueryAsync<T>(string query)
+  public async Task<TResult> ExecuteSingleData<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
   {
     var connection = _context.Database.GetDbConnection();
-    var dataList = new List<T>();
+    TResult result = null;
 
     try
     {
       await connection.OpenAsync();
 
+      using var command = connection.CreateCommand();
+      command.CommandText = query;
+      command.CommandTimeout = 120; // Set timeout to 120 seconds
+
+      if (parameters != null)
+      {
+        foreach (var param in parameters)
+        {
+          var dbParam = command.CreateParameter();
+          dbParam.ParameterName = param.ParameterName;
+          dbParam.Value = param.Value;
+          command.Parameters.Add(dbParam);
+        }
+      }
+
+      using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow);
+
+      if (await reader.ReadAsync())
+      {
+        // Get property map for performance
+        var propertyMap = CreatePropertyMap<TResult>(reader);
+
+        // Map the single record to an object
+        result = MapReaderToObject<TResult>(reader, propertyMap);
+      }
+    }
+    finally
+    {
+      if (connection.State == ConnectionState.Open)
+        await connection.CloseAsync();
+    }
+
+    return result;
+  }
+
+
+  public TResult ExecuteSingleDataSyncronous<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
+  {
+    var connection = _context.Database.GetDbConnection();
+    TResult result = null;
+
+    try
+    {
+      connection.Open();
+
       using (var command = connection.CreateCommand())
       {
         command.CommandText = query;
+        command.CommandTimeout = 120; // Set timeout to 120 seconds
 
-        using (var reader = await command.ExecuteReaderAsync())
+        if (parameters != null)
         {
-          if (!reader.HasRows) return dataList;
-
-          while (await reader.ReadAsync())
+          foreach (var param in parameters)
           {
-            var entity = Activator.CreateInstance<T>();
-            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var dbParam = command.CreateParameter();
+            dbParam.ParameterName = param.ParameterName;
+            dbParam.Value = param.Value;
+            command.Parameters.Add(dbParam);
+          }
+        }
+
+        using (var reader = command.ExecuteReader(CommandBehavior.SingleRow))
+        {
+          if (!reader.HasRows) return null;
+
+          var columnMap = new Dictionary<string, int>();
+          for (int i = 0; i < reader.FieldCount; i++)
+          {
+            columnMap[reader.GetName(i)] = i;
+          }
+
+          var properties = typeof(TResult).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+          if (reader.Read())
+          {
+            var entity = Activator.CreateInstance<TResult>();
 
             foreach (var property in properties)
             {
-              if (!reader.HasColumn(property.Name)) continue;
+              if (!columnMap.ContainsKey(property.Name)) continue;
 
-              var value = reader[property.Name];
-              if (value == DBNull.Value) continue;
+              var columnIndex = columnMap[property.Name];
+              if (reader.IsDBNull(columnIndex)) continue;
 
-              property.SetValue(entity, Convert.ChangeType(value, property.PropertyType));
+              var value = reader.GetValue(columnIndex);
+
+              try
+              {
+                Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+                if (propertyType == typeof(Guid) && value is string)
+                {
+                  property.SetValue(entity, Guid.Parse((string)value));
+                }
+                else if (propertyType.IsEnum && value is string)
+                {
+                  property.SetValue(entity, Enum.Parse(propertyType, (string)value));
+                }
+                else
+                {
+                  property.SetValue(entity, Convert.ChangeType(value, propertyType));
+                }
+              }
+              catch (Exception ex)
+              {
+                Console.Error.WriteLine($"Error converting value '{value}' to type {property.PropertyType.Name} for property {property.Name}: {ex.Message}");
+              }
             }
 
-            dataList.Add(entity);
+            result = entity;
           }
         }
       }
     }
     catch (Exception ex)
     {
-      Console.Error.WriteLine($"Error in ExecuteQueryAsync: {ex.Message}");
+      Console.Error.WriteLine($"Error in ExecuteSingleDataSyncronous: {ex.Message}");
     }
     finally
     {
       if (connection.State == ConnectionState.Open)
       {
-        await connection.CloseAsync();
+        connection.Close();
       }
     }
 
-    return dataList;
+    return result;
   }
 
 
-  #region clde
-  public async Task<IEnumerable<TResult>> ExecuteOptimizedQuery<TResult>(string query, SqlParameter[] parameters) where TResult : class, new()
+  public async Task<IEnumerable<TResult>> ExecuteListQuery<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
   {
     var connection = _context.Database.GetDbConnection();
     var results = new List<TResult>();
@@ -709,7 +542,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
       using var command = connection.CreateCommand();
       command.CommandText = query;
-      command.CommandTimeout = 30; // Set timeout to 30 seconds
+      command.CommandTimeout = 120; // Set timeout to 30 seconds
 
       if (parameters != null)
       {
@@ -741,6 +574,9 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     }
   }
 
+
+  // Helper methods for mapping data reader to object
+  // These methods are generic and can be used in any repository
   private Dictionary<string, PropertyInfo> CreatePropertyMap<T>(DbDataReader reader)
   {
     var properties = typeof(T).GetProperties();
@@ -759,31 +595,55 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     return columnMap;
   }
 
-  private T MapReaderToObject<T>(DbDataReader reader, Dictionary<string, PropertyInfo> propertyMap) where T : new()
+  private T MapReaderToObject<T>(DbDataReader reader, Dictionary<string, PropertyInfo> propertyMap) where T : class, new()
   {
-    var item = new T();
-
-    for (int i = 0; i < reader.FieldCount; i++)
+    var obj = new T();
+    foreach (var entry in propertyMap)
     {
-      string columnName = reader.GetName(i);
+      string columnName = entry.Key;
+      PropertyInfo property = entry.Value;
 
-      if (propertyMap.TryGetValue(columnName, out PropertyInfo property))
+      if (!reader.IsDBNull(reader.GetOrdinal(columnName)))
       {
-        if (!reader.IsDBNull(i))
+        object value = reader[columnName];
+
+        // Handle type conversion explicitly
+        if (property.PropertyType == typeof(bool?) && value is bool)
         {
-          object value = reader.GetValue(i);
-          if (property.PropertyType != value.GetType() && value is IConvertible)
-          {
-            value = Convert.ChangeType(value, property.PropertyType);
-          }
-          property.SetValue(item, value);
+          property.SetValue(obj, (bool?)value); // Directly cast bool to bool?
+        }
+        else if (property.PropertyType == typeof(int?) && value is int)
+        {
+          property.SetValue(obj, (int?)value);
+        }
+        else if (property.PropertyType == typeof(string))
+        {
+          property.SetValue(obj, value?.ToString());
+        }
+        else
+        {
+          // Use default type conversion for other types
+          property.SetValue(obj, Convert.ChangeType(value, property.PropertyType));
+        }
+      }
+      else
+      {
+        // Handle NULL values explicitly
+        if (property.PropertyType == typeof(bool?))
+        {
+          property.SetValue(obj, null); // Set nullable bool to null
+        }
+        else if (property.PropertyType == typeof(int?))
+        {
+          property.SetValue(obj, null); // Set nullable int to null
         }
       }
     }
 
-    return item;
+    return obj;
   }
-  #endregion
+  #endregion Get Data using ado.net
+
 }
 
 
@@ -802,10 +662,3 @@ public static class DbDataReaderExtensions
   }
 }
 
-
-
-
-// DataTable dataTable = _connection.GetDataTable(sqlQuery + orderby);
-//int totalCount = _connection.GetScaler(sqlCount);
-//var dataList = (List<T>)ListConversion.ConvertTo<T>(dataTable);
-//var result = new GridResult<T>().Data(dataList, totalCount);

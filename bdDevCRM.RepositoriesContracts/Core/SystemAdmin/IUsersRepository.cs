@@ -21,7 +21,7 @@ public interface IUsersRepository : IRepositoryBase<Users>
 
   Task<Users> GetUserAsync(int usersId, bool trackChanges);
 
-  Task<UsersRepositoryDto?> GetUserByLoginIdAsync(string loginId, bool trackChanges);
+  UsersRepositoryDto? GetUserByLoginIdAsync(string loginId, bool trackChanges);
 
   Users? GetUserByLoginId(string loginId, bool trackChanges);
 

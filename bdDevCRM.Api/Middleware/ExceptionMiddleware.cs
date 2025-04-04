@@ -1,5 +1,6 @@
 ﻿using bdDevCRM.Api.ApiResponseError;
-using bdDevCRM.LoggerSevice;
+using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Entities.Exceptions.BaseException;
 using bdDevCRM.RepositoriesContracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -45,7 +46,7 @@ public class ExceptionMiddleware
       string details = null;
 
       // Handle specific exception types
-      if (ex is UnauthorizedAccessException)
+      if (ex is System.UnauthorizedAccessException)
       {
         statusCode = (int)HttpStatusCode.Unauthorized;
         message = "You are not authorized to perform this action.";
@@ -59,6 +60,38 @@ public class ExceptionMiddleware
       {
         statusCode = (int)HttpStatusCode.BadRequest;
         message = "One or more validation errors occurred.";
+      }
+      //  custom validation exception start
+      // Update your condition blocks in the middleware with the following pattern:
+      else if (ex is UsernamePasswordMismatchException userPassMismatch)
+      {
+        statusCode = userPassMismatch.StatusCode; // 400 // proper appropriate status code here for username/password mismatch
+        message = ex.Message; // "The username or password is incorrect. Please try again."
+      }
+      else if (ex is BadRequestException badRequestEx)
+      {
+        statusCode = badRequestEx.StatusCode;
+        message = ex.Message;
+      }
+      else if (ex is ConflictException conflictEx)
+      {
+        statusCode = conflictEx.StatusCode;
+        message = ex.Message;
+      }
+      else if (ex is NotFoundException notFoundEx)
+      {
+        statusCode = notFoundEx.StatusCode;
+        message = ex.Message;
+      }
+      else if (ex is ServiceUnavailableException serviceEx)
+      {
+        statusCode = serviceEx.StatusCode;
+        message = ex.Message;
+      }
+      else if (ex is ForbiddenAccessException forbiddenEx)
+      {
+        statusCode = forbiddenEx.StatusCode;
+        message = ex.Message;
       }
       // JWT Token exception handling
       else if (ex is SecurityTokenException || ex is SecurityTokenValidationException || ex is SecurityTokenExpiredException)

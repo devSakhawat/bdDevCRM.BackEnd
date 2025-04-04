@@ -47,6 +47,7 @@ public class MyMapper
     return target;
   }
 
+
   // IEnumerable<Country> countries = await _repository.Countries.GetCountriesAsync(trackChanges);
   //List<CountryDto> countryDtos = MyMapper.JsonCloneIEnumerableToList<Country, CountryDto>(countries);
   public static List<TTarget> JsonCloneIEnumerableToList<TSource, TTarget>(IEnumerable<TSource> sourceList)

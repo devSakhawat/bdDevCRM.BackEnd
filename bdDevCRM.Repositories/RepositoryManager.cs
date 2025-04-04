@@ -21,7 +21,12 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<IMenuRepository> _menuRepository;
   private readonly Lazy<ITokenBlacklistRepository> _tokenBlacklistRepository;
   private readonly Lazy<IModuleRepository> _moduleRepository;
-  private readonly Lazy<IGroupsRepository> _groupsRepository;
+  private readonly Lazy<IGroupRepository> _groupsRepository;
+  private readonly Lazy<IQueryAnalyzerRepository> _queryAnalyzerRepository;
+  private readonly Lazy<IStatusRepository> _statusRepository;
+  private readonly Lazy<IGroupPermissionRepository> _groupPermissionRepository;
+  private readonly Lazy<IAccessControlRepository> _accessControlRepository;
+  private readonly Lazy<IAccessRestrictionRepository> _accessRestrictionRepository;
 
   public RepositoryManager(CRMContext repositoryContext)
   {
@@ -35,7 +40,12 @@ public class RepositoryManager : IRepositoryManager
     _menuRepository = new Lazy<IMenuRepository>(() => new MenuRepository(_repositoryContext));
     _tokenBlacklistRepository = new Lazy<ITokenBlacklistRepository>(() => new TokenBlacklistRepository(_repositoryContext));
     _moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(_repositoryContext));
-    _groupsRepository = new Lazy<IGroupsRepository>(() => new GroupRepository(_repositoryContext));
+    _groupsRepository = new Lazy<IGroupRepository>(() => new GroupRepository(_repositoryContext));
+    _queryAnalyzerRepository = new Lazy<IQueryAnalyzerRepository>(() => new QueryAnalyzerRepository(_repositoryContext));
+    _statusRepository = new Lazy<IStatusRepository>(() => new StatusRepository(_repositoryContext));
+    _groupPermissionRepository = new Lazy<IGroupPermissionRepository>(() => new GroupPermissionRepository(_repositoryContext));
+    _accessControlRepository = new Lazy<IAccessControlRepository>(() => new AccessControlRepository(_repositoryContext));
+    _accessRestrictionRepository = new Lazy<IAccessRestrictionRepository>(() => new AccessRestrictionRepository(_repositoryContext));
   }
 
   public ICountryRepository Countries => _countries.Value;
@@ -47,9 +57,15 @@ public class RepositoryManager : IRepositoryManager
   public IMenuRepository Menus => _menuRepository.Value;
   public ITokenBlacklistRepository TokenBlacklist => _tokenBlacklistRepository.Value;
   public IModuleRepository Modules => _moduleRepository.Value;
-  public IGroupsRepository Groups => _groupsRepository.Value;
+  public IGroupRepository Groups => _groupsRepository.Value;
+  public IQueryAnalyzerRepository QueryAnalyzer => _queryAnalyzerRepository.Value;
+  public IStatusRepository WfState => _statusRepository.Value;
+  public IGroupPermissionRepository GroupPermission => _groupPermissionRepository.Value;
+  public IAccessControlRepository AccessControl => _accessControlRepository.Value;
+  public IAccessRestrictionRepository AccessRestriction => _accessRestrictionRepository.Value;
 
 
+  // Save changes to the database
   public async Task SaveAsync() => await _repositoryContext.SaveChangesAsync();
   public void Save() => _repositoryContext.SaveChanges();
   public void Dispose() => _repositoryContext.Dispose();

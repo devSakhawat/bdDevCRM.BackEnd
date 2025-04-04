@@ -27,7 +27,7 @@ public class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
       WHERE Employment.HRRecordId = 10468";
 
     // Call the generic method with the hardcoded query
-    var result = await GetSingleGenericResultByQuery<EmploymentRepositoryDto>(employmentQuery);
+    var result = await ExecuteSingleData<EmploymentRepositoryDto>(employmentQuery);
     return result;
   }
 
@@ -38,7 +38,7 @@ from Employee
 inner join Employment on Employment.HRRecordId=Employee.HRRecordId 
 left outer join WFState on WFState.WFStateId=Employee.StateId where Employment.HRRecordId={0} ", hrRecordId, DateTime.Today.ToString("MM-dd-yyyy"));
 
-    var data = await GetSingleGenericResultByQuery<Wfstate>(sql);
+    var data = await ExecuteSingleData<Wfstate>(sql);
     return data;
   }
 
@@ -46,7 +46,7 @@ left outer join WFState on WFState.WFStateId=Employee.StateId where Employment.H
   {
     string quary = string.Format(SELECT_EMPLOYEE_BY_HRRECORDID, hrRecordId);
 
-    var data = await GetSingleGenericResultByQuery<EmployeeRepositoryDto>(quary);
+    var data = await ExecuteSingleData<EmployeeRepositoryDto>(quary);
     return data;
   }
 

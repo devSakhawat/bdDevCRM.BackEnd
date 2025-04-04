@@ -92,19 +92,6 @@ public class MenuController : BaseApiController
     return Ok(menusDto.ToList());
   }
 
-  ///// <summary>
-  ///// After login to system
-  ///// </summary>
-  ///// <param name="options"></param>
-  ///// <returns></returns>
-  //[HttpPost(RouteConstants.MenuSummary)]
-  ////[IgnoreMediaTypeValidation]
-  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  //public async Task<IActionResult> GetMenuSummary([FromBody] CRMGridOptions options)
-  //{
-  //  var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
-  //  return (menuSummary != null) ? Ok(menuSummary) : NoContent();
-  //}
 
   /// <summary>
   /// After login to system
@@ -113,7 +100,7 @@ public class MenuController : BaseApiController
   /// <returns></returns>
   [HttpPost(RouteConstants.MenuSummary)]
   //[IgnoreMediaTypeValidation]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> GetMenuSummary([FromBody] CRMGridOptions options)
   {
     var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
@@ -131,8 +118,8 @@ public class MenuController : BaseApiController
   }
 
   [HttpPut(RouteConstants.UpdateMenu)]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  public async Task<IActionResult> UpdateModule([FromRoute] int key, [FromBody] MenuDto modelDto)
+  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> UpdateMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
 
@@ -142,13 +129,17 @@ public class MenuController : BaseApiController
 
   [HttpDelete(RouteConstants.DeleteMenu)]
   [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  public async Task<IActionResult> DeleteModule([FromRoute] int key, [FromBody] MenuDto modelDto)
+  public async Task<IActionResult> DeleteMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
 
     await _serviceManager.Menus.DeleteAsync(key, modelDto);
     return Ok("Success");
   }
+
+
+
+
 
 
 
