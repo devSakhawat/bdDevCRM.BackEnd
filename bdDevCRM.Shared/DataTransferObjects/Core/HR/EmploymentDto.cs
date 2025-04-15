@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace bdDevCRM.Shared.DataTransferObjects.HR;
+namespace bdDevCRM.Shared.DataTransferObjects.Core.HR;
 
 public class EmploymentDto
 {

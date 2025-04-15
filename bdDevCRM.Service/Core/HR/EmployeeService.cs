@@ -2,23 +2,26 @@
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos;
-using bdDevCRM.ServiceContract.HR;
+using bdDevCRM.ServiceContract.Core.HR;
+using bdDevCRM.Shared.DataTransferObjects.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Shared.DataTransferObjects.HR;
 using bdDevCRM.Utilities.OthersLibrary;
+using Microsoft.Extensions.Configuration;
 
-namespace bdDevCRM.Service.HR;
+namespace bdDevCRM.Service.Core.HR;
 
 
 internal sealed class EmployeeService : IEmployeeService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
+  private readonly IConfiguration _configuration;
 
-  public EmployeeService(IRepositoryManager repository, ILoggerManager logger)
+  public EmployeeService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
+    _configuration = configuration;
   }
 
   public async Task<EmploymentDto> GetEmploymentByHrRecordId(int hrRecordId)
@@ -49,6 +52,46 @@ internal sealed class EmployeeService : IEmployeeService
 
     EmployeeDto employeeDto = MyMapper.JsonClone<EmployeeRepositoryDto, EmployeeDto>(employee);
     return employeeDto;
+  }
+
+  // get employee types with id, name and code
+  public async Task<IEnumerable<EmployeeTypeDto>> EmployeeTypes(int param)
+  {
+    // Initialize the employeeTypes collection properly
+    IEnumerable<Employeetype> employeeTypes = Enumerable.Empty<Employeetype>();
+
+    if (param == 0)
+    {
+      employeeTypes = await _repository.EmployeeTypes.ListByWhereWithSelectAsync(
+        selector: x => new Employeetype
+        {
+          Employeetypeid = x.Employeetypeid,
+          EmployeeTypeCode = x.EmployeeTypeCode,
+          Employeetypename = x.Employeetypename
+        }
+        , x => x.IsActive == 0 && (x.IsNotAccess == null || x.IsNotAccess == false)
+        , orderBy: x => x.Employeetypename
+        , trackChanges: false
+      );
+    }
+    else
+    {
+      employeeTypes = await _repository.EmployeeTypes.ListByWhereWithSelectAsync(
+        selector: x => new Employeetype
+        {
+          Employeetypeid = x.Employeetypeid,
+          EmployeeTypeCode = x.EmployeeTypeCode,
+          Employeetypename = x.Employeetypename
+        }
+        , x => x.IsActive == 1, orderBy: x => x.Employeetypename, trackChanges: false);
+    }
+
+    // Check if the result is null or empty
+    if (employeeTypes == null || !employeeTypes.Any())
+      throw new GenericNotFoundException("EmployeeType", "EmployeeTypeId", "0");
+
+    IEnumerable<EmployeeTypeDto> result = MyMapper.JsonCloneIEnumerableToList<Employeetype, EmployeeTypeDto>(employeeTypes);
+    return result;
   }
 
 

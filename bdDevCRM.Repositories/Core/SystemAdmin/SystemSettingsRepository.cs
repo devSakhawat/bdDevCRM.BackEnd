@@ -50,12 +50,6 @@ public class SystemSettingsRepository : RepositoryBase<SystemSettings>, ISystemS
       "IsSingleBranchApplicable={23},CheckPreviousAbsenteeism={24},BypassDefaultStateForSameBoss={25},DefaultLateDeductionDays={26},CheckingApproverSettings={27},IsOtCalculateForSalary = {28},DefaultEarlyExitDeductionDays={29},IsEmployeeIdAutoGenereted={30},IsGradeWiseLeave={31},EnableMultiplePolicyForSameLeaveType={32},IsAbsenteeismMarge={33},IsTotalBillingApplicable={34}," +
       "EnableApproverCheckingWhileApplication={36},EnableDelayOnShiftInGraceTime={37},EnableLateAfterShiftInGraceTime={38}," +
       "EnableEarlyExitBeforeShiftOutGraceTime={39},EnableAbsentAfterLateTime={40},EnableAbsentBeforeEarlyExitTime={41},EnableAbsentForNoOutPunch={42},LateTime={43},EarlyExitTime={44},EnableCustomStatusOutPunch={45},CustomStatusForNoOutPunch='{46}',EnableCustomStatusAfterShiftInGraceTime={47},CustomStatusForAfterShiftinGraceTime='{48}',DefaultLateDeductionDaysNext='{49}',RegulariseAttendaceDaysLimit='{50}', DefaultLateDeductionDaysFirstTime='{51}',ShortLeaveSlot='{52}',CasualWorkerAmount='{53}' where SettingsId = {35}";
-
-
-
-
-
-
   #endregion
 
   #region Global Method

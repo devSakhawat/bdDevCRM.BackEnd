@@ -1,35 +1,37 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
-public class UsersController : BaseApiController
+namespace bdDevCRM.Presentation.Controllers.Core.HR;
+
+public class EmployeeController : BaseApiController
 {
   private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
-
-  public UsersController(IServiceManager serviceManager, IMemoryCache cache)
+  public EmployeeController(IServiceManager serviceManager, IMemoryCache cache)
   {
     _serviceManager = serviceManager;
     _cache = cache;
   }
 
-  [HttpPost(RouteConstants.UserSummary)]
-  public async Task<IActionResult> UserSummary([FromBody] CRMGridOptions options, int companyId)
+  [HttpGet(RouteConstants.EmployeeTypes)]
+  public async Task<IActionResult> EmployeeTypes()
   {
     // from claim.
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
     // userId : which key is reponsible to when cache was created .
     // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
     UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
-    // get hr record id from user.
-    if (user.HrRecordId == 0 || user.HrRecordId == null) throw new IdParametersBadRequestException();
-    var groupSummary = await _serviceManager.Users.UsersSummary(companyId, trackChanges: false, options, user);
-    return (groupSummary != null) ? Ok(groupSummary) : NoContent();
+
+    IEnumerable<EmployeeTypeDto> employees = await _serviceManager.Employees.EmployeeTypes((int)user.AccessParentCompany);
+    return Ok(employees);
   }
+
 
 
 

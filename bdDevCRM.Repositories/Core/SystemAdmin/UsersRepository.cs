@@ -13,12 +13,12 @@ public class UsersRepository : RepositoryBase<Users>, IUsersRepository
 
   private const string UPDATE_USER =
             "Update Users set CompanyID = {0}, LoginId='{1}', UserName='{2}', Password='{3}',EmployeeId={4},CreatedDate={5},LastUpdateDate={6},LastLoginDate={7},FailedLoginNo={8},IsActive={9},IsExpired={10},AccessParentCompany={11} where UserId={12}";
+
   private const string SAVE_PASSWORD_HISTORY =
             "insert into PasswordHistory (USERID, OLDPASSWORD, PASSWORDCHANGEDATE) values ({0}, '{1}', '{2}')";
 
   private const string SELECT_USERS_BY_LOGINID_SQL =
-           "Select Users.UserId, Users.CompanyID, Users.LoginId, Users.UserName, Users.Password, Users.EmployeeId, Users.CreatedDate, Users.LastUpdateDate, Users.LastLoginDate, Users.FailedLoginNo, Users.IsActive, Users.IsExpired, Users.THEME  ,Users.AccessParentCompany ,Users.DefaultDashboard ,Employee.PROFILEPICTURE as ProfilePicture \r\nfrom Users \r\ninner join Employee on Users.EmployeeId = Employee.HRRecordId\r\nwhere rtrim(ltrim(Lower(LoginId))) = '{0}'";
-
+           "Select Users.UserId, Users.CompanyID, Users.LoginId, Users.UserName, Users.Password, Users.EmployeeId, Users.CreatedDate ,Employee.HRRecordId\r\n,Users.LastUpdateDate ,Users.LastLoginDate, Users.FailedLoginNo, Users.IsActive, Users.IsExpired , Users.THEME ,Employment.EmployeeId as Employee_Id\r\n,Users.AccessParentCompany ,Users.DefaultDashboard ,Employee.PROFILEPICTURE as ProfilePicture  \r\nfrom Users \r\ninner join Employee on Users.EmployeeId = Employee.HRRecordId\r\ninner join Employment on Employee.HRRecordId = Employment.HRRecordId\r\nwhere rtrim(ltrim(Lower(LoginId))) = '{0}'";
 
   public IEnumerable<Users> GetUsers(bool trackChanges) => List(u => u.UserId ,trackChanges);
 

@@ -4,6 +4,7 @@ using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Utilities.OthersLibrary;
+using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
@@ -11,13 +12,16 @@ namespace bdDevCRM.Services.Core.SystemAdmin;
 
 internal sealed class CountryService : ICountryService
 {
+
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
+  private readonly IConfiguration _configuration;
 
-  public CountryService(IRepositoryManager repository, ILoggerManager logger)
+  public CountryService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
+    _configuration = configuration;
   }
 
   public async Task<CountryDto> CreateCountryAsync(CountryDto entityForCreate)

@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.ServiceContract.Authentication;
+using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 
@@ -19,7 +20,13 @@ public interface IServiceManager
   IStatusService WfState { get; }
   IAccessControlService AccessControl { get; }
 
+  #region HR
+  IEmployeeService Employees { get; }
+  IBranchService Branches { get; }
+  #endregion HR
 
-  T GetCache<T>(string key);
+
+
+  T GetCache<T>(int key);
 }
 

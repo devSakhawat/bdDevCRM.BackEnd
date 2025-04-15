@@ -1,12 +1,10 @@
-﻿//using bdDevCRM.Entities.CRMGrid;
-using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-//using bdDevCRM.Utilities.KendoGrid;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

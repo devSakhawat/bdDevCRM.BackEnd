@@ -12,6 +12,7 @@ public interface IRepositoryManager : IDisposable
   ISystemSettingsRepository SystemSettings { get; }
   IUsersRepository Users { get; }
   IEmployeeRepository Employees { get; }
+  IEmployeeTypeRepository EmployeeTypes { get; }
   IAuthenticationRepository CustomAuthentication { get; }
   IMenuRepository Menus { get; }
   IModuleRepository Modules { get; }
@@ -21,6 +22,14 @@ public interface IRepositoryManager : IDisposable
   IGroupPermissionRepository GroupPermission { get; }
   IAccessControlRepository AccessControl { get; }
   IAccessRestrictionRepository AccessRestriction { get; }
+  IBranchRepository Branches { get; }
+
+  // instance should be small letter.
+
+
+
+
+
 
   // Save changes to the database
   Task SaveAsync();

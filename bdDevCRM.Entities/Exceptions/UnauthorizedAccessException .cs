@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Entities.Exceptions;
 
-public class UnauthorizedAccessException : ForbiddenAccessException
+public class UnauthorizedAccessCRMException : UnauthorizedException
 {
-  public UnauthorizedAccessException(string message) : base(message)
+  public UnauthorizedAccessCRMException(string message) : base(message)
   {
   }
 }

@@ -1,9 +1,11 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
+using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
-using bdDevCRM.Shared.DataTransferObjects;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.OthersLibrary;
+using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
@@ -13,11 +15,14 @@ internal sealed class CompanyService : ICompanyService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
+  private readonly IConfiguration _configuration;
 
-  public CompanyService(IRepositoryManager repository, ILoggerManager logger)
+
+  public CompanyService(IRepositoryManager repository, ILoggerManager logger ,IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
+    _configuration = configuration;
   }
 
   public IEnumerable<CompanyDto> GetAllCompanies(bool trackChanges)
@@ -58,6 +63,44 @@ internal sealed class CompanyService : ICompanyService
       throw new CollectionByIdsBadRequestException("Companies");
     var companiesToReturn = MyMapper.JsonCloneIEnumerableToList<Company, CompanyDto>(companyEntities);
     return companiesToReturn;
+  }
+
+  public async Task<IEnumerable<CompanyDto>> GetMotherCompanyForEditCompanyCombo(int companyId, int seastionCompnayId)
+  {
+    IEnumerable<CompanyRepositoryDto> companyRepositoriesDto 
+      = await _repository.Companies.GetMotherCompanyForEditCompanyCombo(companyId, seastionCompnayId);
+    IEnumerable<CompanyDto> companyDtos = MyMapper.JsonCloneIEnumerableToList<CompanyRepositoryDto, CompanyDto>(companyRepositoriesDto);
+    return companyDtos;
+  }
+
+  public async Task<IEnumerable<CompanyDto>> GetMotherCompany(int companyId, UsersDto users)
+  {
+    string additionalCondition = await _repository.AccessRestriction.GenerateAccessRestrictionConditionForCompany((int)users.EmployeeId);
+    if (additionalCondition != "") additionalCondition = " or " + additionalCondition;
+
+    if (users.AccessParentCompany == 1 && additionalCondition == "")
+    {
+      companyId = 0;
+      IEnumerable<CompanyRepositoryDto> companyRepositoriesDto = await _repository.Companies.GetMotherCompany(companyId, additionalCondition);
+      return MyMapper.JsonCloneIEnumerableToList<CompanyRepositoryDto, CompanyDto>(companyRepositoriesDto);
+    }
+    else
+    {
+      int controlPanelModuleId = Convert.ToInt32(_configuration["AppSettings:controlPanelModuleId"]);
+
+      var res = await _repository.GroupPermission.GetAccessPermisionForCurrentUser(controlPanelModuleId, (int)users.UserId);
+      var isHr = res.Any(groupPermission => groupPermission.ReferenceID == 22);
+      if (isHr && additionalCondition == "")
+      {
+        IEnumerable<CompanyRepositoryDto> motherCompaniesRepositoryDto = await _repository.Companies.GetMotherCompany(companyId, additionalCondition);
+        return MyMapper.JsonCloneIEnumerableToList<CompanyRepositoryDto, CompanyDto>(motherCompaniesRepositoryDto);
+      }
+      else
+      {
+        IEnumerable<CompanyRepositoryDto> getCompanyList = await _repository.Companies.GetCompanyList(companyId, additionalCondition);
+        return MyMapper.JsonCloneIEnumerableToList<CompanyRepositoryDto, CompanyDto>(getCompanyList);
+      }
+    }
   }
 
 

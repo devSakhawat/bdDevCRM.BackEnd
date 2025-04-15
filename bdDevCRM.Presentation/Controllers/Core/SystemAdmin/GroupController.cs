@@ -69,19 +69,22 @@ public class GroupController : BaseApiController
   }
 
 
-  //[HttpGet(RouteConstants.Groups)]
+  [HttpGet(RouteConstants.Groups)]
   //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
-  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  //public async Task<IActionResult> GetGroups()
-  //{
-  //  var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-  //  IEnumerable<GroupDto> groupsDto = await _serviceManager.Groups.GetGroupsAsync(trackChanges: false);
-  //  return Ok(groupsDto.ToList());
-  //}
+  public async Task<IActionResult> GetGroups()
+  {
+    // from claim.
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    // userId : which key is reponsible to when cache was created .
+    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
+    UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
+
+    IEnumerable<GroupForUserSettings> groupForUserSettings = await _serviceManager.Groups.GetGroups(trackChanges: false);
+    return Ok(groupForUserSettings.ToList());
+  }
 
   //[HttpGet(RouteConstants.GroupsByModuleId)]
   //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
-  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   //public async Task<IActionResult> GroupsByModuleId(int moduleId)
   //{
   //  var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);

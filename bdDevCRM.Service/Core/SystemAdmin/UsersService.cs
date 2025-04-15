@@ -7,20 +7,21 @@ using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.OthersLibrary;
-using System.Threading.Tasks.Dataflow;
+using Microsoft.Extensions.Configuration;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
-
 
 internal sealed class UsersService : IUsersService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
+  private readonly IConfiguration _configuration;
 
-  public UsersService(IRepositoryManager repository, ILoggerManager logger)
+  public UsersService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
+    _configuration = configuration;
   }
 
   public IEnumerable<UsersDto> GetUsers(bool trackChanges)
@@ -74,7 +75,7 @@ internal sealed class UsersService : IUsersService
 
   public UsersDto? GetUserByLoginIdAsync(string loginId, bool trackChanges)
   {
-    UsersRepositoryDto user = _repository.Users.GetUserByLoginIdAsync(loginId, trackChanges);
+    UsersRepositoryDto? user = _repository.Users.GetUserByLoginIdAsync(loginId, trackChanges);
     if (user == null) return null;
 
     UsersDto usersDto = MyMapper.JsonClone<UsersRepositoryDto, UsersDto>(user);
@@ -140,7 +141,7 @@ internal sealed class UsersService : IUsersService
     Users user = await _repository.Users.GetUserAsync(userId, trackChanges);
     if (user == null) throw new GenericNotFoundException("Users", "UserId", userId.ToString());
 
-    await _repository.Users.DeleteAsync(x => x.UserId == userId, trackChanges:true);
+    await _repository.Users.DeleteAsync(x => x.UserId == userId, trackChanges: true);
     await _repository.SaveAsync();
   }
 
@@ -159,21 +160,134 @@ internal sealed class UsersService : IUsersService
 
 
 
-  public async Task<GridEntity<UsersDto>> UsersSummary(bool trackChanges, CRMGridOptions options, int hrrecordId)
+  public async Task<GridEntity<UsersDto>> UsersSummary(int companyId, bool trackChanges, CRMGridOptions options, UsersDto user)
   {
-    IEnumerable<GroupsRepositoryDto> accessGroupsRepositoryDto = await _repository.AccessRestriction.AccessRestrictionGroupsByHrrecordId(hrrecordId);
-    var groupCondition = string.Empty;
-    if (accessGroupsRepositoryDto.ToList().Count > 0)
+    IEnumerable<GroupsRepositoryDto> objGroups = await _repository.AccessRestriction.AccessRestrictionGroupsByHrrecordId((int)user.HrRecordId);
+    string condition = "";
+    var newCondition = "";
+    string groupCondition = string.Empty;
+    if (objGroups.ToList().Count > 0)
     {
-      string groupIds = string.Join(",", accessGroupsRepositoryDto.Select(x => x.GroupId));
-      if (!string.IsNullOrEmpty(groupIds))
+      string groupIds = string.Join(",", objGroups.Select(x => x.GroupId));
+      if (!string.IsNullOrEmpty(groupIds)) groupCondition = $" or GroupId in ({groupIds})";
+    }
+
+    var accessRestrictionRepositoryDto = await _repository.AccessRestriction.AccessRestrictionByHrRecordId((int)user.HrRecordId, groupCondition);
+
+    if (accessRestrictionRepositoryDto.Count() > 0)
+    {
+      IEnumerable<AccessRestrictionRepositoryDto> objAccessRestructionCompany = accessRestrictionRepositoryDto.Where(a => a.ParentReference == 0 && a.ReferenceType == 1).ToList();
+
+      if (objAccessRestructionCompany.Count() > 0)
       {
-        groupCondition = $" or GroupId in ({groupIds})";
+        foreach (var accessRestrictionEntity in objAccessRestructionCompany)
+        {
+          if (newCondition == "")
+          {
+            newCondition += string.Format(" (Employment.CompanyId= {0} ", accessRestrictionEntity.ReferenceId);
+          }
+          else
+          {
+            newCondition += string.Format(" or (Employment.CompanyId={0}", accessRestrictionEntity.ReferenceId);
+          }
+
+          var objAccessRestructionBranch = accessRestrictionRepositoryDto.Where(b => b.ReferenceType == 2 && b.ParentReference == accessRestrictionEntity.ReferenceId).ToList();
+
+          #region Branch Count
+
+          if (objAccessRestructionBranch.Count > 0)
+          {
+            var isFirstConditionForBranch = true;
+            newCondition += " and (";
+
+            foreach (var restrictionEntity in objAccessRestructionBranch)
+            {
+              if (isFirstConditionForBranch)
+              {
+                newCondition += string.Format(" (Employment.BranchId={0}",
+                    restrictionEntity.ReferenceId);
+              }
+              else
+              {
+                newCondition += string.Format(" or (Employment.BranchId={0}",
+                    restrictionEntity.ReferenceId);
+              }
+              isFirstConditionForBranch = false;
+
+              #region Department Count
+
+              var objAccessRestructionDep = accessRestrictionRepositoryDto.Where(b =>
+                          b.ReferenceType == 3 &&
+                          b.ParentReference == accessRestrictionEntity.ReferenceId &&
+                          b.ChiledParentReference == restrictionEntity.ReferenceId).ToList();
+              if (objAccessRestructionDep.Count > 0)
+              {
+                newCondition += " and (";
+                var ids = objAccessRestructionDep.Aggregate("",
+                    (current, entity) =>
+                        current +
+                        (current == ""
+                            ? entity.ReferenceId.ToString()
+                            : "," + entity.ReferenceId.ToString()));
+                if (ids != "")
+                {
+                  newCondition += " Employment.DepartmentId in (" + ids + ")";
+                }
+                newCondition += ")";
+              }
+
+              #endregion
+
+              newCondition += ")";
+            }
+            newCondition += ")";
+          }
+
+          #endregion
+
+          newCondition += " )";
+        }
+      }
+
+      if (user.AccessParentCompany == 1)
+      {
+        if (companyId > 0)
+        {
+          condition = string.Format(" where Users.CompanyId={0}", companyId);
+          if (newCondition != "")
+          {
+            condition += " and (" + newCondition + ")";
+          }
+        }
+        else
+        {
+          if (newCondition != "")
+          {
+            condition = " where " + newCondition;
+          }
+        }
+      }
+      else
+      {
+        condition = string.Format(" where Users.CompanyId={0}", companyId == 0 ? companyId : companyId);
+        if (newCondition != "")
+        {
+          condition += " and (" + newCondition + " )";
+        }
       }
     }
 
-    string query = "Select * from Groups";
-    string orderBy = "GroupId asc";
+
+    string query =
+      string.Format(@"Select Users.*,Employment.DepartmentId ,BranchId ,Employment.EmployeeId as Employee_Id ,Employee.ShortName ,Department.DepartmentName
+,DESIGNATION.DESIGNATIONNAME 
+from Users
+inner join Employment on Employment.HrREcordId = Users.EmployeeID 
+inner join Employee on Employee.HrRecordId = Employment.HrREcordId
+left join Department on Employment.DepartmentId = Department.DepartmentId
+left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
+{0}", condition);
+    string orderBy = "UserName asc";
     var gridEntity = await _repository.Users.GridData<UsersDto>(query, options, orderBy, "");
 
     return gridEntity;

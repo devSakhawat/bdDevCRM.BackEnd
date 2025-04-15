@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+﻿//using System.Security.Cryptography;
 
 namespace bdDevCRM.Utilities.Constants;
 
@@ -8,9 +8,7 @@ public static class RouteConstants
 
   #region Authentication
   public const string Login = "login";
-
   public const string GetUserInfo = "user-info";
-
   public const string Logout = "logout";
   #endregion Authentication
 
@@ -21,7 +19,6 @@ public static class RouteConstants
   public const string CreateModule = "module";
   public const string UpdateModule = "module/{key}";
   public const string DeleteModule = "module/{key}";
-
   #endregion Module
 
   #region Menu
@@ -36,34 +33,35 @@ public static class RouteConstants
   public const string DeleteMenu = "menu/{key}";
   #endregion Menu
 
+  #region Companies
+  public const string Companies = "companies";
+  public const string GetMotherCompany = "mother-companies";
+  public const string ReadCompany = "company/key/{key}";
+  public const string CreateCompany = "company";
+  #endregion Companies
+
   #region Group
   public const string Groups = "groups";
   public const string GroupById = "group/key/{key}";
   public const string GroupPermisionsbyGroupId = "grouppermission/key/";
   public const string GetAccesses = "getaccess";
-
   public const string GroupSummary = "group-summary";
-  //public const string GroupsByModuleId = "groups-by-moduleId";
   public const string CreateGroup = "group";
   public const string ReadGroup = "group/key/{key}";
   public const string UpdateGroup = "group/{key}";
   public const string DeleteGroup = "group/{key}";
+  public const string GroupsByCompany = "groups/companyId";
   #endregion Group
 
   #region QueryAnalyzer
   public const string QueryAnalyzers = "query-analyzers";
   public const string GetCustomizedReportInfo = "customized-report";
-
   #endregion QueryAnalyzer
 
   #region Status
   public const string StatusByMenuId = "status/key/";
-  // actions by status for group 
-  // to get actions which is responsible? after / sign status. so status is responsible for getting actions
   public const string ActionsByStatusIdForGroup = "actions-4-group/status/";
-
   #endregion Status
-
 
   #region AccessControl
   public const string AccessControlSummary = "access-control-summary";
@@ -71,25 +69,11 @@ public static class RouteConstants
   public const string CreateAccessControl = "access-control";
   public const string UpdateAccessControl = "access-control/{key}";
   public const string DeleteAccessControl = "access-control/{key}";
-
   #endregion AccessControl
 
-
-
-  #region Group
-  //public const string GroupById = "group/key/{key}";
-  //public const string GroupPermisionsbyGroupId = "grouppermission/key/";
-  //public const string GetAccesses = "getaccess";
-
-  //public const string GroupsByModuleId = "groups-by-moduleId";
-  //public const string CreateGroup = "group";
-  //public const string ReadGroup = "group/key/{key}";
-  //public const string UpdateGroup = "group/{key}";
-  //public const string DeleteGroup = "group/{key}";
-
-  public const string Users = "users";
+  #region Employee
   public const string UserSummary = "user-summary";
-  #endregion Group
-
-
+  public const string Users = "users";
+  public const string EmployeeTypes = "employeetypes";
+  #endregion Employee
 }

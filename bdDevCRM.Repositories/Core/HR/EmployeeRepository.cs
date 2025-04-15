@@ -3,7 +3,7 @@ using bdDevCRM.RepositoriesContracts.Core.HR;
 using bdDevCRM.RepositoryDtos;
 using bdDevCRM.Sql.Context;
 
-namespace bdDevCRM.Repositories.HR;
+namespace bdDevCRM.Repositories.Core.HR;
 
 public class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
 {

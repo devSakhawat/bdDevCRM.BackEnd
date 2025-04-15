@@ -13,4 +13,8 @@ public interface IGroupService
   Task<IEnumerable<GroupPermissionDto>> GroupPermisionsbyGroupId(int groupId);
 
   Task<IEnumerable<AccessControlDto>> GetAccesses();
+  Task<IEnumerable<GroupPermissionDto>> GetAccessPermisionForCurrentUser(int moduleId, int userId);
+
+  // from user settings
+  Task<IEnumerable<GroupForUserSettings>> GetGroups(bool trackChanges);
 }

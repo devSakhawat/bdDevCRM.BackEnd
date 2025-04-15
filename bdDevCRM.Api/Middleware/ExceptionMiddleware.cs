@@ -93,6 +93,11 @@ public class ExceptionMiddleware
         statusCode = forbiddenEx.StatusCode;
         message = ex.Message;
       }
+      else if (ex is UnauthorizedException unauthorized)
+      {
+        statusCode = unauthorized.StatusCode;
+        message = ex.Message;
+      }
       // JWT Token exception handling
       else if (ex is SecurityTokenException || ex is SecurityTokenValidationException || ex is SecurityTokenExpiredException)
       {

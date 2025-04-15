@@ -81,3 +81,4 @@ public partial class Company
 
     public int? IsNotifyForNextMonIncEligible { get; set; }
 }
+

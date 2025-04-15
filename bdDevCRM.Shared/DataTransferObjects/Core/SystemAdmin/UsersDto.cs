@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+﻿namespace bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 
 public class UsersDto
 {

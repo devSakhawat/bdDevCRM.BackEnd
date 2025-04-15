@@ -27,7 +27,7 @@ public class StatusController : BaseApiController
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
     if (menuId == 0 || menuId == null) throw new IdParametersBadRequestException();
 
-    IEnumerable<WfstateDto> groupPermissions = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges:false);
+    IEnumerable<WfstateDto> groupPermissions = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
     return Ok(groupPermissions);
   }
 
@@ -38,7 +38,7 @@ public class StatusController : BaseApiController
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
     if (statusId == 0 || statusId == null) throw new IdParametersBadRequestException();
 
-    IEnumerable<WfActionDto> groupPermissions = await _serviceManager.WfState.ActionsByStatusIdForGroup(statusId, trackChanges:false);
+    IEnumerable<WfActionDto> groupPermissions = await _serviceManager.WfState.ActionsByStatusIdForGroup(statusId, trackChanges: false);
     return Ok(groupPermissions);
   }
 

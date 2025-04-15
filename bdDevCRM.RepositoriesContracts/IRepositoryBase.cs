@@ -1,5 +1,4 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.Common;
@@ -35,16 +34,37 @@ public interface IRepositoryBase<T>
 
   T GetById(Expression<Func<T, bool>> predicate, bool trackChanges = false);
   Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges = false);
-  T FirstOrDefault(Expression<Func<T, bool>>? expression= null ,bool trackChanges = false);
-  Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression ,bool trackChanges = false);
+  T FirstOrDefault(Expression<Func<T, bool>>? expression = null, bool trackChanges = false);
+  Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression, bool trackChanges = false);
 
   IEnumerable<T> GetListByIds(Expression<Func<T, bool>> expression, bool trackChanges = false);
   Task<IEnumerable<T>> GetListByIdsAsync(Expression<Func<T, bool>> expression, bool trackChanges = false);
 
   IEnumerable<T> List(Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
-  Task<IEnumerable<T>> ListAsync(Expression<Func<T, object>>? orderBy = null,  bool trackChanges = false);
+  Task<IEnumerable<T>> ListAsync(Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
+
   IEnumerable<T> ListByCondition(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
   Task<IEnumerable<T>> ListByConditionAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
+
+
+  IEnumerable<T> ListWithSelect<TResult>(Expression<Func<T, TResult>> selector, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
+  Task<IEnumerable<TResult>> ListWithSelectAsync<TResult>(
+    Expression<Func<T, TResult>> selector,
+    Expression<Func<T, object>>? orderBy = null,
+    bool trackChanges = false);
+
+
+  IEnumerable<TResult> ListByWhereWithSelect<TResult>(
+     Expression<Func<T, bool>>? expression = null,
+     Expression<Func<T, TResult>>? selector = null,
+     Expression<Func<T, object>>? orderBy = null,
+     bool trackChanges = false);
+
+  Task<IEnumerable<TResult>> ListByWhereWithSelectAsync<TResult>(
+     Expression<Func<T, TResult>>? selector = null,
+     Expression<Func<T, bool>>? expression = null,
+     Expression<Func<T, object>>? orderBy = null,
+     bool trackChanges = false);
 
 
   Task<int> CountAsync();

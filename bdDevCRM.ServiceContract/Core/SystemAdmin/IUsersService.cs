@@ -6,7 +6,7 @@ namespace bdDevCRM.ServicesContract.Core.SystemAdmin;
 
 public interface IUsersService
 {
-  Task<GridEntity<UsersDto>> UsersSummary(bool trackChanges, CRMGridOptions options, int hrrecordId);
+  Task<GridEntity<UsersDto>> UsersSummary(int companyId ,bool trackChanges, CRMGridOptions options, UsersDto user);
 
 
   IEnumerable<UsersDto> GetUsers(bool trackChanges);

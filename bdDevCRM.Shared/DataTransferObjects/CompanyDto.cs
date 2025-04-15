@@ -1,7 +1,7 @@
 ﻿namespace bdDevCRM.Shared.DataTransferObjects;
 
 [Serializable]
-public record CompanyDto : IEquatable<CompanyDto>
+public class CompanyDto
 {
   public int CompanyId { get; init; }
   public string? CompanyCode { get; init; }

@@ -1,17 +1,13 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Sql.Context;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Options;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories;
 
@@ -110,11 +106,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
       }
     }
   }
-
   #endregion transaction end
-
-
-
 
   public void Update(T entity) => _dbSet.Update(entity);
 
@@ -130,11 +122,8 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   {
     if (entities == null || !entities.Any()) throw new ArgumentNullException(nameof(entities), "Entities list cannot be null or empty.");
 
-     _dbSet.RemoveRange(entities);
+    _dbSet.RemoveRange(entities);
   }
-
-
-
 
   public async Task DeleteAsync(Expression<Func<T, bool>> predicate, bool trackChanges = false)
   {
@@ -172,9 +161,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     return await query.ToListAsync();
   }
 
-
-
-
   public IEnumerable<T> List(Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
   {
     IQueryable<T> query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
@@ -194,7 +180,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     }
     return await query.ToListAsync();
   }
-  
+
   public IEnumerable<T> ListByCondition(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
   {
 
@@ -210,6 +196,107 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     query = (orderBy != null) ? query.Where(expression).OrderBy(orderBy) : query.Where(expression);
     return await query.ToListAsync(); ;
   }
+
+
+  public IEnumerable<T> ListWithSelect<TResult>(Expression<Func<T, TResult>> selector, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
+  {
+    IQueryable<T> query = !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
+
+    if (orderBy != null)
+    {
+      query = query.OrderBy(orderBy);
+    }
+
+    return (IEnumerable<T>)query.Select(selector).ToList();
+  }
+
+  public async Task<IEnumerable<TResult>> ListWithSelectAsync<TResult>(
+    Expression<Func<T, TResult>> selector,
+    Expression<Func<T, object>>? orderBy = null,
+    bool trackChanges = false)
+  {
+    IQueryable<T> query = !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
+
+    if (orderBy != null)
+    {
+      query = query.OrderBy(orderBy);
+    }
+
+    return await query.Select(selector).ToListAsync();
+  }
+
+
+
+  public IEnumerable<TResult> ListByWhereWithSelect<TResult>(
+     Expression<Func<T, bool>>? expression = null,
+     Expression<Func<T, TResult>>? selector = null,
+     Expression<Func<T, object>>? orderBy = null,
+     bool trackChanges = false)
+  {
+    IQueryable<T> query = !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
+
+    if (expression != null)
+    {
+      query = query.Where(expression);
+    }
+
+    if (orderBy != null)
+    {
+      query = query.OrderBy(orderBy);
+    }
+
+    if (selector != null)
+    {
+      return query.Select(selector).ToList();
+    }
+    else
+    {
+      // Check: T must be assignable to TResult
+      if (typeof(TResult) != typeof(T))
+      {
+        throw new InvalidOperationException("Selector is null but TResult is not same as T.");
+      }
+
+      // Safe cast, since TResult == T
+      return query.Cast<TResult>().ToList();
+    }
+  }
+
+
+  public async Task<IEnumerable<TResult>> ListByWhereWithSelectAsync<TResult>(
+    Expression<Func<T, TResult>>? selector = null,
+    Expression<Func<T, bool>>? expression = null,
+    Expression<Func<T, object>>? orderBy = null,
+    bool trackChanges = false)
+  {
+    IQueryable<T> query = !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
+
+    if (expression is not null)
+    {
+      query = query.Where(expression);
+    }
+
+    if (orderBy is not null)
+    {
+      query = query.OrderBy(orderBy);
+    }
+
+    if (selector is not null)
+    {
+      return await query.Select(selector).ToListAsync();
+    }
+    else
+    {
+      if (typeof(TResult) != typeof(T))
+      {
+        throw new InvalidOperationException("Selector is null but TResult is not same as T.");
+      }
+
+      // Since TResult == T, safe to cast
+      return (IEnumerable<TResult>)await query.Cast<T>().ToListAsync();
+    }
+  }
+
 
 
   public async Task<int> CountAsync() => await _dbSet.AsNoTracking().CountAsync();
@@ -436,7 +523,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     return result;
   }
 
-
   public TResult ExecuteSingleDataSyncronous<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
   {
     var connection = _context.Database.GetDbConnection();
@@ -449,7 +535,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
       using (var command = connection.CreateCommand())
       {
         command.CommandText = query;
-        command.CommandTimeout = 120; // Set timeout to 120 seconds
+        command.CommandTimeout = 120;
 
         if (parameters != null)
         {
@@ -466,7 +552,8 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
         {
           if (!reader.HasRows) return null;
 
-          var columnMap = new Dictionary<string, int>();
+          // Create case-insensitive column mapping
+          var columnMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
           for (int i = 0; i < reader.FieldCount; i++)
           {
             columnMap[reader.GetName(i)] = i;
@@ -480,9 +567,30 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
             foreach (var property in properties)
             {
-              if (!columnMap.ContainsKey(property.Name)) continue;
+              // Try to find column by exact name or case-insensitive match
+              var columnFound = columnMap.TryGetValue(property.Name, out int columnIndex);
+              if (!columnFound)
+              {
+                // Try alternate common cases (e.g., HRRecordId -> HrRecordId)
+                var alternateNames = new[]
+                {
+                  property.Name,
+                  property.Name.ToUpper(),
+                  property.Name.ToLower(),
+                  string.Concat(property.Name[0].ToString().ToUpper(), property.Name.Substring(1))
+                };
 
-              var columnIndex = columnMap[property.Name];
+                foreach (var alternateName in alternateNames)
+                {
+                  if (columnMap.TryGetValue(alternateName, out columnIndex))
+                  {
+                    columnFound = true;
+                    break;
+                  }
+                }
+              }
+
+              if (!columnFound) continue;
               if (reader.IsDBNull(columnIndex)) continue;
 
               var value = reader.GetValue(columnIndex);
@@ -529,6 +637,100 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
     return result;
   }
+
+
+  //public TResult ExecuteSingleDataSyncronous<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
+  //{
+  //  var connection = _context.Database.GetDbConnection();
+  //  TResult result = null;
+
+  //  try
+  //  {
+  //    connection.Open();
+
+  //    using (var command = connection.CreateCommand())
+  //    {
+  //      command.CommandText = query;
+  //      command.CommandTimeout = 120; // Set timeout to 120 seconds
+
+  //      if (parameters != null)
+  //      {
+  //        foreach (var param in parameters)
+  //        {
+  //          var dbParam = command.CreateParameter();
+  //          dbParam.ParameterName = param.ParameterName;
+  //          dbParam.Value = param.Value;
+  //          command.Parameters.Add(dbParam);
+  //        }
+  //      }
+
+  //      using (var reader = command.ExecuteReader(CommandBehavior.SingleRow))
+  //      {
+  //        if (!reader.HasRows) return null;
+
+  //        var columnMap = new Dictionary<string, int>();
+  //        for (int i = 0; i < reader.FieldCount; i++)
+  //        {
+  //          columnMap[reader.GetName(i)] = i;
+  //        }
+
+  //        var properties = typeof(TResult).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+  //        if (reader.Read())
+  //        {
+  //          var entity = Activator.CreateInstance<TResult>();
+
+  //          foreach (var property in properties)
+  //          {
+  //            if (!columnMap.ContainsKey(property.Name)) continue;
+
+  //            var columnIndex = columnMap[property.Name];
+  //            if (reader.IsDBNull(columnIndex)) continue;
+
+  //            var value = reader.GetValue(columnIndex);
+
+  //            try
+  //            {
+  //              Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+  //              if (propertyType == typeof(Guid) && value is string)
+  //              {
+  //                property.SetValue(entity, Guid.Parse((string)value));
+  //              }
+  //              else if (propertyType.IsEnum && value is string)
+  //              {
+  //                property.SetValue(entity, Enum.Parse(propertyType, (string)value));
+  //              }
+  //              else
+  //              {
+  //                property.SetValue(entity, Convert.ChangeType(value, propertyType));
+  //              }
+  //            }
+  //            catch (Exception ex)
+  //            {
+  //              Console.Error.WriteLine($"Error converting value '{value}' to type {property.PropertyType.Name} for property {property.Name}: {ex.Message}");
+  //            }
+  //          }
+
+  //          result = entity;
+  //        }
+  //      }
+  //    }
+  //  }
+  //  catch (Exception ex)
+  //  {
+  //    Console.Error.WriteLine($"Error in ExecuteSingleDataSyncronous: {ex.Message}");
+  //  }
+  //  finally
+  //  {
+  //    if (connection.State == ConnectionState.Open)
+  //    {
+  //      connection.Close();
+  //    }
+  //  }
+
+  //  return result;
+  //}
 
 
   public async Task<IEnumerable<TResult>> ExecuteListQuery<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
@@ -620,10 +822,28 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
         {
           property.SetValue(obj, value?.ToString());
         }
+        // Add DateOnly? conversion
+        else if (property.PropertyType == typeof(DateOnly?) && value is DateTime dateTime)
+        {
+          property.SetValue(obj, DateOnly.FromDateTime(dateTime));
+        }
+        // Add non-nullable DateOnly conversion if needed
+        else if (property.PropertyType == typeof(DateOnly) && value is DateTime dateTime2)
+        {
+          property.SetValue(obj, DateOnly.FromDateTime(dateTime2));
+        }
         else
         {
-          // Use default type conversion for other types
-          property.SetValue(obj, Convert.ChangeType(value, property.PropertyType));
+          try
+          {
+            // Use default type conversion for other types
+            property.SetValue(obj, Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType));
+          }
+          catch (InvalidCastException)
+          {
+            // Log error or handle specific type conversion failures
+            // You might want to add more robust error handling here
+          }
         }
       }
       else
@@ -642,6 +862,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
     return obj;
   }
+
   #endregion Get Data using ado.net
 
 }

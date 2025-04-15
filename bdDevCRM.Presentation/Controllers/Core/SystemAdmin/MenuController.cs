@@ -9,24 +9,33 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
-//[Route("api/[controller]")]
-//[ApiController]
-//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class MenuController : BaseApiController
+
+public class EmployeeController : BaseApiController
 {
   private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
-  public MenuController(IServiceManager serviceManager, IMemoryCache cache)
+
+  public EmployeeController(IServiceManager serviceManager, IMemoryCache cache)
   {
     _serviceManager = serviceManager;
     _cache = cache;
   }
 
-  //[HttpGet("SelectMenuByUserPermission")]
+  //  public class EmployeeController : BaseApiController
+  //{
+  //  private readonly IServiceManager _serviceManager;
+  //  private readonly IMemoryCache _cache;
+  //  public EmployeeController(IServiceManager serviceManager, IMemoryCache cache)
+  //  {
+  //    _serviceManager = serviceManager;
+  //    _cache = cache;
+  //  }
+
+
   [HttpGet(RouteConstants.SelectMenuByUserPermission)]
   //[Produces("application/json")]
   [ResponseCache(Duration = 300)] // Browser caching for 5 minutes
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> SelectMenuByUserPermission()
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -128,7 +137,7 @@ public class MenuController : BaseApiController
   }
 
   [HttpDelete(RouteConstants.DeleteMenu)]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> DeleteMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -136,6 +145,7 @@ public class MenuController : BaseApiController
     await _serviceManager.Menus.DeleteAsync(key, modelDto);
     return Ok("Success");
   }
+
 
 
 

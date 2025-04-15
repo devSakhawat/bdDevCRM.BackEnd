@@ -7,6 +7,7 @@ using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
@@ -237,6 +238,27 @@ internal sealed class GroupService : IGroupService
     return groupPermissionsDto;
   }
 
+  public async Task<IEnumerable<GroupPermissionDto>> GetAccessPermisionForCurrentUser(int moduleId, int userId)
+  {
+    IEnumerable<GroupPermissionRepositoryDto> groupMemeberRepositoriesDto = await _repository.GroupPermission.GetAccessPermisionForCurrentUser(moduleId, userId);
+    IEnumerable<GroupPermissionDto> groupMemeberDtos = MyMapper.JsonCloneIEnumerableToList<GroupPermissionRepositoryDto, GroupPermissionDto>(groupMemeberRepositoriesDto);
+    return groupMemeberDtos;
+  }
+
+  // from user settings
+  public async Task<IEnumerable<GroupForUserSettings>> GetGroups(bool trackChanges)
+  {
+    IEnumerable<Groups> groups = 
+      await _repository.Groups.ListWithSelectAsync(selector: g => new Groups { GroupId = g.GroupId, GroupName = g.GroupName }, trackChanges:false);
+
+    IEnumerable<GroupForUserSettings> groupForUserSettings = MyMapper.JsonCloneIEnumerableToList<Groups, GroupForUserSettings>(groups);
+    return groupForUserSettings;
+  }
+
+  //public async Task<IEnumerable<GroupDto>> GroupsByModuleId(int moduleId, bool trackChanges)
+  //{
+  //  IEnumerable<GroupDto> groupsByModule = await _repository.Groups.ListByConditionAsync(x => x.mod, trackChanges:false);
+  //}
 
 
 
