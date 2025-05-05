@@ -1,6 +1,6 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.RepositoriesContracts.Core.HR;
-using bdDevCRM.RepositoryDtos;
+using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.Core.HR;
@@ -12,6 +12,9 @@ public class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
 
   private const string SELECT_EMPLOYEE_BY_HRRECORDID =
       "Select * from Employee where HRRecordId = {0} order by FullName";
+
+  private const string SELECT_EMPLOYEE_BY_CompanyBranchDepartment_SQL =
+           "Select * from (Select Employee.HRRecordId,EmployeeId,FullName,CompanyId,ReportTo,DepartmentId,BranchId  from Employee inner join Employment ON Employment.HRRecordId = Employee.HRRecordId) as tbl {0} order by FullName";
 
   public async Task<EmploymentRepositoryDto> GetEmploymentByHrRecordId(int hrRecordId)
   {
@@ -50,5 +53,11 @@ left outer join WFState on WFState.WFStateId=Employee.StateId where Employment.H
     return data;
   }
 
+  public async Task<IEnumerable<EmployeesByCompanyBranchDepartmentRepositoroyDto>> GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(string condition)
+  {
+    string sql = string.Format(SELECT_EMPLOYEE_BY_CompanyBranchDepartment_SQL, condition);
+    IEnumerable<EmployeesByCompanyBranchDepartmentRepositoroyDto> returnList = await ExecuteListQuery<EmployeesByCompanyBranchDepartmentRepositoroyDto>(sql);
+    return returnList;
+  }
 
 }

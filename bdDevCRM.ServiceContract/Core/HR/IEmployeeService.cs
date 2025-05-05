@@ -14,5 +14,6 @@ public interface IEmployeeService
   // 
   Task<IEnumerable<EmployeeTypeDto>> EmployeeTypes(int param);
 
+  Task<IEnumerable<EmployeesByCompanyBranchDepartmentDto>> GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(int companyId, int branchId, int departmentId);
 
 }

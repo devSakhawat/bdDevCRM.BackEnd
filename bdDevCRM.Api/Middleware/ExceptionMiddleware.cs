@@ -133,7 +133,6 @@ public class ExceptionMiddleware
       }
 
       context.Response.StatusCode = statusCode;
-
       // Create enhanced ApiException with additional properties
       var response = new ApiException(statusCode, message, details)
       {

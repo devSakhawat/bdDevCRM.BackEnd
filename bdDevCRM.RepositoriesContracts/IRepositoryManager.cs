@@ -6,23 +6,29 @@ namespace bdDevCRM.RepositoriesContracts;
 
 public interface IRepositoryManager : IDisposable
 {
+  // SystemAdmin Part
   ITokenBlacklistRepository TokenBlacklist { get; }
   ICountryRepository Countries { get; }
   ICompanyRepository Companies { get; }
   ISystemSettingsRepository SystemSettings { get; }
   IUsersRepository Users { get; }
-  IEmployeeRepository Employees { get; }
-  IEmployeeTypeRepository EmployeeTypes { get; }
   IAuthenticationRepository CustomAuthentication { get; }
   IMenuRepository Menus { get; }
   IModuleRepository Modules { get; }
   IGroupRepository Groups { get; }
+  IGroupMemberRepository GroupMembers { get; }
   IQueryAnalyzerRepository QueryAnalyzer { get; }
   IStatusRepository WfState { get; }
+  IWorkFlowSettingsRepository Workflow { get; }
   IGroupPermissionRepository GroupPermission { get; }
   IAccessControlRepository AccessControl { get; }
   IAccessRestrictionRepository AccessRestriction { get; }
+
+  // HR Part
+  IEmployeeRepository Employees { get; }
+  IEmployeeTypeRepository EmployeeTypes { get; }
   IBranchRepository Branches { get; }
+  IDepartmentRepository departments { get; }
 
   // instance should be small letter.
 

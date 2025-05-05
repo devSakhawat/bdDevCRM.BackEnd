@@ -21,16 +21,6 @@ public class EmployeeController : BaseApiController
     _cache = cache;
   }
 
-  //  public class EmployeeController : BaseApiController
-  //{
-  //  private readonly IServiceManager _serviceManager;
-  //  private readonly IMemoryCache _cache;
-  //  public EmployeeController(IServiceManager serviceManager, IMemoryCache cache)
-  //  {
-  //    _serviceManager = serviceManager;
-  //    _cache = cache;
-  //  }
-
 
   [HttpGet(RouteConstants.SelectMenuByUserPermission)]
   //[Produces("application/json")]
@@ -148,6 +138,31 @@ public class EmployeeController : BaseApiController
 
 
 
+
+
+  [HttpGet(RouteConstants.MenuForDDL)]
+  //[ResponseCache(Duration = 60)] // Browser caching for 5 minutes
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> MenuForDDL()
+  {
+    // from claim.
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("UserId not found in token.");
+    }
+    var userId = Convert.ToInt32(userIdClaim);
+    // userId : which key is reponsible to when cache was created .
+    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
+
+    IEnumerable<MenuForDDLDto> menusDto = await _serviceManager.Menus.MenuForDDL();
+    return Ok(menusDto.ToList());
+  }
 
 
 

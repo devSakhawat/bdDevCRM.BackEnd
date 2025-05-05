@@ -10,7 +10,6 @@ public interface IGroupRepository : IRepositoryBase<Groups>
   Task<IEnumerable<AccessControlRepositoryDto>> GetAccesses();
 
 
-
   //Task<IEnumerable<Menu>> GetMenus(bool trackChanges);
 
   //Menu? GetMenu(int MenuId, bool trackChanges);

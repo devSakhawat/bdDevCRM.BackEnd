@@ -255,6 +255,14 @@ internal sealed class GroupService : IGroupService
     return groupForUserSettings;
   }
 
+  public async Task<IEnumerable<GroupMemberDto>> GroupMemberByUserId(int userId, bool trackChanges)
+  {
+    // ListByConditionAsync must be call by only enitiy name not dto. 
+    IEnumerable<GroupMember> groupMembers = await _repository.GroupMembers.ListByConditionAsync(expression: x => x.UserId == userId, trackChanges: false);
+    IEnumerable<GroupMemberDto> resultData = MyMapper.JsonCloneIEnumerableToList<GroupMember, GroupMemberDto>(groupMembers);
+    return resultData;
+  }
+
   //public async Task<IEnumerable<GroupDto>> GroupsByModuleId(int moduleId, bool trackChanges)
   //{
   //  IEnumerable<GroupDto> groupsByModule = await _repository.Groups.ListByConditionAsync(x => x.mod, trackChanges:false);

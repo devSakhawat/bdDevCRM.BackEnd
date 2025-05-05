@@ -8,6 +8,7 @@ public class EmptyObjectFilterAttribute : IActionFilter
   public EmptyObjectFilterAttribute()
   {
   }
+
   public void OnActionExecuting(ActionExecutingContext context)
   {
     var action = context.RouteData.Values["action"];
@@ -20,5 +21,6 @@ public class EmptyObjectFilterAttribute : IActionFilter
     }
     if (!context.ModelState.IsValid) context.Result = new UnprocessableEntityObjectResult(context.ModelState);
   }
+
   public void OnActionExecuted(ActionExecutedContext context) { }
 }

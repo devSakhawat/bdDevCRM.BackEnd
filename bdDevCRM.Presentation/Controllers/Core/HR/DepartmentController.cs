@@ -9,18 +9,19 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.Core.HR;
 
-public class BranchController : BaseApiController
+public class DepartmentController : BaseApiController
 {
   private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
-  public BranchController(IServiceManager serviceManager, IMemoryCache cache)
+  public DepartmentController(IServiceManager serviceManager, IMemoryCache cache)
   {
     _serviceManager = serviceManager;
     _cache = cache;
   }
 
-  [HttpGet(RouteConstants.BranchByCompanyIdForCombo)]
-  public async Task<IActionResult> BranchByCompanyIdForCombo([FromQuery] int companyId)
+  [HttpGet(RouteConstants.DepartmentByCompanyIdForCombo)]
+  [AllowAnonymous]
+  public async Task<IActionResult> DepartmentByCompanyIdForCombo([FromQuery] int companyId)
   {
     // from claim.
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -28,21 +29,9 @@ public class BranchController : BaseApiController
     // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
     UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
 
-    IEnumerable<BranchDto> branchList = await _serviceManager.Branches.BranchesByCompanyIdForCombo(companyId, user);
-    return Ok(branchList);
+    IEnumerable<DepartmentDto> result = await _serviceManager.departments.DepartmentesByCompanyIdForCombo(companyId, user);
+    return Ok(result);
   }
-
-
-  //[HttpGet(RouteConstants.StatusByMenuId)]
-  ////[AllowAnonymous]
-  //public async Task<IActionResult> StatusByMenuId([FromQuery] int menuId)
-  //{
-  //  var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-  //  if (menuId == 0 || menuId == null) throw new IdParametersBadRequestException();
-
-  //  IEnumerable<WfstateDto> groupPermissions = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
-  //  return Ok(groupPermissions);
-  //}
 
 
 

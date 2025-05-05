@@ -35,6 +35,7 @@ public sealed class ServiceManager : IServiceManager
   #region HR Area
   private readonly Lazy<IEmployeeService> _employeeService;
   private readonly Lazy<IBranchService> _branchService;
+  private readonly Lazy<IDepartmentService> _departmentService;
   #endregion HR Area
 
 
@@ -59,6 +60,7 @@ public sealed class ServiceManager : IServiceManager
     // HR Area
     _employeeService = new Lazy<IEmployeeService>(() => new EmployeeService(repository, logger, configuration));
     _branchService = new Lazy<IBranchService>(() => new BranchService(repository, logger, configuration));
+    _departmentService = new Lazy<IDepartmentService>(() => new DepartmentService(repository, logger, configuration));
     // HR Area
   }
 
@@ -78,6 +80,7 @@ public sealed class ServiceManager : IServiceManager
   #region HR Area
   public IEmployeeService Employees => _employeeService.Value;
   public IBranchService Branches => _branchService.Value;
+  public IDepartmentService departments => _departmentService.Value;
   #endregion HR Area
 
 

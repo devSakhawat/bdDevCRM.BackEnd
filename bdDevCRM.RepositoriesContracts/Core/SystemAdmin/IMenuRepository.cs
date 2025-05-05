@@ -26,4 +26,5 @@ public interface IMenuRepository : IRepositoryBase<Menu>
   Task<IEnumerable<Menu>> MenusByModuleId(int moduleId, bool trackChanges);
   void UpdateMenu(Menu Menu);
   void DeleteMenu(Menu Menu);
+
 }

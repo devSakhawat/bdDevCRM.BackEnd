@@ -213,4 +213,26 @@ internal sealed class MenuService : IMenuService
     await _repository.SaveAsync();
   }
 
+
+
+
+  public async Task<IEnumerable<MenuForDDLDto>> MenuForDDL()
+  {
+    // Corrected the initialization of the Menu object to use a constructor instead of a collection initializer.
+    IEnumerable<Menu> menus = await _repository.Menus.ListWithSelectAsync(
+        x => new Menu
+        {
+          MenuId = x.MenuId,
+          MenuName = x.MenuName
+        },
+        orderBy: x => x.Sororder,
+        trackChanges: false
+    );
+
+    if (menus.Count() == 0) return new List<MenuForDDLDto>();
+
+    IEnumerable<MenuForDDLDto> menusForDDLDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuForDDLDto>(menus);
+    return menusForDDLDto;
+  }
+
 }

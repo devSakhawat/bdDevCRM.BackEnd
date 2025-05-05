@@ -1,4 +1,4 @@
-﻿namespace bdDevCRM.RepositoryDtos;
+﻿namespace bdDevCRM.RepositoryDtos.Core.HR;
 
 public class PasswordHistoryRepositoryDto
 {

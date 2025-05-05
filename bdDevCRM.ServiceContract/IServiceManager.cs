@@ -23,6 +23,7 @@ public interface IServiceManager
   #region HR
   IEmployeeService Employees { get; }
   IBranchService Branches { get; }
+  IDepartmentService departments { get; }
   #endregion HR
 
 

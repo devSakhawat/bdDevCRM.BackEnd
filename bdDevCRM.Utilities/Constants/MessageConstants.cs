@@ -39,3 +39,8 @@ public static class MessageConstants
   public const string UnauthorizedAttemptOfRecordInsert = "Unauthorized attempt of inserting record!";
   public static string ExceptionError = "";
 }
+
+public static class OperationMessage
+{
+  public const string Success = "Success";
+}

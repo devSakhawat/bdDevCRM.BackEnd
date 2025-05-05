@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 
 namespace bdDevCRM.Repositories;
 
@@ -93,6 +94,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
   public async Task TransactionDisposeAsync()
   {
+    
     if (_currentTransaction != null)
     {
       try
@@ -146,7 +148,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression, bool trackChanges = false)
     => !trackChanges ? await _dbSet.AsNoTracking().FirstOrDefaultAsync(expression) : await _dbSet.FirstOrDefaultAsync(expression);
 
-
   public IEnumerable<T> GetListByIds(Expression<Func<T, bool>> expression, bool trackChanges = false)
   {
     IQueryable<T> query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
@@ -197,7 +198,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     return await query.ToListAsync(); ;
   }
 
-
   public IEnumerable<T> ListWithSelect<TResult>(Expression<Func<T, TResult>> selector, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
   {
     IQueryable<T> query = !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
@@ -224,7 +224,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
     return await query.Select(selector).ToListAsync();
   }
-
 
 
   public IEnumerable<TResult> ListByWhereWithSelect<TResult>(
@@ -262,7 +261,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     }
   }
 
-
   public async Task<IEnumerable<TResult>> ListByWhereWithSelectAsync<TResult>(
     Expression<Func<T, TResult>>? selector = null,
     Expression<Func<T, bool>>? expression = null,
@@ -296,7 +294,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
       return (IEnumerable<TResult>)await query.Cast<T>().ToListAsync();
     }
   }
-
 
 
   public async Task<int> CountAsync() => await _dbSet.AsNoTracking().CountAsync();
@@ -336,17 +333,24 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     }
   }
 
-  public async Task<T?> ExecuteSingleSql(string query)
+  public async Task<T> ExecuteSingleSql(string query)
   {
     try
     {
-      return await _dbSet.FromSqlRaw(query).FirstOrDefaultAsync();
+      var result = await _dbSet.FromSqlRaw(query).FirstOrDefaultAsync();
+
+      if (result == null)
+      {
+        return Activator.CreateInstance<T>()!;
+      }
+      return result;
     }
     catch (Exception ex)
     {
       throw new Exception(ex.Message);
     }
   }
+
 
   public DataTable DataTable(string sqlQuery, params DbParameter[] parameters)
   {
@@ -386,6 +390,102 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   #region Get Data using ado.net
 
 
+  #region Grid execution old mechanism
+  //public async Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy, string condition)
+  //{
+  //  var connection = _context.Database.GetDbConnection();
+  //  var sqlCount = "SELECT COUNT(*) FROM (" + query + " ) As tbl ";
+  //  query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, "");
+  //  var dataList = new List<T>();
+  //  int totalCount = 0;
+  //  try
+  //  {
+  //    await connection.OpenAsync();
+
+  //    using (var countCommand = connection.CreateCommand())
+  //    {
+  //      countCommand.CommandText = sqlCount;
+  //      totalCount = Convert.ToInt32(await countCommand.ExecuteScalarAsync());
+  //    }
+
+  //    using (var command = connection.CreateCommand())
+  //    {
+  //      command.CommandText = query;
+  //      using (var reader = await command.ExecuteReaderAsync())
+  //      {
+  //        if (!reader.HasRows) return new GridEntity<T> { Items = dataList, TotalCount = 0 };
+
+  //        var columnMap = new Dictionary<string, int>();
+  //        for (int i = 0; i < reader.FieldCount; i++)
+  //        {
+  //          columnMap[reader.GetName(i)] = i;
+  //        }
+
+  //        var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+  //        while (await reader.ReadAsync())
+  //        {
+  //          var entity = Activator.CreateInstance<T>();
+
+  //          foreach (var property in properties)
+  //          {
+  //            if (!columnMap.ContainsKey(property.Name)) continue;
+
+  //            var columnIndex = columnMap[property.Name];
+  //            if (reader.IsDBNull(columnIndex)) continue;
+
+  //            var value = reader.GetValue(columnIndex);
+
+  //            try
+  //            {
+  //              Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+  //              if (propertyType == typeof(Guid) && value is string)
+  //              {
+  //                property.SetValue(entity, Guid.Parse((string)value));
+  //              }
+  //              else if (propertyType.IsEnum && value is string)
+  //              {
+  //                property.SetValue(entity, Enum.Parse(propertyType, (string)value));
+  //              }
+  //              else
+  //              {
+  //                property.SetValue(entity, Convert.ChangeType(value, propertyType));
+  //              }
+  //            }
+  //            catch (Exception ex)
+  //            {
+  //              Console.Error.WriteLine($"Error converting value '{value}' to type {property.PropertyType.Name} for property {property.Name}: {ex.Message}");
+  //            }
+  //          }
+
+  //          dataList.Add(entity);
+  //        }
+  //      }
+  //    }
+  //  }
+  //  catch (Exception ex)
+  //  {
+  //    Console.Error.WriteLine($"Error in ExecuteQueryAsync: {ex.Message}");
+  //  }
+  //  finally
+  //  {
+  //    if (connection.State == ConnectionState.Open)
+  //    {
+  //      await connection.CloseAsync();
+  //    }
+  //  }
+
+  //  var dbEntity = new GridEntity<T>();
+  //  dbEntity.Items = dataList ?? new List<T>();
+  //  dbEntity.TotalCount = totalCount;
+  //  dbEntity.Columnses = new List<GridColumns>();
+
+  //  return dbEntity;
+  //}
+  #endregion Grid execution old mechanism
+
+  #region grid with duplicate column name and insensative column and property name
   public async Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy, string condition)
   {
     var connection = _context.Database.GetDbConnection();
@@ -396,13 +496,13 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     try
     {
       await connection.OpenAsync();
-
+      // Total Count Query
       using (var countCommand = connection.CreateCommand())
       {
         countCommand.CommandText = sqlCount;
         totalCount = Convert.ToInt32(await countCommand.ExecuteScalarAsync());
       }
-
+      // Main Data Query
       using (var command = connection.CreateCommand())
       {
         command.CommandText = query;
@@ -410,58 +510,79 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
         {
           if (!reader.HasRows) return new GridEntity<T> { Items = dataList, TotalCount = 0 };
 
-          var columnMap = new Dictionary<string, int>();
+          // Create a case-insensitive dictionary for column mapping
+          var columnMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+          // Check for duplicate column names and report them
+          var duplicateColumns = new List<string>();
+          var columnNames = new List<string>();
+
           for (int i = 0; i < reader.FieldCount; i++)
           {
-            columnMap[reader.GetName(i)] = i;
+            var columnName = reader.GetName(i);
+            columnNames.Add(columnName);
+
+            // Store in lowercase for case-insensitive comparison
+            if (columnMap.ContainsKey(columnName))
+            {
+              duplicateColumns.Add(columnName);
+            }
+            columnMap[columnName] = i;
+          }
+
+          // Report duplicate columns if any found
+          if (duplicateColumns.Any())
+          {
+            throw new InvalidOperationException($"WARNING: Query returned duplicate column names: {string.Join(", ", duplicateColumns)}. This may cause mapping issues.");
           }
 
           var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
           while (await reader.ReadAsync())
           {
             var entity = Activator.CreateInstance<T>();
-
             foreach (var property in properties)
             {
-              if (!columnMap.ContainsKey(property.Name)) continue;
+              // Case-insensitive property matching
+              if (!columnMap.ContainsKey(property.Name))
+              {
+                // Try additional checks for name variations
+                var propertySnakeCase = ToSnakeCase(property.Name);
+                var propertyCamelCase = ToCamelCase(property.Name);
+
+                if (columnMap.ContainsKey(propertySnakeCase))
+                {
+                  ProcessProperty(reader, entity, property, columnMap[propertySnakeCase]);
+                }
+                else if (columnMap.ContainsKey(propertyCamelCase))
+                {
+                  ProcessProperty(reader, entity, property, columnMap[propertyCamelCase]);
+                }
+                // Skip properties that don't match any column
+                continue;
+              }
 
               var columnIndex = columnMap[property.Name];
-              if (reader.IsDBNull(columnIndex)) continue;
-
-              var value = reader.GetValue(columnIndex);
-
-              try
-              {
-                Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-
-                if (propertyType == typeof(Guid) && value is string)
-                {
-                  property.SetValue(entity, Guid.Parse((string)value));
-                }
-                else if (propertyType.IsEnum && value is string)
-                {
-                  property.SetValue(entity, Enum.Parse(propertyType, (string)value));
-                }
-                else
-                {
-                  property.SetValue(entity, Convert.ChangeType(value, propertyType));
-                }
-              }
-              catch (Exception ex)
-              {
-                Console.Error.WriteLine($"Error converting value '{value}' to type {property.PropertyType.Name} for property {property.Name}: {ex.Message}");
-              }
+              ProcessProperty(reader, entity, property, columnIndex);
             }
-
             dataList.Add(entity);
           }
+
+          // Log unmapped properties for debugging
+          var propertyNames = properties.Select(p => p.Name).ToList();
+          var unmappedColumns = columnNames.Where(c => !propertyNames.Contains(c, StringComparer.OrdinalIgnoreCase)).ToList();
+          
+          // add log message
+          //if (unmappedColumns.Any())
+          //{
+            
+          //  throw new InvalidOperationException($"WARNING: Some columns were not mapped to properties: {string.Join(", ", unmappedColumns)}");
+          //}
         }
       }
     }
     catch (Exception ex)
     {
-      Console.Error.WriteLine($"Error in ExecuteQueryAsync: {ex.Message}");
+      throw new InvalidOperationException($"Error in ExecuteQueryAsync: {ex.Message}");
     }
     finally
     {
@@ -475,9 +596,185 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     dbEntity.Items = dataList ?? new List<T>();
     dbEntity.TotalCount = totalCount;
     dbEntity.Columnses = new List<GridColumns>();
-
     return dbEntity;
   }
+
+  // Update Version with auto generated columns
+  public async Task<GridEntity<T>> GridDataUpdated<T>(string query, CRMGridOptions options, string orderBy, string condition)
+  {
+    var connection = _context.Database.GetDbConnection();
+    var sqlCount = "SELECT COUNT(*) FROM (" + query + " ) AS tbl";
+    query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, condition);
+
+    var dataList = new List<T>();
+    var gridColumns = new List<GridColumns>();
+    int totalCount = 0;
+
+    try
+    {
+      await connection.OpenAsync();
+
+      // Total Count Query
+      using (var countCommand = connection.CreateCommand())
+      {
+        countCommand.CommandText = sqlCount;
+        totalCount = Convert.ToInt32(await countCommand.ExecuteScalarAsync());
+      }
+
+      // Main Data Query
+      using (var command = connection.CreateCommand())
+      {
+        command.CommandText = query;
+        using (var reader = await command.ExecuteReaderAsync())
+        {
+          if (!reader.HasRows)
+            return new GridEntity<T> { Items = dataList, TotalCount = 0, Columnses = gridColumns };
+
+          // Mapping column index
+          var columnMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+          var duplicateColumns = new List<string>();
+          var columnNames = new List<string>();
+
+          for (int i = 0; i < reader.FieldCount; i++)
+          {
+            var columnName = reader.GetName(i);
+            columnNames.Add(columnName);
+
+            if (columnMap.ContainsKey(columnName))
+              duplicateColumns.Add(columnName);
+
+            columnMap[columnName] = i;
+          }
+
+          if (duplicateColumns.Any())
+          {
+            throw new InvalidOperationException($"WARNING: Query returned duplicate column names: {string.Join(", ", duplicateColumns)}.");
+          }
+
+          // Generate dynamic GridColumns based on query columns
+          foreach (var columnName in columnNames)
+          {
+            gridColumns.Add(new GridColumns
+            {
+              field = columnName,
+              title = columnName,
+              width = "150px", // Default width, can adjust if needed
+              filterable = true,
+              sortable = true,
+              hidden = false
+            });
+          }
+
+          // Map Data
+          var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+          while (await reader.ReadAsync())
+          {
+            var entity = Activator.CreateInstance<T>();
+            foreach (var property in properties)
+            {
+              if (!columnMap.ContainsKey(property.Name))
+              {
+                var propertySnakeCase = ToSnakeCase(property.Name);
+                var propertyCamelCase = ToCamelCase(property.Name);
+
+                if (columnMap.ContainsKey(propertySnakeCase))
+                  ProcessProperty(reader, entity, property, columnMap[propertySnakeCase]);
+                else if (columnMap.ContainsKey(propertyCamelCase))
+                  ProcessProperty(reader, entity, property, columnMap[propertyCamelCase]);
+
+                continue;
+              }
+
+              var columnIndex = columnMap[property.Name];
+              ProcessProperty(reader, entity, property, columnIndex);
+            }
+            dataList.Add(entity);
+          }
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      throw new InvalidOperationException($"Error in GridData: {ex.Message}");
+    }
+    finally
+    {
+      if (connection.State == ConnectionState.Open)
+        await connection.CloseAsync();
+    }
+
+    return new GridEntity<T>
+    {
+      Items = dataList,
+      TotalCount = totalCount,
+      Columnses = gridColumns
+    };
+  }
+
+
+
+  // Helper method to process a property
+  private void ProcessProperty<T>(DbDataReader reader, T entity, PropertyInfo property, int columnIndex)
+  {
+    if (reader.IsDBNull(columnIndex)) return;
+
+    var value = reader.GetValue(columnIndex);
+    try
+    {
+      Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+      if (propertyType == typeof(Guid) && value is string)
+      {
+        property.SetValue(entity, Guid.Parse((string)value));
+      }
+      else if (propertyType.IsEnum && value is string)
+      {
+        property.SetValue(entity, Enum.Parse(propertyType, (string)value));
+      }
+      else
+      {
+        property.SetValue(entity, Convert.ChangeType(value, propertyType));
+      }
+    }
+    catch (Exception ex)
+    {
+      Console.Error.WriteLine($"Error converting value '{value}' to type {property.PropertyType.Name} for property {property.Name}: {ex.Message}");
+    }
+  }
+
+  // Converts PascalCase to snake_case
+  private string ToSnakeCase(string name)
+  {
+    if (string.IsNullOrEmpty(name)) return name;
+
+    var result = new StringBuilder();
+    result.Append(char.ToLowerInvariant(name[0]));
+
+    for (int i = 1; i < name.Length; i++)
+    {
+      if (char.IsUpper(name[i]))
+      {
+        result.Append('_');
+        result.Append(char.ToLowerInvariant(name[i]));
+      }
+      else
+      {
+        result.Append(name[i]);
+      }
+    }
+
+    return result.ToString();
+  }
+
+  // Converts PascalCase to camelCase
+  private string ToCamelCase(string name)
+  {
+    if (string.IsNullOrEmpty(name)) return name;
+    return char.ToLowerInvariant(name[0]) + name.Substring(1);
+  }
+  #endregion grid with duplicate column name and insensative column and property name
+
+
+
 
   public async Task<TResult> ExecuteSingleData<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
   {

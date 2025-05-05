@@ -17,4 +17,5 @@ public interface IGroupService
 
   // from user settings
   Task<IEnumerable<GroupForUserSettings>> GetGroups(bool trackChanges);
+  Task<IEnumerable<GroupMemberDto>> GroupMemberByUserId(int userId, bool trackChanges);
 }

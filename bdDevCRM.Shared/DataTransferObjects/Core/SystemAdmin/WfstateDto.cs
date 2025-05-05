@@ -10,4 +10,7 @@ public class WfstateDto
   public int IsClosed { get; set; }
   public int TotalCount { get; set; }
   public string MenuName { get; set; }
+
+  public int ModuleId { get; set; }
+  public string? ModuleName{ get; set; }
 }

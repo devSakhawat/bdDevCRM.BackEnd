@@ -1,12 +1,13 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
-using bdDevCRM.RepositoryDtos;
+using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using System.ComponentModel.Design;
 
 namespace bdDevCRM.Service.Core.HR;
 
@@ -91,6 +92,54 @@ internal sealed class EmployeeService : IEmployeeService
       throw new GenericNotFoundException("EmployeeType", "EmployeeTypeId", "0");
 
     IEnumerable<EmployeeTypeDto> result = MyMapper.JsonCloneIEnumerableToList<Employeetype, EmployeeTypeDto>(employeeTypes);
+    return result;
+  }
+
+
+  // get employees with id, name and code
+  public async Task<IEnumerable<EmployeesByCompanyBranchDepartmentDto>> GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(int companyId, int branchId, int departmentId)
+  {
+    string condition = "";
+    if (companyId == 0)
+    {
+      condition = "";
+    }
+    else
+    {
+      condition = " where CompanyId = " + companyId;
+    }
+
+    if (departmentId == 0)
+    {
+      condition = condition;
+    }
+    else
+    {
+      if (condition == "")
+      {
+        condition = "where DEPARTMENTID=" + departmentId;
+      }
+      else
+      {
+        condition += " and DEPARTMENTID = " + departmentId;
+      }
+    }
+
+    if (branchId != 0)
+    {
+      if (condition != "")
+      {
+        condition += " and BranchId=" + branchId;
+      }
+      else
+      {
+        condition = " where BranchId=" + branchId;
+      }
+    }
+
+    IEnumerable<EmployeesByCompanyBranchDepartmentRepositoroyDto> employeeTypes = await _repository.Employees.GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(condition);
+    IEnumerable<EmployeesByCompanyBranchDepartmentDto> result = MyMapper.JsonCloneIEnumerableToList<EmployeesByCompanyBranchDepartmentRepositoroyDto, EmployeesByCompanyBranchDepartmentDto>(employeeTypes);
+    
     return result;
   }
 

@@ -83,6 +83,23 @@ public class GroupController : BaseApiController
     return Ok(groupForUserSettings.ToList());
   }
 
+
+  //[HttpGet(RouteConstants.GetGroupMemberByUserId)]
+  //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
+
+  [HttpGet(RouteConstants.GroupMemberByUserId)]
+  public async Task<IActionResult> GroupMemberByUserId([FromQuery] int userId)
+  {
+    // from claim.
+    var userIdFromSession = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    // userId : which key is reponsible to when cache was created .
+    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
+    UsersDto user = _serviceManager.GetCache<UsersDto>(userIdFromSession);
+
+    IEnumerable<GroupMemberDto> groupForUserSettings = await _serviceManager.Groups.GroupMemberByUserId( userId ,trackChanges: false);
+    return Ok(groupForUserSettings.ToList());
+  }
+
   //[HttpGet(RouteConstants.GroupsByModuleId)]
   //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
   //public async Task<IActionResult> GroupsByModuleId(int moduleId)

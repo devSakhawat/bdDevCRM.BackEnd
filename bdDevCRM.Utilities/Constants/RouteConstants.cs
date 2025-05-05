@@ -31,6 +31,7 @@ public static class RouteConstants
   public const string ReadMenu = "menu/key/{key}";
   public const string UpdateMenu = "menu/{key}";
   public const string DeleteMenu = "menu/{key}";
+  public const string MenuForDDL = "menus-4-ddl";
   #endregion Menu
 
   #region Companies
@@ -51,6 +52,8 @@ public static class RouteConstants
   public const string UpdateGroup = "group/{key}";
   public const string DeleteGroup = "group/{key}";
   public const string GroupsByCompany = "groups/companyId";
+
+  public const string GroupMemberByUserId = "groups/group-members-by-userId/";
   #endregion Group
 
   #region QueryAnalyzer
@@ -63,6 +66,12 @@ public static class RouteConstants
   public const string ActionsByStatusIdForGroup = "actions-4-group/status/";
   #endregion Status
 
+  #region WorkFlow
+  public const string WorkFlowSummary = "workflow-summary";
+  public const string CreateWorkFlow = "workflow";
+  //public const string ActionsByStatusIdForGroup = "actions-4-group/status/";
+  #endregion WorkFlow
+
   #region AccessControl
   public const string AccessControlSummary = "access-control-summary";
   public const string ReadAccessControls = "access-control-list";
@@ -71,9 +80,23 @@ public static class RouteConstants
   public const string DeleteAccessControl = "access-control/{key}";
   #endregion AccessControl
 
-  #region Employee
+  #region user
   public const string UserSummary = "user-summary";
   public const string Users = "users";
+  public const string SaveUser = "user";
+  #endregion user
+
+  #region Employee
   public const string EmployeeTypes = "employeetypes";
+  // Indentity means : companyId, branchId, departmentId
+  public const string EmployeesByCompanyIdAndBranchIdAndDepartmentId = "employees-by-indentities";
   #endregion Employee
+
+  #region Branch
+  public const string BranchByCompanyIdForCombo = "branches-by-compnayId-for-combo/companyId/";
+  #endregion Branch
+
+  #region Department
+  public const string DepartmentByCompanyIdForCombo = "departments-by-compnayId-for-combo/companyId/";
+  #endregion Department
 }
