@@ -25,6 +25,7 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<IGroupMemberRepository> _groupMembersRepository;
   private readonly Lazy<IQueryAnalyzerRepository> _queryAnalyzerRepository;
   private readonly Lazy<IStatusRepository> _statusRepository;
+  private readonly Lazy<IWFActionRepository> _wfActionRepository;
   private readonly Lazy<IWorkFlowSettingsRepository> _workFlowSettingsRepository;
   private readonly Lazy<IGroupPermissionRepository> _groupPermissionRepository;
   private readonly Lazy<IAccessControlRepository> _accessControlRepository;
@@ -53,6 +54,7 @@ public class RepositoryManager : IRepositoryManager
     _groupMembersRepository = new Lazy<IGroupMemberRepository>(() => new GroupMemberRepository(_repositoryContext));
     _queryAnalyzerRepository = new Lazy<IQueryAnalyzerRepository>(() => new QueryAnalyzerRepository(_repositoryContext));
     _statusRepository = new Lazy<IStatusRepository>(() => new StatusRepository(_repositoryContext));
+    _wfActionRepository = new Lazy<IWFActionRepository>(() => new WFActionRepository(_repositoryContext));
     _workFlowSettingsRepository = new Lazy<IWorkFlowSettingsRepository>(() => new WorkFlowSettingsRepository(_repositoryContext));
     _groupPermissionRepository = new Lazy<IGroupPermissionRepository>(() => new GroupPermissionRepository(_repositoryContext));
     _accessControlRepository = new Lazy<IAccessControlRepository>(() => new AccessControlRepository(_repositoryContext));
@@ -80,6 +82,7 @@ public class RepositoryManager : IRepositoryManager
   public IGroupMemberRepository GroupMembers => _groupMembersRepository.Value;
   public IQueryAnalyzerRepository QueryAnalyzer => _queryAnalyzerRepository.Value;
   public IStatusRepository WfState => _statusRepository.Value;
+  public IWFActionRepository WfAction => _wfActionRepository.Value;
   public IWorkFlowSettingsRepository Workflow => _workFlowSettingsRepository.Value;
   public IGroupPermissionRepository GroupPermission => _groupPermissionRepository.Value;
   public IAccessControlRepository AccessControl => _accessControlRepository.Value;

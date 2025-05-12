@@ -65,7 +65,27 @@ public class MyMapper
     if (sourceList == null) throw new ArgumentNullException(nameof(sourceList));
 
     var serialized = JsonConvert.SerializeObject(sourceList);
+    var targetList = JsonConvert.DeserializeObject<IEnumerable<TTarget>>(serialized);
+
+    return targetList;
+  }
+
+  public static List<TTarget> JsonCloneListToList<TSource, TTarget>(List<TSource> sourceList)
+  {
+    if (sourceList == null) throw new ArgumentNullException(nameof(sourceList));
+
+    var serialized = JsonConvert.SerializeObject(sourceList);
     var targetList = JsonConvert.DeserializeObject<List<TTarget>>(serialized);
+
+    return targetList;
+  }
+
+  public static IEnumerable<TTarget> JsonCloneIEnumerableToIEnumerable<TSource, TTarget>(IEnumerable<TSource> sourceList)
+  {
+    if (sourceList == null) throw new ArgumentNullException(nameof(sourceList));
+
+    var serialized = JsonConvert.SerializeObject(sourceList);
+    var targetList = JsonConvert.DeserializeObject<IEnumerable<TTarget>>(serialized);
 
     return targetList;
   }

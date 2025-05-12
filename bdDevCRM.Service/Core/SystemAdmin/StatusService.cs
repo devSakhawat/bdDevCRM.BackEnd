@@ -4,10 +4,10 @@ using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.Common;
 using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace bdDevCRM.Service.Core.SystemAdmin;
 
@@ -16,6 +16,7 @@ internal sealed class StatusService : IStatusService
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
+
 
   public StatusService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
@@ -53,10 +54,10 @@ internal sealed class StatusService : IStatusService
     string res = string.Empty;
 
     #region New WfState
-    int isDefaultStart = modelDto.IsDefaultStart ? 1 : 0;
+    var isDefaultStart = (bool)modelDto.IsDefaultStart ? 1 : 0;
     if (modelDto.WFStateId == 0)
     {
-      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == false  && x.MenuId == modelDto.MenuID && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim());
+      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == false && x.MenuId == modelDto.MenuID && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim());
 
       if (!isDefaultExist)
       {
@@ -106,6 +107,80 @@ internal sealed class StatusService : IStatusService
     return res;
   }
 
+  public async Task<string> CreateActionAsync(WfActionDto modelDto)
+  {
+    string res = string.Empty;
+
+    #region New WfState
+    if (modelDto.WfactionId == 0)
+    {
+      bool isActionExistByStateId = await _repository.WfAction.ExistsAsync(x => x.WfstateId == modelDto.WfstateId && x.ActionName.ToLower().Trim() == modelDto.ActionName.ToLower().Trim());
+
+      if (!isActionExistByStateId)
+      {
+
+        Wfaction wfAcation = MyMapper.JsonClone<WfActionDto, Wfaction>(modelDto);
+        int lastCreatedWfActionId = await _repository.WfAction.CreateAndGetIdAsync(wfAcation);
+        await _repository.SaveAsync();
+        return OperationMessage.Success;
+      }
+      else
+      {
+        res = "The action name already exist for the state!";
+        return res;
+      }
+    }
+    #endregion New WfState
+
+    #region Update WfState
+    else
+    {
+      bool isActionExistByStateId = await _repository.WfAction.ExistsAsync(x => x.WfstateId == modelDto.WfstateId && x.ActionName == modelDto.ActionName);
+
+      if (!isActionExistByStateId)
+      {
+        Wfaction wfAction = MyMapper.JsonClone<WfActionDto, Wfaction>(modelDto);
+        _repository.WfAction.Update(wfAction);
+        await _repository.SaveAsync();
+
+        return OperationMessage.Success;
+      }
+      else
+      {
+        res = "The action name already exist for the state!";
+        return res;
+      }
+    }
+    #endregion Update WfState
+  }
+
+  public async Task<IEnumerable<WfstateDto>> GetNextStatesByMenu(int menuId)
+  {
+    IEnumerable<Wfstate> wfstates = await _repository.WfState.ListByWhereWithSelectAsync(
+      selector: x => new Wfstate { 
+      WfstateId = x.WfstateId,
+      StateName = x.StateName
+      }, 
+      expression: x => x.MenuId == menuId,
+      orderBy: x => x.Sequence,
+      trackChanges: false
+      );
+
+    IEnumerable<WfstateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToIEnumerable<Wfstate, WfstateDto>(wfstates);
+    return wfstatesDto;
+  }
+
+  public async Task<GridEntity<WfActionDto>> GetActionByStatusId(int stateId, CRMGridOptions options)
+  {
+    const string SELECT_ACTION_BY_STATUSID =
+        "Select *, (Select StateName from WFState where WFStateId = NextStateId) as NextStateName from WFAction where WFStateId = {0} ";
+    string orderBy = " AcSortOrder asc ";
+
+    string formattedQuery = string.Format(SELECT_ACTION_BY_STATUSID, stateId);
+    var gridEntity = await _repository.WfAction.GridData<WfActionDto>(formattedQuery, options, orderBy, "");
+
+    return gridEntity;
+  }
 
   #endregion Workflow end
 

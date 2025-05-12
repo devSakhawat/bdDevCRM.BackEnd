@@ -19,6 +19,7 @@ public interface IRepositoryManager : IDisposable
   IGroupMemberRepository GroupMembers { get; }
   IQueryAnalyzerRepository QueryAnalyzer { get; }
   IStatusRepository WfState { get; }
+  IWFActionRepository WfAction { get; }
   IWorkFlowSettingsRepository Workflow { get; }
   IGroupPermissionRepository GroupPermission { get; }
   IAccessControlRepository AccessControl { get; }
@@ -29,7 +30,6 @@ public interface IRepositoryManager : IDisposable
   IEmployeeTypeRepository EmployeeTypes { get; }
   IBranchRepository Branches { get; }
   IDepartmentRepository departments { get; }
-
   // instance should be small letter.
 
 

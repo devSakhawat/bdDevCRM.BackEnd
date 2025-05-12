@@ -69,6 +69,9 @@ public static class RouteConstants
   #region WorkFlow
   public const string WorkFlowSummary = "workflow-summary";
   public const string CreateWorkFlow = "workflow";
+  public const string CreateAction = "wf-action";
+  public const string GetNextStatesByMenu = "next-states-by-menu/";
+  public const string GetActionSummaryByStatusId = "get-action-by-statusId/";
   //public const string ActionsByStatusIdForGroup = "actions-4-group/status/";
   #endregion WorkFlow
 

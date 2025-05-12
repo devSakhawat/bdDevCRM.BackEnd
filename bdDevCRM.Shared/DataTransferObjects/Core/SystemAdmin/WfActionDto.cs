@@ -21,4 +21,6 @@ public class WfActionDto
   public int? SmsAlert { get; set; }
 
   public int? AcSortOrder { get; set; }
+
+  public int? NextStateName { get; set; }
 }
