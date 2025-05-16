@@ -1,5 +1,7 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using Azure;
+using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
@@ -55,14 +57,14 @@ internal sealed class StatusService : IStatusService
 
     #region New WfState
     var isDefaultStart = (bool)modelDto.IsDefaultStart ? 1 : 0;
-    if (modelDto.WFStateId == 0)
+    if (modelDto.WfstateId == 0)
     {
-      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == false && x.MenuId == modelDto.MenuID && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim());
+      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == false && x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim());
 
       if (!isDefaultExist)
       {
         //if (!IsExistsUserByEmployee(usersDto.EmployeeId))
-        if (!await _repository.WfState.ExistsAsync(x => x.MenuId == modelDto.MenuID && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim()))
+        if (!await _repository.WfState.ExistsAsync(x => x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim()))
         {
           Wfstate wfstate = MyMapper.JsonClone<WfstateDto, Wfstate>(modelDto);
           int lastCreatedWfStateId = await _repository.WfState.CreateAndGetIdAsync(wfstate);
@@ -85,7 +87,7 @@ internal sealed class StatusService : IStatusService
     #region Update WfState
     else
     {
-      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == modelDto.IsDefaultStart && x.WfstateId == modelDto.WFStateId);
+      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == modelDto.IsDefaultStart && x.WfstateId == modelDto.WfstateId);
 
       if (!isDefaultExist)
       {
@@ -152,6 +154,19 @@ internal sealed class StatusService : IStatusService
       }
     }
     #endregion Update WfState
+  }
+
+  public async Task<string> DeleteAction(int key, WfActionDto modelDto)
+  {
+    if (modelDto == null) throw new NullModelBadRequestException(new WfActionDto().GetType().Name.ToString());
+    if (key != modelDto.WfactionId) throw new IdMismatchBadRequestException(key.ToString(), new ModuleDto().GetType().Name.ToString());
+
+    Wfaction wfactionData = await _repository.WfAction.FirstOrDefaultAsync(m => m.WfactionId == key, trackChanges: false);
+    if (wfactionData == null) throw new GenericNotFoundException("Wfaction", "ActionId", key.ToString());
+
+    await _repository.WfAction.DeleteAsync(x => x.WfactionId == modelDto.WfactionId, trackChanges: true);
+    await _repository.SaveAsync();
+    return OperationMessage.Success;
   }
 
   public async Task<IEnumerable<WfstateDto>> GetNextStatesByMenu(int menuId)

@@ -12,9 +12,10 @@ public class WfActionDto
 
   public int WfstateId { get; set; }
 
-  public string ActionName { get; set; } = null!;
+  public string? ActionName { get; set; } = null!;
+  public string? StateName { get; set; } = null!;
 
-  public int NextStateId { get; set; }
+  public int? NextStateId { get; set; }
 
   public int? EmailAlert { get; set; }
 
@@ -22,5 +23,8 @@ public class WfActionDto
 
   public int? AcSortOrder { get; set; }
 
-  public int? NextStateName { get; set; }
+  public string? NextStateName { get; set; }
+
+  public int? IsDefaultStart { get; set; }
+  public int? IsClosed { get; set; }
 }

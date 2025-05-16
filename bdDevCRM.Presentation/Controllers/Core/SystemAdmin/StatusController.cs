@@ -118,6 +118,71 @@ public class StatusController : BaseApiController
   }
 
 
+
+  [HttpPut(RouteConstants.UpdateAction)]
+  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  public async Task<IActionResult> UpdateAction([FromRoute] int key, [FromBody] WfActionDto modelDto)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("UserId not found in token.");
+    }
+
+    var userId = Convert.ToInt32(userIdClaim);
+    // userId : which key is responsible to when cache was created.
+    // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
+    var res = await _serviceManager.WfState.CreateActionAsync(modelDto);
+
+    if (res == OperationMessage.Success)
+    {
+      return Ok(res);
+    }
+    else
+    {
+      return Conflict(res);
+    }
+  }
+
+
+  [HttpDelete(RouteConstants.DeleteAction)]
+  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  public async Task<IActionResult> DeleteAction([FromRoute] int key, [FromBody]  WfActionDto modelDto)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("UserId not found in token.");
+    }
+
+    var userId = Convert.ToInt32(userIdClaim);
+    // userId : which key is responsible to when cache was created.
+    // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+    {
+      return Unauthorized("UnAuthorized attempted");
+    }
+    var res = await _serviceManager.WfState.DeleteAction(key,modelDto);
+
+    if (res == OperationMessage.Success)
+    {
+      return Ok(res);
+    }
+    else
+    {
+      return Conflict(res);
+    }
+  }
+
+
+
+
   [HttpGet(RouteConstants.GetNextStatesByMenu)]
   public async Task<IActionResult> GetNextStatesByMenu([FromQuery] int menuId)
   {
