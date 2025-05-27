@@ -190,11 +190,16 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     return query.ToList(); ;
   }
 
-  public async Task<IEnumerable<T>> ListByConditionAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
+  public async Task<IEnumerable<T>> ListByConditionAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false, bool descending = false)
   {
 
     IQueryable<T> query = !trackChanges ? _dbSet.AsNoTracking() : _dbSet;
-    query = (orderBy != null) ? query.Where(expression).OrderBy(orderBy) : query.Where(expression);
+    query = query.Where(expression);
+    //query = (orderBy != null) ? query.Where(expression).OrderBy(orderBy) : query.Where(expression);
+    if (orderBy != null)
+    {
+      query = descending ? query.OrderByDescending(orderBy) : query.OrderBy(orderBy);
+    }
     return await query.ToListAsync(); ;
   }
 

@@ -10,6 +10,9 @@ public class CountryRepository : RepositoryBase<Country>, ICountryRepository
 
   // Get all countries
   public async Task<IEnumerable<Country>> GetCountriesAsync(bool trackChanges) => await ListAsync(c => c.CountryId, trackChanges);
+
+  // Get all Active countries
+  public async Task<IEnumerable<Country>> GetActiveCountriesAsync(bool trackChanges) => await ListByConditionAsync(x => x.Status == 1,c => c.CountryId, trackChanges);
   // Get a single country by ID
   public async Task<Country> GetCountryAsync(int companyId, bool trackChanges) => await FirstOrDefaultAsync(x => x.CountryId.Equals(companyId), trackChanges);
 

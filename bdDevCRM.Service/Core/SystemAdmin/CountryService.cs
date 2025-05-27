@@ -3,6 +3,7 @@ using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
@@ -49,8 +50,6 @@ internal sealed class CountryService : ICountryService
     _logger.LogWarn($"Country with Id: {countryId} is about to be deleted from the database.");
     _repository.Countries.DeleteCountry(country);
     await _repository.SaveAsync();
-
-    // i think the method should return int value.
   }
 
   public async Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges)
@@ -59,6 +58,15 @@ internal sealed class CountryService : ICountryService
     if (countries.Count() == 0) throw new GenericListNotFoundException("Country");
 
     List<CountryDto> countryDtos = MyMapper.JsonCloneIEnumerableToList<Country, CountryDto>(countries);
+    return countryDtos;
+  }
+
+  public async Task<IEnumerable<CountryDDL>> GetCountriesDDLAsync(bool trackChanges)
+  {
+    IEnumerable<Country> countries = await _repository.Countries.GetActiveCountriesAsync(trackChanges);
+    if (countries.Count() == 0) throw new GenericListNotFoundException("Country");
+
+    List<CountryDDL> countryDtos = MyMapper.JsonCloneIEnumerableToList<Country, CountryDDL>(countries);
     return countryDtos;
   }
 

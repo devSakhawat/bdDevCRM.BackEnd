@@ -1,15 +1,20 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.CRM;
+using bdDevCRM.Entities.Entities.Entities.CRMM;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
+using bdDevCRM.RepositoriesContracts.CRM;
 using bdDevCRM.Service.Authentication;
 using bdDevCRM.Service.Core.HR;
 using bdDevCRM.Service.Core.SystemAdmin;
+using bdDevCRM.Service.CRM;
 using bdDevCRM.ServiceContract.Authentication;
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.Services.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
+using bdDevCRM.ServicesContract.CRM;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
@@ -38,7 +43,12 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<IDepartmentService> _departmentService;
   #endregion HR Area
 
-
+  #region CRM
+  private readonly Lazy<ICRMInstituteService> _crminstitute;
+  private readonly Lazy<ICRMCourseService> _crmcourse;
+  private readonly Lazy<ICRMMonthService> _crmmonth;
+  private readonly Lazy<ICRMYearService> _crmyear;
+  #endregion CRM
 
   public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration ,IMemoryCache cache)
   {
@@ -62,6 +72,13 @@ public sealed class ServiceManager : IServiceManager
     _branchService = new Lazy<IBranchService>(() => new BranchService(repository, logger, configuration));
     _departmentService = new Lazy<IDepartmentService>(() => new DepartmentService(repository, logger, configuration));
     // HR Area
+
+    #region CRM
+    _crminstitute = new Lazy<ICRMInstituteService>(() => new CRMInstituteService(repository, logger, configuration));
+    _crmcourse = new Lazy<ICRMCourseService>(() => new CRMCourseService(repository, logger, configuration));
+    _crmmonth = new Lazy<ICRMMonthService>(() => new CRMMonthService(repository, logger, configuration));
+    _crmyear = new Lazy<ICRMYearService>(() => new CRMYearService(repository, logger, configuration));
+    #endregion CRM
   }
 
   public ITokenBlacklistService TokenBlacklist => _tokenBlackListService.Value;
@@ -83,6 +100,12 @@ public sealed class ServiceManager : IServiceManager
   public IDepartmentService departments => _departmentService.Value;
   #endregion HR Area
 
+  #region CRM
+  public ICRMInstituteService CRMInstitutes => _crminstitute.Value;
+  public ICRMCourseService CRMCourses => _crmcourse.Value;
+  public ICRMMonthService CRMMonths => _crmmonth.Value;
+  public ICRMYearService CRMYears => _crmyear.Value;
+  #endregion CRM
 
 
   // Get Cache // generic function for getting cache from memory cache all of them.

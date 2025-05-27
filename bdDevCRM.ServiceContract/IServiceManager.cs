@@ -2,6 +2,7 @@
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
+using bdDevCRM.ServicesContract.CRM;
 
 namespace bdDevCRM.ServicesContract;
 
@@ -26,7 +27,12 @@ public interface IServiceManager
   IDepartmentService departments { get; }
   #endregion HR
 
-
+  #region CRM
+  ICRMInstituteService CRMInstitutes { get; }
+  ICRMCourseService CRMCourses { get; }
+  ICRMMonthService CRMMonths { get; }
+  ICRMYearService CRMYears { get; }
+  #endregion CRM
 
   T GetCache<T>(int key);
 }

@@ -1,6 +1,7 @@
 ﻿using bdDevCRM.RepositoriesContracts.Core.Authentication;
 using bdDevCRM.RepositoriesContracts.Core.HR;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
+using bdDevCRM.RepositoriesContracts.CRM;
 
 namespace bdDevCRM.RepositoriesContracts;
 
@@ -32,7 +33,13 @@ public interface IRepositoryManager : IDisposable
   IDepartmentRepository departments { get; }
   // instance should be small letter.
 
-
+  #region CRM
+  ICRMInstituteRepository CRMInstitute { get; }
+  ICRMCourseRepository CRMCourse { get; }
+  ICRMMonthRepository CRMMonth{ get; }
+  ICRMYearRepository CRMYear { get; }
+  
+  #endregion CRM
 
 
 

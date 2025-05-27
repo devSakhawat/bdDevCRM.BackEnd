@@ -1,10 +1,13 @@
-﻿using bdDevCRM.Repositories.Core.Authentication;
+﻿using bdDevCRM.Entities.Entities.CRM;
+using bdDevCRM.Repositories.Core.Authentication;
 using bdDevCRM.Repositories.Core.HR;
 using bdDevCRM.Repositories.Core.SystemAdmin;
+using bdDevCRM.Repositories.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoriesContracts.Core.Authentication;
 using bdDevCRM.RepositoriesContracts.Core.HR;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
+using bdDevCRM.RepositoriesContracts.CRM;
 using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories;
@@ -38,10 +41,17 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<IDepartmentRepository> _departmentRepository;
   // HR area end  
 
+  #region CRM
+  private readonly Lazy<ICRMInstituteRepository> _crminstituteRepository;
+  private readonly Lazy<ICRMCourseRepository> _crmcourseRepository;
+  private readonly Lazy<ICRMMonthRepository> _crmmonthRepository;
+  private readonly Lazy<ICRMYearRepository> _crmyearRepository;
+  #endregion CRM
+
   public RepositoryManager(CRMContext repositoryContext)
   {
     _repositoryContext = repositoryContext;
-
+    #region System
     _countries = new Lazy<ICountryRepository>(() => new CountryRepository(_repositoryContext));
     _companies = new Lazy<ICompanyRepository>(() => new CompanyRepository(_repositoryContext));
     _systemRepository = new Lazy<ISystemSettingsRepository>(() => new SystemSettingsRepository(_repositoryContext));
@@ -59,6 +69,7 @@ public class RepositoryManager : IRepositoryManager
     _groupPermissionRepository = new Lazy<IGroupPermissionRepository>(() => new GroupPermissionRepository(_repositoryContext));
     _accessControlRepository = new Lazy<IAccessControlRepository>(() => new AccessControlRepository(_repositoryContext));
     _accessRestrictionRepository = new Lazy<IAccessRestrictionRepository>(() => new AccessRestrictionRepository(_repositoryContext));
+    #endregion System
 
     // HR area start  
     _employeeRepository = new Lazy<IEmployeeRepository>(() => new EmployeeRepository(_repositoryContext));
@@ -66,6 +77,13 @@ public class RepositoryManager : IRepositoryManager
     _branchRepository = new Lazy<IBranchRepository>(() => new BranchRepository(_repositoryContext));
     _departmentRepository = new Lazy<IDepartmentRepository>(() => new DepartmentRepository(_repositoryContext));
     // HR area end
+
+    #region CRM
+    _crminstituteRepository = new Lazy<ICRMInstituteRepository>(() => new CRMInstituteRepository(_repositoryContext));
+    _crmcourseRepository = new Lazy<ICRMCourseRepository>(() => new CRMCourseRepository(_repositoryContext));
+    _crmmonthRepository = new Lazy<ICRMMonthRepository>(() => new CRMMonthRepository(_repositoryContext));
+    _crmyearRepository = new Lazy<ICRMYearRepository>(() => new CRMYearRepository(_repositoryContext));
+    #endregion CRM
 
   }
 
@@ -96,7 +114,13 @@ public class RepositoryManager : IRepositoryManager
   public IDepartmentRepository departments => _departmentRepository.Value;
   #endregion HR area
 
-
+  #region CRM
+  public ICRMInstituteRepository CRMInstitute => _crminstituteRepository.Value;
+  public ICRMCourseRepository CRMCourse => _crmcourseRepository.Value;
+  public ICRMMonthRepository CRMMonth => _crmmonthRepository.Value;
+  public ICRMYearRepository CRMYear => _crmyearRepository.Value;
+  
+  #endregion CRM
 
 
   // Save changes to the database

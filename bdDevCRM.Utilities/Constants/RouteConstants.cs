@@ -104,4 +104,16 @@ public static class RouteConstants
   #region Department
   public const string DepartmentByCompanyIdForCombo = "departments-by-compnayId-for-combo/companyId/";
   #endregion Department
+
+  #region CRMApplication
+  public const string CRMApplicationSummary = "crm-application-summary";
+  public const string CRMApplication= "crm-Application";
+  public const string CRMUpdateApplication = "crm-Application/{key}";
+  public const string CRMDeleteApplication = "crm-Application/{key}";
+  public const string CRMCountryDLL = "crm-countryddl";
+  public const string CRMInstituteDLLByCountry = "crm-instituteddl-country";
+  public const string CRMCourseDLLByInstitute = "crm-courseddl-institute";
+  public const string CRMMonthDLL = "crm-monthddl";
+  public const string CRMYearDLL = "crm-yearddl";
+  #endregion CRMApplication
 }
