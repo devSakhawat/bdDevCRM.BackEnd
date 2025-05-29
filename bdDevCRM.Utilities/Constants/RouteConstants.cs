@@ -115,5 +115,6 @@ public static class RouteConstants
   public const string CRMCourseDLLByInstitute = "crm-courseddl-institute";
   public const string CRMMonthDLL = "crm-monthddl";
   public const string CRMYearDLL = "crm-yearddl";
+  public const string CRMInstituteTypeDDL = "crm-institute-type/";
   #endregion CRMApplication
 }

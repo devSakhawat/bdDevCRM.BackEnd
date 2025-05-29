@@ -61,7 +61,28 @@ public class CRMApplicationController : BaseApiController
       return Unauthorized("User not found in cache.");
     }
 
-    var res = await _serviceManager.WfState.GetNextStatesByMenu(countryId);
+    var res = await _serviceManager.CRMInstitutes.CRMInstituteDLLByCountry(countryId, trackChanges: false);
+
+    return Ok(res);
+  }
+
+  [HttpGet(RouteConstants.CRMCourseDLLByInstitute)]
+  public async Task<IActionResult> CRMCourseDLLByInstitute([FromQuery] int countryId)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("Unauthorized attempt to get data!");
+    }
+    var userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
+
+    var res = await _serviceManager.CRMCourses.CRMCourseDLLByInstitute(countryId, trackChanges: false);
 
     return Ok(res);
   }

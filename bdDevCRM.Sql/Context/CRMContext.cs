@@ -20,6 +20,7 @@ public partial class CRMContext : DbContext
   public virtual DbSet<TokenBlacklist> TokenBlacklist { get; set; }
   public virtual DbSet<CrmapplicantCourseDetials> CrmapplicantCourseDetials { get; set; }
 
+  public virtual DbSet<CRMInstituteType> InstituteType { get; set; }
   public virtual DbSet<Crmcourse> Crmcourse { get; set; }
 
   public virtual DbSet<CrmcourseIntake> CrmcourseIntake { get; set; }
@@ -17854,6 +17855,16 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
       entity.Property(e => e.PaymentDate).HasColumnType("datetime");
       entity.Property(e => e.PaymentReferenceNumber)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+    });
+
+    modelBuilder.Entity<CRMInstituteType>(entity =>
+    {
+      entity.HasNoKey();
+
+      entity.Property(e => e.InstituteTypeId).ValueGeneratedOnAdd();
+      entity.Property(e => e.InstituteTypeName)
           .HasMaxLength(50)
           .IsUnicode(false);
     });

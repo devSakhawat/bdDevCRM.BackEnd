@@ -12,24 +12,25 @@ using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 namespace bdDevCRM.Service.CRM;
 
-internal sealed class CRMInstituteService : ICRMInstituteService
+internal sealed class CRMInstituteTypeService : ICRMInstituteTypeService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
 
 
-  public CRMInstituteService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public CRMInstituteTypeService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<DDLInstituteDto>> CRMInstituteDLLByCountry(int countryId, bool trackChanges)
+  public async Task<IEnumerable<CRMInstituteTypeDto>> CRMInstituteTypeDLLByCountry()
   {
-    IEnumerable<DDLInstituteDto> institutesDDLByCountry = await _repository.CRMInstitute.ListByWhereWithSelectAsync(selector: x => new DDLInstituteDto { InstituteId = x.InstituteId, InstituteName = x.InstituteName }, expression: x => x.CountryId == countryId && x.Status == true, orderBy: x => x.InstituteId, trackChanges);
-    return institutesDDLByCountry;
+    IEnumerable<CRMInstituteType> institutesDDLByCountry = await _repository.CRMInstituteType.GetInstituteTypeAsync();
+    IEnumerable<CRMInstituteTypeDto> institutesDDLByCountryDto = MyMapper.JsonCloneIEnumerableToIEnumerable<CRMInstituteType, CRMInstituteTypeDto>(institutesDDLByCountry);
+    return institutesDDLByCountryDto;
   }
 
   //public async Task<IEnumerable<WfActionDto>> ActionsByStatusIdForGroup(int statusId, bool trackChanges)

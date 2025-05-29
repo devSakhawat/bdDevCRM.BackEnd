@@ -7,6 +7,7 @@ namespace bdDevCRM.ServicesContract.CRM;
 
 public interface ICRMCourseService
 {
+  Task<IEnumerable<DDLCourseDto>> CRMCourseDLLByInstitute(int instituteId, bool trackChanges);
 
   //Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges);
   //Task<CountryDto> GetCountryAsync(int countryId, bool trackChanges);

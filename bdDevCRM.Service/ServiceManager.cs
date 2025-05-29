@@ -45,6 +45,7 @@ public sealed class ServiceManager : IServiceManager
 
   #region CRM
   private readonly Lazy<ICRMInstituteService> _crminstitute;
+  private readonly Lazy<ICRMInstituteTypeService> _crminstituteType;
   private readonly Lazy<ICRMCourseService> _crmcourse;
   private readonly Lazy<ICRMMonthService> _crmmonth;
   private readonly Lazy<ICRMYearService> _crmyear;
@@ -75,6 +76,7 @@ public sealed class ServiceManager : IServiceManager
 
     #region CRM
     _crminstitute = new Lazy<ICRMInstituteService>(() => new CRMInstituteService(repository, logger, configuration));
+    _crminstituteType = new Lazy<ICRMInstituteTypeService>(() => new CRMInstituteTypeService(repository, logger, configuration));
     _crmcourse = new Lazy<ICRMCourseService>(() => new CRMCourseService(repository, logger, configuration));
     _crmmonth = new Lazy<ICRMMonthService>(() => new CRMMonthService(repository, logger, configuration));
     _crmyear = new Lazy<ICRMYearService>(() => new CRMYearService(repository, logger, configuration));
@@ -102,6 +104,7 @@ public sealed class ServiceManager : IServiceManager
 
   #region CRM
   public ICRMInstituteService CRMInstitutes => _crminstitute.Value;
+  public ICRMInstituteTypeService CRMInstituteType => _crminstituteType.Value;
   public ICRMCourseService CRMCourses => _crmcourse.Value;
   public ICRMMonthService CRMMonths => _crmmonth.Value;
   public ICRMYearService CRMYears => _crmyear.Value;

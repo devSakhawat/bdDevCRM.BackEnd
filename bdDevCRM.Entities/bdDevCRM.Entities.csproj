@@ -23,6 +23,7 @@
   <ItemGroup>
     <Folder Include="CRMGrid\StaticData\" />
     <Folder Include="Entities\Entities\CRMM\" />
+    <Folder Include="Repository\" />
   </ItemGroup>
 
 </Project>

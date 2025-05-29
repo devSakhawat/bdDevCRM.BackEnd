@@ -1,10 +1,12 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.Entities.CRMM;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
@@ -24,11 +26,11 @@ internal sealed class CRMCourseService : ICRMCourseService
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<WfstateDto>> StatusByMenuId(int menuId, bool trackChanges)
+  public async Task<IEnumerable<DDLCourseDto>> CRMCourseDLLByInstitute(int instituteId, bool trackChanges)
   {
-    IEnumerable<WfStateRepositoryDto> wfstates = await _repository.WfState.StatusByMenuId(menuId, trackChanges);
-    IEnumerable<WfstateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToList<WfStateRepositoryDto, WfstateDto>(wfstates);
-    return wfstatesDto;
+    IEnumerable<DDLCourseDto> ddlCourseDtos = await _repository.CRMCourse.ListByWhereWithSelectAsync(selector: x => new DDLCourseDto {CourseId = x.CourseId, CourseTitle = x.CourseTitle },expression: x => x.InstituteId == instituteId && x.Status == true, trackChanges: trackChanges);
+
+    return ddlCourseDtos;
   }
 
   public async Task<IEnumerable<WfActionDto>> ActionsByStatusIdForGroup(int statusId, bool trackChanges)

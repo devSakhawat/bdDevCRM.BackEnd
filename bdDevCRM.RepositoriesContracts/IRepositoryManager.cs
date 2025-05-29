@@ -35,6 +35,7 @@ public interface IRepositoryManager : IDisposable
 
   #region CRM
   ICRMInstituteRepository CRMInstitute { get; }
+  ICRMInstituteTypeRepository CRMInstituteType { get; }
   ICRMCourseRepository CRMCourse { get; }
   ICRMMonthRepository CRMMonth{ get; }
   ICRMYearRepository CRMYear { get; }

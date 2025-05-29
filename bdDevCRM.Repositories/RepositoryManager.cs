@@ -43,6 +43,7 @@ public class RepositoryManager : IRepositoryManager
 
   #region CRM
   private readonly Lazy<ICRMInstituteRepository> _crminstituteRepository;
+  private readonly Lazy<ICRMInstituteTypeRepository> _crminstituteTypeRepository;
   private readonly Lazy<ICRMCourseRepository> _crmcourseRepository;
   private readonly Lazy<ICRMMonthRepository> _crmmonthRepository;
   private readonly Lazy<ICRMYearRepository> _crmyearRepository;
@@ -80,6 +81,7 @@ public class RepositoryManager : IRepositoryManager
 
     #region CRM
     _crminstituteRepository = new Lazy<ICRMInstituteRepository>(() => new CRMInstituteRepository(_repositoryContext));
+    _crminstituteTypeRepository = new Lazy<ICRMInstituteTypeRepository>(() => new CRMInstituteTypeRepository(_repositoryContext));
     _crmcourseRepository = new Lazy<ICRMCourseRepository>(() => new CRMCourseRepository(_repositoryContext));
     _crmmonthRepository = new Lazy<ICRMMonthRepository>(() => new CRMMonthRepository(_repositoryContext));
     _crmyearRepository = new Lazy<ICRMYearRepository>(() => new CRMYearRepository(_repositoryContext));
@@ -116,6 +118,7 @@ public class RepositoryManager : IRepositoryManager
 
   #region CRM
   public ICRMInstituteRepository CRMInstitute => _crminstituteRepository.Value;
+  public ICRMInstituteTypeRepository CRMInstituteType => _crminstituteTypeRepository.Value;
   public ICRMCourseRepository CRMCourse => _crmcourseRepository.Value;
   public ICRMMonthRepository CRMMonth => _crmmonthRepository.Value;
   public ICRMYearRepository CRMYear => _crmyearRepository.Value;

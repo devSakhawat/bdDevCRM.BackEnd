@@ -5,9 +5,9 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 
 namespace bdDevCRM.ServicesContract.CRM;
 
-public interface ICRMInstituteService
+public interface ICRMInstituteTypeService
 {
-  Task<IEnumerable<DDLInstituteDto>> CRMInstituteDLLByCountry(int countryId, bool trackChanges);
+  Task<IEnumerable<CRMInstituteTypeDto>> CRMInstituteTypeDLLByCountry();
 
 
   //Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges);
