@@ -26,10 +26,10 @@ internal sealed class CRMInstituteTypeService : ICRMInstituteTypeService
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<CRMInstituteTypeDto>> CRMInstituteTypeDLLByCountry()
+  public async Task<IEnumerable<CRMInstituteTypeDto>> CRMInstituteTypeDLL()
   {
-    IEnumerable<CRMInstituteType> institutesDDLByCountry = await _repository.CRMInstituteType.GetInstituteTypeAsync();
-    IEnumerable<CRMInstituteTypeDto> institutesDDLByCountryDto = MyMapper.JsonCloneIEnumerableToIEnumerable<CRMInstituteType, CRMInstituteTypeDto>(institutesDDLByCountry);
+    IEnumerable<CrminstituteType> institutesDDLByCountry = await _repository.CRMInstituteType.GetInstituteTypeAsync();
+    IEnumerable<CRMInstituteTypeDto> institutesDDLByCountryDto = MyMapper.JsonCloneIEnumerableToIEnumerable<CrminstituteType, CRMInstituteTypeDto>(institutesDDLByCountry);
     return institutesDDLByCountryDto;
   }
 

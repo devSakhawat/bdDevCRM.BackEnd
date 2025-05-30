@@ -33,6 +33,7 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<IGroupPermissionRepository> _groupPermissionRepository;
   private readonly Lazy<IAccessControlRepository> _accessControlRepository;
   private readonly Lazy<IAccessRestrictionRepository> _accessRestrictionRepository;
+  private readonly Lazy<ICurrencyRepository> _currencyRepository;
 
   // HR area start  
   private readonly Lazy<IEmployeeRepository> _employeeRepository;
@@ -70,6 +71,8 @@ public class RepositoryManager : IRepositoryManager
     _groupPermissionRepository = new Lazy<IGroupPermissionRepository>(() => new GroupPermissionRepository(_repositoryContext));
     _accessControlRepository = new Lazy<IAccessControlRepository>(() => new AccessControlRepository(_repositoryContext));
     _accessRestrictionRepository = new Lazy<IAccessRestrictionRepository>(() => new AccessRestrictionRepository(_repositoryContext));
+
+    _currencyRepository = new Lazy<ICurrencyRepository>(() => new CurrencyRepository(_repositoryContext));
     #endregion System
 
     // HR area start  
@@ -107,6 +110,7 @@ public class RepositoryManager : IRepositoryManager
   public IGroupPermissionRepository GroupPermission => _groupPermissionRepository.Value;
   public IAccessControlRepository AccessControl => _accessControlRepository.Value;
   public IAccessRestrictionRepository AccessRestriction => _accessRestrictionRepository.Value;
+  public ICurrencyRepository Currency => _currencyRepository.Value;
   #endregion SystemAdmin
 
   #region HR area

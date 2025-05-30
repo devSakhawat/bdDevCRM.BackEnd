@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace bdDevCRM.Entities.Entities;
+namespace bdDevCRM.Entities.Entities.Core;
 
 public partial class CurrencyInfo
 {

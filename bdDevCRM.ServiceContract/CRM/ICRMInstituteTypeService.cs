@@ -7,7 +7,7 @@ namespace bdDevCRM.ServicesContract.CRM;
 
 public interface ICRMInstituteTypeService
 {
-  Task<IEnumerable<CRMInstituteTypeDto>> CRMInstituteTypeDLLByCountry();
+  Task<IEnumerable<CRMInstituteTypeDto>> CRMInstituteTypeDLL();
 
 
   //Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges);

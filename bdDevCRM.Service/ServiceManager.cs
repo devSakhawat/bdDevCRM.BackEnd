@@ -26,6 +26,7 @@ public sealed class ServiceManager : IServiceManager
 
   private readonly Lazy<ITokenBlacklistService> _tokenBlackListService;
   private readonly Lazy<ICountryService> _countryService;
+  private readonly Lazy<ICurrencyService> _currencyService;
   private readonly Lazy<ICompanyService> _companyService;
   private readonly Lazy<ISystemSettingsService> _systemSettingsService;
   private readonly Lazy<IUsersService> _userService;
@@ -57,6 +58,7 @@ public sealed class ServiceManager : IServiceManager
 
     _tokenBlackListService = new Lazy<ITokenBlacklistService>(() => new TokenBlacklistService(configuration, repository, logger));
     _countryService = new Lazy<ICountryService>(() => new CountryService(repository, logger, configuration));
+    _currencyService = new Lazy<ICurrencyService>(() => new CurrencyService(repository, logger, configuration));
     _companyService = new Lazy<ICompanyService>(() => new CompanyService(repository, logger, configuration));
     _systemSettingsService = new Lazy<ISystemSettingsService>(() => new SystemSettingsService(repository, logger, configuration));
     _userService = new Lazy<IUsersService>(() => new UsersService(repository, logger, configuration));
@@ -85,6 +87,7 @@ public sealed class ServiceManager : IServiceManager
 
   public ITokenBlacklistService TokenBlacklist => _tokenBlackListService.Value;
   public ICountryService Countries => _countryService.Value;
+  public ICurrencyService Currencies => _currencyService.Value;
   public ICompanyService Companies => _companyService.Value;
   public ISystemSettingsService SystemSettings => _systemSettingsService.Value;
   public IUsersService Users => _userService.Value;

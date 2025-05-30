@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.Core;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.Entities.Entities.Entities.CRMM;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +20,10 @@ public partial class CRMContext : DbContext
   // new added
   public virtual DbSet<TokenBlacklist> TokenBlacklist { get; set; }
   public virtual DbSet<CrmapplicantCourseDetials> CrmapplicantCourseDetials { get; set; }
-
-  public virtual DbSet<CRMInstituteType> InstituteType { get; set; }
+  public virtual DbSet<CrminstituteType> CrminstituteType { get; set; }
   public virtual DbSet<Crmcourse> Crmcourse { get; set; }
+
+  public virtual DbSet<Currency> Currency { get; set; }
 
   public virtual DbSet<CrmcourseIntake> CrmcourseIntake { get; set; }
 
@@ -17859,15 +17861,41 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
     });
 
-    modelBuilder.Entity<CRMInstituteType>(entity =>
+    modelBuilder.Entity<CrminstituteType>(entity =>
     {
-      entity.HasNoKey();
+      entity
+          .HasNoKey()
+          .ToTable("CRMInstituteType");
 
       entity.Property(e => e.InstituteTypeId).ValueGeneratedOnAdd();
       entity.Property(e => e.InstituteTypeName)
           .HasMaxLength(50)
           .IsUnicode(false);
     });
+
+    modelBuilder.Entity<Currency>(entity =>
+    {
+      entity.HasNoKey();
+
+      entity.Property(e => e.CurrencyCode)
+          .HasMaxLength(5)
+          .IsUnicode(false);
+      entity.Property(e => e.CurrencyId).ValueGeneratedOnAdd();
+      entity.Property(e => e.CurrencyName)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+    });
+
+
+
+
+
+
+
+
+
+
+
 
     OnModelCreatingPartial(modelBuilder);
   }

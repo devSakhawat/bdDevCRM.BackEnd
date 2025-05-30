@@ -10,6 +10,7 @@ public interface IServiceManager
 {
   ITokenBlacklistService TokenBlacklist { get; }
   ICountryService Countries { get; }
+  ICurrencyService Currencies { get; }
   ICompanyService Companies { get; }
   ISystemSettingsService SystemSettings { get; }
   IUsersService Users { get; }

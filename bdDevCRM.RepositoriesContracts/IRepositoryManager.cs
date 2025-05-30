@@ -25,6 +25,7 @@ public interface IRepositoryManager : IDisposable
   IGroupPermissionRepository GroupPermission { get; }
   IAccessControlRepository AccessControl { get; }
   IAccessRestrictionRepository AccessRestriction { get; }
+  ICurrencyRepository Currency { get; }
 
   // HR Part
   IEmployeeRepository Employees { get; }

@@ -23,8 +23,6 @@ public class CRMApplicationController : BaseApiController
 
   #region Course Details start
   [HttpGet(RouteConstants.CRMCountryDLL)]
-  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  //[AllowAnonymous]
   public async Task<IActionResult> CRMCountryDLL()
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
@@ -86,7 +84,29 @@ public class CRMApplicationController : BaseApiController
 
     return Ok(res);
   }
+  
 
+  [HttpGet(RouteConstants.CRMInstituteTypeDDL)]
+  public async Task<IActionResult> CRMInstituteTypeDDL()
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("Unauthorized attempt to get data!");
+    }
+    var userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
+
+    var res = await _serviceManager.CRMInstituteType.CRMInstituteTypeDLL();
+
+    return Ok(res);
+  }
+ 
 
 
   //[HttpPost(RouteConstants.CreateWorkFlow)]

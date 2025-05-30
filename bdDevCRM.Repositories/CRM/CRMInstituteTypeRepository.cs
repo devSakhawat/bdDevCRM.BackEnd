@@ -1,14 +1,15 @@
 ﻿using bdDevCRM.Entities.Entities.CRM;
+using bdDevCRM.Entities.Entities.Entities.CRMM;
 using bdDevCRM.RepositoriesContracts.CRM;
 using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.CRM;
-public class CRMInstituteTypeRepository : RepositoryBase<CRMInstituteType>, ICRMInstituteTypeRepository
+public class CRMInstituteTypeRepository : RepositoryBase<CrminstituteType>, ICRMInstituteTypeRepository
 {
   public CRMInstituteTypeRepository(CRMContext context) : base(context) { }
 
   // Get all Active Institute
-  public async Task<IEnumerable<CRMInstituteType>> GetInstituteTypeAsync() =>
+  public async Task<IEnumerable<CrminstituteType>> GetInstituteTypeAsync() =>
       await ListAsync(trackChanges: false);
 
   ////// Get a single country by ID
