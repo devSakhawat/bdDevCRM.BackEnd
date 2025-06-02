@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Repository\**" />
+    <EmbeddedResource Remove="Repository\**" />
+    <None Remove="Repository\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.13">
       <PrivateAssets>all</PrivateAssets>
@@ -23,7 +29,6 @@
   <ItemGroup>
     <Folder Include="CRMGrid\StaticData\" />
     <Folder Include="Entities\Entities\CRMM\" />
-    <Folder Include="Repository\" />
   </ItemGroup>
 
 </Project>
