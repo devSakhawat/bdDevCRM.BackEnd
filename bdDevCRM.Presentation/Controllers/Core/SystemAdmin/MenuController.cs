@@ -111,7 +111,21 @@ public class EmployeeController : BaseApiController
   [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> SaveMenu([FromBody] MenuDto modelDto)
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("UserId not found in token.");
+    }
+
+    var userId = Convert.ToInt32(userIdClaim);
+    // userId : which key is responsible to when cache was created.
+    // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
+
     var model = await _serviceManager.Menus.CreateAsync(modelDto);
     return (model != null) ? Ok(model) : NoContent();
   }
