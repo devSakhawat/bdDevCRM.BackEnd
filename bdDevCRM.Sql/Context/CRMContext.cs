@@ -1,7 +1,6 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Entities.Core;
 using bdDevCRM.Entities.Entities.CRM;
-using bdDevCRM.Entities.Entities.Entities.CRMM;
 using Microsoft.EntityFrameworkCore;
 
 namespace bdDevCRM.Sql.Context;
@@ -2251,9 +2250,9 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<ZrosterDetailsBackup> ZrosterDetailsBackup { get; set; }
 
-//  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//      => optionsBuilder.UseSqlServer("Server=DESKTOP-657HR8U;User ID=sa;password=@BIr3011;Database=BG_A;TrustServerCertificate=true;");
+  //  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+  //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+  //      => optionsBuilder.UseSqlServer("Server=DESKTOP-657HR8U;User ID=sa;password=@BIr3011;Database=BG_A;TrustServerCertificate=true;");
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -2346,6 +2345,8 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.Campus)
           .HasMaxLength(100)
           .IsUnicode(false);
+      entity.Property(e => e.InstituteName)
+          .HasMaxLength(100);
       entity.Property(e => e.FundsRequirementforVisa)
           .HasMaxLength(300)
           .IsUnicode(false);
@@ -2366,9 +2367,9 @@ public partial class CRMContext : DbContext
           .HasMaxLength(20)
           .IsUnicode(false)
           .HasColumnName("InstitutePhoneNO");
-      entity.Property(e => e.InstituteType)
-          .HasMaxLength(100)
-          .IsUnicode(false);
+      //entity.Property(e => e.InstituteTypeId)
+      //    .HasMaxLength(100)
+      //    .IsUnicode(false);
       entity.Property(e => e.InstitutionLogo)
           .HasMaxLength(200)
           .IsUnicode(false);
@@ -3613,10 +3614,10 @@ public partial class CRMContext : DbContext
               .HasNoKey()
               .ToTable(tb =>
               {
-              tb.HasTrigger("AfterDeleteLateAttLog");
-              tb.HasTrigger("AfterInsertLateAttLog");
-              tb.HasTrigger("tr_Update_AttLog_IsAttendanceClearOut");
-            });
+                tb.HasTrigger("AfterDeleteLateAttLog");
+                tb.HasTrigger("AfterInsertLateAttLog");
+                tb.HasTrigger("tr_Update_AttLog_IsAttendanceClearOut");
+              });
 
       entity.HasIndex(e => new { e.UserId, e.AttendanceDate, e.IsAttendanceClearOut, e.IsLate, e.DefalterType }, "AttendanceLogNONCLUSTEREDIndex");
 
@@ -7919,10 +7920,10 @@ public partial class CRMContext : DbContext
 
       entity.ToTable(tb =>
               {
-              tb.HasTrigger("tr_Employment_LastUpdateDate");
-              tb.HasTrigger("tr_Transfer_Promotion_ConfirmationDate");
-              tb.HasTrigger("trg_EmploymentHist");
-            });
+                tb.HasTrigger("tr_Employment_LastUpdateDate");
+                tb.HasTrigger("tr_Transfer_Promotion_ConfirmationDate");
+                tb.HasTrigger("trg_EmploymentHist");
+              });
 
       entity.HasIndex(e => new { e.CompanyId, e.EmploymentDate }, "NonClasterEmploymentIndex");
 
@@ -10833,10 +10834,10 @@ public partial class CRMContext : DbContext
 
       entity.ToTable(tb =>
               {
-              tb.HasTrigger("AutoApprovalAfterLeavePlanSubmit");
-              tb.HasTrigger("UpdateAppliedDateAfterInsertLeavePlaned");
-              tb.HasTrigger("UpdateApprovedDateAfterLeavePlanedApproval");
-            });
+                tb.HasTrigger("AutoApprovalAfterLeavePlanSubmit");
+                tb.HasTrigger("UpdateAppliedDateAfterInsertLeavePlaned");
+                tb.HasTrigger("UpdateApprovedDateAfterLeavePlanedApproval");
+              });
 
       entity.Property(e => e.AppliedDate).HasColumnType("datetime");
       entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
@@ -13182,9 +13183,9 @@ public partial class CRMContext : DbContext
               .HasNoKey()
               .ToTable(tb =>
               {
-              tb.HasTrigger("UpdateBlockSubmitDateAfterPayrollBlockSetup");
-              tb.HasTrigger("UpdateUnBlockSubmitDateAfterPayrollUnBlockSetup");
-            });
+                tb.HasTrigger("UpdateBlockSubmitDateAfterPayrollBlockSetup");
+                tb.HasTrigger("UpdateUnBlockSubmitDateAfterPayrollUnBlockSetup");
+              });
 
       entity.Property(e => e.BlockDate).HasColumnType("datetime");
       entity.Property(e => e.BlockRemark).HasMaxLength(300);
@@ -17863,13 +17864,12 @@ public partial class CRMContext : DbContext
 
     modelBuilder.Entity<CrminstituteType>(entity =>
     {
-      entity
-          .HasNoKey()
-          .ToTable("CRMInstituteType");
+      entity.HasKey(e => e.InstituteTypeId);
 
-      entity.Property(e => e.InstituteTypeId).ValueGeneratedOnAdd();
+      entity.ToTable("CRMInstituteType");
+
       entity.Property(e => e.InstituteTypeName)
-          .HasMaxLength(50)
+          .HasMaxLength(150)
           .IsUnicode(false);
     });
 

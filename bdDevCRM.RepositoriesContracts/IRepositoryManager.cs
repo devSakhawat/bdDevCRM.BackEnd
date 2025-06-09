@@ -35,8 +35,8 @@ public interface IRepositoryManager : IDisposable
   // instance should be small letter.
 
   #region CRM
-  ICRMInstituteRepository CRMInstitute { get; }
-  ICRMInstituteTypeRepository CRMInstituteType { get; }
+  ICRMInstituteRepository CRMInstitutes { get; }
+  ICRMInstituteTypeRepository CRMInstituteTypes { get; }
   ICRMCourseRepository CRMCourse { get; }
   ICRMMonthRepository CRMMonth{ get; }
   ICRMYearRepository CRMYear { get; }

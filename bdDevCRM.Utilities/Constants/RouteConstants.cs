@@ -12,7 +12,6 @@ public static class RouteConstants
   public const string Logout = "logout";
   #endregion Authentication
 
-
   #region Module
   public const string ModuleSummary = "module-summary";
   public const string Modules = "modules";
@@ -105,7 +104,35 @@ public static class RouteConstants
   public const string DepartmentByCompanyIdForCombo = "departments-by-compnayId-for-combo/companyId/";
   #endregion Department
 
-  #region CRMCore
+  #region Country
+  public const string CountryDDL = "countryddl";
+  public const string CountrySummary = "country-summary";
+  public const string CreateCountry = "country";
+  public const string UpdateCountry = "country/{key}";
+  public const string DeleteCountry = "country/{key}";
+
+  public const string CreateOrUpdateCountry = "country/{key}";
+  #endregion Country
+
+  #region InstituteType
+  public const string InstituteTypeDDL = "crm-institutetype-ddl";
+  public const string InstituteTypeSummary = "crm-institutetype-summary";
+  public const string CreateInstituteType = "crm-institutetype";
+  public const string UpdateInstituteType = "crm-institutetype/{key:int}";
+  public const string DeleteInstituteType = "crm-institutetype/{key:int}";
+  public const string CreateOrUpdateInstituteType = "crm-institutetype-saveORupdate/{key:int}";
+  #endregion InstituteType
+
+  #region Institute
+  public const string InstituteDDL = "instituteddl";
+  public const string InstituteSummary = "institute-summary";
+  public const string CreateInstitute = "institute";
+  public const string UpdateInstitute = "institute/{key:int}";
+  public const string DeleteInstitute = "institute/{key:int}";
+  public const string CreateOrUpdateInstitute = "institute-saveORupdate/{key:int}";
+  #endregion Institute
+
+  #region Currency
   public const string CurrencyDDL = "currencyddl";
   public const string CurrencySummary = "currency-summary";
   public const string CreateCurrency = "currency";
@@ -117,7 +144,7 @@ public static class RouteConstants
   //public const string CRMMonthDLL = "crm-monthddl";
   //public const string CRMYearDLL = "crm-yearddl";
   //public const string CRMInstituteTypeDDL = "crm-institute-type/";
-  #endregion CRMCore
+  #endregion Currency
 
   #region CRMApplication
   public const string CRMApplicationSummary = "crm-application-summary";

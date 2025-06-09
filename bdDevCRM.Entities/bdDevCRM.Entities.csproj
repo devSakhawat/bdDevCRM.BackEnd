@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <Folder Include="CRMGrid\StaticData\" />
-    <Folder Include="Entities\Entities\CRMM\" />
   </ItemGroup>
 
 </Project>

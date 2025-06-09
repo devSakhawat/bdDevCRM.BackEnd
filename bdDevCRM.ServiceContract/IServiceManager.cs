@@ -30,7 +30,7 @@ public interface IServiceManager
 
   #region CRM
   ICRMInstituteService CRMInstitutes { get; }
-  ICRMInstituteTypeService CRMInstituteType { get; }
+  ICRMInstituteTypeService CRMInstituteTypes { get; }
   ICRMCourseService CRMCourses { get; }
   ICRMMonthService CRMMonths { get; }
   ICRMYearService CRMYears { get; }

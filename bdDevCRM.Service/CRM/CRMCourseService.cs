@@ -1,6 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Entities.Entities.CRMM;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
@@ -28,7 +27,7 @@ internal sealed class CRMCourseService : ICRMCourseService
 
   public async Task<IEnumerable<DDLCourseDto>> CRMCourseDLLByInstitute(int instituteId, bool trackChanges)
   {
-    IEnumerable<DDLCourseDto> ddlCourseDtos = await _repository.CRMCourse.ListByWhereWithSelectAsync(selector: x => new DDLCourseDto {CourseId = x.CourseId, CourseTitle = x.CourseTitle },expression: x => x.InstituteId == instituteId && x.Status == true, trackChanges: trackChanges);
+    IEnumerable<DDLCourseDto> ddlCourseDtos = await _repository.CRMCourse.ListByWhereWithSelectAsync(selector: x => new DDLCourseDto { CourseId = x.CourseId, CourseTitle = x.CourseTitle }, expression: x => x.InstituteId == instituteId && x.Status == true, trackChanges: trackChanges);
 
     return ddlCourseDtos;
   }

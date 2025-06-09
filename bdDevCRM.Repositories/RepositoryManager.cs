@@ -17,6 +17,8 @@ public class RepositoryManager : IRepositoryManager
   private readonly CRMContext _repositoryContext;
 
   private readonly Lazy<ICountryRepository> _countries;
+  private readonly Lazy<ICRMInstituteTypeRepository> _crmInstituteTypeRepository;
+  private readonly Lazy<ICRMInstituteRepository> _crmInstituteRepository;
   private readonly Lazy<ICompanyRepository> _companies;
   private readonly Lazy<ISystemSettingsRepository> _systemRepository;
   private readonly Lazy<IUsersRepository> _usersRepository;
@@ -43,7 +45,7 @@ public class RepositoryManager : IRepositoryManager
   // HR area end  
 
   #region CRM
-  private readonly Lazy<ICRMInstituteRepository> _crminstituteRepository;
+  //private readonly Lazy<ICRMInstituteRepository> _crminstituteRepository;
   private readonly Lazy<ICRMInstituteTypeRepository> _crminstituteTypeRepository;
   private readonly Lazy<ICRMCourseRepository> _crmcourseRepository;
   private readonly Lazy<ICRMMonthRepository> _crmmonthRepository;
@@ -55,6 +57,9 @@ public class RepositoryManager : IRepositoryManager
     _repositoryContext = repositoryContext;
     #region System
     _countries = new Lazy<ICountryRepository>(() => new CountryRepository(_repositoryContext));
+    _crmInstituteTypeRepository = new Lazy<ICRMInstituteTypeRepository>( () => new CRMInstituteTypeRepository(_repositoryContext));
+    _crmInstituteRepository = new Lazy<ICRMInstituteRepository>(() => new CRMInstituteRepository(_repositoryContext));
+
     _companies = new Lazy<ICompanyRepository>(() => new CompanyRepository(_repositoryContext));
     _systemRepository = new Lazy<ISystemSettingsRepository>(() => new SystemSettingsRepository(_repositoryContext));
     _usersRepository = new Lazy<IUsersRepository>(() => new UsersRepository(_repositoryContext));
@@ -83,7 +88,6 @@ public class RepositoryManager : IRepositoryManager
     // HR area end
 
     #region CRM
-    _crminstituteRepository = new Lazy<ICRMInstituteRepository>(() => new CRMInstituteRepository(_repositoryContext));
     _crminstituteTypeRepository = new Lazy<ICRMInstituteTypeRepository>(() => new CRMInstituteTypeRepository(_repositoryContext));
     _crmcourseRepository = new Lazy<ICRMCourseRepository>(() => new CRMCourseRepository(_repositoryContext));
     _crmmonthRepository = new Lazy<ICRMMonthRepository>(() => new CRMMonthRepository(_repositoryContext));
@@ -121,8 +125,8 @@ public class RepositoryManager : IRepositoryManager
   #endregion HR area
 
   #region CRM
-  public ICRMInstituteRepository CRMInstitute => _crminstituteRepository.Value;
-  public ICRMInstituteTypeRepository CRMInstituteType => _crminstituteTypeRepository.Value;
+  public ICRMInstituteRepository CRMInstitutes => _crmInstituteRepository.Value;
+  public ICRMInstituteTypeRepository CRMInstituteTypes => _crminstituteTypeRepository.Value;
   public ICRMCourseRepository CRMCourse => _crmcourseRepository.Value;
   public ICRMMonthRepository CRMMonth => _crmmonthRepository.Value;
   public ICRMYearRepository CRMYear => _crmyearRepository.Value;

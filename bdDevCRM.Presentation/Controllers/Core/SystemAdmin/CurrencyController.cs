@@ -10,11 +10,11 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
-public class CRMCorelController : BaseApiController
+public class CurrencyController : BaseApiController
 {
   private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
-  public CRMCorelController(IServiceManager serviceManager, IMemoryCache cache)
+  public CurrencyController(IServiceManager serviceManager, IMemoryCache cache)
   {
     _serviceManager = serviceManager;
     _cache = cache;

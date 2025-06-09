@@ -59,7 +59,8 @@ public class CRMApplicationController : BaseApiController
       return Unauthorized("User not found in cache.");
     }
 
-    var res = await _serviceManager.CRMInstitutes.CRMInstituteDLLByCountry(countryId, trackChanges: false);
+    var res = await _serviceManager.CRMInstitutes.GetInstitutesDDLAsync( trackChanges: false);
+    //var res = await _serviceManager.CRMInstitutes.CRMInstituteDLLByCountry(countryId, trackChanges: false);
 
     return Ok(res);
   }
@@ -102,7 +103,7 @@ public class CRMApplicationController : BaseApiController
       return Unauthorized("User not found in cache.");
     }
 
-    var res = await _serviceManager.CRMInstituteType.CRMInstituteTypeDLL();
+    var res = await _serviceManager.CRMInstituteTypes.GetInstituteTypesDDLAsync();
 
     return Ok(res);
   }

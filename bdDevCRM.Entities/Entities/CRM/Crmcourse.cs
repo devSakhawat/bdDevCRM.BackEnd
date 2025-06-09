@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace bdDevCRM.Entities.Entities.Entities.CRMM;
+namespace bdDevCRM.Entities.Entities.CRM;
 
 public partial class Crmcourse
 {

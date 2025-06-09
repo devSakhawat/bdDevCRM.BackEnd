@@ -1,6 +1,4 @@
-﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Entities.CRM;
-using bdDevCRM.Entities.Entities.Entities.CRMM;
+﻿using bdDevCRM.Entities.Entities.CRM;
 
 namespace bdDevCRM.RepositoriesContracts.CRM;
 

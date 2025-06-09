@@ -70,7 +70,7 @@ public class EmployeeController : BaseApiController
   [HttpGet(RouteConstants.GetMenus)]
   [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
   //[IgnoreMediaTypeValidation]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> GetMenus()
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -130,6 +130,7 @@ public class EmployeeController : BaseApiController
     return (model != null) ? Ok(model) : NoContent();
   }
 
+
   [HttpPut(RouteConstants.UpdateMenu)]
   //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> UpdateMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
@@ -137,7 +138,7 @@ public class EmployeeController : BaseApiController
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
 
     MenuDto returnData = await _serviceManager.Menus.UpdateAsync(key, modelDto);
-    return (returnData != null) ? Ok(returnData) : NoContent();
+    return (returnData != null) ? Ok(OperationMessage.Success) : NoContent();
   }
 
   [HttpDelete(RouteConstants.DeleteMenu)]

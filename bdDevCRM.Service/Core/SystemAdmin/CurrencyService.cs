@@ -13,7 +13,6 @@ namespace bdDevCRM.Services.Core.SystemAdmin;
 
 internal sealed class CurrencyService : ICurrencyService
 {
-
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
@@ -40,8 +39,6 @@ internal sealed class CurrencyService : ICurrencyService
 
     return gridEntity;
   }
-
-
 
   public async Task<string> SaveOrUpdate(int key ,CurrencyDto modelDto)
   {
@@ -109,7 +106,7 @@ internal sealed class CurrencyService : ICurrencyService
   public async Task<string> DeleteCurrency(int key, CurrencyDto modelDto)
   {
     if (modelDto == null) throw new NullModelBadRequestException(new CurrencyDto().GetType().Name.ToString());
-    if (key != modelDto.CurrencyId) throw new IdMismatchBadRequestException(key.ToString(), new ModuleDto().GetType().Name.ToString());
+    if (key != modelDto.CurrencyId) throw new IdMismatchBadRequestException(key.ToString(), new CurrencyDto().GetType().Name.ToString());
 
     CurrencyInfo currencyData = await _repository.Currency.FirstOrDefaultAsync(m => m.CurrencyId == key, trackChanges: false);
     if (currencyData == null) throw new GenericNotFoundException("CurrencyInfo", "CurrencyId", key.ToString());

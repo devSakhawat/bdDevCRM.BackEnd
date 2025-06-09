@@ -9,7 +9,7 @@ public partial class Crminstitute
 
     public int CountryId { get; set; }
 
-    public int? InstituteName { get; set; }
+    public string InstituteName { get; set; }
 
     public string? Campus { get; set; }
 
@@ -39,7 +39,7 @@ public partial class Crminstitute
 
     public string? InstitutionProspectus { get; set; }
 
-    public string? InstituteType { get; set; }
+    public int? InstituteTypeId { get; set; }
 
     public string? InstituteCode { get; set; }
 

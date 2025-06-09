@@ -1,9 +1,5 @@
-﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Entities.CRM;
-using bdDevCRM.Entities.Entities.Entities.CRMM;
-using bdDevCRM.Entities.Exceptions;
+﻿using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
-using bdDevCRM.RepositoriesContracts.CRM;
 using bdDevCRM.Service.Authentication;
 using bdDevCRM.Service.Core.HR;
 using bdDevCRM.Service.Core.SystemAdmin;
@@ -52,7 +48,7 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICRMYearService> _crmyear;
   #endregion CRM
 
-  public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration ,IMemoryCache cache)
+  public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IMemoryCache cache)
   {
     _cache = cache;
 
@@ -107,7 +103,7 @@ public sealed class ServiceManager : IServiceManager
 
   #region CRM
   public ICRMInstituteService CRMInstitutes => _crminstitute.Value;
-  public ICRMInstituteTypeService CRMInstituteType => _crminstituteType.Value;
+  public ICRMInstituteTypeService CRMInstituteTypes => _crminstituteType.Value;
   public ICRMCourseService CRMCourses => _crmcourse.Value;
   public ICRMMonthService CRMMonths => _crmmonth.Value;
   public ICRMYearService CRMYears => _crmyear.Value;
