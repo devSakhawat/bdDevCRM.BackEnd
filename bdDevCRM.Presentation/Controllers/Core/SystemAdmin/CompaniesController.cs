@@ -10,10 +10,10 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 public class CompaniesController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
-  public CompaniesController(IServiceManager serviceManager)
+  //private readonly IServiceManager _serviceManager;
+  public CompaniesController(IServiceManager serviceManager) : base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
   }
 
   [HttpGet(RouteConstants.Companies)]

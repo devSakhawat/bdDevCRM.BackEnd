@@ -124,11 +124,11 @@ public static class RouteConstants
   #endregion InstituteType
 
   #region Institute
-  public const string InstituteDDL = "instituteddl";
-  public const string InstituteSummary = "institute-summary";
-  public const string CreateInstitute = "institute";
-  public const string UpdateInstitute = "institute/{key:int}";
-  public const string DeleteInstitute = "institute/{key:int}";
+  public const string InstituteDDL = "crm-institute-ddl";
+  public const string InstituteSummary = "crm-institute-summary";
+  public const string CreateInstitute = "crm-institute";
+  public const string UpdateInstitute = "crm-institute/{key:int}";
+  public const string DeleteInstitute = "crm-institute/{key:int}";
   public const string CreateOrUpdateInstitute = "institute-saveORupdate/{key:int}";
   #endregion Institute
 

@@ -19,12 +19,12 @@ namespace bdDevCRM.Presentation.Controllers.Authentication;
 //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class AuthenticationController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
+  //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _memoryCache;
 
-  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache)
+  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache): base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
     _memoryCache = memoryCache;
   }
 
@@ -244,6 +244,7 @@ public class AuthenticationController : BaseApiController
 
 
   [HttpGet(RouteConstants.GetUserInfo)]
+  [AllowAnonymous]
   public IActionResult GetUserInfo()
   {
     var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");

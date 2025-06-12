@@ -941,98 +941,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   }
 
 
-  //public TResult ExecuteSingleDataSyncronous<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
-  //{
-  //  var connection = _context.Database.GetDbConnection();
-  //  TResult result = null;
-
-  //  try
-  //  {
-  //    connection.Open();
-
-  //    using (var command = connection.CreateCommand())
-  //    {
-  //      command.CommandText = query;
-  //      command.CommandTimeout = 120; // Set timeout to 120 seconds
-
-  //      if (parameters != null)
-  //      {
-  //        foreach (var param in parameters)
-  //        {
-  //          var dbParam = command.CreateParameter();
-  //          dbParam.ParameterName = param.ParameterName;
-  //          dbParam.Value = param.Value;
-  //          command.Parameters.Add(dbParam);
-  //        }
-  //      }
-
-  //      using (var reader = command.ExecuteReader(CommandBehavior.SingleRow))
-  //      {
-  //        if (!reader.HasRows) return null;
-
-  //        var columnMap = new Dictionary<string, int>();
-  //        for (int i = 0; i < reader.FieldCount; i++)
-  //        {
-  //          columnMap[reader.GetName(i)] = i;
-  //        }
-
-  //        var properties = typeof(TResult).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-  //        if (reader.Read())
-  //        {
-  //          var entity = Activator.CreateInstance<TResult>();
-
-  //          foreach (var property in properties)
-  //          {
-  //            if (!columnMap.ContainsKey(property.Name)) continue;
-
-  //            var columnIndex = columnMap[property.Name];
-  //            if (reader.IsDBNull(columnIndex)) continue;
-
-  //            var value = reader.GetValue(columnIndex);
-
-  //            try
-  //            {
-  //              Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-
-  //              if (propertyType == typeof(Guid) && value is string)
-  //              {
-  //                property.SetValue(entity, Guid.Parse((string)value));
-  //              }
-  //              else if (propertyType.IsEnum && value is string)
-  //              {
-  //                property.SetValue(entity, Enum.Parse(propertyType, (string)value));
-  //              }
-  //              else
-  //              {
-  //                property.SetValue(entity, Convert.ChangeType(value, propertyType));
-  //              }
-  //            }
-  //            catch (Exception ex)
-  //            {
-  //              Console.Error.WriteLine($"Error converting value '{value}' to type {property.PropertyType.Name} for property {property.Name}: {ex.Message}");
-  //            }
-  //          }
-
-  //          result = entity;
-  //        }
-  //      }
-  //    }
-  //  }
-  //  catch (Exception ex)
-  //  {
-  //    Console.Error.WriteLine($"Error in ExecuteSingleDataSyncronous: {ex.Message}");
-  //  }
-  //  finally
-  //  {
-  //    if (connection.State == ConnectionState.Open)
-  //    {
-  //      connection.Close();
-  //    }
-  //  }
-
-  //  return result;
-  //}
 
 
   public async Task<IEnumerable<TResult>> ExecuteListQuery<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
@@ -1167,6 +1075,10 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
   #endregion Get Data using ado.net
 
+
+  #region DMS Module
+
+  #endregion DMS Module
 }
 
 

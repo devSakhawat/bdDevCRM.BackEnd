@@ -4,9 +4,11 @@ using bdDevCRM.Service.Authentication;
 using bdDevCRM.Service.Core.HR;
 using bdDevCRM.Service.Core.SystemAdmin;
 using bdDevCRM.Service.CRM;
+using bdDevCRM.Service.DMS;
 using bdDevCRM.ServiceContract.Authentication;
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
+using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Services.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
@@ -48,6 +50,10 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICRMYearService> _crmyear;
   #endregion CRM
 
+  #region DMS
+  private readonly Lazy<IDmsDocumentService> _dmsDocs;
+  #endregion DMS
+
   public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IMemoryCache cache)
   {
     _cache = cache;
@@ -79,6 +85,10 @@ public sealed class ServiceManager : IServiceManager
     _crmmonth = new Lazy<ICRMMonthService>(() => new CRMMonthService(repository, logger, configuration));
     _crmyear = new Lazy<ICRMYearService>(() => new CRMYearService(repository, logger, configuration));
     #endregion CRM
+
+    #region DMS
+    _dmsDocs = new Lazy<IDmsDocumentService>(() => new DmsDocumentService(repository, logger, configuration));
+    #endregion DMS
   }
 
   public ITokenBlacklistService TokenBlacklist => _tokenBlackListService.Value;
@@ -108,6 +118,10 @@ public sealed class ServiceManager : IServiceManager
   public ICRMMonthService CRMMonths => _crmmonth.Value;
   public ICRMYearService CRMYears => _crmyear.Value;
   #endregion CRM
+
+  #region DMS
+  public IDmsDocumentService DMSDocuments => _dmsDocs.Value;
+  #endregion DMS
 
 
   // Get Cache // generic function for getting cache from memory cache all of them.

@@ -13,11 +13,11 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 public class ModuleController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
+  //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
-  public ModuleController(IServiceManager serviceManager, IMemoryCache cache)
+  public ModuleController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
     _cache = cache;
   }
 

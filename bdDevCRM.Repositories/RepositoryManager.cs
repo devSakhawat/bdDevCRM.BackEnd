@@ -3,11 +3,13 @@ using bdDevCRM.Repositories.Core.Authentication;
 using bdDevCRM.Repositories.Core.HR;
 using bdDevCRM.Repositories.Core.SystemAdmin;
 using bdDevCRM.Repositories.CRM;
+using bdDevCRM.Repositories.DMS;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoriesContracts.Core.Authentication;
 using bdDevCRM.RepositoriesContracts.Core.HR;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoriesContracts.CRM;
+using bdDevCRM.RepositoriesContracts.DMS;
 using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories;
@@ -45,12 +47,15 @@ public class RepositoryManager : IRepositoryManager
   // HR area end  
 
   #region CRM
-  //private readonly Lazy<ICRMInstituteRepository> _crminstituteRepository;
   private readonly Lazy<ICRMInstituteTypeRepository> _crminstituteTypeRepository;
   private readonly Lazy<ICRMCourseRepository> _crmcourseRepository;
   private readonly Lazy<ICRMMonthRepository> _crmmonthRepository;
   private readonly Lazy<ICRMYearRepository> _crmyearRepository;
   #endregion CRM
+
+  #region DMS
+  private readonly Lazy<IDmsDocumentRepository> _dmsDocumentRepository;
+  #endregion DMS
 
   public RepositoryManager(CRMContext repositoryContext)
   {
@@ -94,6 +99,10 @@ public class RepositoryManager : IRepositoryManager
     _crmyearRepository = new Lazy<ICRMYearRepository>(() => new CRMYearRepository(_repositoryContext));
     #endregion CRM
 
+    #region DMS
+    _dmsDocumentRepository = new Lazy<IDmsDocumentRepository>(() => new DmsDocumentRepository(_repositoryContext));
+    #endregion DMS
+
   }
 
   #region SystemAdmin
@@ -130,8 +139,13 @@ public class RepositoryManager : IRepositoryManager
   public ICRMCourseRepository CRMCourse => _crmcourseRepository.Value;
   public ICRMMonthRepository CRMMonth => _crmmonthRepository.Value;
   public ICRMYearRepository CRMYear => _crmyearRepository.Value;
-  
+
   #endregion CRM
+
+  #region DMS
+  public IDmsDocumentRepository DmsDocuments => _dmsDocumentRepository.Value;
+
+  #endregion DMS
 
 
   // Save changes to the database

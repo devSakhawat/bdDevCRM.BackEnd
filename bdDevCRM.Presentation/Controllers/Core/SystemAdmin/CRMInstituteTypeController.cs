@@ -4,26 +4,20 @@ using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 
 public class CRMInstituteTypeController : BaseApiController
 {
-  private readonly IServiceManager _svc;
+  //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
 
-  public CRMInstituteTypeController(IServiceManager svc, IMemoryCache cache)
+  public CRMInstituteTypeController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
   {
-    _svc = svc;
+    //_serviceManager = svc;
     _cache = cache;
   }
 
@@ -36,10 +30,10 @@ public class CRMInstituteTypeController : BaseApiController
       return Unauthorized("Unauthorized attempt to get data!");
 
     int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _svc.GetCache<UsersDto>(userId);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _svc.CRMInstituteTypes.GetInstituteTypesDDLAsync(trackChanges: false);
+    var res = await _serviceManager.CRMInstituteTypes.GetInstituteTypesDDLAsync(trackChanges: false);
     return Ok(res);
   }
 
@@ -52,12 +46,12 @@ public class CRMInstituteTypeController : BaseApiController
       return Unauthorized("Unauthorized attempt to get data!");
 
     int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _svc.GetCache<UsersDto>(userId);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
     if (options == null) return BadRequest("CRMGridOptions cannot be null.");
 
-    var summary = await _svc.CRMInstituteTypes.SummaryGrid(options);
+    var summary = await _serviceManager.CRMInstituteTypes.SummaryGrid(options);
     return (summary != null) ? Ok(summary) : NoContent();
   }
 
@@ -71,10 +65,10 @@ public class CRMInstituteTypeController : BaseApiController
       return Unauthorized("UserId not found in token.");
 
     int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _svc.GetCache<UsersDto>(userId);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _svc.CRMInstituteTypes.CreateNewRecordAsync(dto);
+    var res = await _serviceManager.CRMInstituteTypes.CreateNewRecordAsync(dto);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
   }
 
@@ -88,10 +82,10 @@ public class CRMInstituteTypeController : BaseApiController
       return Unauthorized("UserId not found in token.");
 
     int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _svc.GetCache<UsersDto>(userId);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _svc.CRMInstituteTypes.UpdateRecordAsync(key, dto, false);
+    var res = await _serviceManager.CRMInstituteTypes.UpdateRecordAsync(key, dto, false);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
   }
 
@@ -105,10 +99,10 @@ public class CRMInstituteTypeController : BaseApiController
       return Unauthorized("UserId not found in token.");
 
     int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _svc.GetCache<UsersDto>(userId);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("UnAuthorized attempted");
 
-    var res = await _svc.CRMInstituteTypes.DeleteRecordAsync(key, dto);
+    var res = await _serviceManager.CRMInstituteTypes.DeleteRecordAsync(key, dto);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
   }
 
@@ -123,10 +117,10 @@ public class CRMInstituteTypeController : BaseApiController
       return Unauthorized("UserId not found in token.");
 
     int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _svc.GetCache<UsersDto>(userId);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _svc.CRMInstituteTypes.SaveOrUpdateAsync(key, dto);
+    var res = await _serviceManager.CRMInstituteTypes.SaveOrUpdateAsync(key, dto);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
   }
 }

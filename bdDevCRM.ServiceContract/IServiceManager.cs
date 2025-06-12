@@ -1,6 +1,7 @@
 ﻿using bdDevCRM.ServiceContract.Authentication;
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
+using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.CRM;
 
@@ -35,6 +36,10 @@ public interface IServiceManager
   ICRMMonthService CRMMonths { get; }
   ICRMYearService CRMYears { get; }
   #endregion CRM
+
+  #region DMS
+  IDmsDocumentService DMSDocuments { get; }
+  #endregion DMS
 
   T GetCache<T>(int key);
 }

@@ -14,3 +14,4 @@ public class ApiException : ApiResponse
   public string ErrorType { get; set; }
   public DateTime Timestamp { get; set; }
 }
+

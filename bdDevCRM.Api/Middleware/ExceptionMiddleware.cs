@@ -98,6 +98,16 @@ public class ExceptionMiddleware
         statusCode = unauthorized.StatusCode;
         message = ex.Message;
       }
+      else if (ex is DuplicateRecordException dupEx)
+      {
+        statusCode = dupEx.StatusCode;
+        message = dupEx.Message;
+      }
+      else if (ex is InvalidCreateOperationException invalidCreateEx)
+      {
+        statusCode = invalidCreateEx.StatusCode;
+        message = invalidCreateEx.Message;
+      }
       // JWT Token exception handling
       else if (ex is SecurityTokenException || ex is SecurityTokenValidationException || ex is SecurityTokenExpiredException)
       {

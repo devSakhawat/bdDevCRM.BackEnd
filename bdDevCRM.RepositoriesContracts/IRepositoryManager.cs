@@ -2,6 +2,7 @@
 using bdDevCRM.RepositoriesContracts.Core.HR;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoriesContracts.CRM;
+using bdDevCRM.RepositoriesContracts.DMS;
 
 namespace bdDevCRM.RepositoriesContracts;
 
@@ -40,6 +41,11 @@ public interface IRepositoryManager : IDisposable
   ICRMCourseRepository CRMCourse { get; }
   ICRMMonthRepository CRMMonth{ get; }
   ICRMYearRepository CRMYear { get; }
+  
+  #endregion CRM
+
+  #region CRM
+  IDmsDocumentRepository DmsDocuments { get; }
   
   #endregion CRM
 

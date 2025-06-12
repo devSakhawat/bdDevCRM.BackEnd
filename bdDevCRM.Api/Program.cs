@@ -1,12 +1,8 @@
-using bdDevCRM.Api;
 using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Api.Extensions;
 using bdDevCRM.Api.Middleware;
 using bdDevCRM.Presentation;
 using bdDevCRM.Presentation.ActionFIlters;
-using bdDevCRM.Service.Authentication;
-using bdDevCRM.ServiceContract.Authentication;
-using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
