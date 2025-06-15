@@ -1,4 +1,5 @@
-﻿using System;
+﻿using bdDevCRM.Entities.Entities.DMS;
+using System;
 using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
@@ -9,7 +10,7 @@ public partial class DmsdocumentType
 
     public string Name { get; set; } = null!;
 
-    public string EntityType { get; set; } = null!;
+    public string DocumentType { get; set; } = null!;
 
     public bool IsMandatory { get; set; }
 

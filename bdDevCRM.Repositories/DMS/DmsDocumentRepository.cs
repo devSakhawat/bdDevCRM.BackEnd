@@ -9,13 +9,27 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.DMS;
 
-public sealed class DmsDocumentRepository : RepositoryBase<Dmsdocument>, IDmsDocumentRepository
+public class DmsdocumentRepository : RepositoryBase<Dmsdocument>, IDmsdocumentRepository
 {
-  public DmsDocumentRepository(CRMContext ctx) : base(ctx) { }
+  public DmsdocumentRepository(CRMContext context) : base(context) { }
 
-  public async Task<IEnumerable<Dmsdocument>> GetActiveAsync(bool t) => await ListByConditionAsync(d => d.FilePath != null, d => d.DocumentId, t);
+  // Get all documents ordered by DocumentId
+  public async Task<IEnumerable<Dmsdocument>> GetAllDocumentsAsync(bool trackChanges) =>
+      await ListAsync(x => x.DocumentId, trackChanges);
 
-  public async Task<Dmsdocument?> GetAsync(int id, bool t) =>  await FirstOrDefaultAsync(d => d.DocumentId == id, t);
+  // Get a single document by DocumentId
+  public async Task<Dmsdocument> GetDocumentByIdAsync(int documentId, bool trackChanges) =>
+      await FirstOrDefaultAsync(x => x.DocumentId == documentId, trackChanges);
+
+  // Add a new document
+  public void CreateDocument(Dmsdocument document) => Create(document);
+
+  // Update an existing document
+  public void UpdateDocument(Dmsdocument document) => UpdateByState(document);
+
+  // Delete a document
+  public void DeleteDocument(Dmsdocument document) => Delete(document);
 }
+
 
 

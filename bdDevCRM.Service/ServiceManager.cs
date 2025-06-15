@@ -13,6 +13,7 @@ using bdDevCRM.Services.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.CRM;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
@@ -50,11 +51,18 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICRMYearService> _crmyear;
   #endregion CRM
 
-  #region DMS
-  private readonly Lazy<IDmsDocumentService> _dmsDocs;
-  #endregion DMS
+  #region DMS Lazy Fields
+  private readonly Lazy<IDmsdocumentService> _dmsdocumentService;
+  private readonly Lazy<IDmsdocumentTypeService> _dmsdocumentTypeService;
+  private readonly Lazy<IDmsdocumentTagService> _dmsdocumentTagService;
+  private readonly Lazy<IDmsdocumentTagMapService> _dmsdocumentTagMapService;
+  private readonly Lazy<IDmsdocumentFolderService> _dmsdocumentFolderService;
+  private readonly Lazy<IDmsdocumentVersionService> _dmsdocumentVersionService;
+  private readonly Lazy<IDmsdocumentAccessLogService> _dmsdocumentAccessLogService;
+  //private IHttpContextAccessor httpContextAccessor;
+  #endregion
 
-  public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IMemoryCache cache)
+  public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IMemoryCache cache ,IHttpContextAccessor httpContextAccessor)
   {
     _cache = cache;
 
@@ -86,9 +94,15 @@ public sealed class ServiceManager : IServiceManager
     _crmyear = new Lazy<ICRMYearService>(() => new CRMYearService(repository, logger, configuration));
     #endregion CRM
 
-    #region DMS
-    _dmsDocs = new Lazy<IDmsDocumentService>(() => new DmsDocumentService(repository, logger, configuration));
-    #endregion DMS
+    #region DMS Lazy Initializations
+    _dmsdocumentService = new Lazy<IDmsdocumentService>(() => new DmsdocumentService(repository, logger, configuration, httpContextAccessor));
+    _dmsdocumentTypeService = new Lazy<IDmsdocumentTypeService>(() => new DmsdocumentTypeService(repository, logger, configuration));
+    _dmsdocumentTagService = new Lazy<IDmsdocumentTagService>(() => new DmsdocumentTagService(repository, logger, configuration));
+    _dmsdocumentTagMapService = new Lazy<IDmsdocumentTagMapService>(() => new DmsdocumentTagMapService(repository, logger, configuration));
+    _dmsdocumentFolderService = new Lazy<IDmsdocumentFolderService>(() => new DmsdocumentFolderService(repository, logger, configuration));
+    _dmsdocumentVersionService = new Lazy<IDmsdocumentVersionService>(() => new DmsdocumentVersionService(repository, logger, configuration));
+    _dmsdocumentAccessLogService = new Lazy<IDmsdocumentAccessLogService>(() => new DmsdocumentAccessLogService(repository, logger, configuration));
+    #endregion
   }
 
   public ITokenBlacklistService TokenBlacklist => _tokenBlackListService.Value;
@@ -119,9 +133,15 @@ public sealed class ServiceManager : IServiceManager
   public ICRMYearService CRMYears => _crmyear.Value;
   #endregion CRM
 
-  #region DMS
-  public IDmsDocumentService DMSDocuments => _dmsDocs.Value;
-  #endregion DMS
+  #region DMS Property Exposures
+  public IDmsdocumentService Dmsdocuments => _dmsdocumentService.Value;
+  public IDmsdocumentTypeService DmsdocumentTypes => _dmsdocumentTypeService.Value;
+  public IDmsdocumentTagService DmsdocumentTags => _dmsdocumentTagService.Value;
+  public IDmsdocumentTagMapService DmsdocumentTagMaps => _dmsdocumentTagMapService.Value;
+  public IDmsdocumentFolderService DmsdocumentFolders => _dmsdocumentFolderService.Value;
+  public IDmsdocumentVersionService DmsdocumentVersions => _dmsdocumentVersionService.Value;
+  public IDmsdocumentAccessLogService DmsdocumentAccessLogs => _dmsdocumentAccessLogService.Value;
+  #endregion
 
 
   // Get Cache // generic function for getting cache from memory cache all of them.

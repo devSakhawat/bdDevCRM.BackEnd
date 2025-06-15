@@ -1,4 +1,5 @@
-﻿using System;
+﻿using bdDevCRM.Entities.Entities.DMS;
+using System;
 using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
@@ -15,9 +16,9 @@ public partial class DmsdocumentVersion
 
     public string FilePath { get; set; } = null!;
 
-    public DateTime UploadedDate { get; set; }
+    public DateTime? UploadedDate { get; set; }
 
-    public int UploadedBy { get; set; }
+    public string? UploadedBy { get; set; }
 
     public virtual Dmsdocument Document { get; set; } = null!;
 }

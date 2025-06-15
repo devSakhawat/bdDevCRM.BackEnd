@@ -41,13 +41,18 @@ public interface IRepositoryManager : IDisposable
   ICRMCourseRepository CRMCourse { get; }
   ICRMMonthRepository CRMMonth{ get; }
   ICRMYearRepository CRMYear { get; }
-  
+
   #endregion CRM
 
-  #region CRM
-  IDmsDocumentRepository DmsDocuments { get; }
-  
-  #endregion CRM
+  #region DMS
+  IDmsdocumentRepository Dmsdocuments { get; }
+  IDmsdocumentTypeRepository DmsdocumentTypes { get; }
+  IDmsdocumentTagRepository DmsdocumentTags { get; }
+  IDmsdocumentTagMapRepository DmsdocumentTagMaps { get; }
+  IDmsdocumentFolderRepository DmsdocumentFolders { get; }
+  IDmsdocumentVersionRepository DmsdocumentVersions { get; }
+  IDmsdocumentAccessLogRepository DmsdocumentAccessLogs { get; }
+  #endregion
 
 
 

@@ -34,6 +34,7 @@ public partial class CRMContext : DbContext
   public virtual DbSet<Crmyear> Crmyear { get; set; }
 
   #region DMS
+
   public virtual DbSet<Dmsdocument> Dmsdocument { get; set; }
 
   public virtual DbSet<DmsdocumentAccessLog> DmsdocumentAccessLog { get; set; }
@@ -41,6 +42,8 @@ public partial class CRMContext : DbContext
   public virtual DbSet<DmsdocumentFolder> DmsdocumentFolder { get; set; }
 
   public virtual DbSet<DmsdocumentTag> DmsdocumentTag { get; set; }
+
+  public virtual DbSet<DmsdocumentTagMap> DmsdocumentTagMap { get; set; }
 
   public virtual DbSet<DmsdocumentType> DmsdocumentType { get; set; }
 
@@ -17948,11 +17951,22 @@ public partial class CRMContext : DbContext
       entity.ToTable("DMSDocumentAccessLog");
 
       entity.Property(e => e.AccessDateTime).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.AccessedByUserId)
+          .HasMaxLength(50)
+          .IsUnicode(false);
       entity.Property(e => e.Action).HasMaxLength(50);
-
-      entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentAccessLog)
-          .HasForeignKey(d => d.DocumentId)
-          .HasConstraintName("FK_DocumentAccessLog_Document");
+      entity.Property(e => e.DeviceInfo)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+      entity.Property(e => e.IpAddress)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+      entity.Property(e => e.MacAddress)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+      entity.Property(e => e.Notes)
+          .HasMaxLength(150)
+          .IsUnicode(false);
     });
 
     modelBuilder.Entity<DmsdocumentFolder>(entity =>
@@ -17962,6 +17976,9 @@ public partial class CRMContext : DbContext
       entity.ToTable("DMSDocumentFolder");
 
       entity.Property(e => e.FolderName).HasMaxLength(255);
+      entity.Property(e => e.OwnerId)
+          .HasMaxLength(50)
+          .IsUnicode(false);
       entity.Property(e => e.ReferenceEntityId).HasMaxLength(50);
       entity.Property(e => e.ReferenceEntityType).HasMaxLength(50);
 
@@ -17976,9 +17993,16 @@ public partial class CRMContext : DbContext
 
       entity.ToTable("DMSDocumentTag");
 
-      entity.HasIndex(e => e.Name, "UQ__DMSDocum__737584F60E3D41BA").IsUnique();
+      entity.HasIndex(e => e.DocumentTagName, "UQ__DMSDocum__737584F60E3D41BA").IsUnique();
 
-      entity.Property(e => e.Name).HasMaxLength(100);
+      entity.Property(e => e.DocumentTagName).HasMaxLength(200);
+    });
+
+    modelBuilder.Entity<DmsdocumentTagMap>(entity =>
+    {
+      entity.HasKey(e => new { e.DocumentId, e.TagId }).HasName("PK_DocumentTagMap");
+
+      entity.ToTable("DMSDocumentTagMap");
     });
 
     modelBuilder.Entity<DmsdocumentType>(entity =>
@@ -17988,7 +18012,7 @@ public partial class CRMContext : DbContext
       entity.ToTable("DMSDocumentType");
 
       entity.Property(e => e.AcceptedExtensions).HasMaxLength(255);
-      entity.Property(e => e.EntityType).HasMaxLength(50);
+      entity.Property(e => e.DocumentType).HasMaxLength(100);
       entity.Property(e => e.MaxFileSizeMb).HasColumnName("MaxFileSizeMB");
       entity.Property(e => e.Name).HasMaxLength(100);
     });
@@ -18002,21 +18026,14 @@ public partial class CRMContext : DbContext
       entity.HasIndex(e => new { e.DocumentId, e.VersionNumber }, "UQ_DocumentVersion_DocumentId_VersionNumber").IsUnique();
 
       entity.Property(e => e.FileName).HasMaxLength(255);
+      entity.Property(e => e.UploadedBy).HasMaxLength(50);
       entity.Property(e => e.UploadedDate).HasDefaultValueSql("(getdate())");
 
       entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentVersion)
           .HasForeignKey(d => d.DocumentId)
           .HasConstraintName("FK_DocumentVersion_Document");
     });
-
     #endregion DMS
-
-
-
-
-
-
-
 
 
 

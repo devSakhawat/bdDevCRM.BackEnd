@@ -50,7 +50,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   }
 
   #region Transaction Management Methods
-
   public async Task TransactionBeginAsync()
   {
     if (_currentTransaction != null)
@@ -147,6 +146,16 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     => !trackChanges ? _dbSet.AsNoTracking().FirstOrDefault(expression) : _dbSet.FirstOrDefault(expression);
   public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression, bool trackChanges = false)
     => !trackChanges ? await _dbSet.AsNoTracking().FirstOrDefaultAsync(expression) : await _dbSet.FirstOrDefaultAsync(expression);
+
+  public async Task<T> FirstOrDefaultWithOrderByDescAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false)
+  {
+    IQueryable<T> query = trackChanges ? _dbSet : _dbSet.AsNoTracking();
+    if (orderBy != null)
+    {
+      query = query.OrderByDescending(orderBy);
+    }
+    return await query.FirstOrDefaultAsync(expression);
+  }
 
   public IEnumerable<T> GetListByIds(Expression<Func<T, bool>> expression, bool trackChanges = false)
   {

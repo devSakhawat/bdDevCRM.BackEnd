@@ -75,14 +75,8 @@ public class CRMInstituteController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> CreateNewRecord([FromForm] CrmInstituteDto modelDto)
   {
-    //var userIdClaim = User.FindFirst("UserId")?.Value;
-    //if (string.IsNullOrEmpty(userIdClaim))
-    //  return Unauthorized("UserId not found in token.");
-
-    //int userId = Convert.ToInt32(userIdClaim);
-    //UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    //if (currentUser == null)
-    //  return Unauthorized("User not found in cache.");
+    int userId = HttpContext.GetUserId();
+    var currentUser = HttpContext.GetCurrentUser();
 
     var res = await _serviceManager.CRMInstitutes.CreateNewRecordAsync(modelDto);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);

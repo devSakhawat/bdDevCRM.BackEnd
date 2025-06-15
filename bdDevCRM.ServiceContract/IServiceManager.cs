@@ -38,8 +38,14 @@ public interface IServiceManager
   #endregion CRM
 
   #region DMS
-  IDmsDocumentService DMSDocuments { get; }
-  #endregion DMS
+  IDmsdocumentService Dmsdocuments { get; }
+  IDmsdocumentTypeService DmsdocumentTypes { get; }
+  IDmsdocumentTagService DmsdocumentTags { get; }
+  IDmsdocumentTagMapService DmsdocumentTagMaps { get; }
+  IDmsdocumentFolderService DmsdocumentFolders { get; }
+  IDmsdocumentVersionService DmsdocumentVersions { get; }
+  IDmsdocumentAccessLogService DmsdocumentAccessLogs { get; }
+  #endregion
 
   T GetCache<T>(int key);
 }

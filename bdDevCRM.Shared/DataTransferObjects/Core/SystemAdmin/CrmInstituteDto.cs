@@ -39,7 +39,7 @@ public class CrmInstituteDto
   public string? InstitutionLogo { get; set; }
   public string? InstitutionProspectus { get; set; }
 
-  // ---  নতুন ফাইল ফিল্ড ---
+  // ---  New file field ---
   public IFormFile? InstitutionLogoFile { get; set; }
   public IFormFile? InstitutionProspectusFile { get; set; }
 

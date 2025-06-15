@@ -53,9 +53,15 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<ICRMYearRepository> _crmyearRepository;
   #endregion CRM
 
-  #region DMS
-  private readonly Lazy<IDmsDocumentRepository> _dmsDocumentRepository;
-  #endregion DMS
+  #region DMS - Private Lazy Fields
+  private readonly Lazy<IDmsdocumentRepository> _dmsdocumentRepository;
+  private readonly Lazy<IDmsdocumentTypeRepository> _dmsdocumentTypeRepository;
+  private readonly Lazy<IDmsdocumentTagRepository> _dmsdocumentTagRepository;
+  private readonly Lazy<IDmsdocumentTagMapRepository> _dmsdocumentTagMapRepository;
+  private readonly Lazy<IDmsdocumentFolderRepository> _dmsdocumentFolderRepository;
+  private readonly Lazy<IDmsdocumentVersionRepository> _dmsdocumentVersionRepository;
+  private readonly Lazy<IDmsdocumentAccessLogRepository> _dmsdocumentAccessLogRepository;
+  #endregion
 
   public RepositoryManager(CRMContext repositoryContext)
   {
@@ -99,9 +105,15 @@ public class RepositoryManager : IRepositoryManager
     _crmyearRepository = new Lazy<ICRMYearRepository>(() => new CRMYearRepository(_repositoryContext));
     #endregion CRM
 
-    #region DMS
-    _dmsDocumentRepository = new Lazy<IDmsDocumentRepository>(() => new DmsDocumentRepository(_repositoryContext));
-    #endregion DMS
+    #region DMS - Lazy Initialization
+    _dmsdocumentRepository = new Lazy<IDmsdocumentRepository>(() => new DmsdocumentRepository(_repositoryContext));
+    _dmsdocumentTypeRepository = new Lazy<IDmsdocumentTypeRepository>(() => new DmsdocumentTypeRepository(_repositoryContext));
+    _dmsdocumentTagRepository = new Lazy<IDmsdocumentTagRepository>(() => new DmsdocumentTagRepository(_repositoryContext));
+    _dmsdocumentTagMapRepository = new Lazy<IDmsdocumentTagMapRepository>(() => new DmsdocumentTagMapRepository(_repositoryContext));
+    _dmsdocumentFolderRepository = new Lazy<IDmsdocumentFolderRepository>(() => new DmsdocumentFolderRepository(_repositoryContext));
+    _dmsdocumentVersionRepository = new Lazy<IDmsdocumentVersionRepository>(() => new DmsdocumentVersionRepository(_repositoryContext));
+    _dmsdocumentAccessLogRepository = new Lazy<IDmsdocumentAccessLogRepository>(() => new DmsdocumentAccessLogRepository(_repositoryContext));
+    #endregion
 
   }
 
@@ -142,10 +154,15 @@ public class RepositoryManager : IRepositoryManager
 
   #endregion CRM
 
-  #region DMS
-  public IDmsDocumentRepository DmsDocuments => _dmsDocumentRepository.Value;
-
-  #endregion DMS
+  #region DMS - Repository Properties
+  public IDmsdocumentRepository Dmsdocuments => _dmsdocumentRepository.Value;
+  public IDmsdocumentTypeRepository DmsdocumentTypes => _dmsdocumentTypeRepository.Value;
+  public IDmsdocumentTagRepository DmsdocumentTags => _dmsdocumentTagRepository.Value;
+  public IDmsdocumentTagMapRepository DmsdocumentTagMaps => _dmsdocumentTagMapRepository.Value;
+  public IDmsdocumentFolderRepository DmsdocumentFolders => _dmsdocumentFolderRepository.Value;
+  public IDmsdocumentVersionRepository DmsdocumentVersions => _dmsdocumentVersionRepository.Value;
+  public IDmsdocumentAccessLogRepository DmsdocumentAccessLogs => _dmsdocumentAccessLogRepository.Value;
+  #endregion
 
 
   // Save changes to the database

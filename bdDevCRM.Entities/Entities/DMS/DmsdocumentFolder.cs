@@ -11,11 +11,13 @@ public partial class DmsdocumentFolder
 
     public string FolderName { get; set; } = null!;
 
-    public int OwnerUserId { get; set; }
+    public string OwnerId { get; set; } = null!;
 
     public string ReferenceEntityType { get; set; } = null!;
 
     public string ReferenceEntityId { get; set; } = null!;
+
+    public int? DocumentId { get; set; }
 
     public virtual ICollection<DmsdocumentFolder> InverseParentFolder { get; set; } = new List<DmsdocumentFolder>();
 

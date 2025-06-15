@@ -13,7 +13,7 @@ public class DMSDto
   //public int DocumentTypeId { get; set; }
 
   public string DocumentTypeName { get; set; } = null!;
-  public string EntityType { get; set; } = null!;
+  public string DocumentType { get; set; } = null!;
   public bool IsMandatory { get; set; }
   public string? AcceptedExtensions { get; set; }
   public int? MaxFileSizeMb { get; set; }
@@ -37,11 +37,18 @@ public class DMSDto
 
   //public int DocumentId { get; set; }
 
-  public int AccessedByUserId { get; set; }
+  public string AccessedByUserId { get; set; }
 
   public DateTime AccessDateTime { get; set; }
 
   public string Action { get; set; } = null!;
+  public string? IpAddress { get; set; }
+
+  public string? DeviceInfo { get; set; } //userAgent
+
+  public string? MacAddress { get; set; }
+
+  public string? Notes { get; set; }
 
   // DmsdocumentFolderDto -----------------------
   //public int FolderId { get; set; }
@@ -50,7 +57,7 @@ public class DMSDto
 
   public string FolderName { get; set; } = null!;
 
-  public int OwnerUserId { get; set; }
+  public string OwnerId { get; set; }
 
   //public string ReferenceEntityType { get; set; } = null!;
 
@@ -69,6 +76,6 @@ public class DMSDto
   public int VersionNumber { get; set; }
   //public string FileName { get; set; } = null!;
   //public string FilePath { get; set; } = null!;
-  public DateTime UploadedDate { get; set; }
-  public int UploadedBy { get; set; }
+  public DateTime? UploadedDate { get; set; }
+  public string? UploadedBy { get; set; }
 }
