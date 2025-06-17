@@ -4,10 +4,10 @@ public class ApiException : ApiResponse
 {
   public ApiException(int statusCode, string message = null, string details = null) : base(statusCode, message)
   {
-    Details = details;
+    //Details = details;
   }
 
-  public string Details { get; set; }
+  //public string Details { get; set; }
 
   // New properties
   public string CorrelationId { get; set; }

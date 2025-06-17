@@ -70,3 +70,51 @@ public class EmptyObjectFilterAttribute : IActionFilter
     // You can log or modify result here if needed
   }
 }
+
+
+public class EmptyObjectFilterAttribute2 : IActionFilter
+{
+  public void OnActionExecuting(ActionExecutingContext context)
+  {
+    var action = context.RouteData.Values["action"]?.ToString();
+    var controller = context.RouteData.Values["controller"]?.ToString();
+
+    // Dto detect
+    var dtoArgument = context.ActionArguments
+        .FirstOrDefault(arg => arg.Key.ToLower().Contains("dto") && arg.Value != null);
+
+    if (dtoArgument.Value == null)
+    {
+      context.Result = new BadRequestObjectResult(
+          $"Object is null. Controller: {controller}, Action: {action}"
+      );
+      return;
+    }
+
+    // Check ModelState
+    if (!context.ModelState.IsValid)
+    {
+      var errors = context.ModelState
+          .Where(e => e.Value.Errors.Count > 0)
+          .ToDictionary(
+              kvp => kvp.Key,
+              kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+          );
+
+      context.Result = new BadRequestObjectResult(new
+      {
+        Message = "Validation failed",
+        Controller = controller,
+        Action = action,
+        Errors = errors
+      });
+    }
+  }
+
+  public void OnActionExecuted(ActionExecutedContext context)
+  {
+    // You can log or modify result here if needed
+  }
+}
+
+

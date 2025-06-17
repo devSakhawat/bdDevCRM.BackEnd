@@ -34,7 +34,6 @@ public partial class CRMContext : DbContext
   public virtual DbSet<Crmyear> Crmyear { get; set; }
 
   #region DMS
-
   public virtual DbSet<Dmsdocument> Dmsdocument { get; set; }
 
   public virtual DbSet<DmsdocumentAccessLog> DmsdocumentAccessLog { get; set; }
@@ -17927,21 +17926,6 @@ public partial class CRMContext : DbContext
           .HasForeignKey(d => d.DocumentTypeId)
           .OnDelete(DeleteBehavior.ClientSetNull)
           .HasConstraintName("FK_Document_DocumentType");
-
-      entity.HasMany(d => d.Tag).WithMany(p => p.Document)
-          .UsingEntity<Dictionary<string, object>>(
-              "DmsdocumentTagMap",
-              r => r.HasOne<DmsdocumentTag>().WithMany()
-                  .HasForeignKey("TagId")
-                  .HasConstraintName("FK_DocumentTagMap_DocumentTag"),
-              l => l.HasOne<Dmsdocument>().WithMany()
-                  .HasForeignKey("DocumentId")
-                  .HasConstraintName("FK_DocumentTagMap_Document"),
-              j =>
-              {
-                j.HasKey("DocumentId", "TagId").HasName("PK_DocumentTagMap");
-                j.ToTable("DMSDocumentTagMap");
-              });
     });
 
     modelBuilder.Entity<DmsdocumentAccessLog>(entity =>
@@ -17967,6 +17951,10 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.Notes)
           .HasMaxLength(150)
           .IsUnicode(false);
+
+      entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentAccessLog)
+          .HasForeignKey(d => d.DocumentId)
+          .HasConstraintName("FK_DocumentAccessLog_Document");
     });
 
     modelBuilder.Entity<DmsdocumentFolder>(entity =>
@@ -18000,9 +17988,19 @@ public partial class CRMContext : DbContext
 
     modelBuilder.Entity<DmsdocumentTagMap>(entity =>
     {
-      entity.HasKey(e => new { e.DocumentId, e.TagId }).HasName("PK_DocumentTagMap");
+      entity.HasKey(e => e.TagMapId);
 
       entity.ToTable("DMSDocumentTagMap");
+
+      entity.Property(e => e.TagMapId).ValueGeneratedNever();
+
+      entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentTagMap)
+          .HasForeignKey(d => d.DocumentId)
+          .HasConstraintName("FK_DocumentTagMap_Document");
+
+      entity.HasOne(d => d.Tag).WithMany(p => p.DmsdocumentTagMap)
+          .HasForeignKey(d => d.TagId)
+          .HasConstraintName("FK_DocumentTagMap_DocumentTag");
     });
 
     modelBuilder.Entity<DmsdocumentType>(entity =>
@@ -18026,7 +18024,9 @@ public partial class CRMContext : DbContext
       entity.HasIndex(e => new { e.DocumentId, e.VersionNumber }, "UQ_DocumentVersion_DocumentId_VersionNumber").IsUnique();
 
       entity.Property(e => e.FileName).HasMaxLength(255);
-      entity.Property(e => e.UploadedBy).HasMaxLength(50);
+      entity.Property(e => e.UploadedBy)
+          .HasMaxLength(50)
+          .IsUnicode(false);
       entity.Property(e => e.UploadedDate).HasDefaultValueSql("(getdate())");
 
       entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentVersion)

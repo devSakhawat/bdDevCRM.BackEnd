@@ -1,5 +1,4 @@
-﻿using bdDevCRM.Entities.Entities.DMS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;

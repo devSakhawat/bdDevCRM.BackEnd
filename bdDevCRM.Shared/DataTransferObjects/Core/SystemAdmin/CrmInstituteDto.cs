@@ -22,7 +22,7 @@ public class CrmInstituteDto
 
   // --- Financial / Visa ---
   public decimal? MonthlyLivingCost { get; set; }
-  public string? FundsRequirementforVisa { get; set; }
+  //public string? FundsRequirementforVisa { get; set; }
   public decimal? ApplicationFee { get; set; }
 
   // --- Language & Academic ---

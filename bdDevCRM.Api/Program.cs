@@ -3,6 +3,7 @@ using bdDevCRM.Api.Extensions;
 using bdDevCRM.Api.Middleware;
 using bdDevCRM.Presentation;
 using bdDevCRM.Presentation.ActionFIlters;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -15,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureCors();
 builder.Services.Configureiisintegration();
 builder.Services.ConfigureLoggerService();
@@ -23,6 +25,7 @@ builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureResponseCompression();
 builder.Services.ConfigureGzipCompression();
+builder.Services.ConfigureFileLimit();
 
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>

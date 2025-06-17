@@ -4,6 +4,7 @@ using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -48,20 +49,20 @@ public class CRMInstituteController : BaseApiController
   [HttpPost(RouteConstants.InstituteSummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {
-    //var userIdClaim = User.FindFirst("UserId")?.Value;
-    //if (string.IsNullOrEmpty(userIdClaim))
-    //  return Unauthorized("Unauthorized attempt to get data!");
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      return Unauthorized("Unauthorized attempt to get data!");
 
-    //int userId = Convert.ToInt32(userIdClaim);
-    //UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    //if (currentUser == null)
-    //  return Unauthorized("User not found in cache.");
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
-    //if (options == null)
-    //  return BadRequest("CRMGridOptions cannot be null.");
+    if (options == null)
+      return BadRequest("CRMGridOptions cannot be null.");
 
-    int userId = HttpContext.GetUserId();
-    var currentUser = HttpContext.GetCurrentUser();
+    //int userId = HttpContext.GetUserId();
+    //var currentUser = HttpContext.GetCurrentUser();
 
 
     var summaryGrid = await _serviceManager.CRMInstitutes.SummaryGrid(options);
@@ -71,8 +72,12 @@ public class CRMInstituteController : BaseApiController
   /* --------------------------------------------- */
   /*  POST: /crm-institute  (Create)               */
   /* --------------------------------------------- */
+  //[HttpPost(RouteConstants.CreateInstitute)]
+  ////[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  //public async Task<IActionResult> CreateNewRecord([FromBody] CrmInstituteDto modelDto)
   [HttpPost(RouteConstants.CreateInstitute)]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  [RequestSizeLimit(100_000_000)] // 100MB limit
+  [AllowAnonymous]
   public async Task<IActionResult> CreateNewRecord([FromForm] CrmInstituteDto modelDto)
   {
     int userId = HttpContext.GetUserId();

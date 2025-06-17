@@ -1,5 +1,4 @@
-﻿using bdDevCRM.Entities.Entities.DMS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
@@ -10,5 +9,5 @@ public partial class DmsdocumentTag
 
     public string DocumentTagName { get; set; } = null!;
 
-    public virtual ICollection<Dmsdocument> Document { get; set; } = new List<Dmsdocument>();
+    public virtual ICollection<DmsdocumentTagMap> DmsdocumentTagMap { get; set; } = new List<DmsdocumentTagMap>();
 }

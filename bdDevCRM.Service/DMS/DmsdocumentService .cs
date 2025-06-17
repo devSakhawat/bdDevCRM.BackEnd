@@ -190,12 +190,6 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       _logger.LogInfo($"DMS document created successfylly - DocumentId: {document.DocumentId}");
 
       return document.FilePath; // Return the file path or any other relevant information
-      //return new DMSResponseDto
-      //{
-      //  Success = true,
-      //  DocumentId = document.DocumentId,
-      //  FilePath = "Document Uploaded Successfully"
-      //};
     }
     catch (Exception ex)
     {
