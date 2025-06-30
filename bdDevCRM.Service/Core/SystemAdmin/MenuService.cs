@@ -1,5 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
@@ -65,29 +65,12 @@ internal sealed class MenuService : IMenuService
 
   public async Task<GridEntity<MenuDto>> MenuSummary(bool trackChanges, CRMGridOptions options)
   {
-    //var menus = await _repository.Menus.MenuSummary(trackChanges);
-    //var menusDto = MyMapper.JsonCloneIEnumerableToList<MenuRepositoryDto, MenuDto>(menus);
     string menuSummaryQuery = $"Select MenuId,Menu.ModuleId, MenuName, MenuPath, ISNULL(ParentMenu, 0) as ParentMenu ,ModuleName,ToDo,SORORDER\r\n,(Select MenuName from Menu mn where mn.MenuId = menu.ParentMenu) as ParentMenuName \r\nfrom Menu \r\nleft outer join Module on module.ModuleId = menu.ModuleId";
     string orderBy = "ModuleName asc,ParentMenu asc, MenuName";
 
     var gridEntity = await _repository.Menus.GridData<MenuDto>(menuSummaryQuery, options, orderBy, "");
 
-
-
-    //if (gridEntity.Items.Count == 0) throw new GenericListNotFoundException("Group");
-    ////return gridEntity;
-    ///
-
-
-    //IEnumerable<Menu> menus = await _repository.Menus.GetMenusAsync(trackChanges: false);
-    //List<MenuDto> menusDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuDto>(menus);
-    //GridOptions gridOption = MyMapper.JsonClone<CRMGridOptions, GridOptions>(options);
-
-    //var gridData = Utilities.KendoGrid.GridResult<MenuDto>.Data(menusDto, gridOption);
-
     return gridEntity;
-
-    //return new GridEntity<MenuDto>();
   }
 
   public MenuDto GetMenu(int id, bool trackChanges)
@@ -133,8 +116,8 @@ internal sealed class MenuService : IMenuService
   public async Task<MenuDto> CreateAsync(MenuDto modelDto)
   {
     if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
-    bool isModuleExists = await _repository.Menus.HasAnyAsync(m => m.MenuName == modelDto.MenuName);
-    if (isModuleExists) throw new DuplicateRecordException("Module", "ModuleName");
+    bool isModuleExists = await _repository.Menus.ExistsAsync(m => m.MenuName == modelDto.MenuName);
+    if (isModuleExists) throw new DuplicateRecordException("Menu", "MenuName");
 
     Menu entity = MyMapper.JsonClone<MenuDto, Menu>(modelDto);
     await _repository.Menus.CreateAsync(entity);
@@ -153,14 +136,12 @@ internal sealed class MenuService : IMenuService
     await _repository.SaveAsync();
   }
 
-  public async Task DeleteMenuAsync(int MenuId, bool trackChanges)
+  public async Task DeleteMenuAsync(int menuId, bool trackChanges)
   {
-    var Menu = await _repository.Menus.GetByIdWithNotFoundException(MenuId);
-    _logger.LogWarn($"Menu with Id: {MenuId} is about to be deleted from the database.");
-    _repository.Menus.DeleteMenu(Menu);
+    var Menu = await _repository.Menus.FirstOrDefaultAsync(x => x.MenuId.Equals(menuId));
+    _logger.LogWarn($"Menu with Id: {menuId} is about to be deleted from the database.");
+    if (Menu != null) _repository.Menus.DeleteMenu(Menu);
     await _repository.SaveAsync();
-
-    // i think the method should return int value.
   }
 
   public async Task<IEnumerable<MenuDto>> GetMenusAsync(bool trackChanges)
@@ -211,10 +192,10 @@ internal sealed class MenuService : IMenuService
     if (key != modelDto.MenuId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
 
     Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == modelDto.MenuId, trackChanges: false);
-    if (entity.MenuName == modelDto.MenuName) throw new DuplicateRecordException();
+    //if (entity.MenuName == modelDto.MenuName) throw new DuplicateRecordException();
 
     entity = MyMapper.JsonClone<MenuDto, Menu>(modelDto);
-    _repository.Menus.UpdateAsync(entity);
+    _repository.Menus.UpdateByState(entity);
     await _repository.SaveAsync();
     modelDto = MyMapper.JsonClone<Menu, MenuDto>(entity);
     return modelDto;
@@ -230,6 +211,28 @@ internal sealed class MenuService : IMenuService
 
     await _repository.Menus.DeleteAsync(x => x.MenuId == modelDto.MenuId, trackChanges: true);
     await _repository.SaveAsync();
+  }
+
+
+
+
+  public async Task<IEnumerable<MenuForDDLDto>> MenuForDDL()
+  {
+    // Corrected the initialization of the Menu object to use a constructor instead of a collection initializer.
+    IEnumerable<Menu> menus = await _repository.Menus.ListWithSelectAsync(
+        x => new Menu
+        {
+          MenuId = x.MenuId,
+          MenuName = x.MenuName
+        },
+        orderBy: x => x.Sororder,
+        trackChanges: false
+    );
+
+    if (menus.Count() == 0) return new List<MenuForDDLDto>();
+
+    IEnumerable<MenuForDDLDto> menusForDDLDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuForDDLDto>(menus);
+    return menusForDDLDto;
   }
 
 }

@@ -1,10 +1,12 @@
-﻿using bdDevCRM.Entities.Entities;
+﻿using bdDevCRM.Entities.Entities.System;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.OthersLibrary;
+using Microsoft.Extensions.Configuration;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace bdDevCRM.Service.Core.SystemAdmin;
@@ -13,11 +15,13 @@ internal sealed class SystemSettingsService : ISystemSettingsService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
+  private readonly IConfiguration _configuration;
 
-  public SystemSettingsService(IRepositoryManager repository, ILoggerManager logger)
+  public SystemSettingsService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
+    _configuration = configuration;
   }
 
   public async Task<SystemSettings?> GetSystemSettingsDataByCompanyId(int companyId)

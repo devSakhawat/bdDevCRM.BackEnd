@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="CRMGrid\StaticData\**" />
+    <EmbeddedResource Remove="CRMGrid\StaticData\**" />
+    <None Remove="CRMGrid\StaticData\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.13">
       <PrivateAssets>all</PrivateAssets>
@@ -21,7 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CRMGrid\StaticData\" />
+    <Folder Include="Entities\Entities\" />
+    <Folder Include="Repository\Context\" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 ﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.RepositoryDtos;
+using bdDevCRM.Entities.Entities.System;
+using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ public interface IUsersRepository : IRepositoryBase<Users>
 
   Task<Users> GetUserAsync(int usersId, bool trackChanges);
 
-  Task<UsersRepositoryDto?> GetUserByLoginIdAsync(string loginId, bool trackChanges);
+  UsersRepositoryDto? GetUserByLoginIdAsync(string loginId, bool trackChanges);
 
   Users? GetUserByLoginId(string loginId, bool trackChanges);
 

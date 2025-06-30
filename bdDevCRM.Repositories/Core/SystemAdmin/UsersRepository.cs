@@ -1,6 +1,7 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
-using bdDevCRM.RepositoryDtos;
+using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.EntityFrameworkCore;
@@ -13,46 +14,47 @@ public class UsersRepository : RepositoryBase<Users>, IUsersRepository
 
   private const string UPDATE_USER =
             "Update Users set CompanyID = {0}, LoginId='{1}', UserName='{2}', Password='{3}',EmployeeId={4},CreatedDate={5},LastUpdateDate={6},LastLoginDate={7},FailedLoginNo={8},IsActive={9},IsExpired={10},AccessParentCompany={11} where UserId={12}";
+
   private const string SAVE_PASSWORD_HISTORY =
             "insert into PasswordHistory (USERID, OLDPASSWORD, PASSWORDCHANGEDATE) values ({0}, '{1}', '{2}')";
 
   private const string SELECT_USERS_BY_LOGINID_SQL =
-           "Select Users.UserId, Users.CompanyID, Users.LoginId, Users.UserName, Users.Password, Users.EmployeeId, Users.CreatedDate, Users.LastUpdateDate, Users.LastLoginDate, Users.FailedLoginNo, Users.IsActive, Users.IsExpired, Users.THEME  ,Users.AccessParentCompany ,Users.DefaultDashboard ,Employee.PROFILEPICTURE as ProfilePicture \r\nfrom Users \r\ninner join Employee on Users.EmployeeId = Employee.HRRecordId\r\nwhere rtrim(ltrim(Lower(LoginId))) = '{0}'";
+           "Select Users.UserId, Users.CompanyID, Users.LoginId, Users.UserName, Users.Password, Users.EmployeeId, Users.CreatedDate ,Employee.HRRecordId\r\n,Users.LastUpdateDate ,Users.LastLoginDate, Users.FailedLoginNo, Users.IsActive, Users.IsExpired , Users.THEME ,Employment.EmployeeId as Employee_Id\r\n,Users.AccessParentCompany ,Users.DefaultDashboard ,Employee.PROFILEPICTURE as ProfilePicture  \r\nfrom Users \r\ninner join Employee on Users.EmployeeId = Employee.HRRecordId\r\ninner join Employment on Employee.HRRecordId = Employment.HRRecordId\r\nwhere rtrim(ltrim(Lower(LoginId))) = '{0}'";
 
-
-  public IEnumerable<Users> GetUsers(bool trackChanges) => FindAll(trackChanges).OrderBy(c => c.UserId).ToList();
+  public IEnumerable<Users> GetUsers(bool trackChanges) => List(u => u.UserId ,trackChanges);
 
   public Users GetUser(int UsersId, bool trackChanges)
   {
-    return FindByCondition(c => c.UserId.Equals(UsersId), trackChanges).SingleOrDefault();
+    return FirstOrDefault(c => c.UserId.Equals(UsersId), trackChanges);
   }
 
-  public IEnumerable<Users> GetByIds(IEnumerable<int> ids, bool trackChanges) => FindByCondition(x => ids.Contains(x.UserId), trackChanges).ToList();
+  public IEnumerable<Users> GetByIds(IEnumerable<int> ids, bool trackChanges) 
+    => GetListByIds(x => ids.Contains(x.UserId), trackChanges);
 
   // Get all Users
-  public async Task<IEnumerable<Users>> GetUsersAsync(bool trackChanges) => await FindAll(trackChanges).OrderBy(c => c.UserId).ToListAsync();
+  public async Task<IEnumerable<Users>> GetUsersAsync(bool trackChanges) => await ListAsync(c => c.UserId ,trackChanges);
 
   // Get a single Users by ID
-  public async Task<Users> GetUserAsync(int usersId, bool trackChanges) => await FindByCondition(c => c.UserId.Equals(usersId), trackChanges).FirstOrDefaultAsync();
+  public async Task<Users> GetUserAsync(int usersId, bool trackChanges) => await FirstOrDefaultAsync(c => c.UserId.Equals(usersId), trackChanges);
 
 
   // Get a single Users by LoginId
-  public async Task<UsersRepositoryDto?> GetUserByLoginIdAsync(string loginId, bool trackChanges) 
+  public UsersRepositoryDto? GetUserByLoginIdAsync(string loginId, bool trackChanges) 
   {
     string quary = string.Format(SELECT_USERS_BY_LOGINID_SQL, loginId);
-    UsersRepositoryDto userRepositoryDto = await GetSingleGenericResultByQuery<UsersRepositoryDto>(quary);
+    UsersRepositoryDto userRepositoryDto = ExecuteSingleDataSyncronous<UsersRepositoryDto>(quary);
 
     return userRepositoryDto;
   }
 
   // Get a single Users by LoginId
-  public Users? GetUserByLoginId(string loginId, bool trackChanges) => FindByCondition(c => c.LoginId.Trim().Equals(loginId.Trim()), trackChanges).FirstOrDefault();
+  public Users? GetUserByLoginId(string loginId, bool trackChanges) => FirstOrDefault(c => c.LoginId.Trim().Equals(loginId.Trim()), trackChanges);
 
   // Add a new Users
   public void CreateUser(Users Users) => Create(Users);
 
   // Update an existing Users
-  public void UpdateUser(Users Users) => UpdateAsync(Users);
+  public void UpdateUser(Users Users) => UpdateByState(Users);
 
   // Delete a Users by Object
   public void DeleteUser(Users Users) => Delete(Users);
@@ -63,7 +65,7 @@ public class UsersRepository : RepositoryBase<Users>, IUsersRepository
     //var passwordHistory = new List<PasswordHistoryRepositoryDto>();
     var quary = string.Format(@"SELECT TOP {1} [HistoryId],[UserId],[OldPassword],[PasswordChangeDate] FROM [dbo].[PasswordHistory] WHERE [UserId] = {0} ORDER BY [PasswordChangeDate] DESC", userId, passRestriction);
 
-    IEnumerable<PasswordHistoryRepositoryDto> passwordHistory = await GetListOfDataByQuery<PasswordHistoryRepositoryDto>(quary);
+    IEnumerable<PasswordHistoryRepositoryDto> passwordHistory = await ExecuteListQuery<PasswordHistoryRepositoryDto>(quary);
 
     return passwordHistory.AsQueryable();
   }

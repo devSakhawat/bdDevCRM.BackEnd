@@ -1,0 +1,332 @@
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Extensions;
+using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
+using bdDevCRM.Shared.DataTransferObjects.DMS;
+using bdDevCRM.Utilities.Constants;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
+
+namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
+
+
+public class CRMInstituteController : BaseApiController
+{
+  private readonly IMemoryCache _cache;
+  private readonly IWebHostEnvironment _env;
+
+  public CRMInstituteController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
+  {
+    //_serviceManager = serviceManager;
+    _cache = cache;
+    _env = env;
+  }
+
+  // --------- 1. DDL --------------------------------------------------
+
+  // GitHub Copilot: generate the code by using ResponseHelper for this method InstituteDDL.
+  [HttpGet(RouteConstants.InstituteDDL)]
+  public async Task<IActionResult> InstituteDDL()
+  {
+    int userId = HttpContext.GetUserId();
+    var currentUser = HttpContext.GetCurrentUser();
+
+    var res = await _serviceManager.CRMInstitutes.GetInstitutesDDLAsync(trackChanges: false);
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found"));
+
+    return Ok(ResponseHelper.Success(res, "Institutes retrieved successfully"));
+  }
+
+  // --------- 2. Summary Grid ----------------------------------------
+  [HttpPost(RouteConstants.InstituteSummary)]
+  public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+
+    if (options == null)
+      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+
+
+    var summaryGrid = await _serviceManager.CRMInstitutes.SummaryGrid(options);
+    //return (summaryGrid != null) ? Ok(summaryGrid) : NoContent();
+    if (summaryGrid == null || !summaryGrid.Items.Any())
+      return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
+
+    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+  }
+
+  /* --------------------------------------------- */
+  /*  POST: /crm-institute  (Create)               */
+  /* --------------------------------------------- */
+  [HttpPost(RouteConstants.CreateInstitute)]
+  [RequestSizeLimit(1_000_000)]
+  [AllowAnonymous]
+  public async Task<IActionResult> CreateNewRecord(IFormCollection form)
+  {
+    try
+    {
+      var userIdClaim = User.FindFirst("UserId")?.Value;
+      if (string.IsNullOrEmpty(userIdClaim))
+        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+
+      int userId = Convert.ToInt32(userIdClaim);
+      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+      if (currentUser == null)
+        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+
+      var modelDto = form["modelDto"];
+      if (string.IsNullOrEmpty(modelDto))
+        return BadRequest(ResponseHelper.BadRequest("Institute data is required"));
+
+      var logoFile = form.Files["InstitutionLogoFile"];
+      var prospectusFile = form.Files["InstitutionProspectusFile"];
+
+      var instituteModel = JsonConvert.DeserializeObject<CrmInstituteDto>(modelDto);
+      instituteModel.InstitutionLogoFile = logoFile;
+      instituteModel.InstitutionProspectusFile = prospectusFile;
+
+      CrmInstituteDto res = await _serviceManager.CRMInstitutes.CreateNewRecordAsync(instituteModel, currentUser);
+      await SaveInstituteFilesAsync(res, currentUser);
+
+      if (res.InstituteId > 0)
+        return Ok(ResponseHelper.Created(res, "Institute created successfully"));
+      else
+        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create institute"));
+    }
+    catch (JsonException)
+    {
+      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in institute data"));
+    }
+  }
+
+
+  // --------- 4. Update ----------------------------------------------
+  [HttpPut(RouteConstants.UpdateInstitute)]
+  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  public async Task<IActionResult> UpdateInstitute([FromRoute] int key, [FromForm] CrmInstituteDto modelDto)
+  {
+    try
+    {
+      var userIdClaim = User.FindFirst("UserId")?.Value;
+      if (string.IsNullOrEmpty(userIdClaim))
+        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+
+      int userId = Convert.ToInt32(userIdClaim);
+      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+      if (currentUser == null)
+        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+
+      var res = await _serviceManager.CRMInstitutes.UpdateRecordAsync(key, modelDto, false);
+
+      if (res == OperationMessage.Success)
+        return Ok(ResponseHelper.Success(res, "Institute updated successfully"));
+      else
+        return Conflict(ResponseHelper.Conflict(res));
+    }
+    catch (Exception ex)
+    {
+      // Global Exception Middleware will handle it
+      throw;
+    }
+  }
+
+  [HttpDelete(RouteConstants.DeleteInstitute)]
+  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  public async Task<IActionResult> DeleteInstitute([FromRoute] int key, [FromBody] CrmInstituteDto modelDto)
+  {
+    try
+    {
+      int userId = HttpContext.GetUserId();
+      var currentUser = HttpContext.GetCurrentUser();
+
+      var res = await _serviceManager.CRMInstitutes.DeleteRecordAsync(key, modelDto);
+
+      if (res == OperationMessage.Success)
+        return Ok(ResponseHelper.Success(res, "Institute deleted successfully"));
+      else
+        return Conflict(ResponseHelper.Conflict(res));
+    }
+    catch (Exception ex)
+    {
+      // Global Exception Middleware will handle it
+      throw;
+    }
+  }
+
+  /* =================================================================
+      PRIVATE HELPERS
+   ==================================================================*/
+
+
+  // 'File' Suffix is mendatory to use this function for every file or image fields.
+
+
+  private async Task SaveInstituteFilesAsync(CrmInstituteDto dto, UsersDto currentUser)
+  {
+    // Get institute ID - use override or dto's InstituteId
+    int id = dto.InstituteId;
+    if (id == 0) id = Guid.NewGuid().GetHashCode();
+
+    /* ---------- Save Institution Logo File via DMS ---------- */
+    if (dto.InstitutionLogoFile != null)
+    {
+      // Create DMSDto object for Logo file
+      var logoDMSDto = new DMSDto
+      {
+        // DocumentType properties
+        DocumentTypeName = "Institution_Logo",
+        DocumentType = "Logo",
+        IsMandatory = true,
+        AcceptedExtensions = ".png",
+        MaxFileSizeMb = 1,
+
+        // Document properties
+        Title = $"Logo_{dto.InstituteName}_{DateTime.Now:yyyyMMdd}",
+        Description = $"Institution logo for {dto.InstituteName}",
+        ReferenceEntityType = "CRMInstitute",
+        ReferenceEntityId = id.ToString(),
+        UploadedByUserId = currentUser.UserId.ToString(),
+        SystemTags = "InstitutionLogo",
+
+        // Folder properties
+        FolderName = $"CRMInstitute_{id}",
+        OwnerId = currentUser.UserId.ToString(),
+
+        // Access Log properties
+        AccessedByUserId = currentUser.UserId.ToString(),
+        AccessDateTime = DateTime.UtcNow,
+        Action = "Upload",
+
+        // Tag properties
+        DocumentTagName = "Logo,Institution,Image",
+
+        // Version properties
+        VersionNumber = 1,
+        UploadedBy = currentUser.UserId.ToString(),
+        UploadedDate = DateTime.UtcNow
+      };
+
+      // Convert DMSDto to JSON string
+      string logoDMSJson = JsonConvert.SerializeObject(logoDMSDto);
+
+      // Call DMS service to save file and create all DMS entities
+      string logoFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+          dto.InstitutionLogoFile,
+          logoDMSJson
+      );
+
+      // Update DTO with the returned file path
+      if (!string.IsNullOrEmpty(logoFilePath))
+      {
+        dto.InstitutionLogo = logoFilePath;
+      }
+    }
+
+    /* ---------- Save Institution Prospectus File via DMS ---------- */
+    if (dto.InstitutionProspectusFile != null)
+    {
+      // Create DMSDto object for Prospectus file
+      var prospectusDMSDto = new DMSDto
+      {
+        // DocumentType properties
+        DocumentTypeName = "Institution Prospectus",
+        DocumentType = "Prospectus",
+        IsMandatory = false,
+        AcceptedExtensions = ".pdf,.doc,.docx",
+        MaxFileSizeMb = 5,
+
+        // Document properties
+        Title = $"Prospectus_{dto.InstituteName}_{DateTime.Now:yyyyMMdd}",
+        Description = $"Institution prospectus for {dto.InstituteName}",
+        ReferenceEntityType = "CRMInstitute",
+        ReferenceEntityId = id.ToString(),
+        UploadedByUserId = currentUser.UserId.ToString(),
+        SystemTags = "InstitutionProspectus",
+
+        // Folder properties
+        FolderName = $"CRMInstitute_{id}",
+        OwnerId = currentUser.UserId.ToString(),
+
+        // Access Log properties
+        AccessedByUserId = currentUser.UserId.ToString(),
+        AccessDateTime = DateTime.UtcNow,
+        Action = "Upload",
+
+        // Tag properties
+        DocumentTagName = "Prospectus,Institution,Document",
+
+        // Version properties
+        VersionNumber = 1,
+        UploadedBy = currentUser.UserId.ToString(),
+        UploadedDate = DateTime.UtcNow
+      };
+
+      // Convert DMSDto to JSON string
+      string prospectusDMSJson = JsonConvert.SerializeObject(prospectusDMSDto);
+
+      // Call DMS service to save file and create all DMS entities
+      string prospectusFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(dto.InstitutionProspectusFile, prospectusDMSJson
+      );
+
+      // Update DTO with the returned file path
+      if (!string.IsNullOrEmpty(prospectusFilePath))
+      {
+        dto.InstitutionProspectus = prospectusFilePath;
+      }
+    }
+  }
+
+
+
+  private async Task SaveInstituteFilesAsync2(CrmInstituteDto dto, int? idOverride = null)
+  {
+    // 🔔 ইনস্টিটিউট আইডি—নতুন হলে GuidHash (temp) ব্যবহার
+    int id = idOverride ?? dto.InstituteId;
+    if (id == 0) id = Guid.NewGuid().GetHashCode();
+
+    // 📂 রুট ফোল্ডার: wwwroot/uploads/institutes/{id}
+    string root = Path.Combine(_env.WebRootPath, "uploads", "institutes", id.ToString());
+    if (!Directory.Exists(root))
+      Directory.CreateDirectory(root);
+
+    /* ---------- Logo ---------- */
+    if (dto.InstitutionLogoFile != null)
+    {
+      string ext = Path.GetExtension(dto.InstitutionLogoFile.FileName);
+      string path = Path.Combine(root, "logo" + ext);
+
+      await using var fs = new FileStream(path, FileMode.Create);
+      await dto.InstitutionLogoFile.CopyToAsync(fs);
+
+      dto.InstitutionLogo = $"/uploads/institutes/{id}/logo{ext}";
+    }
+
+    /* ---------- Prospectus ---------- */
+    if (dto.InstitutionProspectusFile != null)
+    {
+      string ext = Path.GetExtension(dto.InstitutionProspectusFile.FileName);
+      string path = Path.Combine(root, "prospectus" + ext);
+
+      await using var fs = new FileStream(path, FileMode.Create);
+      await dto.InstitutionProspectusFile.CopyToAsync(fs);
+
+      dto.InstitutionProspectus = $"/uploads/institutes/{id}/prospectus{ext}";
+    }
+  }
+
+}

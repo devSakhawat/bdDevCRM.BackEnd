@@ -1,18 +1,28 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 
-public interface IGroupsRepository : IRepositoryBase<Groups>
+public interface IGroupRepository : IRepositoryBase<Groups>
 {
   Task<List<GroupsRepositoryDto>> GroupSummary(bool trackChanges);
+  Task<IEnumerable<GroupPermissionRepositoryDto>> GroupPermisionsbyGroupId(int groupId);
+  Task<IEnumerable<AccessControlRepositoryDto>> GetAccesses();
 
-  Task<IEnumerable<Groups>> GroupsAsync(bool trackChanges);
-  Task<Groups> GroupAsync(int GroupId, bool trackChanges);
 
-  public void CreateGroup(Groups Group);
+  //Task<IEnumerable<Menu>> GetMenus(bool trackChanges);
 
-  public void UpdateGroup(Groups Group);
+  //Menu? GetMenu(int MenuId, bool trackChanges);
+  //Task<Menu> GetMenuAsync(int MenuId, bool trackChanges);
+  //void CreateMenu(Menu Menu);
 
-  public void DeleteGroup(Groups Group);
+  //IEnumerable<Menu> GetByIds(IEnumerable<int> ids, bool trackChanges);
+
+
+  //Task<IEnumerable<Menu>> GetMenusAsync(bool trackChanges);
+  //Task<Menu?> MenuByMenuIdWithAdditionalCondition(int MenuId, string additionalCondition);
+  //Task<IEnumerable<Menu>> MenusByModuleId(int moduleId, bool trackChanges);
+  //void UpdateMenu(Menu Menu);
+  //void DeleteMenu(Menu Menu);
 }

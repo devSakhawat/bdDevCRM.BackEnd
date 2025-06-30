@@ -13,19 +13,16 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 public class ModuleController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
+  //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
-  public ModuleController(IServiceManager serviceManager, IMemoryCache cache)
+  public ModuleController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
     _cache = cache;
   }
 
-  //[HttpGet("SelectMenuByUserPermission")]
+
   [HttpPost(RouteConstants.ModuleSummary)]
-  //[Produces("application/json")]
-  //[ResponseCache(Duration = 300)]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> ModuleSummary([FromBody] CRMGridOptions options)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -47,7 +44,6 @@ public class ModuleController : BaseApiController
   }
 
   [HttpPost(RouteConstants.CreateModule)]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> SaveModule([FromBody] ModuleDto moduleDto)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -56,8 +52,7 @@ public class ModuleController : BaseApiController
     return (module != null) ? Ok(module) : NoContent();
   }
 
-  [HttpPost(RouteConstants.UpdateModule)]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  [HttpPut(RouteConstants.UpdateModule)]
   public async Task<IActionResult> UpdateModule([FromRoute] int key, [FromBody] ModuleDto moduleDto)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -67,7 +62,6 @@ public class ModuleController : BaseApiController
   }
 
   [HttpDelete(RouteConstants.DeleteModule)]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> DeleteModule([FromRoute] int key, [FromBody] ModuleDto moduleDto)
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);

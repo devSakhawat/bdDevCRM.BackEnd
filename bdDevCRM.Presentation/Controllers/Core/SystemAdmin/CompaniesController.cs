@@ -1,38 +1,37 @@
-﻿using bdDevCRM.ServicesContract;
-using bdDevCRM.Shared.DataTransferObjects;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+﻿using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client.Region;
+using System.Threading.Tasks;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
-//[Route("api/[controller]")]
-//[ApiController]
-//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class CompaniesController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
-  public CompaniesController(IServiceManager serviceManager)
+  //private readonly IServiceManager _serviceManager;
+  public CompaniesController(IServiceManager serviceManager) : base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
   }
 
-  [HttpGet]
-  [Produces("application/json" ,"text/csv")]
+  [HttpGet(RouteConstants.Companies)]
+  [Produces("application/json", "text/csv")]
   public IActionResult GetCompanies()
   {
     var companies = _serviceManager.Companies.GetAllCompanies(trackChanges: false);
-    return companies.Any() ? Ok(companies) : NoContent(); 
+    return companies.Any() ? Ok(companies) : NoContent();
   }
 
-  [HttpGet("{id:int}")]
-  public IActionResult GetCompany(int id)
+  [HttpGet(RouteConstants.ReadCompany)]
+  public IActionResult GetCompany([FromQuery] int id)
   {
     var company = _serviceManager.Companies.GetCompany(id, trackChanges: false);
     return Ok(company);
   }
 
-  [HttpPost]
+  [HttpPost(RouteConstants.CreateCompany)]
   public IActionResult CreateCompany([FromBody] CompanyDto companyDto)
   {
     if (companyDto is null)
@@ -41,7 +40,7 @@ public class CompaniesController : BaseApiController
     }
 
     var createdCompany = _serviceManager.Companies.CreateCompany(companyDto);
-    return CreatedAtRoute("CompanyById", new {id = createdCompany.CompanyId}, createdCompany);
+    return CreatedAtRoute("CompanyById", new { id = createdCompany.CompanyId }, createdCompany);
   }
 
   [HttpGet("collection/({ids})", Name = "CompanyCollection")]
@@ -51,6 +50,25 @@ public class CompaniesController : BaseApiController
     return Ok(companyEntities);
   }
 
+  [HttpGet(RouteConstants.GetMotherCompany)]
+  public async Task<IActionResult> GetMotherCompany()
+  {
+    // from claim.
+    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    // userId : which key is reponsible to when cache was created .
+    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
+    UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
+    // get hr record id from user.
+    int companyId = 0;
 
+    if (user.HrRecordId == 0 || user.HrRecordId == null) throw new IdParametersBadRequestException();
+    companyId = (int)user.CompanyId;
+
+    IEnumerable<CompanyDto> companyList = await _serviceManager.Companies.GetMotherCompany(companyId, user);
+
+
+    return Ok(companyList);
+  }
 
 }
+

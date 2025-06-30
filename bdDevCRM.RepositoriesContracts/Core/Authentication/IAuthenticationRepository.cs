@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.Entities;
+﻿using bdDevCRM.Entities.Entities.System;
 
 namespace bdDevCRM.RepositoriesContracts.Core.Authentication;
 

@@ -5,8 +5,10 @@ using bdDevCRM.Repositories;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Services;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Sql.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -144,4 +146,16 @@ public static class ServiceExtensions
       options.Level = System.IO.Compression.CompressionLevel.Optimal;
     });
   }
+
+  public static void ConfigureFileLimit(this IServiceCollection services)
+  {
+    services.Configure<FormOptions>(options =>
+    {
+      options.MultipartBodyLengthLimit = 10_000_000; // 100MB
+      options.ValueLengthLimit = int.MaxValue;
+      options.ValueCountLimit = int.MaxValue;
+      options.KeyLengthLimit = int.MaxValue;
+    });
+  }
+
 }

@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
@@ -12,23 +13,19 @@ public interface IMenuRepository : IRepositoryBase<Menu>
 
 
 
+  Task<IEnumerable<Menu>> GetMenus(bool trackChanges);
 
-
-
-
-
-
-  IEnumerable<Menu> GetAllMenus(bool trackChanges);
-  Menu GetMenu(int MenuId, bool trackChanges);
+  Menu? GetMenu(int MenuId, bool trackChanges);
+  Task<Menu> GetMenuAsync(int MenuId, bool trackChanges);
   void CreateMenu(Menu Menu);
 
   IEnumerable<Menu> GetByIds(IEnumerable<int> ids, bool trackChanges);
 
 
   Task<IEnumerable<Menu>> GetMenusAsync(bool trackChanges);
-  Task<Menu> GetMenuAsync(int MenuId, bool trackChanges);
   Task<Menu?> MenuByMenuIdWithAdditionalCondition(int MenuId, string additionalCondition);
   Task<IEnumerable<Menu>> MenusByModuleId(int moduleId, bool trackChanges);
   void UpdateMenu(Menu Menu);
   void DeleteMenu(Menu Menu);
+
 }

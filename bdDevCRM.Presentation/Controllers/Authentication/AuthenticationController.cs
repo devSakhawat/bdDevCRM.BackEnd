@@ -1,8 +1,9 @@
-﻿using bdDevCRM.Presentation.ActionFIlters;
+﻿using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Authentication;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +19,12 @@ namespace bdDevCRM.Presentation.Controllers.Authentication;
 //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class AuthenticationController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
+  //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _memoryCache;
 
-  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache)
+  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache): base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
     _memoryCache = memoryCache;
   }
 
@@ -31,11 +32,11 @@ public class AuthenticationController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   [AllowAnonymous]
   [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> Authenticate([FromBody] UserForAuthenticationDto user)
+  public IActionResult Authenticate([FromBody] UserForAuthenticationDto user)
   {
-    if (!_serviceManager.CustomAuthentication.ValidateUser(user)) return Unauthorized();
+    if (!_serviceManager.CustomAuthentication.ValidateUser(user)) throw new UsernamePasswordMismatchException();
 
-    var token = await _serviceManager.CustomAuthentication.CreateToken(user);
+    var token = _serviceManager.CustomAuthentication.CreateToken(user);
     return Ok(token);
   }
 
@@ -242,29 +243,32 @@ public class AuthenticationController : BaseApiController
   #endregion LoginFrom mvc
 
 
-  //[HttpGet("getUserInfo")]
   [HttpGet(RouteConstants.GetUserInfo)]
-  public async Task<IActionResult> GetUserInfo()
+  [AllowAnonymous]
+  public IActionResult GetUserInfo()
   {
     var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
     var loginId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    if (string.IsNullOrEmpty(loginId))
-    {
-      return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
-    }
+    if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
 
-    var user = await _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
-    if (user == null)
-    {
-      return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
-    }
+    // UsersDto
+    UsersDto? user = _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
+    if (user == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
 
     var UserId = User.FindFirst("UserId")?.Value;
     var cacheKey = $"User_{user.UserId}";
-    _memoryCache.Set(cacheKey, user, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(300) });
+    // Check if the user is already in the cache then destroy the cache
+    if (_memoryCache.TryGetValue(cacheKey, out _)) _memoryCache.Remove(cacheKey);
+
+    // Set the user in the cache with a 5-hours expiration
+    var cacheEntryOptions = new MemoryCacheEntryOptions()
+        .SetSlidingExpiration(TimeSpan.FromHours(5))
+        .SetAbsoluteExpiration(TimeSpan.FromHours(5));
+    _memoryCache.Set(cacheKey, user, cacheEntryOptions);
+    //_memoryCache.Set(cacheKey, user, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(5) });
+
 
     user.Password = "";
-
     return Ok(user);
   }
 
@@ -303,6 +307,30 @@ public class AuthenticationController : BaseApiController
 
   private void ClearMemoryCache()
   {
+    var memCache = _memoryCache as MemoryCache;
+    if (memCache == null) return;
+
+    var coherentState = typeof(MemoryCache).GetProperty("CoherentState",
+        BindingFlags.NonPublic | BindingFlags.Instance);
+
+    var coherentStateValue = coherentState?.GetValue(memCache);
+    if (coherentStateValue == null) return;
+
+    var entriesCollection = coherentStateValue.GetType()
+        .GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    var cacheItems = entriesCollection?.GetValue(coherentStateValue) as IDictionary;
+    if (cacheItems == null) return;
+
+    foreach (var key in cacheItems.Keys.Cast<object>().ToList())
+    {
+      _memoryCache.Remove(key);
+    }
+  }
+
+
+  private void ClearnAllOfTheMemoryCache()
+  {
     var field = typeof(MemoryCache).GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
     if (field != null)
     {
@@ -316,4 +344,5 @@ public class AuthenticationController : BaseApiController
       }
     }
   }
+
 }

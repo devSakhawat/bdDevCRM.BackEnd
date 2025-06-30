@@ -1,7 +1,6 @@
-﻿using bdDevCRM.Entities.Entities;
+﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.Authentication;
 using bdDevCRM.Sql.Context;
-using Microsoft.EntityFrameworkCore;
 
 namespace bdDevCRM.Repositories.Core.Authentication;
 
@@ -14,10 +13,9 @@ public class AuthenticationRepository : RepositoryBase<Users>, IAuthenticationRe
   {
     if (string.IsNullOrEmpty(loginId)) return null;
 
+    Users user = FirstOrDefault(u => u.LoginId == loginId, true);
 
-    Users user = FindByCondition(u => u.LoginId == loginId, true).SingleOrDefault();
-
-    if (user == null )
+    if (user == null)
       return null;
 
     return user;
@@ -30,7 +28,7 @@ public class AuthenticationRepository : RepositoryBase<Users>, IAuthenticationRe
       return null;
 
 
-    Users user = FindByCondition(u => u.LoginId == loginId, true).SingleOrDefault();
+    Users user = FirstOrDefault(u => u.LoginId == loginId, true);
     return user;
   }
 }
