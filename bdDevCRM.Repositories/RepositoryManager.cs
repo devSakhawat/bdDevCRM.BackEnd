@@ -43,7 +43,7 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<IEmployeeRepository> _employeeRepository;
   private readonly Lazy<IEmployeeTypeRepository> _employeetypeRepository;
   private readonly Lazy<IBranchRepository> _branchRepository;
-  private readonly Lazy<IDepartmentRepository> _departmentRepository;
+  //private readonly Lazy<IDepartmentRepository> _departmentRepository;
   // HR area end  
 
   #region CRM
@@ -95,7 +95,7 @@ public class RepositoryManager : IRepositoryManager
     _employeeRepository = new Lazy<IEmployeeRepository>(() => new EmployeeRepository(_repositoryContext));
     _employeetypeRepository = new Lazy<IEmployeeTypeRepository>(() => new EmployeeTypeRepository(_repositoryContext));
     _branchRepository = new Lazy<IBranchRepository>(() => new BranchRepository(_repositoryContext));
-    _departmentRepository = new Lazy<IDepartmentRepository>(() => new DepartmentRepository(_repositoryContext));
+    //_departmentRepository = new Lazy<IDepartmentRepository>(() => new DepartmentRepository(_repositoryContext));
     // HR area end
 
     #region CRM
@@ -142,7 +142,7 @@ public class RepositoryManager : IRepositoryManager
   public IEmployeeRepository Employees => _employeeRepository.Value;
   public IEmployeeTypeRepository EmployeeTypes => _employeetypeRepository.Value;
   public IBranchRepository Branches => _branchRepository.Value;
-  public IDepartmentRepository departments => _departmentRepository.Value;
+  //public IDepartmentRepository departments => _departmentRepository.Value;
   #endregion HR area
 
   #region CRM

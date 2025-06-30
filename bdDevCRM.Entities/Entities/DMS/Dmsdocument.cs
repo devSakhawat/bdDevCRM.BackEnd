@@ -31,6 +31,8 @@ public partial class Dmsdocument
 
     public int? FolderId { get; set; }
 
+    public string SystemTag { get; set; }
+
     public virtual ICollection<DmsdocumentAccessLog> DmsdocumentAccessLog { get; set; } = new List<DmsdocumentAccessLog>();
 
     public virtual ICollection<DmsdocumentTagMap> DmsdocumentTagMap { get; set; } = new List<DmsdocumentTagMap>();

@@ -170,6 +170,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       // 2. Folder Structure Create
       var folder = await CreateFolderStructure(dmsDto);
 
+
       // 3. File Save
       var fileInfo = await SaveFileToSystem(file, dmsDto);
 
@@ -185,7 +186,8 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       // 7. access log create
       await CreateAccessLog(document.DocumentId, dmsDto, "Upload");
 
-      await _repository.SaveAsync();
+      //await _repository.SaveAsync();
+      await _repository.Dmsdocuments.TransactionCommitAsync();
 
       _logger.LogInfo($"DMS document created successfylly - DocumentId: {document.DocumentId}");
 
@@ -195,11 +197,12 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     {
       _logger.LogError($"Error in DMS save data. Error message: {ex.Message}");
       await _repository.Dmsdocuments.TransactionRollbackAsync();
+      await _repository.Dmsdocuments.TransactionDisposeAsync();
       throw;
     }
     finally
     {
-      await _repository.Dmsdocuments.TransactionCommitAsync();
+      await _repository.Dmsdocuments.TransactionDisposeAsync();
     }
   }
 
@@ -229,34 +232,6 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       throw new ArgumentException("Reference entity ID is required.");
   }
 
-  // create document version with duplicate check
-  private async Task<DmsdocumentType> CreateOrGetDocumentType(DMSDto dmsDto)
-  {
-    var documentType = await _repository.DmsdocumentTypes
-        .FirstOrDefaultAsync(dt => dt.Name.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim()
-                                && dt.DocumentType.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim());
-
-    if (documentType == null)
-    {
-      documentType = new DmsdocumentType
-      {
-        Name = dmsDto.DocumentTypeName ?? "Default Document Type",
-        DocumentType = dmsDto.DocumentType,
-        IsMandatory = dmsDto.IsMandatory,
-        AcceptedExtensions = dmsDto.AcceptedExtensions ?? ".pdf, .docx, .jpg, .png, .jpeg",
-        MaxFileSizeMb = dmsDto.MaxFileSizeMb ?? ((dmsDto.AcceptedExtensions != null
-        && (dmsDto.AcceptedExtensions.Contains(".jpg")
-        || dmsDto.AcceptedExtensions.Contains(".png")
-        || dmsDto.AcceptedExtensions.Contains(".jpeg"))) ? 1 : 5)
-        //MaxFileSizeMb = (!dmsDto.AcceptedExtensions.Contains(".pdf")) ? 1 : dmsDto.MaxFileSizeMb ?? 10
-      };
-
-      documentType.DocumentTypeId = await _repository.DmsdocumentTypes.CreateAndGetIdAsync(documentType);
-      await _repository.SaveAsync();
-    }
-
-    return documentType;
-  }
 
   /// <summary>
   /// Create folder structure based on ReferenceEntityType and ReferenceEntityId.
@@ -281,7 +256,6 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       };
 
       parentFolder.FolderId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(parentFolder);
-      await _repository.SaveAsync();
     }
 
     var entityFolder = await _repository.DmsdocumentFolders
@@ -294,29 +268,59 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       {
         FolderName = $"{dmsDto.ReferenceEntityType}_{dmsDto.ReferenceEntityId}",
         ParentFolderId = parentFolder.FolderId,
-        OwnerId = dmsDto.OwnerId.ToString(),
+        OwnerId = null, // may be letter. now entity recordId Or dmsDto.OwnerId.ToString(),
         ReferenceEntityType = dmsDto.ReferenceEntityType,
         ReferenceEntityId = dmsDto.ReferenceEntityId
       };
 
       entityFolder.FolderId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(entityFolder);
-      await _repository.SaveAsync();
     }
 
     return entityFolder;
   }
 
+  // create document version with duplicate check
+  private async Task<DmsdocumentType> CreateOrGetDocumentType(DMSDto dmsDto)
+  {
+    var documentType = await _repository.DmsdocumentTypes
+        .FirstOrDefaultAsync(dt => dt.Name.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim()
+                                && dt.DocumentType.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim());
+
+    if (documentType == null)
+    {
+      documentType = new DmsdocumentType
+      {
+        Name = dmsDto.DocumentTypeName ?? "Default Document Type",
+        DocumentType = dmsDto.DocumentType,
+        IsMandatory = dmsDto.IsMandatory,
+        AcceptedExtensions = dmsDto.AcceptedExtensions ?? ".pdf, .docx, .jpg, .png, .jpeg",
+        MaxFileSizeMb = dmsDto.MaxFileSizeMb ?? ((dmsDto.AcceptedExtensions != null
+        && (dmsDto.AcceptedExtensions.Contains(".jpg")
+        || dmsDto.AcceptedExtensions.Contains(".png")
+        || dmsDto.AcceptedExtensions.Contains(".jpeg"))) ? 1 : 5)
+        //MaxFileSizeMb = (!dmsDto.AcceptedExtensions.Contains(".pdf")) ? 1 : dmsDto.MaxFileSizeMb ?? 10
+      };
+
+      documentType.DocumentTypeId = await _repository.DmsdocumentTypes.CreateAndGetIdAsync(documentType);
+      //await _repository.SaveAsync();
+    }
+
+    return documentType;
+  }
+
+
   // Save file to the system
   private async Task<FileInfoDto> SaveFileToSystem(IFormFile file, DMSDto dmsDto)
   {
     string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-    string folderPath = Path.Combine(rootPath, "Uploads", dmsDto.ReferenceEntityType, dmsDto.ReferenceEntityId, dmsDto.DocumentType);
+    string folderPath = Path.Combine(rootPath, "Uploads", dmsDto.ReferenceEntityType.Trim(), dmsDto.ReferenceEntityId, dmsDto.DocumentType.Trim());
 
     if (!Directory.Exists(folderPath))
       Directory.CreateDirectory(folderPath);
 
     // unique file name generation
-    string fileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid().ToString("N")[..8]}{Path.GetExtension(file.FileName)}";
+    //string fileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid().ToString("N")[..8]}{Path.GetExtension(file.FileName)}";
+    string fileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{DateTime.Now:yyyyMMddHHmmss}{Path.GetExtension(file.FileName)}";
     string fullPath = Path.Combine(folderPath, fileName);
     string relativePath = $"/Uploads/{dmsDto.ReferenceEntityType}/{dmsDto.ReferenceEntityId}/{dmsDto.DocumentType}/{fileName}";
 
@@ -427,7 +431,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     await _repository.SaveAsync();
   }
 
-  // অ্যাক্সেস লগ তৈরি করা
+
   private async Task CreateAccessLog(int documentId, DMSDto dmsDto, string action)
   {
     string ipAddress = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "Unknown";
@@ -443,7 +447,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     }
     catch
     {
-      // MAC address পেতে সমস্যা হলে default রাখা
+      
     }
 
     var accessLog = new DmsdocumentAccessLog

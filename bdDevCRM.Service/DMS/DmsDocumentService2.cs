@@ -2,7 +2,7 @@
 
 
 //using bdDevCRM.Entities.CRMGrid.GRID;
-//using bdDevCRM.Entities.Entities;
+//using bdDevCRM.Entities.Entities.System;
 //using bdDevCRM.Entities.Entities.DMS;
 //using bdDevCRM.Entities.Exceptions;
 //using bdDevCRM.RepositoriesContracts;
@@ -169,8 +169,8 @@
 
 //    if (dmsDto == null || crmInstituteDto == null || usersDto == null) throw new NullModelBadRequestException(nameof(DMSDto));
 
-//    // 01. Check DMSDocumentType by dmsDto.EntityType
-//    var dmsDocumentType = await _repository.DmsdocumentTypes.FirstOrDefaultAsync(f => f.DocumentType.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim());
+//    01.Check DMSDocumentType by dmsDto.EntityType
+//   var dmsDocumentType = await _repository.DmsdocumentTypes.FirstOrDefaultAsync(f => f.DocumentType.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim());
 //    if (dmsDocumentType == null)
 //    {
 //      dmsDocumentType = new DmsdocumentType
@@ -183,25 +183,25 @@
 //        && (dmsDto.AcceptedExtensions.Contains(".jpg")
 //        || dmsDto.AcceptedExtensions.Contains(".png")
 //        || dmsDto.AcceptedExtensions.Contains(".jpeg"))) ? 1 : 5)
-//        //MaxFileSizeMb = (!dmsDto.AcceptedExtensions.Contains(".pdf")) ? 1 : dmsDto.MaxFileSizeMb ?? 10
+//        MaxFileSizeMb = (!dmsDto.AcceptedExtensions.Contains(".pdf")) ? 1 : dmsDto.MaxFileSizeMb ?? 10
 //      };
 //      dmsDocumentType.DocumentTypeId = await _repository.DmsdocumentTypes.CreateAndGetIdAsync(dmsDocumentType);
 //    }
 
-//    // 02. Check parent forlder and child folder DmsdocumentFolders by dmsDto.FolderName and ParentFolderId
-//    var parentFolder = await _repository.DmsdocumentFolders.FirstOrDefaultAsync(f => f.FolderName.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim());
+//    02.Check parent forlder and child folder DmsdocumentFolders by dmsDto.FolderName and ParentFolderId
+//   var parentFolder = await _repository.DmsdocumentFolders.FirstOrDefaultAsync(f => f.FolderName.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim());
 //    if (parentFolder == null)
 //    {
 //      parentFolder = new DmsdocumentFolder
 //      {
 //        FolderName = dmsDto.ReferenceEntityType,
-//        //OwnerId = null, // OwnerId: Folder Owner.
+//        OwnerId = null, // OwnerId: Folder Owner.
 //        ReferenceEntityType = dmsDto.ReferenceEntityType, // e.g., "Crminstitute"
-//        //ReferenceEntityId = "0"
+//        ReferenceEntityId = "0"
 //      };
-//      // Parent folder has no ReferenceEntityId ,OwnerId, and ParentFolderId 
-//      // because it is the top-level folder.
-//      // OwnerId,ReferenceEntityId,ParentFolderId is not set here, it will be set later when creating child folders.
+//      Parent folder has no ReferenceEntityId ,OwnerId, and ParentFolderId
+//       because it is the top - level folder.
+//       OwnerId,ReferenceEntityId,ParentFolderId is not set here, it will be set later when creating child folders.
 //      parentFolder.ParentFolderId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(parentFolder);
 //    }
 
@@ -220,41 +220,41 @@
 //      dmsDocumentFolder.FolderId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(dmsDocumentFolder);
 //    }
 
-//    // 2.1. Find or create parent folder (e.g., "Institute")
+//    2.1.Find or create parent folder(e.g., "Institute")
 //    string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-//    // folderPath = "wwwroot/Uploads/students/CRMInstitute/1/passport/"
-//    // wwwroot/Uploads/EntityName(CRMInstitute, CRMCourse, Student, Agent, like controller/entity)/1 (record or data: like studentIdentity, crnIntituteIdency, CrmCourseIdentity)/DocumentType(like : student(passport, nid, accademic certificate || institute: logo, photo, procpectus etc))
+//    folderPath = "wwwroot/Uploads/students/CRMInstitute/1/passport/"
+//     wwwroot / Uploads / EntityName(CRMInstitute, CRMCourse, Student, Agent, like controller / entity) / 1(record or data: like studentIdentity, crnIntituteIdency, CrmCourseIdentity) / DocumentType(like: student(passport, nid, accademic certificate || institute: logo, photo, procpectus etc))
 //    string folderPath = Path.Combine(rootPath, "Uploads", dmsDto.ReferenceEntityType, dmsDto.ReferenceEntityId, dmsDto.DocumentType);
 //    if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
 //    string fileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}{DateTime.Now.Ticks}{Path.GetExtension(file.FileName)}";
 //    string fullPath = Path.Combine(folderPath, fileName);
 
-//    // Save file to disk
+//    Save file to disk
 //    using (var stream = new FileStream(fullPath, FileMode.Create)) { await file.CopyToAsync(stream); }
 //    string relativeFilePath = $"/Uploads/{dmsDto.ReferenceEntityType}/{dmsDto.ReferenceEntityId}/{dmsDto.DocumentType}/{fileName}";
 
-//    // 3. Create DmsDocument
-//    var document = new Dmsdocument
-//    {
-//      Title = dmsDto.Title ?? fileName,
-//      Description = dmsDto.Description,
-//      FileName = fileName,
-//      FilePath = relativeFilePath,
-//      FileExtension = Path.GetExtension(file.FileName),
-//      FileSize = file.Length,
-//      FolderId = dmsDocumentFolder.FolderId,
-//      DocumentTypeId = dmsDocumentType.DocumentTypeId,
-//      ReferenceEntityType = dmsDto.ReferenceEntityType,
-//      ReferenceEntityId = dmsDto.ReferenceEntityId,
-//      UploadDate = DateTime.UtcNow,
-//      UploadedByUserId = usersDto.UserId.ToString(),
-//    };
+//    3.Create DmsDocument
+//   var document = new Dmsdocument
+//   {
+//     Title = dmsDto.Title ?? fileName,
+//     Description = dmsDto.Description,
+//     FileName = fileName,
+//     FilePath = relativeFilePath,
+//     FileExtension = Path.GetExtension(file.FileName),
+//     FileSize = file.Length,
+//     FolderId = dmsDocumentFolder.FolderId,
+//     DocumentTypeId = dmsDocumentType.DocumentTypeId,
+//     ReferenceEntityType = dmsDto.ReferenceEntityType,
+//     ReferenceEntityId = dmsDto.ReferenceEntityId,
+//     UploadDate = DateTime.UtcNow,
+//     UploadedByUserId = usersDto.UserId.ToString(),
+//   };
 //    document.DocumentId = await _repository.Dmsdocuments.CreateAndGetIdAsync(document);
 //    _logger.LogInfo($"DMS Document created with Id: {document.DocumentId}, Title: {document.Title}, FilePath: {relativeFilePath}");
 
-//    // 4. Create DmsDocumentVersion
-//    var version = new DmsdocumentVersion();
+//    4.Create DmsDocumentVersion
+//   var version = new DmsdocumentVersion();
 //    if (dmsDto.VersionNumber > 0)
 //    {
 //      version.DocumentId = document.DocumentId;
@@ -270,7 +270,7 @@
 //    _logger.LogInfo($"DMS Document created with Id: {document.DocumentId}, VersionId: {version.VersionId}");
 
 
-//    // 5. Create DmsDocumentAccessLog
+//    5.Create DmsDocumentAccessLog
 //    string ipAddress = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "Unknown";
 //    string userAgent = _httpContextAccessor?.HttpContext?.Request?.Headers["User-Agent"].ToString() ?? "Unknown";
 //    _logger.LogInfo($"File uploaded by UserId: {usersDto.UserId}, IP: {ipAddress}, User-Agent: {userAgent}");
@@ -292,9 +292,9 @@
 //    await _repository.DmsdocumentAccessLogs.CreateAsync(accessLog);
 //    await _repository.SaveAsync();
 //    _logger.LogInfo($"DMS Document access log created for DocumentId: {document.DocumentId}, Action: {accessLog.Action}, AccessedByUserId: {accessLog.AccessedByUserId}");
-//    //_configuration["DMS:FileUploadPath"] = relativeFilePath; // Save the file path to configuration if needed
+//    _configuration["DMS:FileUploadPath"] = relativeFilePath; // Save the file path to configuration if needed
 
-//    // 7. Create DmsDocumentTag and Map
+//    7.Create DmsDocumentTag and Map
 //    if (dmsDto.DocumentTagName != null && !string.IsNullOrWhiteSpace(dmsDto.DocumentTagName))
 //    {
 //      var tags = dmsDto.DocumentTagName.Split(',')
@@ -304,8 +304,8 @@
 
 //      foreach (var tagName in tags)
 //      {
-//        // Check if the tag already exists
-//        var tag = await _repository.DmsdocumentTags.FirstOrDefaultAsync(t => t.DocumentTagName == tagName);
+//        Check if the tag already exists
+//       var tag = await _repository.DmsdocumentTags.FirstOrDefaultAsync(t => t.DocumentTagName == tagName);
 //        if (tag == null)
 //        {
 //          tag = new DmsdocumentTag { DocumentTagName = tagName };
@@ -313,14 +313,14 @@
 //          await _repository.SaveAsync();
 //        }
 
-//        //// Map the tag to the document
-//        //var tagMap = new DmsdocumentTagMap
-//        //{
-//        //  DocumentId = document.DocumentId,
-//        //  TagId = tag.TagId
-//        //};
+//        // Map the tag to the document
+//        var tagMap = new DmsdocumentTagMap
+//        {
+//          DocumentId = document.DocumentId,
+//          TagId = tag.TagId
+//        };
 
-//        //await _repository.DmsdocumentTagMaps.CreateAsync(tagMap);
+//        await _repository.DmsdocumentTagMaps.CreateAsync(tagMap);
 //      }
 //    }
 
@@ -357,120 +357,120 @@
 
 
 
-////using bdDevCRM.Entities.CRMGrid.GRID;
-////using bdDevCRM.Entities.Entities.DMS;
-////using bdDevCRM.Entities.Exceptions;
-////using bdDevCRM.RepositoriesContracts;
-////using bdDevCRM.ServiceContract.DMS;
-////using bdDevCRM.Shared.DataTransferObjects.DMS;
-////using bdDevCRM.Utilities.Constants;
-////using bdDevCRM.Utilities.OthersLibrary;
-////using Microsoft.Extensions.Configuration;
-////using System;
-////using System.Collections.Generic;
-////using System.Linq;
-////using System.Text;
-////using System.Threading.Tasks;
+//using bdDevCRM.Entities.CRMGrid.GRID;
+//using bdDevCRM.Entities.Entities.DMS;
+//using bdDevCRM.Entities.Exceptions;
+//using bdDevCRM.RepositoriesContracts;
+//using bdDevCRM.ServiceContract.DMS;
+//using bdDevCRM.Shared.DataTransferObjects.DMS;
+//using bdDevCRM.Utilities.Constants;
+//using bdDevCRM.Utilities.OthersLibrary;
+//using Microsoft.Extensions.Configuration;
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
 
-////namespace bdDevCRM.Service.DMS;
+//namespace bdDevCRM.Service.DMS;
 
-////internal sealed class DmsDocumentService2 : IDmsDocumentService2
-////{
-////  private readonly IRepositoryManager _repo;
-////  private readonly ILoggerManager _log;
-////  private readonly IConfiguration _cfg;
+//internal sealed class DmsDocumentService2 : IDmsDocumentService2
+//{
+//  private readonly IRepositoryManager _repo;
+//  private readonly ILoggerManager _log;
+//  private readonly IConfiguration _cfg;
 
-////  private static readonly string[] _imageExt = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
+//  private static readonly string[] _imageExt = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
 
-////  public DmsDocumentService2(IRepositoryManager repo, ILoggerManager log, IConfiguration cfg)
-////  {
-////    _repo = repo;
-////    _log = log;
-////    _cfg = cfg;
-////  }
+//  public DmsDocumentService2(IRepositoryManager repo, ILoggerManager log, IConfiguration cfg)
+//  {
+//    _repo = repo;
+//    _log = log;
+//    _cfg = cfg;
+//  }
 
-////  // -------------- DDL ----------------------------------------------
-////  public async Task<IEnumerable<KeyValuePair<int, string>>> GetDocumentDDLAsync()
-////  {
-////    var docs = await _repo.DmsDocuments.GetActiveAsync(false);
-////    if (!docs.Any()) throw new GenericListNotFoundException("DmsDocument");
-////    return docs.Select(d => new KeyValuePair<int, string>(d.DocumentId, d.Title));
-////  }
+//  // -------------- DDL ----------------------------------------------
+//  public async Task<IEnumerable<KeyValuePair<int, string>>> GetDocumentDDLAsync()
+//  {
+//    var docs = await _repo.DmsDocuments.GetActiveAsync(false);
+//    if (!docs.Any()) throw new GenericListNotFoundException("DmsDocument");
+//    return docs.Select(d => new KeyValuePair<int, string>(d.DocumentId, d.Title));
+//  }
 
-////  // -------------- Grid ---------------------------------------------
-////  public async Task<GridEntity<DmsDocumentDto>> SummaryGrid(CRMGridOptions opt)
-////  {
-////    string sql = "SELECT * FROM DmsDocument";   // 👉 এখানে আপনার নিজস্ব ভিউ/স্টোর্ড-প্রসিজিউর ব্যবহার করতে পারেন
-////    string orderBy = " UploadDate DESC ";
-////    return await _repo.DmsDocuments.GridData<DmsDocumentDto>(sql, opt, orderBy, "");
-////  }
+//  // -------------- Grid ---------------------------------------------
+//  public async Task<GridEntity<DmsDocumentDto>> SummaryGrid(CRMGridOptions opt)
+//  {
+//    string sql = "SELECT * FROM DmsDocument";   // 👉 এখানে আপনার নিজস্ব ভিউ/স্টোর্ড-প্রসিজিউর ব্যবহার করতে পারেন
+//    string orderBy = " UploadDate DESC ";
+//    return await _repo.DmsDocuments.GridData<DmsDocumentDto>(sql, opt, orderBy, "");
+//  }
 
-////  // -------------- Create -------------------------------------------
-////  public async Task<string> CreateAsync(DmsDocumentDto dto)
-////  {
-////    if (dto.DocumentId != 0) throw new InvalidCreateOperationException("DocumentId must be 0.");
+//  // -------------- Create -------------------------------------------
+//  public async Task<string> CreateAsync(DmsDocumentDto dto)
+//  {
+//    if (dto.DocumentId != 0) throw new InvalidCreateOperationException("DocumentId must be 0.");
 
-////    await ValidateFileRules(dto.FileExtension, dto.FileSize);
+//    await ValidateFileRules(dto.FileExtension, dto.FileSize);
 
-////    bool dup = await _repo.DmsDocuments.ExistsAsync(d =>
-////        d.Title == dto.Title && d.ReferenceEntityId == dto.ReferenceEntityId);
-////    if (dup) throw new DuplicateRecordException("DmsDocument", "Title");
+//    bool dup = await _repo.DmsDocuments.ExistsAsync(d =>
+//        d.Title == dto.Title && d.ReferenceEntityId == dto.ReferenceEntityId);
+//    if (dup) throw new DuplicateRecordException("DmsDocument", "Title");
 
-////    var entity = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(dto);
+//    var entity = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(dto);
 
-////    // 👉 ফাইল সেভ করলে path সেট করুন (StorageService ইত্যাদি)
-////    // entity.FilePath = _fileStore.Save(fileStream, dto.FileName);
+//    // 👉 ফাইল সেভ করলে path সেট করুন (StorageService ইত্যাদি)
+//    // entity.FilePath = _fileStore.Save(fileStream, dto.FileName);
 
-////    int id = await _repo.DmsDocuments.CreateAndGetIdAsync(entity);
-////    if (id <= 0) throw new InvalidCreateOperationException();
+//    int id = await _repo.DmsDocuments.CreateAndGetIdAsync(entity);
+//    if (id <= 0) throw new InvalidCreateOperationException();
 
-////    _log.LogInfo($"DMS Document created, id={id}");
-////    return OperationMessage.Success;
-////  }
+//    _log.LogInfo($"DMS Document created, id={id}");
+//    return OperationMessage.Success;
+//  }
 
-////  // -------------- Update -------------------------------------------
-////  public async Task<string> UpdateAsync(int key, DmsDocumentDto dto)
-////  {
-////    if (key != dto.DocumentId) throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsDocumentDto));
+//  // -------------- Update -------------------------------------------
+//  public async Task<string> UpdateAsync(int key, DmsDocumentDto dto)
+//  {
+//    if (key != dto.DocumentId) throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsDocumentDto));
 
-////    await ValidateFileRules(dto.FileExtension, dto.FileSize);
+//    await ValidateFileRules(dto.FileExtension, dto.FileSize);
 
-////    bool exists = await _repo.DmsDocuments.ExistsAsync(x => x.DocumentId == key);
-////    if (!exists) throw new GenericNotFoundException("DmsDocument", "DocumentId", key.ToString());
+//    bool exists = await _repo.DmsDocuments.ExistsAsync(x => x.DocumentId == key);
+//    if (!exists) throw new GenericNotFoundException("DmsDocument", "DocumentId", key.ToString());
 
-////    var entity = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(dto);
-////    _repo.DmsDocuments.Update(entity);
-////    await _repo.SaveAsync();
+//    var entity = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(dto);
+//    _repo.DmsDocuments.Update(entity);
+//    await _repo.SaveAsync();
 
-////    _log.LogInfo($"DMS Document updated, id={key}");
-////    return OperationMessage.Success;
-////  }
+//    _log.LogInfo($"DMS Document updated, id={key}");
+//    return OperationMessage.Success;
+//  }
 
-////  // -------------- Delete -------------------------------------------
-////  public async Task<string> DeleteAsync(int key)
-////  {
-////    await _repo.DmsDocuments.DeleteAsync(x => x.DocumentId == key, true);
-////    await _repo.SaveAsync();
+//  // -------------- Delete -------------------------------------------
+//  public async Task<string> DeleteAsync(int key)
+//  {
+//    await _repo.DmsDocuments.DeleteAsync(x => x.DocumentId == key, true);
+//    await _repo.SaveAsync();
 
-////    _log.LogInfo($"DMS Document deleted, id={key}");
-////    return OperationMessage.Success;
-////  }
+//    _log.LogInfo($"DMS Document deleted, id={key}");
+//    return OperationMessage.Success;
+//  }
 
-////  // ---------------------------------------------------------
-////  private static Task ValidateFileRules(string ext, long sizeInBytes)
-////  {
-////    bool isImage = _imageExt.Contains(ext.ToLower());
-////    long max = isImage ? 1 * 1024 * 1024 : 5 * 1024 * 1024;
+//  // ---------------------------------------------------------
+//  private static Task ValidateFileRules(string ext, long sizeInBytes)
+//  {
+//    bool isImage = _imageExt.Contains(ext.ToLower());
+//    long max = isImage ? 1 * 1024 * 1024 : 5 * 1024 * 1024;
 
-////    if (sizeInBytes > max)
-////      throw new FileSizeExceededException($"File size exceeds limit ({max / 1024 / 1024} MB).");
+//    if (sizeInBytes > max)
+//      throw new FileSizeExceededException($"File size exceeds limit ({max / 1024 / 1024} MB).");
 
-////    return Task.CompletedTask;
-////  }
-////}
+//    return Task.CompletedTask;
+//  }
+//}
 
-////// If the FileSizeExceededException class is not defined in the bdDevCRM.Entities.Exceptions namespace,
-////// you need to define it. Below is the definition based on the provided type signature.
+//// If the FileSizeExceededException class is not defined in the bdDevCRM.Entities.Exceptions namespace,
+//// you need to define it. Below is the definition based on the provided type signature.
 
 
 

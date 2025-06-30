@@ -32,6 +32,8 @@ public class DMSDto
   public string ReferenceEntityType { get; set; } = null!;
   public string ReferenceEntityId { get; set; } = null!;
 
+  public string SystemTags { get; set; } = null!;
+
   // DmsdocumentAccessLogDto -----------------------
   //public long LogId { get; set; }
 
@@ -78,4 +80,9 @@ public class DMSDto
   //public string FilePath { get; set; } = null!;
   public DateTime? UploadedDate { get; set; }
   public string? UploadedBy { get; set; }
+}
+
+public class Document_SystemLog
+{
+  public string SystemTag { get; set; }
 }

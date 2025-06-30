@@ -6,6 +6,18 @@ public static class RouteConstants
 {
   public const string BaseRoute = "bdDevs-crm";
 
+
+  #region Test
+  public const string TestDDL = "test-ddl";
+  public const string Tests = "tests";
+  public const string GetTest = "get-test";
+  public const string ReadTest = "test/key/{key}";
+  public const string TestCreate = "test";
+  public const string TestUpdate = "test/{key:int}";
+  public const string TestDelete = "test/{key:int}";
+  public const string TestSearch = "test/{key:int}";
+  #endregion Test
+
   #region Authentication
   public const string Login = "login";
   public const string GetUserInfo = "user-info";

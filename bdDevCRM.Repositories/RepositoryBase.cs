@@ -54,7 +54,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   {
     if (_currentTransaction != null)
       throw new InvalidOperationException("A transaction is already in progress.");
-
     _currentTransaction = await _context.Database.BeginTransactionAsync();
   }
 
@@ -726,7 +725,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   }
 
 
-
   // Helper method to process a property
   private void ProcessProperty<T>(DbDataReader reader, T entity, PropertyInfo property, int columnIndex)
   {
@@ -786,9 +784,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     return char.ToLowerInvariant(name[0]) + name.Substring(1);
   }
   #endregion grid with duplicate column name and insensative column and property name
-
-
-
 
   public async Task<TResult> ExecuteSingleData<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
   {
@@ -948,9 +943,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
     return result;
   }
-
-
-
 
   public async Task<IEnumerable<TResult>> ExecuteListQuery<TResult>(string query, SqlParameter[] parameters = null) where TResult : class, new()
   {

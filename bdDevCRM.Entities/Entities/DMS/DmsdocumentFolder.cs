@@ -11,7 +11,7 @@ public partial class DmsdocumentFolder
 
     public string FolderName { get; set; } = null!;
 
-    public string OwnerId { get; set; } = null!;
+    public string? OwnerId { get; set; } = null!;
 
     public string ReferenceEntityType { get; set; } = null!;
 

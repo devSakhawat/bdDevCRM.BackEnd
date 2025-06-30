@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using NLog;
@@ -103,12 +104,44 @@ app.UseResponseCompression();
 //}
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//  FileProvider = new PhysicalFileProvider(
+//        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads")),
+//  RequestPath = "/Uploads"
+//});
+
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//  FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads")),
+//  RequestPath = "/Uploads",
+//  ServeUnknownFileTypes = true, // important for .pdf
+//  DefaultContentType = "application/octet-stream"
+//});
+
+
+
+
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
   ForwardedHeaders = ForwardedHeaders.All
 });
 app.UseCors("CorsPolicy");
+app.UseStaticFiles(new StaticFileOptions
+{
+  FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads")),
+  RequestPath = "/Uploads",
+  OnPrepareResponse = ctx =>
+  {
+    // CORS headers properly set
+    ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+    ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
+    ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");
+    ctx.Context.Response.Headers.Append("Cache-Control", "public, max-age=3600");
+  }
+});
+
 
 // Add these lines in this specific order
 app.UseAuthentication(); // Must come before authorization

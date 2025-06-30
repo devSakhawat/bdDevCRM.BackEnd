@@ -1,6 +1,7 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
@@ -34,7 +35,11 @@ public class CRMInstituteTypeController : BaseApiController
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
     var res = await _serviceManager.CRMInstituteTypes.GetInstituteTypesDDLAsync(trackChanges: false);
-    return Ok(res);
+    //return Ok(res);
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<CRMInstituteTypeDto>>("No institute type found"));
+
+    return Ok(ResponseHelper.Success(res, "Institute type retrieved successfully"));
   }
 
   // 2️⃣ Summary Grid --------------------------------------------------

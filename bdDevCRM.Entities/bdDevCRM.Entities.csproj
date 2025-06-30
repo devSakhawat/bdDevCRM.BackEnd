@@ -8,11 +8,8 @@
 
   <ItemGroup>
     <Compile Remove="CRMGrid\StaticData\**" />
-    <Compile Remove="Repository\**" />
     <EmbeddedResource Remove="CRMGrid\StaticData\**" />
-    <EmbeddedResource Remove="Repository\**" />
     <None Remove="CRMGrid\StaticData\**" />
-    <None Remove="Repository\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +29,7 @@
 
   <ItemGroup>
     <Folder Include="Entities\Entities\" />
+    <Folder Include="Repository\Context\" />
   </ItemGroup>
 
 </Project>

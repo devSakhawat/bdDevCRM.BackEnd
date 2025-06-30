@@ -2,8 +2,10 @@
 using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -39,7 +41,12 @@ public class CountryController : BaseApiController
 
     //var res = await _serviceManager.Currencies.GetCurrenciesDDLAsync();
     var res = await _serviceManager.Countries.GetCountriesDDLAsync(trackChanges: false);
-    return Ok(res);
+
+    //return Ok(res);
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<CountryDDL>>("No country found"));
+
+    return Ok(ResponseHelper.Success(res, "Country retrieved successfully"));
   }
 
 

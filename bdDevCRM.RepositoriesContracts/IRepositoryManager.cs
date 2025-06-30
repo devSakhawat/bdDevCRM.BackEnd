@@ -32,7 +32,7 @@ public interface IRepositoryManager : IDisposable
   IEmployeeRepository Employees { get; }
   IEmployeeTypeRepository EmployeeTypes { get; }
   IBranchRepository Branches { get; }
-  IDepartmentRepository departments { get; }
+  //IDepartmentRepository departments { get; }
   // instance should be small letter.
 
   #region CRM

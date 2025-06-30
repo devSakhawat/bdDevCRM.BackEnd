@@ -7,7 +7,7 @@ using bdDevCRM.Sql.Context;
 namespace bdDevCRM.Repositories.Core.HR;
 
 
-public class DepartmentRepository : RepositoryBase<Department>, IDepartmentRepository
-{
-  public DepartmentRepository(CRMContext context) : base(context) { }
-}
+//public class DepartmentRepository : RepositoryBase<Department>, IDepartmentRepository
+//{
+//  public DepartmentRepository(CRMContext context) : base(context) { }
+//}

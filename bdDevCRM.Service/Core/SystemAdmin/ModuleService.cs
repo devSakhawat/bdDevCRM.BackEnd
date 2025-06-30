@@ -1,5 +1,6 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;

@@ -5,6 +5,7 @@ using bdDevCRM.Repositories;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Services;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Sql.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;

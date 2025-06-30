@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.HR;
 using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.Sql.Context;
@@ -18,8 +19,7 @@ public class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
 
   public async Task<EmploymentRepositoryDto> GetEmploymentByHrRecordId(int hrRecordId)
   {
-    string employmentQuery =
-    @"SELECT EMPLOYEETYPE.IsContract, EMPLOYEETYPE.IsProbationary, Employment.HRRecordId, EmployeeId, EmployeeType, 
+    string employmentQuery = string.Format(@"SELECT EMPLOYEETYPE.IsContract, EMPLOYEETYPE.IsProbationary, Employment.HRRecordId, EmployeeId, EmployeeType, 
              DESIGNATIONID, StartDate, EmploymentDate, CompanyId, DepartmentId, ReportTo, TelephoneExtension, OfficialEmail, 
              EmergencyContactName, EmergencyContactNo, PossibleConfirmationDate, Duties, AttendanceCardNo, UserId, 
              Employment.LastUpdateDate, BankBranchId, BankAccountNo, BRANCHID, GPFNO, JobEndDate, JOININGPOST, EXPERIENCE, 
@@ -27,7 +27,8 @@ public class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
              FacilityId, SectionId, Approver, ApproverDepartmentId, SalaryLocation 
       FROM Employment 
       INNER JOIN EMPLOYEETYPE ON EMPLOYEETYPE.EMPLOYEETYPEID = Employment.EmployeeType 
-      WHERE Employment.HRRecordId = 10468";
+      WHERE Employment.HRRecordId = {0}", hrRecordId);
+    ;
 
     // Call the generic method with the hardcoded query
     var result = await ExecuteSingleData<EmploymentRepositoryDto>(employmentQuery);

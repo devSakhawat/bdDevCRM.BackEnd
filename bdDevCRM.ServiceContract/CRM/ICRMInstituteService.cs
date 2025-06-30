@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -9,10 +10,13 @@ public interface ICRMInstituteService
 {
   Task<IEnumerable<CrmInstituteDto>> GetInstitutesDDLAsync(bool trackChanges = false);
   Task<GridEntity<CrmInstituteDto>> SummaryGrid(CRMGridOptions options);
-  Task<string> CreateNewRecordAsync(CrmInstituteDto dto);
+  Task<CrmInstituteDto> CreateNewRecordAsync(CrmInstituteDto dto ,UsersDto currentUser);
   Task<string> UpdateRecordAsync(int key, CrmInstituteDto dto, bool trackChanges);
   Task<string> DeleteRecordAsync(int key, CrmInstituteDto dto);
-  Task<string> SaveOrUpdateAsync(int key, CrmInstituteDto dto);
+
+  Task<CrmInstituteDto> GetInstituteNameIdAsync(string name, bool trackChanges = false);
+
+  //Task<string> SaveOrUpdateAsync(int key, CrmInstituteDto dto);
 }
 
 

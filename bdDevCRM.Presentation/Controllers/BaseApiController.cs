@@ -11,6 +11,23 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#region Old_Code
+
+
 [Route(RouteConstants.BaseRoute)] // Assuming RouteConstants.BaseRoute is defined elsewhere, e.g., "api/[controller]"
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -107,3 +124,6 @@ public class BaseApiController : ControllerBase
 //{
 
 //}
+
+
+#endregion Old_Code

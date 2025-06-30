@@ -5,7 +5,7 @@ namespace bdDevCRM.Entities.Entities.CRM;
 
 public partial class CrminstituteType
 {
-  public int InstituteTypeId { get; set; }
+    public int InstituteTypeId { get; set; }
 
-  public string InstituteTypeName { get; set; } = null!;
+    public string InstituteTypeName { get; set; } = null!;
 }

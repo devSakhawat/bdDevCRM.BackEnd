@@ -2,7 +2,7 @@
 
 namespace bdDevCRM.RepositoriesContracts.Core.HR;
 
-public interface IDepartmentRepository : IRepositoryBase<Department>
-{
+//public interface IDepartmentRepository : IRepositoryBase<Department>
+//{
 
-}
+//}

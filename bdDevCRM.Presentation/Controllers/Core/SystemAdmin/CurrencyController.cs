@@ -2,7 +2,9 @@
 using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +39,11 @@ public class CurrencyController : BaseApiController
     }
 
     var res = await _serviceManager.Currencies.GetCurrenciesDDLAsync();
-    return Ok(res);
+    //return Ok(res);
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<CurrencyDDL>>("No currency found"));
+
+    return Ok(ResponseHelper.Success(res, "Currency retrieved successfully"));
   }
 
   

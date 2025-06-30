@@ -1,15 +1,18 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
 public partial class Crminstitute
 {
+  [Key]
     public int InstituteId { get; set; }
 
     public int CountryId { get; set; }
 
-    public string InstituteName { get; set; }
+    public string InstituteName { get; set; } = null!;
 
     public string? Campus { get; set; }
 
