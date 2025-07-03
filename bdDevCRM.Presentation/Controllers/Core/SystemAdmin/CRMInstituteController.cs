@@ -35,8 +35,16 @@ public class CRMInstituteController : BaseApiController
   [HttpGet(RouteConstants.InstituteDDL)]
   public async Task<IActionResult> InstituteDDL()
   {
-    int userId = HttpContext.GetUserId();
-    var currentUser = HttpContext.GetCurrentUser();
+    //int userId = HttpContext.GetUserId();
+    //var currentUser = HttpContext.GetCurrentUser();
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      return Unauthorized("Unauthorized attempt to get data!");
+
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null) return Unauthorized("User not found in cache.");
 
     var res = await _serviceManager.CRMInstitutes.GetInstitutesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
@@ -75,7 +83,6 @@ public class CRMInstituteController : BaseApiController
   /* --------------------------------------------- */
   [HttpPost(RouteConstants.CreateInstitute)]
   [RequestSizeLimit(1_000_000)]
-  [AllowAnonymous]
   public async Task<IActionResult> CreateNewRecord(IFormCollection form)
   {
     try

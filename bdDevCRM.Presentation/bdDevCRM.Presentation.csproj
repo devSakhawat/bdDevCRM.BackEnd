@@ -14,11 +14,12 @@
   <ItemGroup>
     <ProjectReference Include="..\bdDevCRM.LoggerSevice\bdDevCRM.LoggerSevice.csproj" />
     <ProjectReference Include="..\bdDevCRM.ServiceContract\bdDevCRM.ServiceContract.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Shared\bdDevCRM.Shared.csproj" />
     <ProjectReference Include="..\bdDevCRM.Utilities\bdDevCRM.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ApiResponse\" />
+    <Folder Include="ActionFIlters\ApiResponse\" />
   </ItemGroup>
 
 </Project>

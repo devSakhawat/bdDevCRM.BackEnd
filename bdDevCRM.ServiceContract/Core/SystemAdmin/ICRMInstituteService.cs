@@ -4,7 +4,7 @@ using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 
-namespace bdDevCRM.ServicesContract.CRM;
+namespace bdDevCRM.ServiceContract.Core.SystemAdmin;
 
 public interface ICRMInstituteService
 {

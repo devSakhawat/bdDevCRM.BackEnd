@@ -522,9 +522,10 @@ public partial class CRMContext : DbContext
 
     modelBuilder.Entity<Crmcourse>(entity =>
     {
-      entity
-          .HasNoKey()
-          .ToTable("CRMCourse");
+      entity.HasKey(e => e.CourseId);
+      //entity
+      //    .HasNoKey()
+      //    .ToTable("CRMCourse");
 
       entity.Property(e => e.AdditionalInformationOfCourse)
           .HasMaxLength(300)

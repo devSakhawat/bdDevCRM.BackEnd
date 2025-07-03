@@ -65,26 +65,26 @@ public class CRMApplicationController : BaseApiController
     return Ok(res);
   }
 
-  [HttpGet(RouteConstants.CRMCourseDLLByInstitute)]
-  public async Task<IActionResult> CRMCourseDLLByInstitute([FromQuery] int countryId)
-  {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-    {
-      return Unauthorized("Unauthorized attempt to get data!");
-    }
-    var userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+  //[HttpGet(RouteConstants.CRMCourseDLLByInstitute)]
+  //public async Task<IActionResult> CRMCourseDLLByInstitute([FromQuery] int countryId)
+  //{
+  //  var userIdClaim = User.FindFirst("UserId")?.Value;
+  //  if (string.IsNullOrEmpty(userIdClaim))
+  //  {
+  //    return Unauthorized("Unauthorized attempt to get data!");
+  //  }
+  //  var userId = Convert.ToInt32(userIdClaim);
+  //  UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
 
-    if (currentUser == null)
-    {
-      return Unauthorized("User not found in cache.");
-    }
+  //  if (currentUser == null)
+  //  {
+  //    return Unauthorized("User not found in cache.");
+  //  }
 
-    var res = await _serviceManager.CRMCourses.CRMCourseDLLByInstitute(countryId, trackChanges: false);
+  //  var res = await _serviceManager.CRMCourses.CRMCourseDLLByInstitute(countryId, trackChanges: false);
 
-    return Ok(res);
-  }
+  //  return Ok(res);
+  //}
   
 
   [HttpGet(RouteConstants.CRMInstituteTypeDDL)]
