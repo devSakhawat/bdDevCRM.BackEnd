@@ -7,7 +7,8 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 using bdDevCRM.Utilities.Constants;
-using Microsoft.AspNetCore.Authorization;
+using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -46,24 +47,49 @@ public class CRMInstituteController : BaseApiController
   }
 
   // --------- 2. Summary Grid ----------------------------------------
+  //[HttpPost(RouteConstants.InstituteSummary)]
+  //public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
+  //{
+  //  var userIdClaim = User.FindFirst("UserId")?.Value;
+  //  if (string.IsNullOrEmpty(userIdClaim))
+  //    return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+
+  //  int userId = Convert.ToInt32(userIdClaim);
+  //  UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+  //  if (currentUser == null)
+  //    return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+
+  //  if (options == null)
+  //    return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+
+
+  //  var summaryGrid = await _serviceManager.CRMInstitutes.SummaryGrid(options);
+  //  //return (summaryGrid != null) ? Ok(summaryGrid) : NoContent();
+  //  if (summaryGrid == null || !summaryGrid.Items.Any())
+  //    return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
+
+  //  return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+  //}
+
+
   [HttpPost(RouteConstants.InstituteSummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      throw new GenericUnauthorizedException("User authentication required.");
 
-    int userId = Convert.ToInt32(userIdClaim);
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      throw new GenericUnauthorizedException("User session expired.");
 
     if (options == null)
-      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
-
+      throw new NullModelBadRequestException(nameof(CRMGridOptions));
 
     var summaryGrid = await _serviceManager.CRMInstitutes.SummaryGrid(options);
-    //return (summaryGrid != null) ? Ok(summaryGrid) : NoContent();
     if (summaryGrid == null || !summaryGrid.Items.Any())
       return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
 
@@ -75,44 +101,74 @@ public class CRMInstituteController : BaseApiController
   /* --------------------------------------------- */
   [HttpPost(RouteConstants.CreateInstitute)]
   [RequestSizeLimit(1_000_000)]
-  [AllowAnonymous]
-  public async Task<IActionResult> CreateNewRecord(IFormCollection form)
+  public async Task<IActionResult> CreateNewRecord([FromForm] CrmInstituteDto form)
   {
-    try
-    {
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+    if (form == null)
+      throw new NullModelBadRequestException(nameof(CrmInstituteDto));
 
-      int userId = Convert.ToInt32(userIdClaim);
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
 
-      var modelDto = form["modelDto"];
-      if (string.IsNullOrEmpty(modelDto))
-        return BadRequest(ResponseHelper.BadRequest("Institute data is required"));
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
 
-      var logoFile = form.Files["InstitutionLogoFile"];
-      var prospectusFile = form.Files["InstitutionProspectusFile"];
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
 
-      var instituteModel = JsonConvert.DeserializeObject<CrmInstituteDto>(modelDto);
-      instituteModel.InstitutionLogoFile = logoFile;
-      instituteModel.InstitutionProspectusFile = prospectusFile;
+    if (!Request.HasFormContentType)
+      throw new GenericBadRequestException("Invalid content type. Expected multipart/form-data.");
 
-      CrmInstituteDto res = await _serviceManager.CRMInstitutes.CreateNewRecordAsync(instituteModel, currentUser);
-      await SaveInstituteFilesAsync(res, currentUser);
+    // Save institute record
+    CrmInstituteDto savedDto = await _serviceManager.CRMInstitutes.CreateNewRecordAsync(form, currentUser);
 
-      if (res.InstituteId > 0)
-        return Ok(ResponseHelper.Created(res, "Institute created successfully"));
-      else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create institute"));
-    }
-    catch (JsonException)
-    {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in institute data"));
-    }
+    // Save attached files (Logo, Prospectus)
+    await SaveInstituteFilesAsync(savedDto, currentUser);
+
+    if (savedDto.InstituteId <= 0)
+      throw new InvalidCreateOperationException("Failed to create institute record.");
+
+    return Ok(ResponseHelper.Created(savedDto, "Institute created successfully."));
   }
+
+  //public async Task<IActionResult> CreateNewRecord(IFormCollection form)
+  //{
+  //  try
+  //  {
+  //    var userIdClaim = User.FindFirst("UserId")?.Value;
+  //    if (string.IsNullOrEmpty(userIdClaim))
+  //      return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+
+  //    int userId = Convert.ToInt32(userIdClaim);
+  //    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+  //    if (currentUser == null)
+  //      return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+
+  //    var modelDto = form["modelDto"];
+  //    if (string.IsNullOrEmpty(modelDto))
+  //      return BadRequest(ResponseHelper.BadRequest("Institute data is required"));
+
+  //    var logoFile = form.Files["InstitutionLogoFile"];
+  //    var prospectusFile = form.Files["InstitutionProspectusFile"];
+
+  //    var instituteModel = JsonConvert.DeserializeObject<CrmInstituteDto>(modelDto);
+  //    instituteModel.InstitutionLogoFile = logoFile;
+  //    instituteModel.InstitutionProspectusFile = prospectusFile;
+
+  //    CrmInstituteDto res = await _serviceManager.CRMInstitutes.CreateNewRecordAsync(instituteModel, currentUser);
+  //    await SaveInstituteFilesAsync(res, currentUser);
+
+  //    if (res.InstituteId > 0)
+  //      return Ok(ResponseHelper.Created(res, "Institute created successfully"));
+  //    else
+  //      return StatusCode(500, ResponseHelper.InternalServerError("Failed to create institute"));
+  //  }
+  //  catch (JsonException)
+  //  {
+  //    return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in institute data"));
+  //  }
+  //}
 
 
   // --------- 4. Update ----------------------------------------------
@@ -132,6 +188,10 @@ public class CRMInstituteController : BaseApiController
         return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
 
       var res = await _serviceManager.CRMInstitutes.UpdateRecordAsync(key, modelDto, false);
+
+
+      // Save attached files (Logo, Prospectus)
+      await SaveInstituteFilesAsync(modelDto, currentUser);
 
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "Institute updated successfully"));

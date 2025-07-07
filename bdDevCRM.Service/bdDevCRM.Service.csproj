@@ -10,6 +10,7 @@
     <ProjectReference Include="..\bdDevCRM.Entities\bdDevCRM.Entities.csproj" />
     <ProjectReference Include="..\bdDevCRM.RepositoriesContracts\bdDevCRM.RepositoriesContracts.csproj" />
     <ProjectReference Include="..\bdDevCRM.ServiceContract\bdDevCRM.ServiceContract.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Shared\bdDevCRM.Shared.csproj" />
     <ProjectReference Include="..\bdDevCRM.Utilities\bdDevCRM.Utilities.csproj" />
   </ItemGroup>
 

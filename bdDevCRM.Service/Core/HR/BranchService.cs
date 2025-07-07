@@ -1,11 +1,12 @@
 ﻿using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos;
 using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 

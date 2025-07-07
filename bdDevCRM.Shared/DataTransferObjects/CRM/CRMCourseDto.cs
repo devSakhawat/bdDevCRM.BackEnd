@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
-public class CRMCourseDto
+public class CrmCourseDto
 {
   public int CourseId { get; set; }
 
@@ -59,4 +59,8 @@ public class CRMCourseDto
   public string? After2YearsPswcompletingCourse { get; set; }
 
   public string? DocumentId { get; set; }
+
+  // --- Foreign Key Name Fields ---
+  public string? InstituteName { get; set; }
+  public string? CurrencyName { get; set; }
 }

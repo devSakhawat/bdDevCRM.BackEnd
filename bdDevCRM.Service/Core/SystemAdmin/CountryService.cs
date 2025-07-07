@@ -1,7 +1,7 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Entities.Core;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects;
@@ -12,6 +12,7 @@ using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
+using bdDevCRM.Utilities.Exceptions;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 

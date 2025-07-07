@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.Exceptions;
+﻿
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Service.Authentication;
 using bdDevCRM.Service.Core.HR;
@@ -13,6 +13,7 @@ using bdDevCRM.Services.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.CRM;
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -89,7 +90,7 @@ public sealed class ServiceManager : IServiceManager
     #region CRM
     _crminstitute = new Lazy<ICRMInstituteService>(() => new CRMInstituteService(repository, logger, configuration, httpContextAccessor));
     _crminstituteType = new Lazy<ICRMInstituteTypeService>(() => new CRMInstituteTypeService(repository, logger, configuration));
-    _crmcourse = new Lazy<ICRMCourseService>(() => new CRMCourseService(repository, logger, configuration));
+    _crmcourse = new Lazy<ICRMCourseService>(() => new CRMCourseService(repository, logger, configuration, httpContextAccessor));
     _crmmonth = new Lazy<ICRMMonthService>(() => new CRMMonthService(repository, logger, configuration));
     _crmyear = new Lazy<ICRMYearService>(() => new CRMYearService(repository, logger, configuration));
     #endregion CRM

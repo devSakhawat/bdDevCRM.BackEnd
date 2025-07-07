@@ -1,5 +1,4 @@
-﻿using bdDevCRM.Entities.Exceptions;
-using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;

@@ -1,10 +1,11 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.DMS;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System;

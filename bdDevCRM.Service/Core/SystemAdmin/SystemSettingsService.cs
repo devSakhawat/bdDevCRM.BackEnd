@@ -1,6 +1,6 @@
 ﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects;

@@ -144,18 +144,21 @@ public static class RouteConstants
   public const string CreateOrUpdateInstitute = "institute-saveORupdate/{key:int}";
   #endregion Institute
 
+  #region Course
+  public const string CourseDDL = "crm-course-ddl";
+  public const string CourseSummary = "crm-course-summary";
+  public const string CreateCourse = "crm-course";
+  public const string UpdateCourse = "crm-course/{key:int}";
+  public const string DeleteCourse = "crm-course/{key:int}";
+  public const string CreateOrUpdateCourse = "course-saveORupdate/{key:int}";
+  #endregion Course
+
   #region Currency
   public const string CurrencyDDL = "currencyddl";
   public const string CurrencySummary = "currency-summary";
   public const string CreateCurrency = "currency";
   public const string CreateOrUpdateCurrency = "currency/{key}";
   public const string DeleteCurrency = "currency/{key}";
-  //public const string CRMCountryDLL = "crm-countryddl";
-  //public const string CRMInstituteDLLByCountry = "crm-instituteddl-country";
-  //public const string CRMCourseDLLByInstitute = "crm-courseddl-institute";
-  //public const string CRMMonthDLL = "crm-monthddl";
-  //public const string CRMYearDLL = "crm-yearddl";
-  //public const string CRMInstituteTypeDDL = "crm-institute-type/";
   #endregion Currency
 
   #region CRMApplication

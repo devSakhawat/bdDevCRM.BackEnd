@@ -1,10 +1,9 @@
-﻿using bdDevCRM.Entities.Exceptions;
+﻿
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client.Region;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 

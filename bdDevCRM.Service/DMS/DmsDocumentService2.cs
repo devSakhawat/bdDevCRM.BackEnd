@@ -4,7 +4,7 @@
 //using bdDevCRM.Entities.CRMGrid.GRID;
 //using bdDevCRM.Entities.Entities.System;
 //using bdDevCRM.Entities.Entities.DMS;
-//using bdDevCRM.Entities.Exceptions;
+//
 //using bdDevCRM.RepositoriesContracts;
 //using bdDevCRM.ServiceContract.DMS;
 //using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -359,7 +359,7 @@
 
 //using bdDevCRM.Entities.CRMGrid.GRID;
 //using bdDevCRM.Entities.Entities.DMS;
-//using bdDevCRM.Entities.Exceptions;
+//
 //using bdDevCRM.RepositoriesContracts;
 //using bdDevCRM.ServiceContract.DMS;
 //using bdDevCRM.Shared.DataTransferObjects.DMS;

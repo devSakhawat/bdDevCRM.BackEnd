@@ -1,11 +1,11 @@
-﻿using bdDevCRM.Api.ApiResponseError;
-using bdDevCRM.Entities.Exceptions;
-using bdDevCRM.Entities.Exceptions.BaseException;
-using bdDevCRM.RepositoriesContracts;
+﻿using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Shared.ApiResponse;
+using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Utilities.Exceptions.BaseException;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Text.Json;
 
 namespace bdDevCRM.Api.Middleware;
@@ -49,85 +49,121 @@ public class ExceptionMiddleware
     ApiException response = ex switch
     {
       // Custom validation exceptions
-      UsernamePasswordMismatchException userPassMismatch => new ApiException(userPassMismatch.StatusCode, ex.Message)
+      UsernamePasswordMismatchException userPassMismatch => new ApiException(
+          userPassMismatch.StatusCode,
+          ex.Message
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = nameof(UsernamePasswordMismatchException)
+        ErrorType = nameof(UsernamePasswordMismatchException),
       },
 
-      BadRequestException badRequestEx => new ApiException(badRequestEx.StatusCode, ex.Message)
+      BadRequestException badRequestEx => new ApiException(
+          badRequestEx.StatusCode,
+          ex.Message
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = nameof(BadRequestException)
+        ErrorType = nameof(BadRequestException),
       },
 
-      ConflictException conflictEx => new ApiException(conflictEx.StatusCode, ex.Message)
+      DuplicateRecordException dupEx => new ApiException(dupEx.StatusCode, ex.Message)
       {
         CorrelationId = correlationId,
-        ErrorType = nameof(ConflictException)
+        ErrorType = nameof(DuplicateRecordException),
+      },
+
+      ConflictException conflictEx => new ApiException(
+          conflictEx.StatusCode,
+          ex is DuplicateRecordException ? ex.Message : "Conflict occurred."
+      )
+      {
+        CorrelationId = correlationId,
+        ErrorType = ex.GetType().Name,
       },
 
       NotFoundException notFoundEx => new ApiException(notFoundEx.StatusCode, ex.Message)
       {
         CorrelationId = correlationId,
-        ErrorType = nameof(NotFoundException)
+        ErrorType = nameof(NotFoundException),
       },
 
-      ServiceUnavailableException serviceEx => new ApiException(serviceEx.StatusCode, ex.Message)
+      ServiceUnavailableException serviceEx => new ApiException(
+          serviceEx.StatusCode,
+          ex.Message
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = nameof(ServiceUnavailableException)
+        ErrorType = nameof(ServiceUnavailableException),
       },
 
-      ForbiddenAccessException forbiddenEx => new ApiException(forbiddenEx.StatusCode, ex.Message)
+      ForbiddenAccessException forbiddenEx => new ApiException(
+          forbiddenEx.StatusCode,
+          ex.Message
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = nameof(ForbiddenAccessException)
+        ErrorType = nameof(ForbiddenAccessException),
       },
 
-      UnauthorizedException unauthorized => new ApiException(unauthorized.StatusCode, ex.Message)
+      UnauthorizedException unauthorized => new ApiException(
+          unauthorized.StatusCode,
+          ex.Message
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = nameof(UnauthorizedException)
+        ErrorType = nameof(UnauthorizedException),
       },
 
       // Remove DuplicateRecordException as it is already handled by ConflictException
-      InvalidCreateOperationException invalidCreateEx => new ApiException(invalidCreateEx.StatusCode, invalidCreateEx.Message)
+      InvalidCreateOperationException invalidCreateEx => new ApiException(
+          invalidCreateEx.StatusCode,
+          invalidCreateEx.Message
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = nameof(InvalidCreateOperationException)
+        ErrorType = nameof(InvalidCreateOperationException),
       },
 
       // Built-in exceptions
-      System.UnauthorizedAccessException => new ApiException(401, "You are not authorized to perform this action.")
+      System.UnauthorizedAccessException => new ApiException(
+          401,
+          "You are not authorized to perform this action."
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = "UnauthorizedAccess"
+        ErrorType = "UnauthorizedAccess",
       },
 
       KeyNotFoundException => new ApiException(404, "The requested resource was not found.")
       {
         CorrelationId = correlationId,
-        ErrorType = "NotFound"
+        ErrorType = "NotFound",
       },
 
       ValidationException => new ApiException(400, "One or more validation errors occurred.")
       {
         CorrelationId = correlationId,
-        ErrorType = "Validation"
+        ErrorType = "Validation",
       },
 
       // JWT Token exceptions
-      SecurityTokenExpiredException => new ApiException(401, "Your authentication token has expired. Please log in again.")
+      SecurityTokenExpiredException => new ApiException(
+          401,
+          "Your authentication token has expired. Please log in again."
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = "TokenExpired"
+        ErrorType = "TokenExpired",
       },
 
-      SecurityTokenException or SecurityTokenValidationException => new ApiException(401, "Invalid authentication token. Please log in again.")
+      SecurityTokenException or SecurityTokenValidationException => new ApiException(
+          401,
+          "Invalid authentication token. Please log in again."
+      )
       {
         CorrelationId = correlationId,
-        ErrorType = "InvalidToken"
+        ErrorType = "InvalidToken",
       },
 
       // Database exceptions
@@ -135,16 +171,19 @@ public class ExceptionMiddleware
       {
         CorrelationId = correlationId,
         ErrorType = "DatabaseError",
-        Details = _env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null
+        Details = _env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null,
       },
 
       // Generic exception
-      _ => new ApiException(500, _env.IsDevelopment() ? GetMostRelevantMessage(ex) : "An unexpected error occurred.")
+      _ => new ApiException(
+          500,
+          _env.IsDevelopment() ? GetMostRelevantMessage(ex) : "An unexpected error occurred."
+      )
       {
         CorrelationId = correlationId,
         ErrorType = ex.GetType().Name,
-        Details = _env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null
-      }
+        Details = _env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null,
+      },
     };
 
     context.Response.StatusCode = response.StatusCode;
@@ -152,12 +191,14 @@ public class ExceptionMiddleware
     var options = new JsonSerializerOptions
     {
       PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-      WriteIndented = _env.IsDevelopment()
+      WriteIndented = _env.IsDevelopment(),
     };
 
     var json = JsonSerializer.Serialize(response, options);
     await context.Response.WriteAsync(json);
   }
+
+
 
   private string GetMostRelevantMessage(Exception exception)
   {
@@ -188,6 +229,109 @@ public class ExceptionMiddleware
     return "A database error occurred. Please verify your input.";
   }
 }
+
+public static class ExceptionToApiResponseMapper
+{
+  public static ApiException Map(Exception ex, IHostEnvironment env, out int statusCode)
+  {
+    string message = ex.Message;
+    string errorType = ex.GetType().Name;
+    string details = env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null;
+
+    (statusCode, message, errorType) = ex switch
+    {
+      // Custom exception types
+      BadRequestException => (
+          (int)HttpStatusCode.BadRequest,
+          message,
+          nameof(BadRequestException)
+      ),
+      UnauthorizedException => (
+          (int)HttpStatusCode.Unauthorized,
+          message,
+          nameof(UnauthorizedException)
+      ),
+      ForbiddenAccessException => (
+          (int)HttpStatusCode.Forbidden,
+          message,
+          nameof(ForbiddenAccessException)
+      ),
+      NotFoundException => ((int)HttpStatusCode.NotFound, message, nameof(NotFoundException)),
+      ConflictException => ((int)HttpStatusCode.Conflict, message, nameof(ConflictException)),
+      ServiceUnavailableException => (
+          (int)HttpStatusCode.ServiceUnavailable,
+          message,
+          nameof(ServiceUnavailableException)
+      ),
+
+      // JWT and token issues
+      SecurityTokenExpiredException => (
+          401,
+          "Your authentication token has expired. Please log in again.",
+          "TokenExpired"
+      ),
+      SecurityTokenValidationException => (
+          401,
+          "Invalid authentication token. Please log in again.",
+          "InvalidToken"
+      ),
+
+      // Framework
+      KeyNotFoundException => (404, "The requested resource was not found.", "KeyNotFound"),
+      UnauthorizedAccessException => (
+          401,
+          "You are not authorized to perform this action.",
+          "UnauthorizedAccess"
+      ),
+      ValidationException => (400, "One or more validation errors occurred.", "Validation"),
+
+      // EF Core
+      DbUpdateException => (500, SanitizeDatabaseErrorMessage(ex), "DatabaseError"),
+
+      // Default fallback
+      _ => (
+          500,
+          env.IsDevelopment() ? GetMostRelevantMessage(ex) : "An unexpected error occurred.",
+          errorType
+      ),
+    };
+
+    return new ApiException(statusCode, message) { ErrorType = errorType, Details = details };
+  }
+
+  private static string GetMostRelevantMessage(Exception exception)
+  {
+    if (exception.InnerException?.InnerException != null)
+      return exception.InnerException.InnerException.Message;
+    if (exception.InnerException != null)
+      return exception.InnerException.Message;
+    return exception.Message;
+  }
+
+  private static string GetMostRelevantStackTrace(Exception exception)
+  {
+    if (exception.InnerException?.InnerException != null)
+      return exception.InnerException.InnerException.StackTrace;
+    if (exception.InnerException != null)
+      return exception.InnerException.StackTrace;
+    return exception.StackTrace;
+  }
+
+  private static string SanitizeDatabaseErrorMessage(Exception exception)
+  {
+    string message = GetMostRelevantMessage(exception);
+
+    if (message.Contains("foreign key", StringComparison.OrdinalIgnoreCase))
+      return "A database relation constraint has been violated. The related record cannot be deleted.";
+    if (
+        message.Contains("unique", StringComparison.OrdinalIgnoreCase)
+        || message.Contains("duplicate", StringComparison.OrdinalIgnoreCase)
+    )
+      return "This data already exists. Please use a different value.";
+    return "A database error occurred. Please verify your input.";
+  }
+}
+
 
 #region Old Code
 /////////////// Old

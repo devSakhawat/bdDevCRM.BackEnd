@@ -1,11 +1,10 @@
 ﻿
 // CRM.Solution.Presentation/Controllers/BaseApiController.cs (or wherever your BaseApiController is located)
 
-using bdDevCRM.Entities.Exceptions;
-using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants; // Add this using directive if IServiceManager depends on IMemoryCache directly
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
