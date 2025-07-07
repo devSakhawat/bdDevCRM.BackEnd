@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ApiResponse\" />
+    <Folder Include="ActionFIlters\ApiResponse\" />
   </ItemGroup>
 
 </Project>

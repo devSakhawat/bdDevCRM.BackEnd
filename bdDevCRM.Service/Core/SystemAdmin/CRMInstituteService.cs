@@ -1,6 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
-
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.Shared.ApiResponse;
@@ -39,8 +38,6 @@ internal sealed class CRMInstituteService : ICRMInstituteService
 
   public async Task<GridEntity<CrmInstituteDto>> SummaryGrid(CRMGridOptions options)
   {
-    string sql =
-        @"select InstituteId ,CRMInstitute.CountryId ,InstituteName ,Campus ,Website ,MonthlyLivingCost ,FundsRequirementforVisa ,ApplicationFee
 ,CRMInstitute.CurrencyId ,IsLanguageMandatory ,LanguagesRequirement ,InstitutionalBenefits ,PartTimeWorkDetails ,ScholarshipsPolicy ,InstitutionStatusNotes
 ,CRMInstitute.InstituteTypeId ,InstituteCode ,InstituteEmail ,InstituteAddress ,InstitutePhoneNO ,InstituteMobileNo,CRMInstitute.Status ,Country.CountryName 
 ,CurrencyInfo.CurrencyName ,CRMInstituteType.InstituteTypeName ,docLogo.FilePath as InstitutionLogo , docProspectus.FilePath as InstitutionProspectus
@@ -67,7 +64,7 @@ left join DMSDocument docProspectus on CRMInstitute.InstituteId = docProspectus.
 
     var entity = MyMapper.JsonClone<CrmInstituteDto, Crminstitute>(dto);
     dto.InstituteId = await _repository.CRMInstitutes.CreateAndGetIdAsync(entity);
-    
+
     return dto;
   }
 
@@ -342,5 +339,6 @@ left join DMSDocument docProspectus on CRMInstitute.InstituteId = docProspectus.
 
   //public Task<string> SaveOrUpdateAsync(int key, CrmInstituteDto dto) => dto.InstituteId == 0 ? CreateNewRecordAsync(dto) : UpdateRecordAsync(key, dto, false);
 }
+
 
 

@@ -1,32 +1,20 @@
-﻿
-
-
-
-using bdDevCRM.Shared.DataTransferObjects.CRM;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Extensions;
+using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
-//using global::bdDevCRM.Presentation.ActionFIlters;
-//using global::bdDevCRM.ServicesContract;
-//using global::bdDevCRM.Utilities.Constants;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Text.Json;
-using bdDevCRM.ServicesContract;
-using bdDevCRM.Presentation.Extensions;
-using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Presentation.ActionFIlters;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 [ApiController]
-[Route("api/[controller]")]
 public class CRMCourseController : BaseApiController
 {
   private readonly IMemoryCache _cache;
@@ -42,10 +30,33 @@ public class CRMCourseController : BaseApiController
   [HttpGet(RouteConstants.CourseDDL)]
   public async Task<IActionResult> CourseDDL()
   {
-    int userId = HttpContext.GetUserId();
-    var currentUser = HttpContext.GetCurrentUser();
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      return Unauthorized("Unauthorized attempt to get data!");
+
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null) return Unauthorized("User not found in cache.");
 
     var res = await _serviceManager.CRMCourses.GetCoursesDDLAsync(trackChanges: false);
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
+
+    return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
+  }
+
+  [HttpGet(RouteConstants.CourseByInstituteIdDDL)]
+  public async Task<IActionResult> CourseByInstituteIdDDL([FromRoute] int instituteId)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      return Unauthorized("Unauthorized attempt to get data!");
+
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null) return Unauthorized("User not found in cache.");
+
+    var res = await _serviceManager.CRMCourses.GetCourseByInstituteIdDDLAsync(instituteId, trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
 
@@ -69,17 +80,13 @@ public class CRMCourseController : BaseApiController
       return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
 
     var summaryGrid = await _serviceManager.CRMCourses.SummaryGrid(options);
-    if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<CrmCourseDto>>("No data found"));
-
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
   [HttpPost(RouteConstants.CreateCourse)]
   [RequestSizeLimit(1_000_000)]
-  [AllowAnonymous]
-  public async Task<IActionResult> CreateNewRecord([FromForm] CrmCourseDto modelDto)
+  public async Task<IActionResult> CreateNewRecord([FromBody]  CrmCourseDto modelDto)
   {
     try
     {
@@ -111,7 +118,7 @@ public class CRMCourseController : BaseApiController
   // --------- 4. Update ----------------------------------------------
   [HttpPut(RouteConstants.UpdateCourse)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> UpdateCourse([FromRoute] int key, [FromForm] CrmCourseDto modelDto)
+  public async Task<IActionResult> UpdateCourse([FromRoute] int key, [FromBody] CrmCourseDto modelDto)
   {
     try
     {

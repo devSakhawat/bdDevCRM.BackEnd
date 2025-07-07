@@ -27,7 +27,7 @@ using Microsoft.AspNetCore.Mvc;
 #region Old_Code
 
 
-[Route(RouteConstants.BaseRoute)] // Assuming RouteConstants.BaseRoute is defined elsewhere, e.g., "api/[controller]"
+[Route(RouteConstants.BaseRoute)]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 //[AuthorizeUser]

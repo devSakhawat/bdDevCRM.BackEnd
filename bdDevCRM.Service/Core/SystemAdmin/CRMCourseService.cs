@@ -1,6 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
-
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -37,6 +36,16 @@ internal sealed class CRMCourseService : ICRMCourseService
     var list = await _repository.CRMCourse.GetActiveCoursesAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("CrmCourse");
     return MyMapper.JsonCloneIEnumerableToList<Crmcourse, CrmCourseDto>(list);
+  }
+
+  public async Task<IEnumerable<CRMCourseDDLDto>> GetCourseByInstituteIdDDLAsync(int instituteId, bool trackChanges = false)
+  {
+    var list = await _repository.CRMCourse.ListByWhereWithSelectAsync(
+      selector: x => new CRMCourseDDLDto { CourseId = x.CourseId, CourseTitle = x.CourseTitle }
+      ,expression: x => x.InstituteId == instituteId, trackChanges: false);
+
+    return list.Any() ? MyMapper.JsonCloneIEnumerableToList<CRMCourseDDLDto, CRMCourseDDLDto>(list) 
+      : new List<CRMCourseDDLDto>();
   }
 
   public async Task<IEnumerable<CrmCourseDto>> GetActiveCoursesAsync(bool trackChanges = false)
@@ -142,7 +151,6 @@ from CrmCourse c
 left join CrmInstitute i on c.InstituteId = i.InstituteId
 left join CurrencyInfo curr on c.CurrencyId = curr.CurrencyId
 ";
-    string orderBy = " c.CourseTitle asc ";
     return await _repository.CRMCourse.GridData<CrmCourseDto>(sql, options, orderBy, "");
   }
 }
