@@ -38,6 +38,8 @@ internal sealed class CRMInstituteService : ICRMInstituteService
 
   public async Task<GridEntity<CrmInstituteDto>> SummaryGrid(CRMGridOptions options)
   {
+    string sql =
+            @"select InstituteId ,CRMInstitute.CountryId ,InstituteName ,Campus ,Website ,MonthlyLivingCost ,FundsRequirementforVisa ,ApplicationFee
 ,CRMInstitute.CurrencyId ,IsLanguageMandatory ,LanguagesRequirement ,InstitutionalBenefits ,PartTimeWorkDetails ,ScholarshipsPolicy ,InstitutionStatusNotes
 ,CRMInstitute.InstituteTypeId ,InstituteCode ,InstituteEmail ,InstituteAddress ,InstitutePhoneNO ,InstituteMobileNo,CRMInstitute.Status ,Country.CountryName 
 ,CurrencyInfo.CurrencyName ,CRMInstituteType.InstituteTypeName ,docLogo.FilePath as InstitutionLogo , docProspectus.FilePath as InstitutionProspectus

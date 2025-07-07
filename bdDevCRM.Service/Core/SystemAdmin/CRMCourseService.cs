@@ -12,24 +12,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace bdDevCRM.Service.Core.SystemAdmin;
 
-internal sealed class CRMCourseService : ICRMCourseService
+internal sealed class CRMCourseService(
+    IRepositoryManager repository,
+    ILoggerManager logger,
+    IConfiguration config,
+    IHttpContextAccessor httpContextAccessor) : ICRMCourseService
 {
-  private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
-  private readonly IConfiguration _config;
-  private readonly IHttpContextAccessor _httpContextAccessor;
-
-  public CRMCourseService(
-      IRepositoryManager repository,
-      ILoggerManager logger,
-      IConfiguration config,
-      IHttpContextAccessor httpContextAccessor)
-  {
-    _repository = repository;
-    _logger = logger;
-    _config = config;
-    _httpContextAccessor = httpContextAccessor;
-  }
+  private readonly IRepositoryManager _repository = repository;
+  private readonly ILoggerManager _logger = logger;
+  private readonly IConfiguration _config = config;
+  private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
   public async Task<IEnumerable<CrmCourseDto>> GetCoursesDDLAsync(bool trackChanges = false)
   {
@@ -42,9 +34,9 @@ internal sealed class CRMCourseService : ICRMCourseService
   {
     var list = await _repository.CRMCourse.ListByWhereWithSelectAsync(
       selector: x => new CRMCourseDDLDto { CourseId = x.CourseId, CourseTitle = x.CourseTitle }
-      ,expression: x => x.InstituteId == instituteId, trackChanges: false);
+      , expression: x => x.InstituteId == instituteId, trackChanges: false);
 
-    return list.Any() ? MyMapper.JsonCloneIEnumerableToList<CRMCourseDDLDto, CRMCourseDDLDto>(list) 
+    return list.Any() ? MyMapper.JsonCloneIEnumerableToList<CRMCourseDDLDto, CRMCourseDDLDto>(list)
       : new List<CRMCourseDDLDto>();
   }
 
@@ -151,6 +143,7 @@ from CrmCourse c
 left join CrmInstitute i on c.InstituteId = i.InstituteId
 left join CurrencyInfo curr on c.CurrencyId = curr.CurrencyId
 ";
+    string orderBy = " CourseTitle asc ";
     return await _repository.CRMCourse.GridData<CrmCourseDto>(sql, options, orderBy, "");
   }
 }

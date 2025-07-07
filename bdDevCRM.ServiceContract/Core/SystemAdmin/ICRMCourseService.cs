@@ -11,6 +11,7 @@ namespace bdDevCRM.ServiceContract.Core.SystemAdmin;
 public interface ICRMCourseService
 {
   Task<IEnumerable<CrmCourseDto>> GetCoursesDDLAsync(bool trackChanges = false);
+  Task<IEnumerable<CRMCourseDDLDto>> GetCourseByInstituteIdDDLAsync(int instituteId, bool trackChanges = false);
   Task<IEnumerable<CrmCourseDto>> GetActiveCoursesAsync(bool trackChanges = false);
   Task<IEnumerable<CrmCourseDto>> GetCoursesAsync(bool trackChanges = false);
   Task<CrmCourseDto> GetCourseAsync(int id, bool trackChanges = false);

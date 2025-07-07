@@ -145,12 +145,15 @@ public static class RouteConstants
   #endregion Institute
 
   #region Course
+  #region Course
   public const string CourseDDL = "crm-course-ddl";
+  public const string CourseByInstituteIdDDL = "crm-course-by-instituteid-ddl/{instituteId:int}";
   public const string CourseSummary = "crm-course-summary";
   public const string CreateCourse = "crm-course";
   public const string UpdateCourse = "crm-course/{key:int}";
   public const string DeleteCourse = "crm-course/{key:int}";
   public const string CreateOrUpdateCourse = "course-saveORupdate/{key:int}";
+  #endregion Course
   #endregion Course
 
   #region Currency
