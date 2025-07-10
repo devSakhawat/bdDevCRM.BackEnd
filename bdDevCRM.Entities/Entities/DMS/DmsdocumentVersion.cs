@@ -5,19 +5,25 @@ namespace bdDevCRM.Entities.Entities.DMS;
 
 public partial class DmsdocumentVersion
 {
-    public int VersionId { get; set; }
+  public int VersionId { get; set; }
 
-    public int DocumentId { get; set; }
+  public int DocumentId { get; set; }
 
-    public int VersionNumber { get; set; }
+  public int VersionNumber { get; set; }
 
-    public string FileName { get; set; } = null!;
+  public string FileName { get; set; } = null!;
 
-    public string FilePath { get; set; } = null!;
+  public string FilePath { get; set; } = null!;
 
-    public DateTime? UploadedDate { get; set; }
+  public DateTime? UploadedDate { get; set; }
 
-    public string? UploadedBy { get; set; }
+  public string? UploadedBy { get; set; }
 
-    public virtual Dmsdocument Document { get; set; } = null!;
+  public bool? IsCurrentVersion { get; set; }
+
+  public string? VersionNotes { get; set; }
+
+  public int? PreviousVersionId { get; set; }
+
+  public long? FileSize { get; set; }
 }

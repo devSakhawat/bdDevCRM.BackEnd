@@ -29,11 +29,30 @@ internal sealed class CRMInstituteService : ICRMInstituteService
     _httpContextAccessor = httpContextAccessor;
   }
 
-  public async Task<IEnumerable<CrmInstituteDto>> GetInstitutesDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<CrmInstituteDLLDto>> GetInstitutesDDLAsync(bool trackChanges = false)
   {
     var list = await _repository.CRMInstitutes.GetActiveInstitutesAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("CrmInstitute");
-    return MyMapper.JsonCloneIEnumerableToList<Crminstitute, CrmInstituteDto>(list);
+    return MyMapper.JsonCloneIEnumerableToList<Crminstitute, CrmInstituteDLLDto>(list);
+  }
+
+  public async Task<IEnumerable<CrmInstituteDLLDto>> GetInstitutesByCountryIdDDLAsync(int countryId, bool trackChanges = false)
+  {
+    IEnumerable<CrmInstituteDLLDto> list = await _repository.CRMInstitutes.ListByWhereWithSelectAsync( 
+      expression: x => x.CountryId == countryId, 
+      selector: x => new CrmInstituteDLLDto
+      { 
+        InstituteId = x.InstituteId,
+        InstituteName = x.InstituteName
+      },
+      orderBy: x => x.InstituteName,
+      trackChanges: trackChanges
+      );
+
+    if (!list.Any()) throw new GenericListNotFoundException("CrmInstitute");
+    //return MyMapper.JsonCloneIEnumerableToList<CrmInstituteDLLDto, CrmInstituteDto>(list);
+
+    return list;
   }
 
   public async Task<GridEntity<CrmInstituteDto>> SummaryGrid(CRMGridOptions options)
@@ -70,18 +89,18 @@ left join DMSDocument docProspectus on CRMInstitute.InstituteId = docProspectus.
     return dto;
   }
 
-  public async Task<string> UpdateRecordAsync(int key, CrmInstituteDto dto, bool trackChanges)
+  public async Task<CrmInstituteDto> UpdateRecordAsync(int key, CrmInstituteDto updateDto, bool trackChanges)
   {
-    if (key != dto.InstituteId) return "Key mismatch.";
+    if (key != updateDto.InstituteId) throw new IdMismatchBadRequestException(key.ToString(), "Institute Update");
 
     bool exists = await _repository.CRMInstitutes.ExistsAsync(x => x.InstituteId == key);
     if (!exists) throw new GenericNotFoundException("CrmInstitute", "InstituteId", key.ToString());
 
-    var entity = MyMapper.JsonClone<CrmInstituteDto, Crminstitute>(dto);
+    var entity = MyMapper.JsonClone<CrmInstituteDto, Crminstitute>(updateDto);
     _repository.CRMInstitutes.Update(entity);
     await _repository.SaveAsync();
     _logger.LogInfo($"CrmInstitute updated, id={key}");
-    return OperationMessage.Success;
+    return MyMapper.JsonClone<Crminstitute, CrmInstituteDto>(entity);
   }
 
   public async Task<string> DeleteRecordAsync(int key, CrmInstituteDto dto)

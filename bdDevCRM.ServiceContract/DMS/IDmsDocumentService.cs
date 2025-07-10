@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -17,7 +18,8 @@ public interface IDmsdocumentService
   Task<string> UpdateNewRecordAsync(int key, DmsDocumentDto modelDto, bool trackChanges);
   Task<string> DeleteRecordAsync(int key, DmsDocumentDto modelDto);
   Task<string> SaveOrUpdate(int key, DmsDocumentDto modelDto);
-
+  //// single record
+  //Task<Dmsdocument> GetExistingDocumentAsync(string entityId, string entityType, string documentType);
 
   Task<string> SaveFileAndDocumentWithAllDmsAsync(IFormFile file, string allAboutDMS);
 }

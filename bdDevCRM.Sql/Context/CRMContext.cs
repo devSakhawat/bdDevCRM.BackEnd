@@ -95,6 +95,8 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<DmsdocumentVersion> DmsdocumentVersion { get; set; }
 
+  public virtual DbSet<DmsFileUpdateHistory> DmsFileUpdateHistory { get; set; }
+
   public virtual DbSet<Docmdetails> Docmdetails { get; set; }
 
   public virtual DbSet<Docmdetailshistory> Docmdetailshistory { get; set; }
@@ -849,14 +851,26 @@ public partial class CRMContext : DbContext
       entity.HasIndex(e => new { e.DocumentId, e.VersionNumber }, "UQ_DocumentVersion_DocumentId_VersionNumber").IsUnique();
 
       entity.Property(e => e.FileName).HasMaxLength(255);
+      entity.Property(e => e.IsCurrentVersion).HasDefaultValue(true);
       entity.Property(e => e.UploadedBy)
           .HasMaxLength(50)
           .IsUnicode(false);
       entity.Property(e => e.UploadedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.VersionNotes).HasMaxLength(500);
+    });
 
-      entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentVersion)
-          .HasForeignKey(d => d.DocumentId)
-          .HasConstraintName("FK_DocumentVersion_Document");
+    modelBuilder.Entity<DmsFileUpdateHistory>(entity =>
+    {
+      entity.HasKey(e => e.Id).HasName("PK__FileUpda__3214EC07BA143434");
+
+      entity.Property(e => e.DocumentType).HasMaxLength(50);
+      entity.Property(e => e.EntityId).HasMaxLength(50);
+      entity.Property(e => e.EntityType).HasMaxLength(50);
+      entity.Property(e => e.NewFilePath).HasMaxLength(500);
+      entity.Property(e => e.Notes).HasMaxLength(1000);
+      entity.Property(e => e.OldFilePath).HasMaxLength(500);
+      entity.Property(e => e.UpdateReason).HasMaxLength(200);
+      entity.Property(e => e.UpdatedBy).HasMaxLength(50);
     });
 
     modelBuilder.Entity<Docmdetails>(entity =>

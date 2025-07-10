@@ -80,6 +80,13 @@ public class DMSDto
   //public string FilePath { get; set; } = null!;
   public DateTime? UploadedDate { get; set; }
   public string? UploadedBy { get; set; }
+  public bool IsCurrentVersion { get; set; }
+  public string VersionNotes { get; set; }
+  public int PreviousVersionId { get; set; }
+
+  // Version Control Properties
+  public int? ExistingDocumentId { get; set; }
+  public string UpdateReason { get; set; }
 }
 
 public class Document_SystemLog

@@ -142,9 +142,10 @@ public static class RouteConstants
   public const string UpdateInstitute = "crm-institute/{key:int}";
   public const string DeleteInstitute = "crm-institute/{key:int}";
   public const string CreateOrUpdateInstitute = "institute-saveORupdate/{key:int}";
+
+  public const string InstituteDDLByCountryId = "crm-institut-by-countryid-ddl";
   #endregion Institute
 
-  #region Course
   #region Course
   public const string CourseDDL = "crm-course-ddl";
   public const string CourseByInstituteIdDDL = "crm-course-by-instituteid-ddl/{instituteId:int}";
@@ -153,7 +154,6 @@ public static class RouteConstants
   public const string UpdateCourse = "crm-course/{key:int}";
   public const string DeleteCourse = "crm-course/{key:int}";
   public const string CreateOrUpdateCourse = "course-saveORupdate/{key:int}";
-  #endregion Course
   #endregion Course
 
   #region Currency

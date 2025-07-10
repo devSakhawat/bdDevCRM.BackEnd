@@ -60,7 +60,7 @@ public class MyMapper
     return targetList;
   }
 
-  public static IEnumerable<TTarget> JsonCloneListToIEnumerable<TSource, TTarget>(List<TSource> sourceList)
+  public static IEnumerable<TTarget> JsonCloneIEnumerableToIEnumerable<TSource, TTarget>(List<TSource> sourceList)
   {
     if (sourceList == null) throw new ArgumentNullException(nameof(sourceList));
 

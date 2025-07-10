@@ -52,6 +52,7 @@ public interface IRepositoryManager : IDisposable
   IDmsdocumentFolderRepository DmsdocumentFolders { get; }
   IDmsdocumentVersionRepository DmsdocumentVersions { get; }
   IDmsdocumentAccessLogRepository DmsdocumentAccessLogs { get; }
+  IDmsFileUpdateHistoryRepository IDmsFileUpdateHistories { get; }
   #endregion
 
 

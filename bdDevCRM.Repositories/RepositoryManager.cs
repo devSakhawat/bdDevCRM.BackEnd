@@ -61,6 +61,7 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<IDmsdocumentFolderRepository> _dmsdocumentFolderRepository;
   private readonly Lazy<IDmsdocumentVersionRepository> _dmsdocumentVersionRepository;
   private readonly Lazy<IDmsdocumentAccessLogRepository> _dmsdocumentAccessLogRepository;
+  private readonly Lazy<IDmsFileUpdateHistoryRepository> _dmsFileUpdateHistoryRepository;
   #endregion
 
   public RepositoryManager(CRMContext repositoryContext)
@@ -113,6 +114,7 @@ public class RepositoryManager : IRepositoryManager
     _dmsdocumentFolderRepository = new Lazy<IDmsdocumentFolderRepository>(() => new DmsdocumentFolderRepository(_repositoryContext));
     _dmsdocumentVersionRepository = new Lazy<IDmsdocumentVersionRepository>(() => new DmsdocumentVersionRepository(_repositoryContext));
     _dmsdocumentAccessLogRepository = new Lazy<IDmsdocumentAccessLogRepository>(() => new DmsdocumentAccessLogRepository(_repositoryContext));
+    _dmsFileUpdateHistoryRepository = new Lazy<IDmsFileUpdateHistoryRepository>(() => new DmsFileUpdateHistoryRepository(_repositoryContext));
     #endregion
 
   }
@@ -162,6 +164,7 @@ public class RepositoryManager : IRepositoryManager
   public IDmsdocumentFolderRepository DmsdocumentFolders => _dmsdocumentFolderRepository.Value;
   public IDmsdocumentVersionRepository DmsdocumentVersions => _dmsdocumentVersionRepository.Value;
   public IDmsdocumentAccessLogRepository DmsdocumentAccessLogs => _dmsdocumentAccessLogRepository.Value;
+  public IDmsFileUpdateHistoryRepository IDmsFileUpdateHistories => _dmsFileUpdateHistoryRepository.Value;
   #endregion
 
 

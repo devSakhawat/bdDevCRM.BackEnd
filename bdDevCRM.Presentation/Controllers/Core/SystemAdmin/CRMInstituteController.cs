@@ -8,7 +8,6 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.Exceptions;
-using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +49,31 @@ public class CRMInstituteController : BaseApiController
     var res = await _serviceManager.CRMInstitutes.GetInstitutesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found"));
+
+    return Ok(ResponseHelper.Success(res, "Institutes retrieved successfully"));
+  }
+
+  [HttpGet(RouteConstants.InstituteDDLByCountryId)]
+  public async Task<IActionResult> InstituteDDLByCountryId(int countryId)
+  {
+    // Parameter validation
+    if (countryId <= 0)
+      throw new GenericBadRequestException("Invalid country ID. Country ID must be greater than 0.");
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    var res = await _serviceManager.CRMInstitutes.GetInstitutesByCountryIdDDLAsync(countryId, trackChanges: false);
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found for the specified country"));
 
     return Ok(ResponseHelper.Success(res, "Institutes retrieved successfully"));
   }
@@ -184,34 +208,38 @@ public class CRMInstituteController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateInstitute([FromRoute] int key, [FromForm] CrmInstituteDto modelDto)
   {
-    try
-    {
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+    if (modelDto == null)
+      throw new NullModelBadRequestException(nameof(CrmInstituteDto));
 
-      int userId = Convert.ToInt32(userIdClaim);
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
 
-      var res = await _serviceManager.CRMInstitutes.UpdateRecordAsync(key, modelDto, false);
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    if (!Request.HasFormContentType)
+      throw new GenericBadRequestException("Invalid content type. Expected multipart/form-data.");
+
+    // Get existing institute record
+    CrmInstituteDto updatedDto = await _serviceManager.CRMInstitutes.UpdateRecordAsync(key, modelDto, false);
 
 
-      // Save attached files (Logo, Prospectus)
-      await SaveInstituteFilesAsync(modelDto, currentUser);
+    // Save attached files (Logo, Prospectus)
+    await SaveInstituteFilesAsync(modelDto, currentUser);
 
-      if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Institute updated successfully"));
-      else
-        return Conflict(ResponseHelper.Conflict(res));
-    }
-    catch (Exception ex)
-    {
-      // Global Exception Middleware will handle it
-      throw;
-    }
+    //
+    if (updatedDto.InstituteId <= 0)
+      throw new InvalidUpdateOperationException("Failed to update institute record.");
+
+    // Return success response
+    return Ok(ResponseHelper.Success(updatedDto, "Institute updated successfully"));
   }
+
 
   [HttpDelete(RouteConstants.DeleteInstitute)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
@@ -242,8 +270,6 @@ public class CRMInstituteController : BaseApiController
 
 
   // 'File' Suffix is mendatory to use this function for every file or image fields.
-
-
   private async Task SaveInstituteFilesAsync(CrmInstituteDto dto, UsersDto currentUser)
   {
     // Get institute ID - use override or dto's InstituteId
@@ -264,7 +290,7 @@ public class CRMInstituteController : BaseApiController
         MaxFileSizeMb = 1,
 
         // Document properties
-        Title = $"Logo_{dto.InstituteName}_{DateTime.Now:yyyyMMdd}",
+        Title = $"Logo_{dto.InstituteName}_{DateTime.Now:yyyyMMdd:FFFFF}",
         Description = $"Institution logo for {dto.InstituteName}",
         ReferenceEntityType = "CRMInstitute",
         ReferenceEntityId = id.ToString(),
@@ -293,10 +319,7 @@ public class CRMInstituteController : BaseApiController
       string logoDMSJson = JsonConvert.SerializeObject(logoDMSDto);
 
       // Call DMS service to save file and create all DMS entities
-      string logoFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
-          dto.InstitutionLogoFile,
-          logoDMSJson
-      );
+      string logoFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync( dto.InstitutionLogoFile, logoDMSJson );
 
       // Update DTO with the returned file path
       if (!string.IsNullOrEmpty(logoFilePath))
@@ -319,7 +342,7 @@ public class CRMInstituteController : BaseApiController
         MaxFileSizeMb = 5,
 
         // Document properties
-        Title = $"Prospectus_{dto.InstituteName}_{DateTime.Now:yyyyMMdd}",
+        Title = $"Prospectus_{dto.InstituteName}_{DateTime.Now:yyyyMMdd:FFFF}",
         Description = $"Institution prospectus for {dto.InstituteName}",
         ReferenceEntityType = "CRMInstitute",
         ReferenceEntityId = id.ToString(),
@@ -358,6 +381,141 @@ public class CRMInstituteController : BaseApiController
       }
     }
   }
+
+  //// Update Institute Files Method with Version Control Strategy
+  //private async Task UpdateInstituteFilesWithVersioningAsync(CrmInstituteDto updatedDto, CrmInstituteDto existingDto, UsersDto currentUser)
+  //{
+  //  int id = updatedDto.InstituteId;
+
+  //  /* ---------- Update Institution Logo File with Versioning ---------- */
+  //  if (updatedDto.InstitutionLogoFile != null)
+  //  {
+  //    // Get existing document info for versioning
+  //    //var existingLogoDocument = await GetExistingDocumentAsync(id.ToString(), "CRMInstitute", "Logo");
+  //    //int nextVersionNumber = await GetNextVersionNumberAsync(existingLogoDocument?.DocumentId ?? 0);
+
+  //    // Create new version of logo file
+  //    var logoDMSDto = new DMSDto
+  //    {
+  //      // DocumentType properties
+  //      DocumentTypeName = "Institution_Logo",
+  //      DocumentType = "Logo",
+  //      IsMandatory = true,
+  //      AcceptedExtensions = ".png",
+  //      MaxFileSizeMb = 1,
+
+  //      // Document properties
+  //      Title = $"Logo_{updatedDto.InstituteName}_{DateTime.Now:yyyyMMdd}_v{nextVersionNumber}",
+  //      Description = $"Institution logo for {updatedDto.InstituteName} (Version {nextVersionNumber})",
+  //      ReferenceEntityType = "CRMInstitute",
+  //      ReferenceEntityId = id.ToString(),
+  //      UploadedByUserId = currentUser.UserId.ToString(),
+  //      SystemTags = "InstitutionLogo,Updated",
+
+  //      // Folder properties
+  //      FolderName = $"CRMInstitute_{id}",
+  //      OwnerId = currentUser.UserId.ToString(),
+
+  //      // Access Log properties
+  //      AccessedByUserId = currentUser.UserId.ToString(),
+  //      AccessDateTime = DateTime.UtcNow,
+  //      Action = "Update",
+
+  //      // Tag properties
+  //      DocumentTagName = "Logo,Institution,Image,Updated",
+
+  //      // Version properties
+  //      VersionNumber = nextVersionNumber,
+  //      UploadedBy = currentUser.UserId.ToString(),
+  //      UploadedDate = DateTime.UtcNow,
+
+  //      // For versioning - reference to existing document
+  //      ExistingDocumentId = existingLogoDocument?.DocumentId
+  //    };
+
+  //    string logoDMSJson = JsonConvert.SerializeObject(logoDMSDto);
+  //    string logoFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithVersioningAsync(
+  //        updatedDto.InstitutionLogoFile,
+  //        logoDMSJson
+  //    );
+
+  //    if (!string.IsNullOrEmpty(logoFilePath))
+  //    {
+  //      updatedDto.InstitutionLogo = logoFilePath;
+  //      // Update database with new logo path
+  //      await _serviceManager.CRMInstitutes.UpdateLogoPathAsync(id, logoFilePath);
+
+  //      // Create file update history
+  //      await CreateFileUpdateHistoryAsync(id.ToString(), "CRMInstitute", "Logo",
+  //          existingDto.InstitutionLogo, logoFilePath, nextVersionNumber, currentUser);
+  //    }
+  //  }
+
+  //  /* ---------- Update Institution Prospectus File with Versioning ---------- */
+  //  if (updatedDto.InstitutionProspectusFile != null)
+  //  {
+  //    // Get existing document info for versioning
+  //    var existingProspectusDocument = await GetExistingDocumentAsync(id.ToString(), "CRMInstitute", "Prospectus");
+  //    int nextVersionNumber = await GetNextVersionNumberAsync(existingProspectusDocument?.DocumentId ?? 0);
+
+  //    // Create new version of prospectus file
+  //    var prospectusDMSDto = new DMSDto
+  //    {
+  //      // DocumentType properties
+  //      DocumentTypeName = "Institution Prospectus",
+  //      DocumentType = "Prospectus",
+  //      IsMandatory = false,
+  //      AcceptedExtensions = ".pdf,.doc,.docx",
+  //      MaxFileSizeMb = 5,
+
+  //      // Document properties
+  //      Title = $"Prospectus_{updatedDto.InstituteName}_{DateTime.Now:yyyyMMdd}_v{nextVersionNumber}",
+  //      Description = $"Institution prospectus for {updatedDto.InstituteName} (Version {nextVersionNumber})",
+  //      ReferenceEntityType = "CRMInstitute",
+  //      ReferenceEntityId = id.ToString(),
+  //      UploadedByUserId = currentUser.UserId.ToString(),
+  //      SystemTags = "InstitutionProspectus,Updated",
+
+  //      // Folder properties
+  //      FolderName = $"CRMInstitute_{id}",
+  //      OwnerId = currentUser.UserId.ToString(),
+
+  //      // Access Log properties
+  //      AccessedByUserId = currentUser.UserId.ToString(),
+  //      AccessDateTime = DateTime.UtcNow,
+  //      Action = "Update",
+
+  //      // Tag properties
+  //      DocumentTagName = "Prospectus,Institution,Document,Updated",
+
+  //      // Version properties
+  //      VersionNumber = nextVersionNumber,
+  //      UploadedBy = currentUser.UserId.ToString(),
+  //      UploadedDate = DateTime.UtcNow,
+
+  //      // For versioning - reference to existing document
+  //      ExistingDocumentId = existingProspectusDocument?.DocumentId
+  //    };
+
+  //    string prospectusDMSJson = JsonConvert.SerializeObject(prospectusDMSDto);
+  //    string prospectusFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithVersioningAsync(
+  //        updatedDto.InstitutionProspectusFile,
+  //        prospectusDMSJson
+  //    );
+
+  //    if (!string.IsNullOrEmpty(prospectusFilePath))
+  //    {
+  //      updatedDto.InstitutionProspectus = prospectusFilePath;
+  //      // Update database with new prospectus path
+  //      await _serviceManager.CRMInstitutes.UpdateProspectusPathAsync(id, prospectusFilePath);
+
+  //      // Create file update history
+  //      await CreateFileUpdateHistoryAsync(id.ToString(), "CRMInstitute", "Prospectus",
+  //          existingDto.InstitutionProspectus, prospectusFilePath, nextVersionNumber, currentUser);
+  //    }
+  //  }
+  //}
+
 
 
 

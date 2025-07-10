@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\Entities\" />
     <Folder Include="Repository\Context\" />
   </ItemGroup>
 
