@@ -229,8 +229,8 @@ public class CRMInstituteController : BaseApiController
     CrmInstituteDto updatedDto = await _serviceManager.CRMInstitutes.UpdateRecordAsync(key, modelDto, false);
 
 
-    // Save attached files (Logo, Prospectus)
-    await SaveInstituteFilesAsync(modelDto, currentUser);
+    //// Save attached files (Logo, Prospectus)
+    //await SaveInstituteFilesAsync(modelDto, currentUser);
 
     //
     if (updatedDto.InstituteId <= 0)

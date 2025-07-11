@@ -49,7 +49,7 @@ internal sealed class CRMInstituteService : ICRMInstituteService
       trackChanges: trackChanges
       );
 
-    if (!list.Any()) throw new GenericListNotFoundException("CrmInstitute");
+    if (!list.Any()) return new List<CrmInstituteDLLDto>();
     //return MyMapper.JsonCloneIEnumerableToList<CrmInstituteDLLDto, CrmInstituteDto>(list);
 
     return list;

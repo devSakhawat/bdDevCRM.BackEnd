@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities.Core;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
@@ -6,6 +7,7 @@ using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -48,13 +50,20 @@ public class CRMCourseController : BaseApiController
   [HttpGet(RouteConstants.CourseByInstituteIdDDL)]
   public async Task<IActionResult> CourseByInstituteIdDDL([FromRoute] int instituteId)
   {
+    // Parameter validation
+    if (instituteId <= 0)
+      throw new GenericBadRequestException("Invalid country ID. Country ID must be greater than 0.");
+
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+      throw new GenericUnauthorizedException("User authentication required.");
 
-    int userId = Convert.ToInt32(userIdClaim);
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.CRMCourses.GetCourseByInstituteIdDDLAsync(instituteId, trackChanges: false);
     if (res == null || !res.Any())

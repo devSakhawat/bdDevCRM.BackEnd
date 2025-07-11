@@ -32,12 +32,20 @@ internal sealed class CRMCourseService(
 
   public async Task<IEnumerable<CRMCourseDDLDto>> GetCourseByInstituteIdDDLAsync(int instituteId, bool trackChanges = false)
   {
-    var list = await _repository.CRMCourse.ListByWhereWithSelectAsync(
-      selector: x => new CRMCourseDDLDto { CourseId = x.CourseId, CourseTitle = x.CourseTitle }
-      , expression: x => x.InstituteId == instituteId, trackChanges: false);
 
-    return list.Any() ? MyMapper.JsonCloneIEnumerableToList<CRMCourseDDLDto, CRMCourseDDLDto>(list)
-      : new List<CRMCourseDDLDto>();
+    IEnumerable<CRMCourseDDLDto> list = await _repository.CRMCourse.ListByWhereWithSelectAsync(
+      expression: x => x.InstituteId == instituteId,
+      selector: x => new CRMCourseDDLDto
+      {
+        CourseId = x.CourseId,
+        CourseTitle = x.CourseTitle
+      },
+      orderBy: x => x.CourseTitle,
+      trackChanges: trackChanges
+      );
+
+    if (!list.Any()) return new List<CRMCourseDDLDto>();
+    return list;
   }
 
   public async Task<IEnumerable<CrmCourseDto>> GetActiveCoursesAsync(bool trackChanges = false)
