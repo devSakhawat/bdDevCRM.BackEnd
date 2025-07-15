@@ -51,11 +51,23 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICRMMonthService> _crmmonth;
   private readonly Lazy<ICRMYearService> _crmyear;
 
-  // New CRM services
+  // Existing CRM services
   private readonly Lazy<IApplicantCourseService> _applicantCourseService;
   private readonly Lazy<IApplicantInfoService> _applicantInfoService;
   private readonly Lazy<IPermanentAddressService> _permanentAddressService;
   private readonly Lazy<IPresentAddressService> _presentAddressService;
+  
+  // New 10 CRM services
+  private readonly Lazy<IEducationHistoryService> _educationHistoryService;
+  private readonly Lazy<IIeltsinformationService> _ieltsinformationService;
+  private readonly Lazy<IToeflinformationService> _toeflinformationService;
+  private readonly Lazy<IPteinformationService> _pteinformationService;
+  private readonly Lazy<IGmatinformationService> _gmatinformationService;
+  private readonly Lazy<IOthersinformationService> _othersinformationService;
+  private readonly Lazy<IWorkExperienceService> _workExperienceService;
+  private readonly Lazy<IApplicantReferenceService> _applicantReferenceService;
+  private readonly Lazy<IStatementOfPurposeService> _statementOfPurposeService;
+  private readonly Lazy<IAdditionalInfoService> _additionalInfoService;
   #endregion CRM
 
   #region DMS Lazy Fields
@@ -66,7 +78,6 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<IDmsdocumentFolderService> _dmsdocumentFolderService;
   private readonly Lazy<IDmsdocumentVersionService> _dmsdocumentVersionService;
   private readonly Lazy<IDmsdocumentAccessLogService> _dmsdocumentAccessLogService;
-  //private IHttpContextAccessor httpContextAccessor;
   #endregion
 
   public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IMemoryCache cache ,IHttpContextAccessor httpContextAccessor)
@@ -91,7 +102,6 @@ public sealed class ServiceManager : IServiceManager
     _employeeService = new Lazy<IEmployeeService>(() => new EmployeeService(repository, logger, configuration));
     _branchService = new Lazy<IBranchService>(() => new BranchService(repository, logger, configuration));
     //_departmentService = new Lazy<IDepartmentService>(() => new DepartmentService(repository, logger, configuration));
-    // HR Area
 
     #region CRM
     _crminstitute = new Lazy<ICRMInstituteService>(() => new CRMInstituteService(repository, logger, configuration, httpContextAccessor));
@@ -100,11 +110,23 @@ public sealed class ServiceManager : IServiceManager
     _crmmonth = new Lazy<ICRMMonthService>(() => new CRMMonthService(repository, logger, configuration));
     _crmyear = new Lazy<ICRMYearService>(() => new CRMYearService(repository, logger, configuration));
 
-    // New CRM services initialization
+    // Existing CRM services initialization
     _applicantCourseService = new Lazy<IApplicantCourseService>(() => new ApplicantCourseService(repository, logger, configuration, httpContextAccessor));
     _applicantInfoService = new Lazy<IApplicantInfoService>(() => new ApplicantInfoService(repository, logger, configuration, httpContextAccessor));
     _permanentAddressService = new Lazy<IPermanentAddressService>(() => new PermanentAddressService(repository, logger, configuration, httpContextAccessor));
     _presentAddressService = new Lazy<IPresentAddressService>(() => new PresentAddressService(repository, logger, configuration, httpContextAccessor));
+    
+    // New 10 CRM services initialization
+    _educationHistoryService = new Lazy<IEducationHistoryService>(() => new EducationHistoryService(repository, logger, configuration, httpContextAccessor));
+    _ieltsinformationService = new Lazy<IIeltsinformationService>(() => new IeltsinformationService(repository, logger, configuration, httpContextAccessor));
+    _toeflinformationService = new Lazy<IToeflinformationService>(() => new ToeflinformationService(repository, logger, configuration, httpContextAccessor));
+    _pteinformationService = new Lazy<IPteinformationService>(() => new PteinformationService(repository, logger, configuration, httpContextAccessor));
+    _gmatinformationService = new Lazy<IGmatinformationService>(() => new GmatinformationService(repository, logger, configuration, httpContextAccessor));
+    _othersinformationService = new Lazy<IOthersinformationService>(() => new OthersinformationService(repository, logger, configuration, httpContextAccessor));
+    _workExperienceService = new Lazy<IWorkExperienceService>(() => new WorkExperienceService(repository, logger, configuration, httpContextAccessor));
+    _applicantReferenceService = new Lazy<IApplicantReferenceService>(() => new ApplicantReferenceService(repository, logger, configuration, httpContextAccessor));
+    _statementOfPurposeService = new Lazy<IStatementOfPurposeService>(() => new StatementOfPurposeService(repository, logger, configuration, httpContextAccessor));
+    _additionalInfoService = new Lazy<IAdditionalInfoService>(() => new AdditionalInfoService(repository, logger, configuration, httpContextAccessor));
     #endregion CRM
 
     #region DMS Lazy Initializations
@@ -145,11 +167,23 @@ public sealed class ServiceManager : IServiceManager
   public ICRMMonthService CRMMonths => _crmmonth.Value;
   public ICRMYearService CRMYears => _crmyear.Value;
 
-  // New CRM service properties
+  // Existing CRM service properties
   public IApplicantCourseService ApplicantCourses => _applicantCourseService.Value;
   public IApplicantInfoService ApplicantInfos => _applicantInfoService.Value;
   public IPermanentAddressService PermanentAddresses => _permanentAddressService.Value;
   public IPresentAddressService PresentAddresses => _presentAddressService.Value;
+  
+  // New 10 CRM service properties - ALL IMPLEMENTED NOW!
+  public IEducationHistoryService EducationHistories => _educationHistoryService.Value;
+  public IIeltsinformationService IeltsInformations => _ieltsinformationService.Value;
+  public IToeflinformationService ToeflInformations => _toeflinformationService.Value;
+  public IPteinformationService PteInformations => _pteinformationService.Value;
+  public IGmatinformationService GmatInformations => _gmatinformationService.Value;
+  public IOthersinformationService OthersInformations => _othersinformationService.Value;
+  public IWorkExperienceService WorkExperiences => _workExperienceService.Value;
+  public IApplicantReferenceService ApplicantReferences => _applicantReferenceService.Value;
+  public IStatementOfPurposeService StatementOfPurposes => _statementOfPurposeService.Value;
+  public IAdditionalInfoService AdditionalInfos => _additionalInfoService.Value;
   #endregion CRM
 
   #region DMS Property Exposures

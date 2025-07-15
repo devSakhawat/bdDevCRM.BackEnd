@@ -166,6 +166,8 @@ public static class RouteConstants
   public const string DeleteCurrency = "currency/{key}";
   #endregion Currency
 
+
+  // CRM Application related routes
   #region CRMApplication
   public const string CRMApplicationSummary = "crm-application-summary";
   public const string CRMApplication= "crm-application";
@@ -214,4 +216,94 @@ public static class RouteConstants
   public const string DeletePresentAddress = "present-address/{key:int}";
   public const string PresentAddressByApplicantId = "present-address-by-applicantid/{applicantId:int}";
   #endregion PresentAddress
+
+  #region EducationHistory
+  public const string EducationHistoryDDL = "education-history-ddl";
+  public const string EducationHistorySummary = "education-history-summary";
+  public const string CreateEducationHistory = "education-history";
+  public const string UpdateEducationHistory = "education-history/{key:int}";
+  public const string DeleteEducationHistory = "education-history/{key:int}";
+  public const string EducationHistoryByApplicantId = "education-history-by-applicantid/{applicantId:int}";
+  #endregion EducationHistory
+
+  #region IeltsInformation
+  public const string IeltsInformationDDL = "ielts-information-ddl";
+  public const string IeltsInformationSummary = "ielts-information-summary";
+  public const string CreateIeltsInformation = "ielts-information";
+  public const string UpdateIeltsInformation = "ielts-information/{key:int}";
+  public const string DeleteIeltsInformation = "ielts-information/{key:int}";
+  public const string IeltsInformationByApplicantId = "ielts-information-by-applicantid/{applicantId:int}";
+  #endregion IeltsInformation
+
+  #region ToeflInformation
+  public const string ToeflInformationDDL = "toefl-information-ddl";
+  public const string ToeflInformationSummary = "toefl-information-summary";
+  public const string CreateToeflInformation = "toefl-information";
+  public const string UpdateToeflInformation = "toefl-information/{key:int}";
+  public const string DeleteToeflInformation = "toefl-information/{key:int}";
+  public const string ToeflInformationByApplicantId = "toefl-information-by-applicantid/{applicantId:int}";
+  #endregion ToeflInformation
+
+  #region PteInformation
+  public const string PteInformationDDL = "pte-information-ddl";
+  public const string PteInformationSummary = "pte-information-summary";
+  public const string CreatePteInformation = "pte-information";
+  public const string UpdatePteInformation = "pte-information/{key:int}";
+  public const string DeletePteInformation = "pte-information/{key:int}";
+  public const string PteInformationByApplicantId = "pte-information-by-applicantid/{applicantId:int}";
+  #endregion PteInformation
+
+  #region GmatInformation
+  public const string GmatInformationDDL = "gmat-information-ddl";
+  public const string GmatInformationSummary = "gmat-information-summary";
+  public const string CreateGmatInformation = "gmat-information";
+  public const string UpdateGmatInformation = "gmat-information/{key:int}";
+  public const string DeleteGmatInformation = "gmat-information/{key:int}";
+  public const string GmatInformationByApplicantId = "gmat-information-by-applicantid/{applicantId:int}";
+  #endregion GmatInformation
+
+  #region OthersInformation
+  public const string OthersInformationDDL = "others-information-ddl";
+  public const string OthersInformationSummary = "others-information-summary";
+  public const string CreateOthersInformation = "others-information";
+  public const string UpdateOthersInformation = "others-information/{key:int}";
+  public const string DeleteOthersInformation = "others-information/{key:int}";
+  public const string OthersInformationByApplicantId = "others-information-by-applicantid/{applicantId:int}";
+  #endregion OthersInformation
+
+  #region WorkExperience
+  public const string WorkExperienceDDL = "work-experience-ddl";
+  public const string WorkExperienceSummary = "work-experience-summary";
+  public const string CreateWorkExperience = "work-experience";
+  public const string UpdateWorkExperience = "work-experience/{key:int}";
+  public const string DeleteWorkExperience = "work-experience/{key:int}";
+  public const string WorkExperienceByApplicantId = "work-experience-by-applicantid/{applicantId:int}";
+  #endregion WorkExperience
+
+  #region ApplicantReference
+  public const string ApplicantReferenceDDL = "applicant-reference-ddl";
+  public const string ApplicantReferenceSummary = "applicant-reference-summary";
+  public const string CreateApplicantReference = "applicant-reference";
+  public const string UpdateApplicantReference = "applicant-reference/{key:int}";
+  public const string DeleteApplicantReference = "applicant-reference/{key:int}";
+  public const string ApplicantReferenceByApplicantId = "applicant-reference-by-applicantid/{applicantId:int}";
+  #endregion ApplicantReference
+
+  #region StatementOfPurpose
+  public const string StatementOfPurposeDDL = "statement-of-purpose-ddl";
+  public const string StatementOfPurposeSummary = "statement-of-purpose-summary";
+  public const string CreateStatementOfPurpose = "statement-of-purpose";
+  public const string UpdateStatementOfPurpose = "statement-of-purpose/{key:int}";
+  public const string DeleteStatementOfPurpose = "statement-of-purpose/{key:int}";
+  public const string StatementOfPurposeByApplicantId = "statement-of-purpose-by-applicantid/{applicantId:int}";
+  #endregion StatementOfPurpose
+
+  #region AdditionalInfo
+  public const string AdditionalInfoDDL = "additional-info-ddl";
+  public const string AdditionalInfoSummary = "additional-info-summary";
+  public const string CreateAdditionalInfo = "additional-info";
+  public const string UpdateAdditionalInfo = "additional-info/{key:int}";
+  public const string DeleteAdditionalInfo = "additional-info/{key:int}";
+  public const string AdditionalInfoByApplicantId = "additional-info-by-applicantid/{applicantId:int}";
+  #endregion AdditionalInfo
 }

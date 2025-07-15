@@ -52,11 +52,23 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<ICRMMonthRepository> _crmmonthRepository;
   private readonly Lazy<ICRMYearRepository> _crmyearRepository;
 
-  // New CRM repositories
+  // Existing CRM repositories
   private readonly Lazy<IApplicantCourseRepository> _applicantCourseRepository;
   private readonly Lazy<IApplicantInfoRepository> _applicantInfoRepository;
   private readonly Lazy<IPermanentAddressRepository> _permanentAddressRepository;
   private readonly Lazy<IPresentAddressRepository> _presentAddressRepository;
+
+  // New 10 CRM repositories
+  private readonly Lazy<IEducationHistoryRepository> _educationHistoryRepository;
+  private readonly Lazy<IIeltsinformationRepository> _ieltsinformationRepository;
+  private readonly Lazy<IToeflinformationRepository> _toeflinformationRepository;
+  private readonly Lazy<IPteinformationRepository> _pteinformationRepository;
+  private readonly Lazy<IGmatinformationRepository> _gmatinformationRepository;
+  private readonly Lazy<IOthersinformationRepository> _othersinformationRepository;
+  private readonly Lazy<IWorkExperienceRepository> _workExperienceRepository;
+  private readonly Lazy<IApplicantReferenceRepository> _applicantReferenceRepository;
+  private readonly Lazy<IStatementOfPurposeRepository> _statementOfPurposeRepository;
+  private readonly Lazy<IAdditionalInfoRepository> _additionalInfoRepository;
   #endregion CRM
 
   #region DMS - Private Lazy Fields
@@ -111,11 +123,23 @@ public class RepositoryManager : IRepositoryManager
     _crmmonthRepository = new Lazy<ICRMMonthRepository>(() => new CRMMonthRepository(_repositoryContext));
     _crmyearRepository = new Lazy<ICRMYearRepository>(() => new CRMYearRepository(_repositoryContext));
 
-    // New CRM repositories initialization
+    // Existing CRM repositories initialization
     _applicantCourseRepository = new Lazy<IApplicantCourseRepository>(() => new ApplicantCourseRepository(_repositoryContext));
     _applicantInfoRepository = new Lazy<IApplicantInfoRepository>(() => new ApplicantInfoRepository(_repositoryContext));
     _permanentAddressRepository = new Lazy<IPermanentAddressRepository>(() => new PermanentAddressRepository(_repositoryContext));
     _presentAddressRepository = new Lazy<IPresentAddressRepository>(() => new PresentAddressRepository(_repositoryContext));
+
+    // New 10 CRM repositories initialization
+    _educationHistoryRepository = new Lazy<IEducationHistoryRepository>(() => new EducationHistoryRepository(_repositoryContext));
+    _ieltsinformationRepository = new Lazy<IIeltsinformationRepository>(() => new IeltsinformationRepository(_repositoryContext));
+    _toeflinformationRepository = new Lazy<IToeflinformationRepository>(() => new ToeflinformationRepository(_repositoryContext));
+    _pteinformationRepository = new Lazy<IPteinformationRepository>(() => new PteinformationRepository(_repositoryContext));
+    _gmatinformationRepository = new Lazy<IGmatinformationRepository>(() => new GmatinformationRepository(_repositoryContext));
+    _othersinformationRepository = new Lazy<IOthersinformationRepository>(() => new OthersinformationRepository(_repositoryContext));
+    _workExperienceRepository = new Lazy<IWorkExperienceRepository>(() => new WorkExperienceRepository(_repositoryContext));
+    _applicantReferenceRepository = new Lazy<IApplicantReferenceRepository>(() => new ApplicantReferenceRepository(_repositoryContext));
+    _statementOfPurposeRepository = new Lazy<IStatementOfPurposeRepository>(() => new StatementOfPurposeRepository(_repositoryContext));
+    _additionalInfoRepository = new Lazy<IAdditionalInfoRepository>(() => new AdditionalInfoRepository(_repositoryContext));
     #endregion CRM
 
     #region DMS - Lazy Initialization
@@ -166,11 +190,23 @@ public class RepositoryManager : IRepositoryManager
   public ICRMMonthRepository CRMMonth => _crmmonthRepository.Value;
   public ICRMYearRepository CRMYear => _crmyearRepository.Value;
 
-  // New CRM repository properties
+  // Existing CRM repository properties
   public IApplicantCourseRepository ApplicantCourse => _applicantCourseRepository.Value;
   public IApplicantInfoRepository ApplicantInfo => _applicantInfoRepository.Value;
   public IPermanentAddressRepository PermanentAddress => _permanentAddressRepository.Value;
   public IPresentAddressRepository PresentAddress => _presentAddressRepository.Value;
+
+  // New 10 CRM repository properties
+  public IEducationHistoryRepository EducationHistory => _educationHistoryRepository.Value;
+  public IIeltsinformationRepository IeltsInformation => _ieltsinformationRepository.Value;
+  public IToeflinformationRepository ToeflInformation => _toeflinformationRepository.Value;
+  public IPteinformationRepository PteInformation => _pteinformationRepository.Value;
+  public IGmatinformationRepository GmatInformation => _gmatinformationRepository.Value;
+  public IOthersinformationRepository OthersInformation => _othersinformationRepository.Value;
+  public IWorkExperienceRepository WorkExperience => _workExperienceRepository.Value;
+  public IApplicantReferenceRepository ApplicantReference => _applicantReferenceRepository.Value;
+  public IStatementOfPurposeRepository StatementOfPurpose => _statementOfPurposeRepository.Value;
+  public IAdditionalInfoRepository AdditionalInfo => _additionalInfoRepository.Value;
   #endregion CRM
 
   #region DMS - Repository Properties

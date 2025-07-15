@@ -42,11 +42,23 @@ public interface IRepositoryManager : IDisposable
   ICRMMonthRepository CRMMonth{ get; }
   ICRMYearRepository CRMYear { get; }
   
-  // New CRM repositories
+  // Existing CRM repositories
   IApplicantCourseRepository ApplicantCourse { get; }
   IApplicantInfoRepository ApplicantInfo { get; }
   IPermanentAddressRepository PermanentAddress { get; }
   IPresentAddressRepository PresentAddress { get; }
+  
+  // New CRM repositories for 10 entities
+  IEducationHistoryRepository EducationHistory { get; }
+  IIeltsinformationRepository IeltsInformation { get; }
+  IToeflinformationRepository ToeflInformation { get; }
+  IPteinformationRepository PteInformation { get; }
+  IGmatinformationRepository GmatInformation { get; }
+  IOthersinformationRepository OthersInformation { get; }
+  IWorkExperienceRepository WorkExperience { get; }
+  IApplicantReferenceRepository ApplicantReference { get; }
+  IStatementOfPurposeRepository StatementOfPurpose { get; }
+  IAdditionalInfoRepository AdditionalInfo { get; }
   #endregion CRM
 
   #region DMS

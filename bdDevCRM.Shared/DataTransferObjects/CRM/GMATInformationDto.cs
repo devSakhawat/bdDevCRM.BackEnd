@@ -4,7 +4,7 @@ namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
 public class GMATInformationDto
 {
-  public int GMATInformationId { get; set; } // Fixed: was PTEInformationId
+  public int GmatinformationId { get; set; } // Fixed: was PTEInformationId
   public int ApplicantId { get; set; } // Foreign Key
   public string? GMATListening { get; set; }
   public string? GMATReading { get; set; }

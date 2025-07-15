@@ -37,11 +37,23 @@ public interface IServiceManager
   ICRMMonthService CRMMonths { get; }
   ICRMYearService CRMYears { get; }
   
-  // New CRM services
+  // Existing CRM services
   IApplicantCourseService ApplicantCourses { get; }
   IApplicantInfoService ApplicantInfos { get; }
   IPermanentAddressService PermanentAddresses { get; }
   IPresentAddressService PresentAddresses { get; }
+  
+  // New 10 CRM services
+  IEducationHistoryService EducationHistories { get; }
+  IIeltsinformationService IeltsInformations { get; }
+  IToeflinformationService ToeflInformations { get; }
+  IPteinformationService PteInformations { get; }
+  IGmatinformationService GmatInformations { get; }
+  IOthersinformationService OthersInformations { get; }
+  IWorkExperienceService WorkExperiences { get; }
+  IApplicantReferenceService ApplicantReferences { get; }
+  IStatementOfPurposeService StatementOfPurposes { get; }
+  IAdditionalInfoService AdditionalInfos { get; }
   #endregion CRM
 
   #region DMS
