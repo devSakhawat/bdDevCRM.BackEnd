@@ -1,60 +1,37 @@
-﻿namespace bdDevCRM.Entities.Entities.CRM;
+using System;
 
-public partial class ApplicantCourse
+namespace bdDevCRM.Shared.DataTransferObjects.CRM;
+
+/// <summary>
+/// Applicant Course Form Details DTO
+/// </summary>
+public class ApplicantCourseDto
 {
   public int ApplicantCourseId { get; set; }
-
-  public int ApplicantId { get; set; }
-
-  public int CourseId { get; set; } // New foreign key to Crmcourse
-
+  public int ApplicantId { get; set; } // Foreign Key
+  public int CourseId { get; set; } // Foreign Key to Crmcourse
   public int CountryId { get; set; }
-
   public string? CountryName { get; set; }
-
   public int InstituteId { get; set; }
-
   public string? InstituteName { get; set; }
-
   public string? CourseTitle { get; set; }
-
   public int IntakeMonthId { get; set; }
-
   public string? IntakeMonth { get; set; }
-
   public int IntakeYearId { get; set; }
-
   public string? IntakeYear { get; set; }
-
   public string? ApplicationFee { get; set; }
-
   public int CurrencyId { get; set; }
-
   public string? CurrencyName { get; set; }
-
   public int PaymentMethodId { get; set; }
-
   public string? PaymentMethod { get; set; }
-
   public string? PaymentReferenceNumber { get; set; }
-
   public DateTime? PaymentDate { get; set; }
-
   public string? Remarks { get; set; }
-
+  
+  // Common fields
   public DateTime CreatedDate { get; set; }
-
   public int CreatedBy { get; set; }
-
   public DateTime? UpdatedDate { get; set; }
-
   public int? UpdatedBy { get; set; }
 
-  public virtual CrmApplication Applicant { get; set; } = null!;
-
-  public virtual Crmcourse Course { get; set; } = null!; // New navigation property
-
-
-  //public virtual ICollection<CrmApplication> Applications { get; set; } = new List<CrmApplication>();
-  //public virtual ICollection<Crmcourse> Courses { get; set; } = new List<Crmcourse>();
 }

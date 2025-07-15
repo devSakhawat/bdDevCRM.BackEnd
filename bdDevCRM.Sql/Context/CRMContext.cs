@@ -109,10 +109,6 @@ public partial class CRMContext : DbContext
   #endregion CRM Application
 
 
-
-
-
-
   public virtual DbSet<CurencyRate> CurencyRate { get; set; }
 
   public virtual DbSet<Currency> Currency { get; set; }
@@ -577,6 +573,7 @@ public partial class CRMContext : DbContext
       entity.HasKey(e => e.ApplicantCourseId).HasName("PK__Applican__32CD933287A9B7A4");
 
       entity.HasIndex(e => e.ApplicantId, "IX_ApplicantCourse_ApplicantId");
+      entity.HasIndex(e => e.CourseId, "IX_ApplicantCourse_CourseId"); // New index for CourseId
 
       entity.Property(e => e.ApplicationFee).HasMaxLength(20);
       entity.Property(e => e.CountryName).HasMaxLength(100);
@@ -593,6 +590,11 @@ public partial class CRMContext : DbContext
       entity.HasOne(d => d.Applicant).WithMany(p => p.ApplicantCourse)
           .HasForeignKey(d => d.ApplicantId)
           .HasConstraintName("FK_ApplicantCourse_CrmApplication");
+
+      //// New foreign key relationship to Crmcourse
+      //entity.HasOne(d => d.Course).WithMany(p => p.ApplicantCourse)
+      //    .HasForeignKey(d => d.CourseId)
+      //    .HasConstraintName("FK_ApplicantCourse_Crmcourse");
     });
 
     modelBuilder.Entity<ApplicantInfo>(entity =>
