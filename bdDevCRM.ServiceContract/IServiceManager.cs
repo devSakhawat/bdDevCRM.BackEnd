@@ -45,11 +45,11 @@ public interface IServiceManager
   
   // New 10 CRM services
   IEducationHistoryService EducationHistories { get; }
-  IIeltsinformationService IeltsInformations { get; }
-  IToeflinformationService ToeflInformations { get; }
-  IPteinformationService PteInformations { get; }
-  IGmatinformationService GmatInformations { get; }
-  IOthersinformationService OthersInformations { get; }
+  IIELTSInformationService IELTSInformations { get; }
+  ITOEFLInformationService TOEFLInformations { get; }
+  IPTEInformationService PTEInformations { get; }
+  IGMATInformationService GMATInformations { get; }
+  IOTHERSInformationService OTHERSInformations { get; }
   IWorkExperienceService WorkExperiences { get; }
   IApplicantReferenceService ApplicantReferences { get; }
   IStatementOfPurposeService StatementOfPurposes { get; }

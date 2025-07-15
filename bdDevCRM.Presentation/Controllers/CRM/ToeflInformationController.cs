@@ -39,7 +39,7 @@ public class ToeflInformationController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.ToeflInformations.GetToeflinformationsDDLAsync(trackChanges: false);
+    var res = await _serviceManager.TOEFLInformations.GetToeflinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<TOEFLInformationDto>>("No TOEFL information found"));
 
@@ -63,7 +63,7 @@ public class ToeflInformationController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.ToeflInformations.GetToeflinformationByApplicantIdAsync(applicantId, trackChanges: false);
+    var res = await _serviceManager.TOEFLInformations.GetToeflinformationByApplicantIdAsync(applicantId, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "TOEFL information retrieved successfully"));
   }
 
@@ -83,7 +83,7 @@ public class ToeflInformationController : BaseApiController
     if (options == null)
       return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
 
-    var summaryGrid = await _serviceManager.ToeflInformations.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.TOEFLInformations.SummaryGrid(options);
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
@@ -106,7 +106,7 @@ public class ToeflInformationController : BaseApiController
       if (modelDto == null)
         return BadRequest(ResponseHelper.BadRequest("TOEFL information data is required"));
 
-      TOEFLInformationDto res = await _serviceManager.ToeflInformations.CreateNewRecordAsync(modelDto, currentUser);
+      TOEFLInformationDto res = await _serviceManager.TOEFLInformations.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.TOEFLInformationId > 0)
         return Ok(ResponseHelper.Created(res, "TOEFL information created successfully"));
@@ -135,7 +135,7 @@ public class ToeflInformationController : BaseApiController
       if (currentUser == null)
         return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
 
-      var res = await _serviceManager.ToeflInformations.UpdateRecordAsync(key, modelDto, false);
+      var res = await _serviceManager.TOEFLInformations.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "TOEFL information updated successfully"));
@@ -158,7 +158,7 @@ public class ToeflInformationController : BaseApiController
       int userId = HttpContext.GetUserId();
       var currentUser = HttpContext.GetCurrentUser();
 
-      var res = await _serviceManager.ToeflInformations.DeleteRecordAsync(key, modelDto);
+      var res = await _serviceManager.TOEFLInformations.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "TOEFL information deleted successfully"));
@@ -181,7 +181,7 @@ public class ToeflInformationController : BaseApiController
       if (string.IsNullOrEmpty(userIdClaim))
         return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
 
-      var res = await _serviceManager.ToeflInformations.GetToeflinformationAsync(key, trackChanges: false);
+      var res = await _serviceManager.TOEFLInformations.GetToeflinformationAsync(key, trackChanges: false);
       return Ok(ResponseHelper.Success(res, "TOEFL information retrieved successfully"));
     }
     catch (Exception)

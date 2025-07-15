@@ -12,11 +12,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace bdDevCRM.Service.CRM;
 
-internal sealed class GmatinformationService(
+internal sealed class GMATInformationService(
     IRepositoryManager repository,
     ILoggerManager logger,
     IConfiguration config,
-    IHttpContextAccessor httpContextAccessor) : IGmatinformationService
+    IHttpContextAccessor httpContextAccessor) : IGMATInformationService
 {
   private readonly IRepositoryManager _repository = repository;
   private readonly ILoggerManager _logger = logger;
@@ -25,37 +25,37 @@ internal sealed class GmatinformationService(
 
   public async Task<IEnumerable<GMATInformationDto>> GetGmatinformationsDDLAsync(bool trackChanges = false)
   {
-    var list = await _repository.GmatInformation.GetActiveGmatinformationsAsync(trackChanges);
-    if (!list.Any()) throw new GenericListNotFoundException("GmatInformation");
-    return MyMapper.JsonCloneIEnumerableToList<Gmatinformation, GMATInformationDto>(list);
+    var list = await _repository.GMATInformation.GetActiveGmatinformationsAsync(trackChanges);
+    if (!list.Any()) throw new GenericListNotFoundException("GMATInformation");
+    return MyMapper.JsonCloneIEnumerableToList<GMATInformation, GMATInformationDto>(list);
   }
 
   public async Task<IEnumerable<GMATInformationDto>> GetActiveGmatinformationsAsync(bool trackChanges = false)
   {
-    var list = await _repository.GmatInformation.GetActiveGmatinformationsAsync(trackChanges);
-    if (!list.Any()) throw new GenericListNotFoundException("GmatInformation");
-    return MyMapper.JsonCloneIEnumerableToList<Gmatinformation, GMATInformationDto>(list);
+    var list = await _repository.GMATInformation.GetActiveGmatinformationsAsync(trackChanges);
+    if (!list.Any()) throw new GenericListNotFoundException("GMATInformation");
+    return MyMapper.JsonCloneIEnumerableToList<GMATInformation, GMATInformationDto>(list);
   }
 
   public async Task<IEnumerable<GMATInformationDto>> GetGmatinformationsAsync(bool trackChanges = false)
   {
-    var list = await _repository.GmatInformation.GetGmatinformationsAsync(trackChanges);
-    if (!list.Any()) throw new GenericListNotFoundException("GmatInformation");
-    return MyMapper.JsonCloneIEnumerableToList<Gmatinformation, GMATInformationDto>(list);
+    var list = await _repository.GMATInformation.GetGmatinformationsAsync(trackChanges);
+    if (!list.Any()) throw new GenericListNotFoundException("GMATInformation");
+    return MyMapper.JsonCloneIEnumerableToList<GMATInformation, GMATInformationDto>(list);
   }
 
   public async Task<GMATInformationDto> GetGmatinformationAsync(int id, bool trackChanges = false)
   {
-    var entity = await _repository.GmatInformation.GetGmatinformationAsync(id, trackChanges);
-    if (entity == null) throw new GenericNotFoundException("GmatInformation", "GmatinformationId", id.ToString());
-    return MyMapper.JsonClone<Gmatinformation, GMATInformationDto>(entity);
+    var entity = await _repository.GMATInformation.GetGmatinformationAsync(id, trackChanges);
+    if (entity == null) throw new GenericNotFoundException("GMATInformation", "GmatinformationId", id.ToString());
+    return MyMapper.JsonClone<GMATInformation, GMATInformationDto>(entity);
   }
 
   public async Task<GMATInformationDto> GetGmatinformationByApplicantIdAsync(int applicantId, bool trackChanges = false)
   {
-    var entity = await _repository.GmatInformation.GetGmatinformationByApplicantIdAsync(applicantId, trackChanges);
-    if (entity == null) throw new GenericNotFoundException("GmatInformation", "ApplicantId", applicantId.ToString());
-    return MyMapper.JsonClone<Gmatinformation, GMATInformationDto>(entity);
+    var entity = await _repository.GMATInformation.GetGmatinformationByApplicantIdAsync(applicantId, trackChanges);
+    if (entity == null) throw new GenericNotFoundException("GMATInformation", "ApplicantId", applicantId.ToString());
+    return MyMapper.JsonClone<GMATInformation, GMATInformationDto>(entity);
   }
 
   public async Task<GMATInformationDto> CreateNewRecordAsync(GMATInformationDto dto, UsersDto currentUser)
@@ -64,14 +64,14 @@ internal sealed class GmatinformationService(
       throw new InvalidCreateOperationException("GmatinformationId must be 0.");
 
     // Check for duplicate applicant ID
-    bool applicantExists = await _repository.GmatInformation.ExistsAsync(x => x.ApplicantId == dto.ApplicantId);
-    if (applicantExists) throw new DuplicateRecordException("GmatInformation", "ApplicantId");
+    bool applicantExists = await _repository.GMATInformation.ExistsAsync(x => x.ApplicantId == dto.ApplicantId);
+    if (applicantExists) throw new DuplicateRecordException("GMATInformation", "ApplicantId");
 
-    var entity = MyMapper.JsonClone<GMATInformationDto, Gmatinformation>(dto);
+    var entity = MyMapper.JsonClone<GMATInformationDto, GMATInformation>(dto);
     entity.CreatedDate = DateTime.UtcNow;
     entity.CreatedBy = currentUser.UserId ?? 0;
-    
-    dto.GmatinformationId = await _repository.GmatInformation.CreateAndGetIdAsync(entity);
+
+    dto.GmatinformationId = await _repository.GMATInformation.CreateAndGetIdAsync(entity);
     dto.CreatedDate = entity.CreatedDate;
     dto.CreatedBy = entity.CreatedBy;
 
@@ -82,15 +82,15 @@ internal sealed class GmatinformationService(
   {
     if (key != dto.GmatinformationId) return "Key mismatch.";
 
-    bool exists = await _repository.GmatInformation.ExistsAsync(x => x.GmatinformationId == key);
-    if (!exists) throw new GenericNotFoundException("GmatInformation", "GmatinformationId", key.ToString());
+    bool exists = await _repository.GMATInformation.ExistsAsync(x => x.GMATInformationId == key);
+    if (!exists) throw new GenericNotFoundException("GMATInformation", "GmatinformationId", key.ToString());
 
-    var entity = MyMapper.JsonClone<GMATInformationDto, Gmatinformation>(dto);
+    var entity = MyMapper.JsonClone<GMATInformationDto, GMATInformation>(dto);
     entity.UpdatedDate = DateTime.UtcNow;
-    
-    _repository.GmatInformation.Update(entity);
+
+    _repository.GMATInformation.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"GmatInformation updated, id={key}");
+    _logger.LogInfo($"GMATInformation updated, id={key}");
     return OperationMessage.Success;
   }
 
@@ -99,9 +99,9 @@ internal sealed class GmatinformationService(
     if (key != dto.GmatinformationId)
       throw new IdMismatchBadRequestException(key.ToString(), nameof(GMATInformationDto));
 
-    await _repository.GmatInformation.DeleteAsync(x => x.GmatinformationId == key, true);
+    await _repository.GMATInformation.DeleteAsync(x => x.GMATInformationId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"GmatInformation deleted, id={key}");
+    _logger.LogInfo($"GMATInformation deleted, id={key}");
     return OperationMessage.Success;
   }
 
@@ -124,10 +124,10 @@ select
     gi.UpdatedDate,
     gi.UpdatedBy,
     app.ApplicationStatus
-from Gmatinformation gi
+from GMATInformation gi
 left join CrmApplication app on gi.ApplicantId = app.ApplicationId
 ";
     string orderBy = " gi.CreatedDate desc ";
-    return await _repository.GmatInformation.GridData<GMATInformationDto>(sql, options, orderBy, "");
+    return await _repository.GMATInformation.GridData<GMATInformationDto>(sql, options, orderBy, "");
   }
 }

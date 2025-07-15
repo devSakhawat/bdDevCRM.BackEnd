@@ -38,7 +38,7 @@ public class OthersInformationController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.OthersInformations.GetOthersinformationsDDLAsync(trackChanges: false);
+    var res = await _serviceManager.OTHERSInformations.GetOthersinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<OTHERSInformationDto>>("No others information found"));
 
@@ -59,7 +59,7 @@ public class OthersInformationController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.OthersInformations.GetOthersinformationByApplicantIdAsync(applicantId, trackChanges: false);
+    var res = await _serviceManager.OTHERSInformations.GetOthersinformationByApplicantIdAsync(applicantId, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "Others information retrieved successfully"));
   }
 
@@ -75,7 +75,7 @@ public class OthersInformationController : BaseApiController
     if (currentUser == null)
       return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
 
-    var summaryGrid = await _serviceManager.OthersInformations.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.OTHERSInformations.SummaryGrid(options);
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
@@ -90,7 +90,7 @@ public class OthersInformationController : BaseApiController
     if (currentUser == null)
       return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
 
-    OTHERSInformationDto res = await _serviceManager.OthersInformations.CreateNewRecordAsync(modelDto, currentUser);
+    OTHERSInformationDto res = await _serviceManager.OTHERSInformations.CreateNewRecordAsync(modelDto, currentUser);
     return Ok(ResponseHelper.Created(res, "Others information created successfully"));
   }
 
@@ -98,7 +98,7 @@ public class OthersInformationController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateOthersInformation([FromRoute] int key, [FromBody] OTHERSInformationDto modelDto)
   {
-    var res = await _serviceManager.OthersInformations.UpdateRecordAsync(key, modelDto, false);
+    var res = await _serviceManager.OTHERSInformations.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
       return Ok(ResponseHelper.Success(res, "Others information updated successfully"));
     else
@@ -109,7 +109,7 @@ public class OthersInformationController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> DeleteOthersInformation([FromRoute] int key, [FromBody] OTHERSInformationDto modelDto)
   {
-    var res = await _serviceManager.OthersInformations.DeleteRecordAsync(key, modelDto);
+    var res = await _serviceManager.OTHERSInformations.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
       return Ok(ResponseHelper.Success(res, "Others information deleted successfully"));
     else
@@ -119,7 +119,7 @@ public class OthersInformationController : BaseApiController
   [HttpGet(RouteConstants.UpdateOthersInformation)]
   public async Task<IActionResult> GetOthersInformation([FromRoute] int key)
   {
-    var res = await _serviceManager.OthersInformations.GetOthersinformationAsync(key, trackChanges: false);
+    var res = await _serviceManager.OTHERSInformations.GetOthersinformationAsync(key, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "Others information retrieved successfully"));
   }
 }

@@ -40,7 +40,7 @@ public class ApplicantReferenceController : BaseApiController
 
     var res = await _serviceManager.ApplicantReferences.GetApplicantReferencesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<ReferenceDto>>("No applicant references found"));
+      return Ok(ResponseHelper.NoContent<IEnumerable<ApplicantReferenceDto>>("No applicant references found"));
 
     return Ok(ResponseHelper.Success(res, "Applicant references retrieved successfully"));
   }
@@ -80,7 +80,7 @@ public class ApplicantReferenceController : BaseApiController
   }
 
   [HttpPost(RouteConstants.CreateApplicantReference)]
-  public async Task<IActionResult> CreateNewRecord([FromBody] ReferenceDto modelDto)
+  public async Task<IActionResult> CreateNewRecord([FromBody] ApplicantReferenceDto modelDto)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
@@ -90,13 +90,13 @@ public class ApplicantReferenceController : BaseApiController
     if (currentUser == null)
       return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
 
-    ReferenceDto res = await _serviceManager.ApplicantReferences.CreateNewRecordAsync(modelDto, currentUser);
+    ApplicantReferenceDto res = await _serviceManager.ApplicantReferences.CreateNewRecordAsync(modelDto, currentUser);
     return Ok(ResponseHelper.Created(res, "Applicant reference created successfully"));
   }
 
   [HttpPut(RouteConstants.UpdateApplicantReference)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> UpdateApplicantReference([FromRoute] int key, [FromBody] ReferenceDto modelDto)
+  public async Task<IActionResult> UpdateApplicantReference([FromRoute] int key, [FromBody] ApplicantReferenceDto modelDto)
   {
     var res = await _serviceManager.ApplicantReferences.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
@@ -107,7 +107,7 @@ public class ApplicantReferenceController : BaseApiController
 
   [HttpDelete(RouteConstants.DeleteApplicantReference)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> DeleteApplicantReference([FromRoute] int key, [FromBody] ReferenceDto modelDto)
+  public async Task<IActionResult> DeleteApplicantReference([FromRoute] int key, [FromBody] ApplicantReferenceDto modelDto)
   {
     var res = await _serviceManager.ApplicantReferences.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)

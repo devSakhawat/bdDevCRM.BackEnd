@@ -2,11 +2,11 @@ using bdDevCRM.Entities.Entities.CRM;
 
 namespace bdDevCRM.RepositoriesContracts.CRM;
 
-public interface IPteinformationRepository : IRepositoryBase<Pteinformation>
+public interface IPTEInformationRepository : IRepositoryBase<PTEInformation>
 {
-  Task<IEnumerable<Pteinformation>> GetActivePteinformationsAsync(bool track);
-  Task<IEnumerable<Pteinformation>> GetPteinformationsAsync(bool track);
-  Task<Pteinformation?> GetPteinformationAsync(int id, bool track);
-  Task<IEnumerable<Pteinformation>> GetPteinformationsByApplicantIdAsync(int applicantId, bool track);
-  Task<Pteinformation?> GetPteinformationByApplicantIdAsync(int applicantId, bool track);
+  Task<IEnumerable<PTEInformation>> GetActivePteinformationsAsync(bool track);
+  Task<IEnumerable<PTEInformation>> GetPteinformationsAsync(bool track);
+  Task<PTEInformation?> GetPteinformationAsync(int id, bool track);
+  Task<IEnumerable<PTEInformation>> GetPteinformationsByApplicantIdAsync(int applicantId, bool track);
+  Task<PTEInformation?> GetPteinformationByApplicantIdAsync(int applicantId, bool track);
 }

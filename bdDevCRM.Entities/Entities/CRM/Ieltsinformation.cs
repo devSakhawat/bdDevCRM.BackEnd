@@ -3,27 +3,27 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
-public partial class Ieltsinformation
+public partial class IELTSInformation
 {
-    public int IeltsinformationId { get; set; }
+    public int IELTSInformationId { get; set; }
 
     public int ApplicantId { get; set; }
 
-    public string? Ieltslistening { get; set; }
+    public string? IELTSListening { get; set; }
 
-    public string? Ieltsreading { get; set; }
+    public string? IELTSReading { get; set; }
 
-    public string? Ieltswriting { get; set; }
+    public string? IELTSWriting { get; set; }
 
-    public string? Ieltsspeaking { get; set; }
+    public string? IELTSSpeaking { get; set; }
 
-    public string? IeltsoverallScore { get; set; }
+    public string? IELTSOverallScore { get; set; }
 
-    public DateTime? Ieltsdate { get; set; }
+    public DateTime? IELTSDate { get; set; }
 
-    public string? IeltsscannedCopyPath { get; set; }
+    public string? IELTSScannedCopyPath { get; set; }
 
-    public string? IeltsadditionalInformation { get; set; }
+    public string? IELTSAdditionalInformation { get; set; }
 
     public DateTime CreatedDate { get; set; }
 

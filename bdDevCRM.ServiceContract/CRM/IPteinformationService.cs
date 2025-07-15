@@ -4,7 +4,7 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 
 namespace bdDevCRM.ServiceContract.CRM;
 
-public interface IPteinformationService
+public interface IPTEInformationService
 {
   Task<IEnumerable<PTEInformationDto>> GetPteinformationsDDLAsync(bool trackChanges = false);
   Task<IEnumerable<PTEInformationDto>> GetActivePteinformationsAsync(bool trackChanges = false);

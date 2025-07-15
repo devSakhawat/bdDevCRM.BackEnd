@@ -29,21 +29,21 @@ public partial class CrmApplication
 
     public virtual ICollection<EducationHistory> EducationHistory { get; set; } = new List<EducationHistory>();
 
-    public virtual ICollection<Gmatinformation> Gmatinformation { get; set; } = new List<Gmatinformation>();
+    public virtual ICollection<GMATInformation> GMATInformation { get; set; } = new List<GMATInformation>();
 
-    public virtual ICollection<Ieltsinformation> Ieltsinformation { get; set; } = new List<Ieltsinformation>();
+    public virtual ICollection<IELTSInformation> IELTSInformation { get; set; } = new List<IELTSInformation>();
 
-    public virtual ICollection<Othersinformation> Othersinformation { get; set; } = new List<Othersinformation>();
+    public virtual ICollection<OTHERSInformation> OTHERSInformation { get; set; } = new List<OTHERSInformation>();
+
+    public virtual ICollection<PTEInformation> PTEInformation { get; set; } = new List<PTEInformation>();
 
     public virtual ICollection<PermanentAddress> PermanentAddress { get; set; } = new List<PermanentAddress>();
 
     public virtual ICollection<PresentAddress> PresentAddress { get; set; } = new List<PresentAddress>();
 
-    public virtual ICollection<Pteinformation> Pteinformation { get; set; } = new List<Pteinformation>();
-
     public virtual ICollection<StatementOfPurpose> StatementOfPurpose { get; set; } = new List<StatementOfPurpose>();
 
-    public virtual ICollection<Toeflinformation> Toeflinformation { get; set; } = new List<Toeflinformation>();
+    public virtual ICollection<TOEFLInformation> TOEFLInformation { get; set; } = new List<TOEFLInformation>();
 
     public virtual ICollection<WorkExperience> WorkExperience { get; set; } = new List<WorkExperience>();
 }

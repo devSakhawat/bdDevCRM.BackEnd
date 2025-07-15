@@ -88,21 +88,21 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<EducationHistory> EducationHistory { get; set; }
 
-  public virtual DbSet<Gmatinformation> Gmatinformation { get; set; }
+  public virtual DbSet<GMATInformation> GMATInformation { get; set; }
 
-  public virtual DbSet<Ieltsinformation> Ieltsinformation { get; set; }
+  public virtual DbSet<IELTSInformation> IELTSInformation { get; set; }
 
-  public virtual DbSet<Othersinformation> Othersinformation { get; set; }
+  public virtual DbSet<OTHERSInformation> OTHERSInformation { get; set; }
+
+  public virtual DbSet<PTEInformation> PTEInformation { get; set; }
 
   public virtual DbSet<PermanentAddress> PermanentAddress { get; set; }
 
   public virtual DbSet<PresentAddress> PresentAddress { get; set; }
 
-  public virtual DbSet<Pteinformation> Pteinformation { get; set; }
-
   public virtual DbSet<StatementOfPurpose> StatementOfPurpose { get; set; }
 
-  public virtual DbSet<Toeflinformation> Toeflinformation { get; set; }
+  public virtual DbSet<TOEFLInformation> TOEFLInformation { get; set; }
 
   public virtual DbSet<WorkExperience> WorkExperience { get; set; }
 
@@ -553,12 +553,8 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.DocumentName).HasMaxLength(200);
       entity.Property(e => e.DocumentTitle).HasMaxLength(200);
       entity.Property(e => e.FileThumbnail).HasMaxLength(500);
-      entity.Property(e => e.HealthNmedicalNeeds)
-          .HasMaxLength(10)
-          .HasColumnName("HealthNMedicalNeeds");
-      entity.Property(e => e.HealthNmedicalNeedsRemarks)
-          .HasMaxLength(1000)
-          .HasColumnName("HealthNMedicalNeedsRemarks");
+      entity.Property(e => e.HealthNMedicalNeeds).HasMaxLength(10);
+      entity.Property(e => e.HealthNMedicalNeedsRemarks).HasMaxLength(1000);
       entity.Property(e => e.RecordType).HasMaxLength(20);
       entity.Property(e => e.RequireAccommodation).HasMaxLength(10);
       entity.Property(e => e.UploadFile).HasMaxLength(500);
@@ -573,7 +569,6 @@ public partial class CRMContext : DbContext
       entity.HasKey(e => e.ApplicantCourseId).HasName("PK__Applican__32CD933287A9B7A4");
 
       entity.HasIndex(e => e.ApplicantId, "IX_ApplicantCourse_ApplicantId");
-      entity.HasIndex(e => e.CourseId, "IX_ApplicantCourse_CourseId"); // New index for CourseId
 
       entity.Property(e => e.ApplicationFee).HasMaxLength(20);
       entity.Property(e => e.CountryName).HasMaxLength(100);
@@ -590,11 +585,6 @@ public partial class CRMContext : DbContext
       entity.HasOne(d => d.Applicant).WithMany(p => p.ApplicantCourse)
           .HasForeignKey(d => d.ApplicantId)
           .HasConstraintName("FK_ApplicantCourse_CrmApplication");
-
-      //// New foreign key relationship to Crmcourse
-      //entity.HasOne(d => d.Course).WithMany(p => p.ApplicantCourse)
-      //    .HasForeignKey(d => d.CourseId)
-      //    .HasConstraintName("FK_ApplicantCourse_Crmcourse");
     });
 
     modelBuilder.Entity<ApplicantInfo>(entity =>
@@ -637,9 +627,7 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.Country).HasMaxLength(100);
       entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
       entity.Property(e => e.Designation).HasMaxLength(100);
-      entity.Property(e => e.EmailId)
-          .HasMaxLength(100)
-          .HasColumnName("EmailID");
+      entity.Property(e => e.EmailID).HasMaxLength(100);
       entity.Property(e => e.FaxNo).HasMaxLength(20);
       entity.Property(e => e.Institution).HasMaxLength(200);
       entity.Property(e => e.Name).HasMaxLength(200);
@@ -687,102 +675,79 @@ public partial class CRMContext : DbContext
           .HasConstraintName("FK_EducationHistory_CrmApplication");
     });
 
-    modelBuilder.Entity<Gmatinformation>(entity =>
+    modelBuilder.Entity<GMATInformation>(entity =>
     {
-      entity.HasKey(e => e.GmatinformationId).HasName("PK__GMATInfo__511C53EC85F16CC8");
-
-      entity.ToTable("GMATInformation");
+      entity.HasKey(e => e.GMATInformationId).HasName("PK__GMATInfo__511C53EC85F16CC8");
 
       entity.HasIndex(e => e.ApplicantId, "IX_GMATInformation_ApplicantId");
 
-      entity.Property(e => e.GmatinformationId).HasColumnName("GMATInformationId");
       entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
-      entity.Property(e => e.GmatadditionalInformation)
-          .HasMaxLength(1000)
-          .HasColumnName("GMATAdditionalInformation");
-      entity.Property(e => e.Gmatdate).HasColumnName("GMATDate");
-      entity.Property(e => e.Gmatlistening)
-          .HasMaxLength(10)
-          .HasColumnName("GMATListening");
-      entity.Property(e => e.GmatoverallScore)
-          .HasMaxLength(10)
-          .HasColumnName("GMATOverallScore");
-      entity.Property(e => e.Gmatreading)
-          .HasMaxLength(10)
-          .HasColumnName("GMATReading");
-      entity.Property(e => e.GmatscannedCopyPath)
-          .HasMaxLength(500)
-          .HasColumnName("GMATScannedCopyPath");
-      entity.Property(e => e.Gmatspeaking)
-          .HasMaxLength(10)
-          .HasColumnName("GMATSpeaking");
-      entity.Property(e => e.Gmatwriting)
-          .HasMaxLength(10)
-          .HasColumnName("GMATWriting");
+      entity.Property(e => e.GMATAdditionalInformation).HasMaxLength(1000);
+      entity.Property(e => e.GMATListening).HasMaxLength(10);
+      entity.Property(e => e.GMATOverallScore).HasMaxLength(10);
+      entity.Property(e => e.GMATReading).HasMaxLength(10);
+      entity.Property(e => e.GMATScannedCopyPath).HasMaxLength(500);
+      entity.Property(e => e.GMATSpeaking).HasMaxLength(10);
+      entity.Property(e => e.GMATWriting).HasMaxLength(10);
 
-      entity.HasOne(d => d.Applicant).WithMany(p => p.Gmatinformation)
+      entity.HasOne(d => d.Applicant).WithMany(p => p.GMATInformation)
           .HasForeignKey(d => d.ApplicantId)
           .HasConstraintName("FK_GMATInformation_CrmApplication");
     });
 
-    modelBuilder.Entity<Ieltsinformation>(entity =>
+    modelBuilder.Entity<IELTSInformation>(entity =>
     {
-      entity.HasKey(e => e.IeltsinformationId).HasName("PK__IELTSInf__F3D98972CC94C426");
-
-      entity.ToTable("IELTSInformation");
+      entity.HasKey(e => e.IELTSInformationId).HasName("PK__IELTSInf__F3D98972CC94C426");
 
       entity.HasIndex(e => e.ApplicantId, "IX_IELTSInformation_ApplicantId");
 
-      entity.Property(e => e.IeltsinformationId).HasColumnName("IELTSInformationId");
       entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
-      entity.Property(e => e.IeltsadditionalInformation)
-          .HasMaxLength(1000)
-          .HasColumnName("IELTSAdditionalInformation");
-      entity.Property(e => e.Ieltsdate).HasColumnName("IELTSDate");
-      entity.Property(e => e.Ieltslistening)
-          .HasMaxLength(10)
-          .HasColumnName("IELTSListening");
-      entity.Property(e => e.IeltsoverallScore)
-          .HasMaxLength(10)
-          .HasColumnName("IELTSOverallScore");
-      entity.Property(e => e.Ieltsreading)
-          .HasMaxLength(10)
-          .HasColumnName("IELTSReading");
-      entity.Property(e => e.IeltsscannedCopyPath)
-          .HasMaxLength(500)
-          .HasColumnName("IELTSScannedCopyPath");
-      entity.Property(e => e.Ieltsspeaking)
-          .HasMaxLength(10)
-          .HasColumnName("IELTSSpeaking");
-      entity.Property(e => e.Ieltswriting)
-          .HasMaxLength(10)
-          .HasColumnName("IELTSWriting");
+      entity.Property(e => e.IELTSAdditionalInformation).HasMaxLength(1000);
+      entity.Property(e => e.IELTSListening).HasMaxLength(10);
+      entity.Property(e => e.IELTSOverallScore).HasMaxLength(10);
+      entity.Property(e => e.IELTSReading).HasMaxLength(10);
+      entity.Property(e => e.IELTSScannedCopyPath).HasMaxLength(500);
+      entity.Property(e => e.IELTSSpeaking).HasMaxLength(10);
+      entity.Property(e => e.IELTSWriting).HasMaxLength(10);
 
-      entity.HasOne(d => d.Applicant).WithMany(p => p.Ieltsinformation)
+      entity.HasOne(d => d.Applicant).WithMany(p => p.IELTSInformation)
           .HasForeignKey(d => d.ApplicantId)
           .HasConstraintName("FK_IELTSInformation_CrmApplication");
     });
 
-    modelBuilder.Entity<Othersinformation>(entity =>
+    modelBuilder.Entity<OTHERSInformation>(entity =>
     {
-      entity.HasKey(e => e.OthersinformationId).HasName("PK__OTHERSIn__213F3EE4606225BB");
-
-      entity.ToTable("OTHERSInformation");
+      entity.HasKey(e => e.OTHERSInformationId).HasName("PK__OTHERSIn__213F3EE4606225BB");
 
       entity.HasIndex(e => e.ApplicantId, "IX_OTHERSInformation_ApplicantId");
 
-      entity.Property(e => e.OthersinformationId).HasColumnName("OTHERSInformationId");
       entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
-      entity.Property(e => e.OthersadditionalInformation)
-          .HasMaxLength(1000)
-          .HasColumnName("OTHERSAdditionalInformation");
-      entity.Property(e => e.OthersscannedCopyPath)
-          .HasMaxLength(500)
-          .HasColumnName("OTHERSScannedCopyPath");
+      entity.Property(e => e.OTHERSAdditionalInformation).HasMaxLength(1000);
+      entity.Property(e => e.OTHERSScannedCopyPath).HasMaxLength(500);
 
-      entity.HasOne(d => d.Applicant).WithMany(p => p.Othersinformation)
+      entity.HasOne(d => d.Applicant).WithMany(p => p.OTHERSInformation)
           .HasForeignKey(d => d.ApplicantId)
           .HasConstraintName("FK_OTHERSInformation_CrmApplication");
+    });
+
+    modelBuilder.Entity<PTEInformation>(entity =>
+    {
+      entity.HasKey(e => e.PTEInformationId).HasName("PK__PTEInfor__1D54A241907CD2A7");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_PTEInformation_ApplicantId");
+
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.PTEAdditionalInformation).HasMaxLength(1000);
+      entity.Property(e => e.PTEListening).HasMaxLength(10);
+      entity.Property(e => e.PTEOverallScore).HasMaxLength(10);
+      entity.Property(e => e.PTEReading).HasMaxLength(10);
+      entity.Property(e => e.PTEScannedCopyPath).HasMaxLength(500);
+      entity.Property(e => e.PTESpeaking).HasMaxLength(10);
+      entity.Property(e => e.PTEWriting).HasMaxLength(10);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.PTEInformation)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_PTEInformation_CrmApplication");
     });
 
     modelBuilder.Entity<PermanentAddress>(entity =>
@@ -821,44 +786,6 @@ public partial class CRMContext : DbContext
           .HasConstraintName("FK_PresentAddress_CrmApplication");
     });
 
-    modelBuilder.Entity<Pteinformation>(entity =>
-    {
-      entity.HasKey(e => e.PteinformationId).HasName("PK__PTEInfor__1D54A241907CD2A7");
-
-      entity.ToTable("PTEInformation");
-
-      entity.HasIndex(e => e.ApplicantId, "IX_PTEInformation_ApplicantId");
-
-      entity.Property(e => e.PteinformationId).HasColumnName("PTEInformationId");
-      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
-      entity.Property(e => e.PteadditionalInformation)
-          .HasMaxLength(1000)
-          .HasColumnName("PTEAdditionalInformation");
-      entity.Property(e => e.Ptedate).HasColumnName("PTEDate");
-      entity.Property(e => e.Ptelistening)
-          .HasMaxLength(10)
-          .HasColumnName("PTEListening");
-      entity.Property(e => e.PteoverallScore)
-          .HasMaxLength(10)
-          .HasColumnName("PTEOverallScore");
-      entity.Property(e => e.Ptereading)
-          .HasMaxLength(10)
-          .HasColumnName("PTEReading");
-      entity.Property(e => e.PtescannedCopyPath)
-          .HasMaxLength(500)
-          .HasColumnName("PTEScannedCopyPath");
-      entity.Property(e => e.Ptespeaking)
-          .HasMaxLength(10)
-          .HasColumnName("PTESpeaking");
-      entity.Property(e => e.Ptewriting)
-          .HasMaxLength(10)
-          .HasColumnName("PTEWriting");
-
-      entity.HasOne(d => d.Applicant).WithMany(p => p.Pteinformation)
-          .HasForeignKey(d => d.ApplicantId)
-          .HasConstraintName("FK_PTEInformation_CrmApplication");
-    });
-
     modelBuilder.Entity<StatementOfPurpose>(entity =>
     {
       entity.HasKey(e => e.StatementOfPurposeId).HasName("PK__Statemen__88D17C3D821C3764");
@@ -873,40 +800,22 @@ public partial class CRMContext : DbContext
           .HasConstraintName("FK_StatementOfPurpose_CrmApplication");
     });
 
-    modelBuilder.Entity<Toeflinformation>(entity =>
+    modelBuilder.Entity<TOEFLInformation>(entity =>
     {
-      entity.HasKey(e => e.ToeflinformationId).HasName("PK__TOEFLInf__BD367513513F8AB5");
-
-      entity.ToTable("TOEFLInformation");
+      entity.HasKey(e => e.TOEFLInformationId).HasName("PK__TOEFLInf__BD367513513F8AB5");
 
       entity.HasIndex(e => e.ApplicantId, "IX_TOEFLInformation_ApplicantId");
 
-      entity.Property(e => e.ToeflinformationId).HasColumnName("TOEFLInformationId");
       entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
-      entity.Property(e => e.ToefladditionalInformation)
-          .HasMaxLength(1000)
-          .HasColumnName("TOEFLAdditionalInformation");
-      entity.Property(e => e.Toefldate).HasColumnName("TOEFLDate");
-      entity.Property(e => e.Toefllistening)
-          .HasMaxLength(10)
-          .HasColumnName("TOEFLListening");
-      entity.Property(e => e.ToefloverallScore)
-          .HasMaxLength(10)
-          .HasColumnName("TOEFLOverallScore");
-      entity.Property(e => e.Toeflreading)
-          .HasMaxLength(10)
-          .HasColumnName("TOEFLReading");
-      entity.Property(e => e.ToeflscannedCopyPath)
-          .HasMaxLength(500)
-          .HasColumnName("TOEFLScannedCopyPath");
-      entity.Property(e => e.Toeflspeaking)
-          .HasMaxLength(10)
-          .HasColumnName("TOEFLSpeaking");
-      entity.Property(e => e.Toeflwriting)
-          .HasMaxLength(10)
-          .HasColumnName("TOEFLWriting");
+      entity.Property(e => e.TOEFLAdditionalInformation).HasMaxLength(1000);
+      entity.Property(e => e.TOEFLListening).HasMaxLength(10);
+      entity.Property(e => e.TOEFLOverallScore).HasMaxLength(10);
+      entity.Property(e => e.TOEFLReading).HasMaxLength(10);
+      entity.Property(e => e.TOEFLScannedCopyPath).HasMaxLength(500);
+      entity.Property(e => e.TOEFLSpeaking).HasMaxLength(10);
+      entity.Property(e => e.TOEFLWriting).HasMaxLength(10);
 
-      entity.HasOne(d => d.Applicant).WithMany(p => p.Toeflinformation)
+      entity.HasOne(d => d.Applicant).WithMany(p => p.TOEFLInformation)
           .HasForeignKey(d => d.ApplicantId)
           .HasConstraintName("FK_TOEFLInformation_CrmApplication");
     });

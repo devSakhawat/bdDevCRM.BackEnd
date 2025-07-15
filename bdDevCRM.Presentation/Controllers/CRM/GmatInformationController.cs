@@ -38,7 +38,7 @@ public class GmatInformationController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.GmatInformations.GetGmatinformationsDDLAsync(trackChanges: false);
+    var res = await _serviceManager.GMATInformations.GetGmatinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<GMATInformationDto>>("No GMAT information found"));
 
@@ -59,7 +59,7 @@ public class GmatInformationController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.GmatInformations.GetGmatinformationByApplicantIdAsync(applicantId, trackChanges: false);
+    var res = await _serviceManager.GMATInformations.GetGmatinformationByApplicantIdAsync(applicantId, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "GMAT information retrieved successfully"));
   }
 
@@ -75,7 +75,7 @@ public class GmatInformationController : BaseApiController
     if (currentUser == null)
       return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
 
-    var summaryGrid = await _serviceManager.GmatInformations.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.GMATInformations.SummaryGrid(options);
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
@@ -90,7 +90,7 @@ public class GmatInformationController : BaseApiController
     if (currentUser == null)
       return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
 
-    GMATInformationDto res = await _serviceManager.GmatInformations.CreateNewRecordAsync(modelDto, currentUser);
+    GMATInformationDto res = await _serviceManager.GMATInformations.CreateNewRecordAsync(modelDto, currentUser);
     return Ok(ResponseHelper.Created(res, "GMAT information created successfully"));
   }
 
@@ -98,7 +98,7 @@ public class GmatInformationController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateGmatInformation([FromRoute] int key, [FromBody] GMATInformationDto modelDto)
   {
-    var res = await _serviceManager.GmatInformations.UpdateRecordAsync(key, modelDto, false);
+    var res = await _serviceManager.GMATInformations.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
       return Ok(ResponseHelper.Success(res, "GMAT information updated successfully"));
     else
@@ -109,7 +109,7 @@ public class GmatInformationController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> DeleteGmatInformation([FromRoute] int key, [FromBody] GMATInformationDto modelDto)
   {
-    var res = await _serviceManager.GmatInformations.DeleteRecordAsync(key, modelDto);
+    var res = await _serviceManager.GMATInformations.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
       return Ok(ResponseHelper.Success(res, "GMAT information deleted successfully"));
     else
@@ -119,7 +119,7 @@ public class GmatInformationController : BaseApiController
   [HttpGet(RouteConstants.UpdateGmatInformation)]
   public async Task<IActionResult> GetGmatInformation([FromRoute] int key)
   {
-    var res = await _serviceManager.GmatInformations.GetGmatinformationAsync(key, trackChanges: false);
+    var res = await _serviceManager.GMATInformations.GetGmatinformationAsync(key, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "GMAT information retrieved successfully"));
   }
 }

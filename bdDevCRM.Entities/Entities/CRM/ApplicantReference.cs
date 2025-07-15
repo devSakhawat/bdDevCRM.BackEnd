@@ -15,7 +15,7 @@ public partial class ApplicantReference
 
     public string? Institution { get; set; }
 
-    public string? EmailId { get; set; }
+    public string? EmailID { get; set; }
 
     public string? PhoneNo { get; set; }
 

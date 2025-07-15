@@ -4,22 +4,22 @@ using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.CRM;
 
-public sealed class ToeflinformationRepository : RepositoryBase<Toeflinformation>, IToeflinformationRepository
+public sealed class TOEFLInformationRepository : RepositoryBase<TOEFLInformation>, ITOEFLInformationRepository
 {
-  public ToeflinformationRepository(CRMContext context) : base(context) { }
+  public TOEFLInformationRepository(CRMContext context) : base(context) { }
 
-  public async Task<IEnumerable<Toeflinformation>> GetActiveToeflinformationsAsync(bool track) =>
-      await ListAsync(c => c.ToeflinformationId, track);
+  public async Task<IEnumerable<TOEFLInformation>> GetActiveToeflinformationsAsync(bool track) =>
+      await ListAsync(c => c.TOEFLInformationId, track);
 
-  public async Task<IEnumerable<Toeflinformation>> GetToeflinformationsAsync(bool track) =>
-      await ListAsync(c => c.ToeflinformationId, track);
+  public async Task<IEnumerable<TOEFLInformation>> GetToeflinformationsAsync(bool track) =>
+      await ListAsync(c => c.TOEFLInformationId, track);
 
-  public async Task<Toeflinformation?> GetToeflinformationAsync(int id, bool track) =>
-      await FirstOrDefaultAsync(c => c.ToeflinformationId == id, track);
+  public async Task<TOEFLInformation?> GetToeflinformationAsync(int id, bool track) =>
+      await FirstOrDefaultAsync(c => c.TOEFLInformationId == id, track);
 
-  public async Task<IEnumerable<Toeflinformation>> GetToeflinformationsByApplicantIdAsync(int applicantId, bool track) =>
-      await ListByConditionAsync(x => x.ApplicantId == applicantId, c => c.ToeflinformationId, track);
+  public async Task<IEnumerable<TOEFLInformation>> GetToeflinformationsByApplicantIdAsync(int applicantId, bool track) =>
+      await ListByConditionAsync(x => x.ApplicantId == applicantId, c => c.TOEFLInformationId, track);
 
-  public async Task<Toeflinformation?> GetToeflinformationByApplicantIdAsync(int applicantId, bool track) =>
+  public async Task<TOEFLInformation?> GetToeflinformationByApplicantIdAsync(int applicantId, bool track) =>
       await FirstOrDefaultAsync(c => c.ApplicantId == applicantId, track);
 }

@@ -11,9 +11,9 @@ public partial class AdditionalInfo
 
     public string? RequireAccommodation { get; set; }
 
-    public string? HealthNmedicalNeeds { get; set; }
+    public string? HealthNMedicalNeeds { get; set; }
 
-    public string? HealthNmedicalNeedsRemarks { get; set; }
+    public string? HealthNMedicalNeedsRemarks { get; set; }
 
     public string? AdditionalInformationRemarks { get; set; }
 

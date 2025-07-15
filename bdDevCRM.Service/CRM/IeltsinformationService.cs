@@ -12,11 +12,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace bdDevCRM.Service.CRM;
 
-internal sealed class IeltsinformationService(
+internal sealed class IELTSInformationService(
     IRepositoryManager repository,
     ILoggerManager logger,
     IConfiguration config,
-    IHttpContextAccessor httpContextAccessor) : IIeltsinformationService
+    IHttpContextAccessor httpContextAccessor) : IIELTSInformationService
 {
   private readonly IRepositoryManager _repository = repository;
   private readonly ILoggerManager _logger = logger;
@@ -25,37 +25,37 @@ internal sealed class IeltsinformationService(
 
   public async Task<IEnumerable<IELTSInformationDto>> GetIeltsinformationsDDLAsync(bool trackChanges = false)
   {
-    var list = await _repository.IeltsInformation.GetActiveIeltsinformationsAsync(trackChanges);
-    if (!list.Any()) throw new GenericListNotFoundException("IeltsInformation");
-    return MyMapper.JsonCloneIEnumerableToList<Ieltsinformation, IELTSInformationDto>(list);
+    var list = await _repository.IELTSInformation.GetActiveIeltsinformationsAsync(trackChanges);
+    if (!list.Any()) throw new GenericListNotFoundException("IELTSInformation");
+    return MyMapper.JsonCloneIEnumerableToList<IELTSInformation, IELTSInformationDto>(list);
   }
 
   public async Task<IEnumerable<IELTSInformationDto>> GetActiveIeltsinformationsAsync(bool trackChanges = false)
   {
-    var list = await _repository.IeltsInformation.GetActiveIeltsinformationsAsync(trackChanges);
-    if (!list.Any()) throw new GenericListNotFoundException("IeltsInformation");
-    return MyMapper.JsonCloneIEnumerableToList<Ieltsinformation, IELTSInformationDto>(list);
+    var list = await _repository.IELTSInformation.GetActiveIeltsinformationsAsync(trackChanges);
+    if (!list.Any()) throw new GenericListNotFoundException("IELTSInformation");
+    return MyMapper.JsonCloneIEnumerableToList<IELTSInformation, IELTSInformationDto>(list);
   }
 
   public async Task<IEnumerable<IELTSInformationDto>> GetIeltsinformationsAsync(bool trackChanges = false)
   {
-    var list = await _repository.IeltsInformation.GetIeltsinformationsAsync(trackChanges);
-    if (!list.Any()) throw new GenericListNotFoundException("IeltsInformation");
-    return MyMapper.JsonCloneIEnumerableToList<Ieltsinformation, IELTSInformationDto>(list);
+    var list = await _repository.IELTSInformation.GetIeltsinformationsAsync(trackChanges);
+    if (!list.Any()) throw new GenericListNotFoundException("IELTSInformation");
+    return MyMapper.JsonCloneIEnumerableToList<IELTSInformation, IELTSInformationDto>(list);
   }
 
   public async Task<IELTSInformationDto> GetIeltsinformationAsync(int id, bool trackChanges = false)
   {
-    var entity = await _repository.IeltsInformation.GetIeltsinformationAsync(id, trackChanges);
-    if (entity == null) throw new GenericNotFoundException("IeltsInformation", "IeltsinformationId", id.ToString());
-    return MyMapper.JsonClone<Ieltsinformation, IELTSInformationDto>(entity);
+    var entity = await _repository.IELTSInformation.GetIeltsinformationAsync(id, trackChanges);
+    if (entity == null) throw new GenericNotFoundException("IELTSInformation", "IELTSInformationId", id.ToString());
+    return MyMapper.JsonClone<IELTSInformation, IELTSInformationDto>(entity);
   }
 
   public async Task<IELTSInformationDto> GetIeltsinformationByApplicantIdAsync(int applicantId, bool trackChanges = false)
   {
-    var entity = await _repository.IeltsInformation.GetIeltsinformationByApplicantIdAsync(applicantId, trackChanges);
-    if (entity == null) throw new GenericNotFoundException("IeltsInformation", "ApplicantId", applicantId.ToString());
-    return MyMapper.JsonClone<Ieltsinformation, IELTSInformationDto>(entity);
+    var entity = await _repository.IELTSInformation.GetIeltsinformationByApplicantIdAsync(applicantId, trackChanges);
+    if (entity == null) throw new GenericNotFoundException("IELTSInformation", "ApplicantId", applicantId.ToString());
+    return MyMapper.JsonClone<IELTSInformation, IELTSInformationDto>(entity);
   }
 
   public async Task<IELTSInformationDto> CreateNewRecordAsync(IELTSInformationDto dto, UsersDto currentUser)
@@ -64,14 +64,14 @@ internal sealed class IeltsinformationService(
       throw new InvalidCreateOperationException("IELTSInformationId must be 0.");
 
     // Check for duplicate applicant ID
-    bool applicantExists = await _repository.IeltsInformation.ExistsAsync(x => x.ApplicantId == dto.ApplicantId);
-    if (applicantExists) throw new DuplicateRecordException("IeltsInformation", "ApplicantId");
+    bool applicantExists = await _repository.IELTSInformation.ExistsAsync(x => x.ApplicantId == dto.ApplicantId);
+    if (applicantExists) throw new DuplicateRecordException("IELTSInformation", "ApplicantId");
 
-    var entity = MyMapper.JsonClone<IELTSInformationDto, Ieltsinformation>(dto);
+    var entity = MyMapper.JsonClone<IELTSInformationDto, IELTSInformation>(dto);
     entity.CreatedDate = DateTime.UtcNow;
     entity.CreatedBy = currentUser.UserId ?? 0;
     
-    dto.IELTSInformationId = await _repository.IeltsInformation.CreateAndGetIdAsync(entity);
+    dto.IELTSInformationId = await _repository.IELTSInformation.CreateAndGetIdAsync(entity);
     dto.CreatedDate = entity.CreatedDate;
     dto.CreatedBy = entity.CreatedBy;
 
@@ -82,15 +82,15 @@ internal sealed class IeltsinformationService(
   {
     if (key != dto.IELTSInformationId) return "Key mismatch.";
 
-    bool exists = await _repository.IeltsInformation.ExistsAsync(x => x.IeltsinformationId == key);
-    if (!exists) throw new GenericNotFoundException("IeltsInformation", "IeltsinformationId", key.ToString());
+    bool exists = await _repository.IELTSInformation.ExistsAsync(x => x.IELTSInformationId == key);
+    if (!exists) throw new GenericNotFoundException("IELTSInformation", "IELTSInformationId", key.ToString());
 
-    var entity = MyMapper.JsonClone<IELTSInformationDto, Ieltsinformation>(dto);
+    var entity = MyMapper.JsonClone<IELTSInformationDto, IELTSInformation>(dto);
     entity.UpdatedDate = DateTime.UtcNow;
     
-    _repository.IeltsInformation.Update(entity);
+    _repository.IELTSInformation.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"IeltsInformation updated, id={key}");
+    _logger.LogInfo($"IELTSInformation updated, id={key}");
     return OperationMessage.Success;
   }
 
@@ -99,9 +99,9 @@ internal sealed class IeltsinformationService(
     if (key != dto.IELTSInformationId)
       throw new IdMismatchBadRequestException(key.ToString(), nameof(IELTSInformationDto));
 
-    await _repository.IeltsInformation.DeleteAsync(x => x.IeltsinformationId == key, true);
+    await _repository.IELTSInformation.DeleteAsync(x => x.IELTSInformationId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"IeltsInformation deleted, id={key}");
+    _logger.LogInfo($"IELTSInformation deleted, id={key}");
     return OperationMessage.Success;
   }
 
@@ -109,7 +109,7 @@ internal sealed class IeltsinformationService(
   {
     string sql = @"
 select 
-    ii.IeltsinformationId,
+    ii.IELTSInformationId,
     ii.ApplicantId,
     ii.Ieltslistening,
     ii.Ieltsreading,
@@ -124,10 +124,10 @@ select
     ii.UpdatedDate,
     ii.UpdatedBy,
     app.ApplicationStatus
-from Ieltsinformation ii
+from IELTSInformation ii
 left join CrmApplication app on ii.ApplicantId = app.ApplicationId
 ";
     string orderBy = " ii.CreatedDate desc ";
-    return await _repository.IeltsInformation.GridData<IELTSInformationDto>(sql, options, orderBy, "");
+    return await _repository.IELTSInformation.GridData<IELTSInformationDto>(sql, options, orderBy, "");
   }
 }

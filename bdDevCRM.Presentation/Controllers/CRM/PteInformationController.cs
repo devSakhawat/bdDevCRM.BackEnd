@@ -38,7 +38,7 @@ public class PteInformationController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.PteInformations.GetPteinformationsDDLAsync(trackChanges: false);
+    var res = await _serviceManager.PTEInformations.GetPteinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<PTEInformationDto>>("No PTE information found"));
 
@@ -59,7 +59,7 @@ public class PteInformationController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.PteInformations.GetPteinformationByApplicantIdAsync(applicantId, trackChanges: false);
+    var res = await _serviceManager.PTEInformations.GetPteinformationByApplicantIdAsync(applicantId, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "PTE information retrieved successfully"));
   }
 
@@ -75,7 +75,7 @@ public class PteInformationController : BaseApiController
     if (currentUser == null)
       return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
 
-    var summaryGrid = await _serviceManager.PteInformations.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.PTEInformations.SummaryGrid(options);
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
@@ -90,7 +90,7 @@ public class PteInformationController : BaseApiController
     if (currentUser == null)
       return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
 
-    PTEInformationDto res = await _serviceManager.PteInformations.CreateNewRecordAsync(modelDto, currentUser);
+    PTEInformationDto res = await _serviceManager.PTEInformations.CreateNewRecordAsync(modelDto, currentUser);
     return Ok(ResponseHelper.Created(res, "PTE information created successfully"));
   }
 
@@ -98,7 +98,7 @@ public class PteInformationController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdatePteInformation([FromRoute] int key, [FromBody] PTEInformationDto modelDto)
   {
-    var res = await _serviceManager.PteInformations.UpdateRecordAsync(key, modelDto, false);
+    var res = await _serviceManager.PTEInformations.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
       return Ok(ResponseHelper.Success(res, "PTE information updated successfully"));
     else
@@ -109,7 +109,7 @@ public class PteInformationController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> DeletePteInformation([FromRoute] int key, [FromBody] PTEInformationDto modelDto)
   {
-    var res = await _serviceManager.PteInformations.DeleteRecordAsync(key, modelDto);
+    var res = await _serviceManager.PTEInformations.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
       return Ok(ResponseHelper.Success(res, "PTE information deleted successfully"));
     else
@@ -119,7 +119,7 @@ public class PteInformationController : BaseApiController
   [HttpGet(RouteConstants.UpdatePteInformation)]
   public async Task<IActionResult> GetPteInformation([FromRoute] int key)
   {
-    var res = await _serviceManager.PteInformations.GetPteinformationAsync(key, trackChanges: false);
+    var res = await _serviceManager.PTEInformations.GetPteinformationAsync(key, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "PTE information retrieved successfully"));
   }
 }

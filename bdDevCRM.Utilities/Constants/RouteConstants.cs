@@ -226,50 +226,50 @@ public static class RouteConstants
   public const string EducationHistoryByApplicantId = "education-history-by-applicantid/{applicantId:int}";
   #endregion EducationHistory
 
-  #region IeltsInformation
+  #region IELTSInformation
   public const string IeltsInformationDDL = "ielts-information-ddl";
   public const string IeltsInformationSummary = "ielts-information-summary";
   public const string CreateIeltsInformation = "ielts-information";
   public const string UpdateIeltsInformation = "ielts-information/{key:int}";
   public const string DeleteIeltsInformation = "ielts-information/{key:int}";
   public const string IeltsInformationByApplicantId = "ielts-information-by-applicantid/{applicantId:int}";
-  #endregion IeltsInformation
+  #endregion IELTSInformation
 
-  #region ToeflInformation
+  #region TOEFLInformation
   public const string ToeflInformationDDL = "toefl-information-ddl";
   public const string ToeflInformationSummary = "toefl-information-summary";
   public const string CreateToeflInformation = "toefl-information";
   public const string UpdateToeflInformation = "toefl-information/{key:int}";
   public const string DeleteToeflInformation = "toefl-information/{key:int}";
   public const string ToeflInformationByApplicantId = "toefl-information-by-applicantid/{applicantId:int}";
-  #endregion ToeflInformation
+  #endregion TOEFLInformation
 
-  #region PteInformation
+  #region PTEInformation
   public const string PteInformationDDL = "pte-information-ddl";
   public const string PteInformationSummary = "pte-information-summary";
   public const string CreatePteInformation = "pte-information";
   public const string UpdatePteInformation = "pte-information/{key:int}";
   public const string DeletePteInformation = "pte-information/{key:int}";
   public const string PteInformationByApplicantId = "pte-information-by-applicantid/{applicantId:int}";
-  #endregion PteInformation
+  #endregion PTEInformation
 
-  #region GmatInformation
+  #region GMATInformation
   public const string GmatInformationDDL = "gmat-information-ddl";
   public const string GmatInformationSummary = "gmat-information-summary";
   public const string CreateGmatInformation = "gmat-information";
   public const string UpdateGmatInformation = "gmat-information/{key:int}";
   public const string DeleteGmatInformation = "gmat-information/{key:int}";
   public const string GmatInformationByApplicantId = "gmat-information-by-applicantid/{applicantId:int}";
-  #endregion GmatInformation
+  #endregion GMATInformation
 
-  #region OthersInformation
+  #region OTHERSInformation
   public const string OthersInformationDDL = "others-information-ddl";
   public const string OthersInformationSummary = "others-information-summary";
   public const string CreateOthersInformation = "others-information";
   public const string UpdateOthersInformation = "others-information/{key:int}";
   public const string DeleteOthersInformation = "others-information/{key:int}";
   public const string OthersInformationByApplicantId = "others-information-by-applicantid/{applicantId:int}";
-  #endregion OthersInformation
+  #endregion OTHERSInformation
 
   #region WorkExperience
   public const string WorkExperienceDDL = "work-experience-ddl";

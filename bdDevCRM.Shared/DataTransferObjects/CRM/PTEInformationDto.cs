@@ -4,7 +4,7 @@ namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
 public class PTEInformationDto
 {
-  public int PteinformationId { get; set; }
+  public int PTEInformationId { get; set; }
   public int ApplicantId { get; set; } // Foreign Key
   public string? PTEListening { get; set; }
   public string? PTEReading { get; set; }

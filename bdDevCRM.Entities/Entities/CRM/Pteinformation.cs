@@ -3,27 +3,27 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
-public partial class Pteinformation
+public partial class PTEInformation
 {
-    public int PteinformationId { get; set; }
+    public int PTEInformationId { get; set; }
 
     public int ApplicantId { get; set; }
 
-    public string? Ptelistening { get; set; }
+    public string? PTEListening { get; set; }
 
-    public string? Ptereading { get; set; }
+    public string? PTEReading { get; set; }
 
-    public string? Ptewriting { get; set; }
+    public string? PTEWriting { get; set; }
 
-    public string? Ptespeaking { get; set; }
+    public string? PTESpeaking { get; set; }
 
-    public string? PteoverallScore { get; set; }
+    public string? PTEOverallScore { get; set; }
 
-    public DateTime? Ptedate { get; set; }
+    public DateTime? PTEDate { get; set; }
 
-    public string? PtescannedCopyPath { get; set; }
+    public string? PTEScannedCopyPath { get; set; }
 
-    public string? PteadditionalInformation { get; set; }
+    public string? PTEAdditionalInformation { get; set; }
 
     public DateTime CreatedDate { get; set; }
 

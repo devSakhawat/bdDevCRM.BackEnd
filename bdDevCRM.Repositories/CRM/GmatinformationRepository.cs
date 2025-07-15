@@ -4,22 +4,22 @@ using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.CRM;
 
-public sealed class GmatinformationRepository : RepositoryBase<Gmatinformation>, IGmatinformationRepository
+public sealed class GMATInformationRepository : RepositoryBase<GMATInformation>, IGMATInformationRepository
 {
-  public GmatinformationRepository(CRMContext context) : base(context) { }
+  public GMATInformationRepository(CRMContext context) : base(context) { }
 
-  public async Task<IEnumerable<Gmatinformation>> GetActiveGmatinformationsAsync(bool track) =>
-      await ListAsync(c => c.GmatinformationId, track);
+  public async Task<IEnumerable<GMATInformation>> GetActiveGmatinformationsAsync(bool track) =>
+      await ListAsync(c => c.GMATInformationId, track);
 
-  public async Task<IEnumerable<Gmatinformation>> GetGmatinformationsAsync(bool track) =>
-      await ListAsync(c => c.GmatinformationId, track);
+  public async Task<IEnumerable<GMATInformation>> GetGmatinformationsAsync(bool track) =>
+      await ListAsync(c => c.GMATInformationId, track);
 
-  public async Task<Gmatinformation?> GetGmatinformationAsync(int id, bool track) =>
-      await FirstOrDefaultAsync(c => c.GmatinformationId == id, track);
+  public async Task<GMATInformation?> GetGmatinformationAsync(int id, bool track) =>
+      await FirstOrDefaultAsync(c => c.GMATInformationId == id, track);
 
-  public async Task<IEnumerable<Gmatinformation>> GetGmatinformationsByApplicantIdAsync(int applicantId, bool track) =>
-      await ListByConditionAsync(x => x.ApplicantId == applicantId, c => c.GmatinformationId, track);
+  public async Task<IEnumerable<GMATInformation>> GetGmatinformationsByApplicantIdAsync(int applicantId, bool track) =>
+      await ListByConditionAsync(x => x.ApplicantId == applicantId, c => c.GMATInformationId, track);
 
-  public async Task<Gmatinformation?> GetGmatinformationByApplicantIdAsync(int applicantId, bool track) =>
+  public async Task<GMATInformation?> GetGmatinformationByApplicantIdAsync(int applicantId, bool track) =>
       await FirstOrDefaultAsync(c => c.ApplicantId == applicantId, track);
 }

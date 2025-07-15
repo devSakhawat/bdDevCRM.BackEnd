@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
-public partial class Othersinformation
+public partial class OTHERSInformation
 {
-    public int OthersinformationId { get; set; }
+    public int OTHERSInformationId { get; set; }
 
     public int ApplicantId { get; set; }
 
-    public string? OthersadditionalInformation { get; set; }
+    public string? OTHERSAdditionalInformation { get; set; }
 
-    public string? OthersscannedCopyPath { get; set; }
+    public string? OTHERSScannedCopyPath { get; set; }
 
     public DateTime CreatedDate { get; set; }
 

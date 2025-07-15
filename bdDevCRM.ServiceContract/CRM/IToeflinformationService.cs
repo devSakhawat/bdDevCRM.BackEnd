@@ -4,7 +4,7 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 
 namespace bdDevCRM.ServiceContract.CRM;
 
-public interface IToeflinformationService
+public interface ITOEFLInformationService
 {
   Task<IEnumerable<TOEFLInformationDto>> GetToeflinformationsDDLAsync(bool trackChanges = false);
   Task<IEnumerable<TOEFLInformationDto>> GetActiveToeflinformationsAsync(bool trackChanges = false);

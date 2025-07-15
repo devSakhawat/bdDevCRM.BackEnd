@@ -50,11 +50,11 @@ public interface IRepositoryManager : IDisposable
   
   // New CRM repositories for 10 entities
   IEducationHistoryRepository EducationHistory { get; }
-  IIeltsinformationRepository IeltsInformation { get; }
-  IToeflinformationRepository ToeflInformation { get; }
-  IPteinformationRepository PteInformation { get; }
-  IGmatinformationRepository GmatInformation { get; }
-  IOthersinformationRepository OthersInformation { get; }
+  IIELTSInformationRepository IELTSInformation { get; }
+  ITOEFLInformationRepository TOEFLInformation { get; }
+  IPTEInformationRepository PTEInformation { get; }
+  IGMATInformationRepository GMATInformation { get; }
+  IOTHERSInformationRepository OTHERSInformation { get; }
   IWorkExperienceRepository WorkExperience { get; }
   IApplicantReferenceRepository ApplicantReference { get; }
   IStatementOfPurposeRepository StatementOfPurpose { get; }

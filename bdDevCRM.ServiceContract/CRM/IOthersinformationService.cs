@@ -4,7 +4,7 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 
 namespace bdDevCRM.ServiceContract.CRM;
 
-public interface IOthersinformationService
+public interface IOTHERSInformationService
 {
   Task<IEnumerable<OTHERSInformationDto>> GetOthersinformationsDDLAsync(bool trackChanges = false);
   Task<IEnumerable<OTHERSInformationDto>> GetActiveOthersinformationsAsync(bool trackChanges = false);

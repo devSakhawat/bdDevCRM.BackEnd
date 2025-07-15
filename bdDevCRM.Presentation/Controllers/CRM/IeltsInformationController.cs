@@ -39,7 +39,7 @@ public class IeltsInformationController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.IeltsInformations.GetIeltsinformationsDDLAsync(trackChanges: false);
+    var res = await _serviceManager.IELTSInformations.GetIeltsinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<IELTSInformationDto>>("No IELTS information found"));
 
@@ -63,7 +63,7 @@ public class IeltsInformationController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.IeltsInformations.GetIeltsinformationByApplicantIdAsync(applicantId, trackChanges: false);
+    var res = await _serviceManager.IELTSInformations.GetIeltsinformationByApplicantIdAsync(applicantId, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "IELTS information retrieved successfully"));
   }
 
@@ -83,7 +83,7 @@ public class IeltsInformationController : BaseApiController
     if (options == null)
       return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
 
-    var summaryGrid = await _serviceManager.IeltsInformations.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.IELTSInformations.SummaryGrid(options);
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
@@ -106,7 +106,7 @@ public class IeltsInformationController : BaseApiController
       if (modelDto == null)
         return BadRequest(ResponseHelper.BadRequest("IELTS information data is required"));
 
-      IELTSInformationDto res = await _serviceManager.IeltsInformations.CreateNewRecordAsync(modelDto, currentUser);
+      IELTSInformationDto res = await _serviceManager.IELTSInformations.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.IELTSInformationId > 0)
         return Ok(ResponseHelper.Created(res, "IELTS information created successfully"));
@@ -135,7 +135,7 @@ public class IeltsInformationController : BaseApiController
       if (currentUser == null)
         return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
 
-      var res = await _serviceManager.IeltsInformations.UpdateRecordAsync(key, modelDto, false);
+      var res = await _serviceManager.IELTSInformations.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "IELTS information updated successfully"));
@@ -158,7 +158,7 @@ public class IeltsInformationController : BaseApiController
       int userId = HttpContext.GetUserId();
       var currentUser = HttpContext.GetCurrentUser();
 
-      var res = await _serviceManager.IeltsInformations.DeleteRecordAsync(key, modelDto);
+      var res = await _serviceManager.IELTSInformations.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "IELTS information deleted successfully"));
@@ -181,7 +181,7 @@ public class IeltsInformationController : BaseApiController
       if (string.IsNullOrEmpty(userIdClaim))
         return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
 
-      var res = await _serviceManager.IeltsInformations.GetIeltsinformationAsync(key, trackChanges: false);
+      var res = await _serviceManager.IELTSInformations.GetIeltsinformationAsync(key, trackChanges: false);
       return Ok(ResponseHelper.Success(res, "IELTS information retrieved successfully"));
     }
     catch (Exception)

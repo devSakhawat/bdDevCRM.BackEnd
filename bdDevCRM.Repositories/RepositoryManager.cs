@@ -60,11 +60,11 @@ public class RepositoryManager : IRepositoryManager
 
   // New 10 CRM repositories
   private readonly Lazy<IEducationHistoryRepository> _educationHistoryRepository;
-  private readonly Lazy<IIeltsinformationRepository> _ieltsinformationRepository;
-  private readonly Lazy<IToeflinformationRepository> _toeflinformationRepository;
-  private readonly Lazy<IPteinformationRepository> _pteinformationRepository;
-  private readonly Lazy<IGmatinformationRepository> _gmatinformationRepository;
-  private readonly Lazy<IOthersinformationRepository> _othersinformationRepository;
+  private readonly Lazy<IIELTSInformationRepository> _ieltsinformationRepository;
+  private readonly Lazy<ITOEFLInformationRepository> _toeflinformationRepository;
+  private readonly Lazy<IPTEInformationRepository> _pteinformationRepository;
+  private readonly Lazy<IGMATInformationRepository> _gmatinformationRepository;
+  private readonly Lazy<IOTHERSInformationRepository> _othersinformationRepository;
   private readonly Lazy<IWorkExperienceRepository> _workExperienceRepository;
   private readonly Lazy<IApplicantReferenceRepository> _applicantReferenceRepository;
   private readonly Lazy<IStatementOfPurposeRepository> _statementOfPurposeRepository;
@@ -131,11 +131,11 @@ public class RepositoryManager : IRepositoryManager
 
     // New 10 CRM repositories initialization
     _educationHistoryRepository = new Lazy<IEducationHistoryRepository>(() => new EducationHistoryRepository(_repositoryContext));
-    _ieltsinformationRepository = new Lazy<IIeltsinformationRepository>(() => new IeltsinformationRepository(_repositoryContext));
-    _toeflinformationRepository = new Lazy<IToeflinformationRepository>(() => new ToeflinformationRepository(_repositoryContext));
-    _pteinformationRepository = new Lazy<IPteinformationRepository>(() => new PteinformationRepository(_repositoryContext));
-    _gmatinformationRepository = new Lazy<IGmatinformationRepository>(() => new GmatinformationRepository(_repositoryContext));
-    _othersinformationRepository = new Lazy<IOthersinformationRepository>(() => new OthersinformationRepository(_repositoryContext));
+    _ieltsinformationRepository = new Lazy<IIELTSInformationRepository>(() => new IELTSInformationRepository(_repositoryContext));
+    _toeflinformationRepository = new Lazy<ITOEFLInformationRepository>(() => new TOEFLInformationRepository(_repositoryContext));
+    _pteinformationRepository = new Lazy<IPTEInformationRepository>(() => new PteinformationRepository(_repositoryContext));
+    _gmatinformationRepository = new Lazy<IGMATInformationRepository>(() => new GMATInformationRepository(_repositoryContext));
+    _othersinformationRepository = new Lazy<IOTHERSInformationRepository>(() => new OTHERSInformationRepository(_repositoryContext));
     _workExperienceRepository = new Lazy<IWorkExperienceRepository>(() => new WorkExperienceRepository(_repositoryContext));
     _applicantReferenceRepository = new Lazy<IApplicantReferenceRepository>(() => new ApplicantReferenceRepository(_repositoryContext));
     _statementOfPurposeRepository = new Lazy<IStatementOfPurposeRepository>(() => new StatementOfPurposeRepository(_repositoryContext));
@@ -198,11 +198,11 @@ public class RepositoryManager : IRepositoryManager
 
   // New 10 CRM repository properties
   public IEducationHistoryRepository EducationHistory => _educationHistoryRepository.Value;
-  public IIeltsinformationRepository IeltsInformation => _ieltsinformationRepository.Value;
-  public IToeflinformationRepository ToeflInformation => _toeflinformationRepository.Value;
-  public IPteinformationRepository PteInformation => _pteinformationRepository.Value;
-  public IGmatinformationRepository GmatInformation => _gmatinformationRepository.Value;
-  public IOthersinformationRepository OthersInformation => _othersinformationRepository.Value;
+  public IIELTSInformationRepository IELTSInformation => _ieltsinformationRepository.Value;
+  public ITOEFLInformationRepository TOEFLInformation => _toeflinformationRepository.Value;
+  public IPTEInformationRepository PTEInformation => _pteinformationRepository.Value;
+  public IGMATInformationRepository GMATInformation => _gmatinformationRepository.Value;
+  public IOTHERSInformationRepository OTHERSInformation => _othersinformationRepository.Value;
   public IWorkExperienceRepository WorkExperience => _workExperienceRepository.Value;
   public IApplicantReferenceRepository ApplicantReference => _applicantReferenceRepository.Value;
   public IStatementOfPurposeRepository StatementOfPurpose => _statementOfPurposeRepository.Value;
@@ -224,5 +224,6 @@ public class RepositoryManager : IRepositoryManager
   public async Task SaveAsync() => await _repositoryContext.SaveChangesAsync();
   public void Save() => _repositoryContext.SaveChanges();
   public void Dispose() => _repositoryContext.Dispose();
+
 }
 

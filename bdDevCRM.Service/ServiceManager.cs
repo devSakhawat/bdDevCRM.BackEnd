@@ -59,11 +59,11 @@ public sealed class ServiceManager : IServiceManager
   
   // New 10 CRM services
   private readonly Lazy<IEducationHistoryService> _educationHistoryService;
-  private readonly Lazy<IIeltsinformationService> _ieltsinformationService;
-  private readonly Lazy<IToeflinformationService> _toeflinformationService;
-  private readonly Lazy<IPteinformationService> _pteinformationService;
-  private readonly Lazy<IGmatinformationService> _gmatinformationService;
-  private readonly Lazy<IOthersinformationService> _othersinformationService;
+  private readonly Lazy<IIELTSInformationService> _ieltsinformationService;
+  private readonly Lazy<ITOEFLInformationService> _toeflinformationService;
+  private readonly Lazy<IPTEInformationService> _pteinformationService;
+  private readonly Lazy<IGMATInformationService> _gmatinformationService;
+  private readonly Lazy<IOTHERSInformationService> _othersinformationService;
   private readonly Lazy<IWorkExperienceService> _workExperienceService;
   private readonly Lazy<IApplicantReferenceService> _applicantReferenceService;
   private readonly Lazy<IStatementOfPurposeService> _statementOfPurposeService;
@@ -118,11 +118,11 @@ public sealed class ServiceManager : IServiceManager
     
     // New 10 CRM services initialization
     _educationHistoryService = new Lazy<IEducationHistoryService>(() => new EducationHistoryService(repository, logger, configuration, httpContextAccessor));
-    _ieltsinformationService = new Lazy<IIeltsinformationService>(() => new IeltsinformationService(repository, logger, configuration, httpContextAccessor));
-    _toeflinformationService = new Lazy<IToeflinformationService>(() => new ToeflinformationService(repository, logger, configuration, httpContextAccessor));
-    _pteinformationService = new Lazy<IPteinformationService>(() => new PteinformationService(repository, logger, configuration, httpContextAccessor));
-    _gmatinformationService = new Lazy<IGmatinformationService>(() => new GmatinformationService(repository, logger, configuration, httpContextAccessor));
-    _othersinformationService = new Lazy<IOthersinformationService>(() => new OthersinformationService(repository, logger, configuration, httpContextAccessor));
+    _ieltsinformationService = new Lazy<IIELTSInformationService>(() => new IELTSInformationService(repository, logger, configuration, httpContextAccessor));
+    _toeflinformationService = new Lazy<ITOEFLInformationService>(() => new TOEFLInformationService(repository, logger, configuration, httpContextAccessor));
+    _pteinformationService = new Lazy<IPTEInformationService>(() => new PTEInformationService(repository, logger, configuration, httpContextAccessor));
+    _gmatinformationService = new Lazy<IGMATInformationService>(() => new GMATInformationService(repository, logger, configuration, httpContextAccessor));
+    _othersinformationService = new Lazy<IOTHERSInformationService>(() => new OTHERSInformationService(repository, logger, configuration, httpContextAccessor));
     _workExperienceService = new Lazy<IWorkExperienceService>(() => new WorkExperienceService(repository, logger, configuration, httpContextAccessor));
     _applicantReferenceService = new Lazy<IApplicantReferenceService>(() => new ApplicantReferenceService(repository, logger, configuration, httpContextAccessor));
     _statementOfPurposeService = new Lazy<IStatementOfPurposeService>(() => new StatementOfPurposeService(repository, logger, configuration, httpContextAccessor));
@@ -175,11 +175,11 @@ public sealed class ServiceManager : IServiceManager
   
   // New 10 CRM service properties - ALL IMPLEMENTED NOW!
   public IEducationHistoryService EducationHistories => _educationHistoryService.Value;
-  public IIeltsinformationService IeltsInformations => _ieltsinformationService.Value;
-  public IToeflinformationService ToeflInformations => _toeflinformationService.Value;
-  public IPteinformationService PteInformations => _pteinformationService.Value;
-  public IGmatinformationService GmatInformations => _gmatinformationService.Value;
-  public IOthersinformationService OthersInformations => _othersinformationService.Value;
+  public IIELTSInformationService IELTSInformations => _ieltsinformationService.Value;
+  public ITOEFLInformationService TOEFLInformations => _toeflinformationService.Value;
+  public IPTEInformationService PTEInformations => _pteinformationService.Value;
+  public IGMATInformationService GMATInformations => _gmatinformationService.Value;
+  public IOTHERSInformationService OTHERSInformations => _othersinformationService.Value;
   public IWorkExperienceService WorkExperiences => _workExperienceService.Value;
   public IApplicantReferenceService ApplicantReferences => _applicantReferenceService.Value;
   public IStatementOfPurposeService StatementOfPurposes => _statementOfPurposeService.Value;

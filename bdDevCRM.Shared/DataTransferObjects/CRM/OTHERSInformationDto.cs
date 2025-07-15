@@ -4,7 +4,7 @@ namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
 public class OTHERSInformationDto
 {
-  public int OthersinformationId { get; set; }
+  public int OTHERSInformationId { get; set; }
   public int ApplicantId { get; set; } // Foreign Key
   public string? OTHERSAdditionalInformation { get; set; }
   public string? OTHERSScannedCopyPath { get; set; }

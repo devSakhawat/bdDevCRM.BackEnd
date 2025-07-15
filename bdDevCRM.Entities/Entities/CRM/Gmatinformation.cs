@@ -3,27 +3,27 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
-public partial class Gmatinformation
+public partial class GMATInformation
 {
-    public int GmatinformationId { get; set; }
+    public int GMATInformationId { get; set; }
 
     public int ApplicantId { get; set; }
 
-    public string? Gmatlistening { get; set; }
+    public string? GMATListening { get; set; }
 
-    public string? Gmatreading { get; set; }
+    public string? GMATReading { get; set; }
 
-    public string? Gmatwriting { get; set; }
+    public string? GMATWriting { get; set; }
 
-    public string? Gmatspeaking { get; set; }
+    public string? GMATSpeaking { get; set; }
 
-    public string? GmatoverallScore { get; set; }
+    public string? GMATOverallScore { get; set; }
 
-    public DateTime? Gmatdate { get; set; }
+    public DateTime? GMATDate { get; set; }
 
-    public string? GmatscannedCopyPath { get; set; }
+    public string? GMATScannedCopyPath { get; set; }
 
-    public string? GmatadditionalInformation { get; set; }
+    public string? GMATAdditionalInformation { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
