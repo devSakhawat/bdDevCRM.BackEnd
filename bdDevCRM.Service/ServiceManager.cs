@@ -1,5 +1,4 @@
-﻿
-using bdDevCRM.RepositoriesContracts;
+﻿using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Service.Authentication;
 using bdDevCRM.Service.Core.HR;
 using bdDevCRM.Service.Core.SystemAdmin;
@@ -8,6 +7,7 @@ using bdDevCRM.Service.DMS;
 using bdDevCRM.ServiceContract.Authentication;
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
+using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Services.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
@@ -50,6 +50,12 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICRMCourseService> _crmcourse;
   private readonly Lazy<ICRMMonthService> _crmmonth;
   private readonly Lazy<ICRMYearService> _crmyear;
+
+  // New CRM services
+  private readonly Lazy<IApplicantCourseService> _applicantCourseService;
+  private readonly Lazy<IApplicantInfoService> _applicantInfoService;
+  private readonly Lazy<IPermanentAddressService> _permanentAddressService;
+  private readonly Lazy<IPresentAddressService> _presentAddressService;
   #endregion CRM
 
   #region DMS Lazy Fields
@@ -93,6 +99,12 @@ public sealed class ServiceManager : IServiceManager
     _crmcourse = new Lazy<ICRMCourseService>(() => new CRMCourseService(repository, logger, configuration, httpContextAccessor));
     _crmmonth = new Lazy<ICRMMonthService>(() => new CRMMonthService(repository, logger, configuration));
     _crmyear = new Lazy<ICRMYearService>(() => new CRMYearService(repository, logger, configuration));
+
+    // New CRM services initialization
+    _applicantCourseService = new Lazy<IApplicantCourseService>(() => new ApplicantCourseService(repository, logger, configuration, httpContextAccessor));
+    _applicantInfoService = new Lazy<IApplicantInfoService>(() => new ApplicantInfoService(repository, logger, configuration, httpContextAccessor));
+    _permanentAddressService = new Lazy<IPermanentAddressService>(() => new PermanentAddressService(repository, logger, configuration, httpContextAccessor));
+    _presentAddressService = new Lazy<IPresentAddressService>(() => new PresentAddressService(repository, logger, configuration, httpContextAccessor));
     #endregion CRM
 
     #region DMS Lazy Initializations
@@ -132,6 +144,12 @@ public sealed class ServiceManager : IServiceManager
   public ICRMCourseService CRMCourses => _crmcourse.Value;
   public ICRMMonthService CRMMonths => _crmmonth.Value;
   public ICRMYearService CRMYears => _crmyear.Value;
+
+  // New CRM service properties
+  public IApplicantCourseService ApplicantCourses => _applicantCourseService.Value;
+  public IApplicantInfoService ApplicantInfos => _applicantInfoService.Value;
+  public IPermanentAddressService PermanentAddresses => _permanentAddressService.Value;
+  public IPresentAddressService PresentAddresses => _presentAddressService.Value;
   #endregion CRM
 
   #region DMS Property Exposures
@@ -143,7 +161,6 @@ public sealed class ServiceManager : IServiceManager
   public IDmsdocumentVersionService DmsdocumentVersions => _dmsdocumentVersionService.Value;
   public IDmsdocumentAccessLogService DmsdocumentAccessLogs => _dmsdocumentAccessLogService.Value;
   #endregion
-
 
   // Get Cache // generic function for getting cache from memory cache all of them.
   // This method retrieves an object from the cache using the provided key.
@@ -158,8 +175,6 @@ public sealed class ServiceManager : IServiceManager
     // If not found in cache, throw an exception
     throw new UnauthorizedAccessCRMException("User session has expired or is invalid. Please login again.");
   }
-
-
 }
 
 

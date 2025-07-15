@@ -178,4 +178,40 @@ public static class RouteConstants
   public const string CRMYearDLL = "crm-yearddl";
   public const string CRMInstituteTypeDDL = "crm-institute-type/";
   #endregion CRMApplication
+
+  #region ApplicantCourse
+  public const string ApplicantCourseDDL = "applicant-course-ddl";
+  public const string ApplicantCourseSummary = "applicant-course-summary";
+  public const string CreateApplicantCourse = "applicant-course";
+  public const string UpdateApplicantCourse = "applicant-course/{key:int}";
+  public const string DeleteApplicantCourse = "applicant-course/{key:int}";
+  public const string ApplicantCoursesByApplicantId = "applicant-courses-by-applicantid/{applicantId:int}";
+  #endregion ApplicantCourse
+
+  #region ApplicantInfo
+  public const string ApplicantInfoDDL = "applicant-info-ddl";
+  public const string ApplicantInfoSummary = "applicant-info-summary";
+  public const string CreateApplicantInfo = "applicant-info";
+  public const string UpdateApplicantInfo = "applicant-info/{key:int}";
+  public const string DeleteApplicantInfo = "applicant-info/{key:int}";
+  public const string ApplicantInfoByApplicationId = "applicant-info-by-applicationid/{applicationId:int}";
+  #endregion ApplicantInfo
+
+  #region PermanentAddress
+  public const string PermanentAddressDDL = "permanent-address-ddl";
+  public const string PermanentAddressSummary = "permanent-address-summary";
+  public const string CreatePermanentAddress = "permanent-address";
+  public const string UpdatePermanentAddress = "permanent-address/{key:int}";
+  public const string DeletePermanentAddress = "permanent-address/{key:int}";
+  public const string PermanentAddressByApplicantId = "permanent-address-by-applicantid/{applicantId:int}";
+  #endregion PermanentAddress
+
+  #region PresentAddress
+  public const string PresentAddressDDL = "present-address-ddl";
+  public const string PresentAddressSummary = "present-address-summary";
+  public const string CreatePresentAddress = "present-address";
+  public const string UpdatePresentAddress = "present-address/{key:int}";
+  public const string DeletePresentAddress = "present-address/{key:int}";
+  public const string PresentAddressByApplicantId = "present-address-by-applicantid/{applicantId:int}";
+  #endregion PresentAddress
 }

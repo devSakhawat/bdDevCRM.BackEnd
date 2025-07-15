@@ -41,7 +41,12 @@ public interface IRepositoryManager : IDisposable
   ICRMCourseRepository CRMCourse { get; }
   ICRMMonthRepository CRMMonth{ get; }
   ICRMYearRepository CRMYear { get; }
-
+  
+  // New CRM repositories
+  IApplicantCourseRepository ApplicantCourse { get; }
+  IApplicantInfoRepository ApplicantInfo { get; }
+  IPermanentAddressRepository PermanentAddress { get; }
+  IPresentAddressRepository PresentAddress { get; }
   #endregion CRM
 
   #region DMS
@@ -54,9 +59,6 @@ public interface IRepositoryManager : IDisposable
   IDmsdocumentAccessLogRepository DmsdocumentAccessLogs { get; }
   IDmsFileUpdateHistoryRepository IDmsFileUpdateHistories { get; }
   #endregion
-
-
-
 
   // Save changes to the database
   Task SaveAsync();

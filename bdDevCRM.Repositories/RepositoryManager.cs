@@ -51,6 +51,12 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<ICRMCourseRepository> _crmcourseRepository;
   private readonly Lazy<ICRMMonthRepository> _crmmonthRepository;
   private readonly Lazy<ICRMYearRepository> _crmyearRepository;
+
+  // New CRM repositories
+  private readonly Lazy<IApplicantCourseRepository> _applicantCourseRepository;
+  private readonly Lazy<IApplicantInfoRepository> _applicantInfoRepository;
+  private readonly Lazy<IPermanentAddressRepository> _permanentAddressRepository;
+  private readonly Lazy<IPresentAddressRepository> _presentAddressRepository;
   #endregion CRM
 
   #region DMS - Private Lazy Fields
@@ -104,6 +110,12 @@ public class RepositoryManager : IRepositoryManager
     _crmcourseRepository = new Lazy<ICRMCourseRepository>(() => new CRMCourseRepository(_repositoryContext));
     _crmmonthRepository = new Lazy<ICRMMonthRepository>(() => new CRMMonthRepository(_repositoryContext));
     _crmyearRepository = new Lazy<ICRMYearRepository>(() => new CRMYearRepository(_repositoryContext));
+
+    // New CRM repositories initialization
+    _applicantCourseRepository = new Lazy<IApplicantCourseRepository>(() => new ApplicantCourseRepository(_repositoryContext));
+    _applicantInfoRepository = new Lazy<IApplicantInfoRepository>(() => new ApplicantInfoRepository(_repositoryContext));
+    _permanentAddressRepository = new Lazy<IPermanentAddressRepository>(() => new PermanentAddressRepository(_repositoryContext));
+    _presentAddressRepository = new Lazy<IPresentAddressRepository>(() => new PresentAddressRepository(_repositoryContext));
     #endregion CRM
 
     #region DMS - Lazy Initialization
@@ -154,6 +166,11 @@ public class RepositoryManager : IRepositoryManager
   public ICRMMonthRepository CRMMonth => _crmmonthRepository.Value;
   public ICRMYearRepository CRMYear => _crmyearRepository.Value;
 
+  // New CRM repository properties
+  public IApplicantCourseRepository ApplicantCourse => _applicantCourseRepository.Value;
+  public IApplicantInfoRepository ApplicantInfo => _applicantInfoRepository.Value;
+  public IPermanentAddressRepository PermanentAddress => _permanentAddressRepository.Value;
+  public IPresentAddressRepository PresentAddress => _presentAddressRepository.Value;
   #endregion CRM
 
   #region DMS - Repository Properties
@@ -166,7 +183,6 @@ public class RepositoryManager : IRepositoryManager
   public IDmsdocumentAccessLogRepository DmsdocumentAccessLogs => _dmsdocumentAccessLogRepository.Value;
   public IDmsFileUpdateHistoryRepository IDmsFileUpdateHistories => _dmsFileUpdateHistoryRepository.Value;
   #endregion
-
 
   // Save changes to the database
   public async Task SaveAsync() => await _repositoryContext.SaveChangesAsync();

@@ -4,6 +4,7 @@ using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.CRM;
+using bdDevCRM.ServiceContract.CRM;
 
 namespace bdDevCRM.ServicesContract;
 
@@ -35,6 +36,12 @@ public interface IServiceManager
   ICRMCourseService CRMCourses { get; }
   ICRMMonthService CRMMonths { get; }
   ICRMYearService CRMYears { get; }
+  
+  // New CRM services
+  IApplicantCourseService ApplicantCourses { get; }
+  IApplicantInfoService ApplicantInfos { get; }
+  IPermanentAddressService PermanentAddresses { get; }
+  IPresentAddressService PresentAddresses { get; }
   #endregion CRM
 
   #region DMS
