@@ -168,7 +168,7 @@ public static class RouteConstants
 
   #region CRMApplication
   public const string CRMApplicationSummary = "crm-application-summary";
-  public const string CRMApplication= "crm-Application";
+  public const string CRMApplication= "crm-application";
   public const string CRMUpdateApplication = "crm-Application/{key}";
   public const string CRMDeleteApplication = "crm-Application/{key}";
   public const string CRMCountryDLL = "crm-countryddl";

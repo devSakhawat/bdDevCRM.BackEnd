@@ -73,6 +73,46 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<Crmyear> Crmyear { get; set; }
 
+
+  #region CRM Application
+
+  public virtual DbSet<AdditionalInfo> AdditionalInfo { get; set; }
+
+  public virtual DbSet<ApplicantCourse> ApplicantCourse { get; set; }
+
+  public virtual DbSet<ApplicantInfo> ApplicantInfo { get; set; }
+
+  public virtual DbSet<ApplicantReference> ApplicantReference { get; set; }
+
+  public virtual DbSet<CrmApplication> CrmApplication { get; set; }
+
+  public virtual DbSet<EducationHistory> EducationHistory { get; set; }
+
+  public virtual DbSet<Gmatinformation> Gmatinformation { get; set; }
+
+  public virtual DbSet<Ieltsinformation> Ieltsinformation { get; set; }
+
+  public virtual DbSet<Othersinformation> Othersinformation { get; set; }
+
+  public virtual DbSet<PermanentAddress> PermanentAddress { get; set; }
+
+  public virtual DbSet<PresentAddress> PresentAddress { get; set; }
+
+  public virtual DbSet<Pteinformation> Pteinformation { get; set; }
+
+  public virtual DbSet<StatementOfPurpose> StatementOfPurpose { get; set; }
+
+  public virtual DbSet<Toeflinformation> Toeflinformation { get; set; }
+
+  public virtual DbSet<WorkExperience> WorkExperience { get; set; }
+
+  #endregion CRM Application
+
+
+
+
+
+
   public virtual DbSet<CurencyRate> CurencyRate { get; set; }
 
   public virtual DbSet<Currency> Currency { get; set; }
@@ -504,6 +544,392 @@ public partial class CRMContext : DbContext
           .HasMaxLength(500)
           .IsUnicode(false);
     });
+
+
+    #region CRM Application
+    modelBuilder.Entity<AdditionalInfo>(entity =>
+    {
+      entity.HasKey(e => e.AdditionalInfoId).HasName("PK__Addition__2C4B5286E68CDFDB");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_AdditionalInfo_ApplicantId");
+
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.DocumentName).HasMaxLength(200);
+      entity.Property(e => e.DocumentTitle).HasMaxLength(200);
+      entity.Property(e => e.FileThumbnail).HasMaxLength(500);
+      entity.Property(e => e.HealthNmedicalNeeds)
+          .HasMaxLength(10)
+          .HasColumnName("HealthNMedicalNeeds");
+      entity.Property(e => e.HealthNmedicalNeedsRemarks)
+          .HasMaxLength(1000)
+          .HasColumnName("HealthNMedicalNeedsRemarks");
+      entity.Property(e => e.RecordType).HasMaxLength(20);
+      entity.Property(e => e.RequireAccommodation).HasMaxLength(10);
+      entity.Property(e => e.UploadFile).HasMaxLength(500);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.AdditionalInfo)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_AdditionalInfo_CrmApplication");
+    });
+
+    modelBuilder.Entity<ApplicantCourse>(entity =>
+    {
+      entity.HasKey(e => e.ApplicantCourseId).HasName("PK__Applican__32CD933287A9B7A4");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_ApplicantCourse_ApplicantId");
+
+      entity.Property(e => e.ApplicationFee).HasMaxLength(20);
+      entity.Property(e => e.CountryName).HasMaxLength(100);
+      entity.Property(e => e.CourseTitle).HasMaxLength(300);
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.CurrencyName).HasMaxLength(50);
+      entity.Property(e => e.InstituteName).HasMaxLength(200);
+      entity.Property(e => e.IntakeMonth).HasMaxLength(20);
+      entity.Property(e => e.IntakeYear).HasMaxLength(10);
+      entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+      entity.Property(e => e.PaymentReferenceNumber).HasMaxLength(100);
+      entity.Property(e => e.Remarks).HasMaxLength(500);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.ApplicantCourse)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_ApplicantCourse_CrmApplication");
+    });
+
+    modelBuilder.Entity<ApplicantInfo>(entity =>
+    {
+      entity.HasKey(e => e.ApplicantInfoId).HasName("PK__Applican__B1C5A16C102A5535");
+
+      entity.HasIndex(e => e.ApplicationId, "IX_ApplicantInfo_ApplicationId");
+
+      entity.Property(e => e.ApplicantImagePath).HasMaxLength(500);
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.EmailAddress).HasMaxLength(100);
+      entity.Property(e => e.FirstName).HasMaxLength(100);
+      entity.Property(e => e.GenderName).HasMaxLength(50);
+      entity.Property(e => e.HasValidPassport).HasMaxLength(10);
+      entity.Property(e => e.LastName).HasMaxLength(100);
+      entity.Property(e => e.MaritalStatusName).HasMaxLength(50);
+      entity.Property(e => e.Mobile).HasMaxLength(20);
+      entity.Property(e => e.Nationality).HasMaxLength(100);
+      entity.Property(e => e.PassportNumber).HasMaxLength(50);
+      entity.Property(e => e.PhoneAreaCode).HasMaxLength(10);
+      entity.Property(e => e.PhoneCountryCode).HasMaxLength(10);
+      entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+      entity.Property(e => e.SkypeId).HasMaxLength(50);
+      entity.Property(e => e.TitleText).HasMaxLength(50);
+      entity.Property(e => e.TitleValue).HasMaxLength(10);
+
+      entity.HasOne(d => d.Application).WithMany(p => p.ApplicantInfo)
+          .HasForeignKey(d => d.ApplicationId)
+          .HasConstraintName("FK_ApplicantInfo_CrmApplication");
+    });
+
+    modelBuilder.Entity<ApplicantReference>(entity =>
+    {
+      entity.HasKey(e => e.ApplicantReferenceId).HasName("PK__Referenc__8C380D28A0B0C76A");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_ApplicantReference_ApplicantId");
+
+      entity.Property(e => e.Address).HasMaxLength(500);
+      entity.Property(e => e.City).HasMaxLength(100);
+      entity.Property(e => e.Country).HasMaxLength(100);
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.Designation).HasMaxLength(100);
+      entity.Property(e => e.EmailId)
+          .HasMaxLength(100)
+          .HasColumnName("EmailID");
+      entity.Property(e => e.FaxNo).HasMaxLength(20);
+      entity.Property(e => e.Institution).HasMaxLength(200);
+      entity.Property(e => e.Name).HasMaxLength(200);
+      entity.Property(e => e.PhoneNo).HasMaxLength(20);
+      entity.Property(e => e.PostOrZipCode).HasMaxLength(20);
+      entity.Property(e => e.State).HasMaxLength(100);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.ApplicantReference)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_Reference_CrmApplication");
+    });
+
+    modelBuilder.Entity<CrmApplication>(entity =>
+    {
+      entity.HasKey(e => e.ApplicationId).HasName("PK__CrmAppli__C93A4C993395B73E");
+
+      entity.HasIndex(e => e.ApplicationStatus, "IX_CrmApplication_ApplicationStatus");
+
+      entity.HasIndex(e => e.CreatedBy, "IX_CrmApplication_CreatedBy");
+
+      entity.HasIndex(e => e.CreatedDate, "IX_CrmApplication_CreatedDate");
+
+      entity.Property(e => e.ApplicationStatus)
+          .HasMaxLength(50)
+          .HasDefaultValue("Draft");
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+    });
+
+    modelBuilder.Entity<EducationHistory>(entity =>
+    {
+      entity.HasKey(e => e.EducationHistoryId).HasName("PK__Educatio__576CCA0D8FC52CF9");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_EducationHistory_ApplicantId");
+
+      entity.Property(e => e.AttachedDocument).HasMaxLength(500);
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.DocumentName).HasMaxLength(200);
+      entity.Property(e => e.Grade).HasMaxLength(50);
+      entity.Property(e => e.Institution).HasMaxLength(200);
+      entity.Property(e => e.PdfThumbnail).HasMaxLength(500);
+      entity.Property(e => e.Qualification).HasMaxLength(200);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.EducationHistory)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_EducationHistory_CrmApplication");
+    });
+
+    modelBuilder.Entity<Gmatinformation>(entity =>
+    {
+      entity.HasKey(e => e.GmatinformationId).HasName("PK__GMATInfo__511C53EC85F16CC8");
+
+      entity.ToTable("GMATInformation");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_GMATInformation_ApplicantId");
+
+      entity.Property(e => e.GmatinformationId).HasColumnName("GMATInformationId");
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.GmatadditionalInformation)
+          .HasMaxLength(1000)
+          .HasColumnName("GMATAdditionalInformation");
+      entity.Property(e => e.Gmatdate).HasColumnName("GMATDate");
+      entity.Property(e => e.Gmatlistening)
+          .HasMaxLength(10)
+          .HasColumnName("GMATListening");
+      entity.Property(e => e.GmatoverallScore)
+          .HasMaxLength(10)
+          .HasColumnName("GMATOverallScore");
+      entity.Property(e => e.Gmatreading)
+          .HasMaxLength(10)
+          .HasColumnName("GMATReading");
+      entity.Property(e => e.GmatscannedCopyPath)
+          .HasMaxLength(500)
+          .HasColumnName("GMATScannedCopyPath");
+      entity.Property(e => e.Gmatspeaking)
+          .HasMaxLength(10)
+          .HasColumnName("GMATSpeaking");
+      entity.Property(e => e.Gmatwriting)
+          .HasMaxLength(10)
+          .HasColumnName("GMATWriting");
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.Gmatinformation)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_GMATInformation_CrmApplication");
+    });
+
+    modelBuilder.Entity<Ieltsinformation>(entity =>
+    {
+      entity.HasKey(e => e.IeltsinformationId).HasName("PK__IELTSInf__F3D98972CC94C426");
+
+      entity.ToTable("IELTSInformation");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_IELTSInformation_ApplicantId");
+
+      entity.Property(e => e.IeltsinformationId).HasColumnName("IELTSInformationId");
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.IeltsadditionalInformation)
+          .HasMaxLength(1000)
+          .HasColumnName("IELTSAdditionalInformation");
+      entity.Property(e => e.Ieltsdate).HasColumnName("IELTSDate");
+      entity.Property(e => e.Ieltslistening)
+          .HasMaxLength(10)
+          .HasColumnName("IELTSListening");
+      entity.Property(e => e.IeltsoverallScore)
+          .HasMaxLength(10)
+          .HasColumnName("IELTSOverallScore");
+      entity.Property(e => e.Ieltsreading)
+          .HasMaxLength(10)
+          .HasColumnName("IELTSReading");
+      entity.Property(e => e.IeltsscannedCopyPath)
+          .HasMaxLength(500)
+          .HasColumnName("IELTSScannedCopyPath");
+      entity.Property(e => e.Ieltsspeaking)
+          .HasMaxLength(10)
+          .HasColumnName("IELTSSpeaking");
+      entity.Property(e => e.Ieltswriting)
+          .HasMaxLength(10)
+          .HasColumnName("IELTSWriting");
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.Ieltsinformation)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_IELTSInformation_CrmApplication");
+    });
+
+    modelBuilder.Entity<Othersinformation>(entity =>
+    {
+      entity.HasKey(e => e.OthersinformationId).HasName("PK__OTHERSIn__213F3EE4606225BB");
+
+      entity.ToTable("OTHERSInformation");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_OTHERSInformation_ApplicantId");
+
+      entity.Property(e => e.OthersinformationId).HasColumnName("OTHERSInformationId");
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.OthersadditionalInformation)
+          .HasMaxLength(1000)
+          .HasColumnName("OTHERSAdditionalInformation");
+      entity.Property(e => e.OthersscannedCopyPath)
+          .HasMaxLength(500)
+          .HasColumnName("OTHERSScannedCopyPath");
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.Othersinformation)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_OTHERSInformation_CrmApplication");
+    });
+
+    modelBuilder.Entity<PermanentAddress>(entity =>
+    {
+      entity.HasKey(e => e.PermanentAddressId).HasName("PK__Permanen__3288F2681F94FE3E");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_PermanentAddress_ApplicantId");
+
+      entity.Property(e => e.Address).HasMaxLength(500);
+      entity.Property(e => e.City).HasMaxLength(100);
+      entity.Property(e => e.CountryName).HasMaxLength(100);
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.PostalCode).HasMaxLength(20);
+      entity.Property(e => e.State).HasMaxLength(100);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.PermanentAddress)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_PermanentAddress_CrmApplication");
+    });
+
+    modelBuilder.Entity<PresentAddress>(entity =>
+    {
+      entity.HasKey(e => e.PresentAddressId).HasName("PK__PresentA__C0BAC2A2D25EB48C");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_PresentAddress_ApplicantId");
+
+      entity.Property(e => e.Address).HasMaxLength(500);
+      entity.Property(e => e.City).HasMaxLength(100);
+      entity.Property(e => e.CountryName).HasMaxLength(100);
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.PostalCode).HasMaxLength(20);
+      entity.Property(e => e.State).HasMaxLength(100);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.PresentAddress)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_PresentAddress_CrmApplication");
+    });
+
+    modelBuilder.Entity<Pteinformation>(entity =>
+    {
+      entity.HasKey(e => e.PteinformationId).HasName("PK__PTEInfor__1D54A241907CD2A7");
+
+      entity.ToTable("PTEInformation");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_PTEInformation_ApplicantId");
+
+      entity.Property(e => e.PteinformationId).HasColumnName("PTEInformationId");
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.PteadditionalInformation)
+          .HasMaxLength(1000)
+          .HasColumnName("PTEAdditionalInformation");
+      entity.Property(e => e.Ptedate).HasColumnName("PTEDate");
+      entity.Property(e => e.Ptelistening)
+          .HasMaxLength(10)
+          .HasColumnName("PTEListening");
+      entity.Property(e => e.PteoverallScore)
+          .HasMaxLength(10)
+          .HasColumnName("PTEOverallScore");
+      entity.Property(e => e.Ptereading)
+          .HasMaxLength(10)
+          .HasColumnName("PTEReading");
+      entity.Property(e => e.PtescannedCopyPath)
+          .HasMaxLength(500)
+          .HasColumnName("PTEScannedCopyPath");
+      entity.Property(e => e.Ptespeaking)
+          .HasMaxLength(10)
+          .HasColumnName("PTESpeaking");
+      entity.Property(e => e.Ptewriting)
+          .HasMaxLength(10)
+          .HasColumnName("PTEWriting");
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.Pteinformation)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_PTEInformation_CrmApplication");
+    });
+
+    modelBuilder.Entity<StatementOfPurpose>(entity =>
+    {
+      entity.HasKey(e => e.StatementOfPurposeId).HasName("PK__Statemen__88D17C3D821C3764");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_StatementOfPurpose_ApplicantId");
+
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.StatementOfPurposeFilePath).HasMaxLength(500);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.StatementOfPurpose)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_StatementOfPurpose_CrmApplication");
+    });
+
+    modelBuilder.Entity<Toeflinformation>(entity =>
+    {
+      entity.HasKey(e => e.ToeflinformationId).HasName("PK__TOEFLInf__BD367513513F8AB5");
+
+      entity.ToTable("TOEFLInformation");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_TOEFLInformation_ApplicantId");
+
+      entity.Property(e => e.ToeflinformationId).HasColumnName("TOEFLInformationId");
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.ToefladditionalInformation)
+          .HasMaxLength(1000)
+          .HasColumnName("TOEFLAdditionalInformation");
+      entity.Property(e => e.Toefldate).HasColumnName("TOEFLDate");
+      entity.Property(e => e.Toefllistening)
+          .HasMaxLength(10)
+          .HasColumnName("TOEFLListening");
+      entity.Property(e => e.ToefloverallScore)
+          .HasMaxLength(10)
+          .HasColumnName("TOEFLOverallScore");
+      entity.Property(e => e.Toeflreading)
+          .HasMaxLength(10)
+          .HasColumnName("TOEFLReading");
+      entity.Property(e => e.ToeflscannedCopyPath)
+          .HasMaxLength(500)
+          .HasColumnName("TOEFLScannedCopyPath");
+      entity.Property(e => e.Toeflspeaking)
+          .HasMaxLength(10)
+          .HasColumnName("TOEFLSpeaking");
+      entity.Property(e => e.Toeflwriting)
+          .HasMaxLength(10)
+          .HasColumnName("TOEFLWriting");
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.Toeflinformation)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_TOEFLInformation_CrmApplication");
+    });
+
+    modelBuilder.Entity<WorkExperience>(entity =>
+    {
+      entity.HasKey(e => e.WorkExperienceId).HasName("PK__WorkExpe__55A2B8896E76F131");
+
+      entity.HasIndex(e => e.ApplicantId, "IX_WorkExperience_ApplicantId");
+
+      entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.DocumentName).HasMaxLength(200);
+      entity.Property(e => e.FileThumbnail).HasMaxLength(500);
+      entity.Property(e => e.MainResponsibility).HasMaxLength(1000);
+      entity.Property(e => e.NameOfEmployer).HasMaxLength(200);
+      entity.Property(e => e.Period).HasMaxLength(50);
+      entity.Property(e => e.Position).HasMaxLength(100);
+      entity.Property(e => e.ScannedCopy).HasMaxLength(500);
+
+      entity.HasOne(d => d.Applicant).WithMany(p => p.WorkExperience)
+          .HasForeignKey(d => d.ApplicantId)
+          .HasConstraintName("FK_WorkExperience_CrmApplication");
+    });
+    #endregion CRM Application
+
 
     modelBuilder.Entity<CrmapplicantCourseDetials>(entity =>
     {
