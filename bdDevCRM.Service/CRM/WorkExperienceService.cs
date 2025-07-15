@@ -23,39 +23,39 @@ internal sealed class WorkExperienceService(
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-  public async Task<IEnumerable<WorkExperienceDto>> GetWorkExperiencesDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<WorkExperienceHistoryDto>> GetWorkExperiencesDDLAsync(bool trackChanges = false)
   {
     var list = await _repository.WorkExperience.GetActiveWorkExperiencesAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("WorkExperience");
-    return MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceDto>(list);
+    return MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceHistoryDto>(list);
   }
 
-  public async Task<IEnumerable<WorkExperienceDto>> GetActiveWorkExperiencesAsync(bool trackChanges = false)
+  public async Task<IEnumerable<WorkExperienceHistoryDto>> GetActiveWorkExperiencesAsync(bool trackChanges = false)
   {
     var list = await _repository.WorkExperience.GetActiveWorkExperiencesAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("WorkExperience");
-    return MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceDto>(list);
+    return MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceHistoryDto>(list);
   }
 
-  public async Task<IEnumerable<WorkExperienceDto>> GetWorkExperiencesAsync(bool trackChanges = false)
+  public async Task<IEnumerable<WorkExperienceHistoryDto>> GetWorkExperiencesAsync(bool trackChanges = false)
   {
     var list = await _repository.WorkExperience.GetWorkExperiencesAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("WorkExperience");
-    return MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceDto>(list);
+    return MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceHistoryDto>(list);
   }
 
-  public async Task<WorkExperienceDto> GetWorkExperienceAsync(int id, bool trackChanges = false)
+  public async Task<WorkExperienceHistoryDto> GetWorkExperienceAsync(int id, bool trackChanges = false)
   {
     var entity = await _repository.WorkExperience.GetWorkExperienceAsync(id, trackChanges);
     if (entity == null) throw new GenericNotFoundException("WorkExperience", "WorkExperienceId", id.ToString());
-    return MyMapper.JsonClone<WorkExperience, WorkExperienceDto>(entity);
+    return MyMapper.JsonClone<WorkExperience, WorkExperienceHistoryDto>(entity);
   }
 
-  public async Task<IEnumerable<WorkExperienceDto>> GetWorkExperiencesByApplicantIdAsync(int applicantId, bool trackChanges = false)
+  public async Task<IEnumerable<WorkExperienceHistoryDto>> GetWorkExperiencesByApplicantIdAsync(int applicantId, bool trackChanges = false)
   {
     var list = await _repository.WorkExperience.GetWorkExperiencesByApplicantIdAsync(applicantId, trackChanges);
-    if (!list.Any()) return new List<WorkExperienceDto>();
-    return MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceDto>(list);
+    if (!list.Any()) return new List<WorkExperienceHistoryDto>();
+    return MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceHistoryDto>(list);
   }
 
   public async Task<WorkExperienceHistoryDto> CreateNewRecordAsync(WorkExperienceHistoryDto dto, UsersDto currentUser)
