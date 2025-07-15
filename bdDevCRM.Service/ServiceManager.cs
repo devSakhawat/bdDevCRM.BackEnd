@@ -196,6 +196,7 @@ public sealed class ServiceManager : IServiceManager
   public IDmsdocumentAccessLogService DmsdocumentAccessLogs => _dmsdocumentAccessLogService.Value;
   #endregion
 
+
   // Get Cache // generic function for getting cache from memory cache all of them.
   // This method retrieves an object from the cache using the provided key.
   // If the object is found, it returns the object; otherwise, it throws an exception with 401 status code.
@@ -209,6 +210,8 @@ public sealed class ServiceManager : IServiceManager
     // If not found in cache, throw an exception
     throw new UnauthorizedAccessCRMException("User session has expired or is invalid. Please login again.");
   }
+
+
 
 }
 

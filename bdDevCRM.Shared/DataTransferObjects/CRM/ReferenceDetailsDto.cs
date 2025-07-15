@@ -4,6 +4,6 @@ namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
 public class ReferenceDetailsDto
 {
-  public List<ReferenceDto>? References { get; set; }
+  public List<ApplicantReferenceDto>? References { get; set; }
   public int TotalReferenceRecords { get; set; }
 }

@@ -29,6 +29,7 @@ public class CRMInstituteController : BaseApiController
     _env = env;
   }
 
+
   // --------- 1. DDL --------------------------------------------------
 
   // GitHub Copilot: generate the code by using ResponseHelper for this method InstituteDDL.
@@ -79,31 +80,6 @@ public class CRMInstituteController : BaseApiController
   }
 
   // --------- 2. Summary Grid ----------------------------------------
-  //[HttpPost(RouteConstants.InstituteSummary)]
-  //public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
-  //{
-  //  var userIdClaim = User.FindFirst("UserId")?.Value;
-  //  if (string.IsNullOrEmpty(userIdClaim))
-  //    return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
-
-  //  int userId = Convert.ToInt32(userIdClaim);
-  //  UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-  //  if (currentUser == null)
-  //    return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
-
-  //  if (options == null)
-  //    return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
-
-
-  //  var summaryGrid = await _serviceManager.CRMInstitutes.SummaryGrid(options);
-  //  //return (summaryGrid != null) ? Ok(summaryGrid) : NoContent();
-  //  if (summaryGrid == null || !summaryGrid.Items.Any())
-  //    return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
-
-  //  return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
-  //}
-
-
   [HttpPost(RouteConstants.InstituteSummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {

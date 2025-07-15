@@ -24,7 +24,6 @@ public class CRMApplicationController : BaseApiController
   }
 
   #region Helper Methods
-
   private bool TryGetLoggedInUser(out UsersDto currentUser)
   {
     currentUser = null;
@@ -62,8 +61,7 @@ public class CRMApplicationController : BaseApiController
   {
     // File upload logic will be implemented here
   }
-
-  #endregion
+  #endregion Helper Methods
 
   #region Course Details start
   [HttpGet(RouteConstants.CRMCountryDLL)]
@@ -116,6 +114,7 @@ public class CRMApplicationController : BaseApiController
   #endregion Course Details end
 
   [HttpPost(RouteConstants.CRMApplication)]
+  //public async Task<IActionResult> CreateApplication([FromForm] string ApplicationData, [FromForm] IFormFileCollection files)
   public async Task<IActionResult> CreateApplication([FromForm] string ApplicationData, [FromForm] IFormFileCollection files)
   {
     try

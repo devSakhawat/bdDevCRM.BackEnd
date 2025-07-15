@@ -2,7 +2,7 @@ using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
-public class ReferenceDto
+public class ApplicantReferenceDto
 {
   public int ApplicantReferenceId { get; set; } // Fixed: was ApplicantRefferenceId
   public int ApplicantId { get; set; } // Foreign Key
