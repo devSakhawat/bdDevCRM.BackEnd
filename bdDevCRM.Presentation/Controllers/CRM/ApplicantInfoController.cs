@@ -108,7 +108,7 @@ public class ApplicantInfoController : BaseApiController
 
       ApplicantInfoDto res = await _serviceManager.ApplicantInfos.CreateNewRecordAsync(modelDto, currentUser);
 
-      if (res.ApplicantInfoId > 0)
+      if (res.ApplicantId > 0)
         return Ok(ResponseHelper.Created(res, "Applicant info created successfully"));
       else
         return StatusCode(500, ResponseHelper.InternalServerError("Failed to create applicant info"));

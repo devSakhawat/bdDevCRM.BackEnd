@@ -8,13 +8,17 @@ namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 public class CrmApplicationDto
 {
   public int ApplicationId { get; set; }
+
   public DateTime ApplicationDate { get; set; }
-  public string ApplicationStatus { get; set; } = "Draft";
-  
-  // Common fields
+
+  public string ApplicationStatus { get; set; } = null!;
+
   public DateTime CreatedDate { get; set; }
+
   public int CreatedBy { get; set; }
+
   public DateTime? UpdatedDate { get; set; }
+
   public int? UpdatedBy { get; set; }
 
   public CourseInformationDto? CourseInformation { get; set; }

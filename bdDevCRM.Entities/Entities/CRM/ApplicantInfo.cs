@@ -5,7 +5,7 @@ namespace bdDevCRM.Entities.Entities.CRM;
 
 public partial class ApplicantInfo
 {
-    public int ApplicantInfoId { get; set; }
+    public int ApplicantId { get; set; }
 
     public int ApplicationId { get; set; }
 

@@ -47,7 +47,7 @@ internal sealed class ApplicantInfoService(
   public async Task<ApplicantInfoDto> GetApplicantInfoAsync(int id, bool trackChanges = false)
   {
     var entity = await _repository.ApplicantInfo.GetApplicantInfoAsync(id, trackChanges);
-    if (entity == null) throw new GenericNotFoundException("ApplicantInfo", "ApplicantInfoId", id.ToString());
+    if (entity == null) throw new GenericNotFoundException("ApplicantInfo", "ApplicantId", id.ToString());
     return MyMapper.JsonClone<ApplicantInfo, ApplicantInfoDto>(entity);
   }
 
@@ -60,8 +60,8 @@ internal sealed class ApplicantInfoService(
 
   public async Task<ApplicantInfoDto> CreateNewRecordAsync(ApplicantInfoDto dto, UsersDto currentUser)
   {
-    if (dto.ApplicantInfoId != 0)
-      throw new InvalidCreateOperationException("ApplicantInfoId must be 0.");
+    if (dto.ApplicantId != 0)
+      throw new InvalidCreateOperationException("ApplicantId must be 0.");
 
     // Check for duplicate email
     if (!string.IsNullOrEmpty(dto.EmailAddress))
@@ -78,7 +78,7 @@ internal sealed class ApplicantInfoService(
     entity.CreatedDate = DateTime.UtcNow;
     entity.CreatedBy = currentUser.UserId ?? 0;
     
-    dto.ApplicantInfoId = await _repository.ApplicantInfo.CreateAndGetIdAsync(entity);
+    dto.ApplicantId = await _repository.ApplicantInfo.CreateAndGetIdAsync(entity);
     dto.CreatedDate = entity.CreatedDate;
     dto.CreatedBy = entity.CreatedBy;
 
@@ -87,10 +87,10 @@ internal sealed class ApplicantInfoService(
 
   public async Task<string> UpdateRecordAsync(int key, ApplicantInfoDto dto, bool trackChanges)
   {
-    if (key != dto.ApplicantInfoId) return "Key mismatch.";
+    if (key != dto.ApplicantId) return "Key mismatch.";
 
-    bool exists = await _repository.ApplicantInfo.ExistsAsync(x => x.ApplicantInfoId == key);
-    if (!exists) throw new GenericNotFoundException("ApplicantInfo", "ApplicantInfoId", key.ToString());
+    bool exists = await _repository.ApplicantInfo.ExistsAsync(x => x.ApplicantId == key);
+    if (!exists) throw new GenericNotFoundException("ApplicantInfo", "ApplicantId", key.ToString());
 
     var entity = MyMapper.JsonClone<ApplicantInfoDto, ApplicantInfo>(dto);
     entity.UpdatedDate = DateTime.UtcNow;
@@ -103,10 +103,10 @@ internal sealed class ApplicantInfoService(
 
   public async Task<string> DeleteRecordAsync(int key, ApplicantInfoDto dto)
   {
-    if (key != dto.ApplicantInfoId)
+    if (key != dto.ApplicantId)
       throw new IdMismatchBadRequestException(key.ToString(), nameof(ApplicantInfoDto));
 
-    await _repository.ApplicantInfo.DeleteAsync(x => x.ApplicantInfoId == key, true);
+    await _repository.ApplicantInfo.DeleteAsync(x => x.ApplicantId == key, true);
     await _repository.SaveAsync();
     _logger.LogInfo($"ApplicantInfo deleted, id={key}");
     return OperationMessage.Success;
@@ -123,7 +123,7 @@ internal sealed class ApplicantInfoService(
   {
     string sql = @"
 select 
-    ai.ApplicantInfoId,
+    ai.ApplicantId,
     ai.ApplicationId,
     ai.GenderId,
     ai.GenderName,

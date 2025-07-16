@@ -9,13 +9,13 @@ public sealed class ApplicantInfoRepository : RepositoryBase<ApplicantInfo>, IAp
   public ApplicantInfoRepository(CRMContext context) : base(context) { }
 
   public async Task<IEnumerable<ApplicantInfo>> GetActiveApplicantInfosAsync(bool track) =>
-      await ListAsync(c => c.ApplicantInfoId, track);
+      await ListAsync(c => c.ApplicantId, track);
 
   public async Task<IEnumerable<ApplicantInfo>> GetApplicantInfosAsync(bool track) =>
-      await ListAsync(c => c.ApplicantInfoId, track);
+      await ListAsync(c => c.ApplicantId, track);
 
   public async Task<ApplicantInfo?> GetApplicantInfoAsync(int id, bool track) =>
-      await FirstOrDefaultAsync(c => c.ApplicantInfoId == id, track);
+      await FirstOrDefaultAsync(c => c.ApplicantId == id, track);
 
   public async Task<ApplicantInfo?> GetApplicantInfoByApplicationIdAsync(int applicationId, bool track) =>
       await FirstOrDefaultAsync(c => c.ApplicationId == applicationId, track);

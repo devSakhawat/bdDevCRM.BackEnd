@@ -589,7 +589,7 @@ public partial class CRMContext : DbContext
 
     modelBuilder.Entity<ApplicantInfo>(entity =>
     {
-      entity.HasKey(e => e.ApplicantInfoId).HasName("PK__Applican__B1C5A16C102A5535");
+      entity.HasKey(e => e.ApplicantId).HasName("PK__Applican__B1C5A16C102A5535");
 
       entity.HasIndex(e => e.ApplicationId, "IX_ApplicantInfo_ApplicationId");
 
