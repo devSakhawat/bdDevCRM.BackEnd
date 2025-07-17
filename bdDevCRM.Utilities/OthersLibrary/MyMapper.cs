@@ -91,3 +91,24 @@ public class MyMapper
   }
 }
 
+
+public static class JsonSafeDeserializer
+{
+  public static T SafeDeserialize<T>(string json) where T : new()
+  {
+    var settings = new JsonSerializerSettings
+    {
+      NullValueHandling = NullValueHandling.Ignore,
+      MissingMemberHandling = MissingMemberHandling.Ignore,
+      Error = (sender, args) =>
+      {
+        Console.WriteLine("JSON Error at: " + args.ErrorContext.Path);
+        args.ErrorContext.Handled = true;
+      }
+    };
+
+    return JsonConvert.DeserializeObject<T>(json, settings) ?? new T();
+  }
+}
+
+

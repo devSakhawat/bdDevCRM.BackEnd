@@ -2,13 +2,15 @@
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Security.Principal;
-using System.Text.Json;
+//using System.Text.Json;
 
 public class CRMApplicationController : BaseApiController
 {
@@ -126,7 +128,7 @@ public class CRMApplicationController : BaseApiController
         return Unauthorized("User authentication failed.");
       }
 
-      var applicationDto = JsonSerializer.Deserialize<CrmApplicationDto>(ApplicationData, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+      var applicationDto = JsonSafeDeserializer.SafeDeserialize<CrmApplicationDto>(ApplicationData);
 
       if (applicationDto == null)
       {
@@ -212,10 +214,12 @@ public class CRMApplicationController : BaseApiController
         return Unauthorized("User authentication failed.");
       }
 
-      var applicationDto = JsonSerializer.Deserialize<CrmApplicationDto>(ApplicationData, new JsonSerializerOptions
-      {
-        PropertyNameCaseInsensitive = true
-      });
+      //var applicationDto = JsonSerializer.Deserialize<CrmApplicationDto>(ApplicationData, new JsonSerializerOptions
+      //{
+      //  PropertyNameCaseInsensitive = true
+      //});
+
+      var applicationDto = JsonConvert.DeserializeObject<CrmApplicationDto>(ApplicationData);
 
       if (applicationDto == null)
       {
