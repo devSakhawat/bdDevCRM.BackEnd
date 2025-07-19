@@ -108,7 +108,7 @@ public class CRMInstituteController : BaseApiController
   /*  POST: /crm-institute  (Create)               */
   /* --------------------------------------------- */
   [HttpPost(RouteConstants.CreateInstitute)]
-  [RequestSizeLimit(1_000_000)]
+  [RequestSizeLimit(5_000_000)]
   public async Task<IActionResult> CreateNewRecord([FromForm] CrmInstituteDto form)
   {
     if (form == null)
@@ -243,7 +243,6 @@ public class CRMInstituteController : BaseApiController
   /* =================================================================
       PRIVATE HELPERS
    ==================================================================*/
-
 
   // 'File' Suffix is mendatory to use this function for every file or image fields.
   private async Task SaveInstituteFilesAsync(CrmInstituteDto dto, UsersDto currentUser)

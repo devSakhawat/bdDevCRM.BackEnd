@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -51,7 +52,11 @@ public class ApplicantInfoDto
 
   public string? SkypeId { get; set; }
 
+  // File Handle
+  public IFormFile? ApplicantImageFile { get; set; }
   public string? ApplicantImagePath { get; set; }
+  public string? ApplicantImagePreview { get; set; }
+
 
   public DateTime CreatedDate { get; set; }
 

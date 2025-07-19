@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -20,6 +21,9 @@ public class TOEFLInformationDto
 
   public DateTime? TOEFLDate { get; set; }
 
+
+  public IFormFile? TOEFLScannedCopyFile { get; set; }
+  public string? TOEFLScannedCopyFileName { get; set; }
   public string? TOEFLScannedCopyPath { get; set; }
 
   public string? TOEFLAdditionalInformation { get; set; }
@@ -32,3 +36,4 @@ public class TOEFLInformationDto
 
   public int? UpdatedBy { get; set; }
 }
+

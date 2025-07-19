@@ -37,32 +37,6 @@ public class CRMApplicationController : BaseApiController
     currentUser = _serviceManager.GetCache<UsersDto>(userId);
     return currentUser != null;
   }
-
-  private (bool IsValid, string ErrorMessage) ValidateApplicationData(CrmApplicationDto applicationDto)
-  {
-    if (applicationDto.CourseInformation?.ApplicantCourse != null)
-    {
-      var courseDetails = applicationDto.CourseInformation.ApplicantCourse;
-      if (courseDetails.CountryId <= 0)
-        return (false, "Country selection is required");
-      if (courseDetails.InstituteId <= 0)
-        return (false, "Institute selection is required");
-      if (courseDetails.CourseId <= 0)
-        return (false, "Course selection is required");
-    }
-
-    return (true, string.Empty);
-  }
-
-  private (bool IsValid, string ErrorMessage) ValidateFileUploads(IFormFileCollection files)
-  {
-    return (true, string.Empty);
-  }
-
-  private async Task HandleApplicationFileUploads(CrmApplicationDto applicationDto, IFormFileCollection files)
-  {
-    // File upload logic will be implemented here
-  }
   #endregion Helper Methods
 
   #region Course Details start
@@ -362,6 +336,149 @@ public class CRMApplicationController : BaseApiController
       });
     }
   }
+
+
+  /// <summary>
+  /// Validates application data
+  /// </summary>
+  private (bool IsValid, string ErrorMessage) ValidateApplicationData(CrmApplicationDto applicationDto)
+  {
+    if (applicationDto.CourseInformation?.ApplicantCourse != null)
+    {
+      var courseDetails = applicationDto.CourseInformation.ApplicantCourse;
+      if (courseDetails.CountryId <= 0)
+        return (false, "Country selection is required");
+      if (courseDetails.InstituteId <= 0)
+        return (false, "Institute selection is required");
+      if (courseDetails.CourseId <= 0)
+        return (false, "Course selection is required");
+    }
+
+
+    // Course Information Validation
+    if (applicationDto.CourseInformation?.ApplicantCourse != null)
+    {
+      var courseDetails = applicationDto.CourseInformation.ApplicantCourse;
+      if (courseDetails.CountryId <= 0)
+      {
+        return (false, "Country selection is required in Course Information");
+      }
+    }
+
+    // Personal Details Validation
+    if (applicationDto.CourseInformation?.PersonalDetails != null)
+    {
+      var personalDetails = applicationDto.CourseInformation.PersonalDetails;
+      if (string.IsNullOrWhiteSpace(personalDetails.FirstName))
+      {
+        return (false, "First Name is required in Personal Details");
+      }
+      if (string.IsNullOrWhiteSpace(personalDetails.LastName))
+      {
+        return (false, "Last Name is required in Personal Details");
+      }
+      if (personalDetails.GenderId <= 0)
+      {
+        return (false, "Gender selection is required in Personal Details");
+      }
+      if (personalDetails.DateOfBirth == null)
+      {
+        return (false, "Date of Birth is required in Personal Details");
+      }
+    }
+
+    // Additional validations can be added here for other sections
+
+    return (true, string.Empty);
+  }
+
+  /// <summary>
+  /// Handles all file uploads for the application
+  /// </summary>
+  private async Task HandleApplicationFileUploads(CrmApplicationDto applicationDto, IFormFileCollection files)
+  {
+    if (files == null || files.Count == 0) return;
+
+    var uploadsBasePath = Path.Combine(_environment.WebRootPath, "uploads", "applications");
+    Directory.CreateDirectory(uploadsBasePath);
+
+    foreach (var file in files)
+    {
+      if (file.Length > 0)
+      {
+        var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+        var filePath = Path.Combine(uploadsBasePath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+          await file.CopyToAsync(stream);
+        }
+
+        var relativePath = $"/uploads/applications/{fileName}";
+
+        // Map files to appropriate properties based on file field names
+        switch (file.Name)
+        {
+          case "ApplicantImageFile":
+            if (applicationDto.CourseInformation?.PersonalDetails != null)
+              applicationDto.CourseInformation.PersonalDetails.ApplicantImagePath = relativePath;
+            break;
+          case "IELTSScannedCopyFile":
+            if (applicationDto.EducationInformation?.IELTSInformation != null)
+              applicationDto.EducationInformation.IELTSInformation.IELTSScannedCopyPath = relativePath;
+            break;
+          case "TOEFLScannedCopyFile":
+            if (applicationDto.EducationInformation?.TOEFLInformation != null)
+              applicationDto.EducationInformation.TOEFLInformation.TOEFLScannedCopyPath = relativePath;
+            break;
+          case "PTEScannedCopyFile":
+            if (applicationDto.EducationInformation?.PTEInformation != null)
+              applicationDto.EducationInformation.PTEInformation.PTEScannedCopyPath = relativePath;
+            break;
+          case "GMATScannedCopyFile":
+            if (applicationDto.EducationInformation?.GMATInformation != null)
+              applicationDto.EducationInformation.GMATInformation.GMATScannedCopyPath = relativePath;
+            break;
+          case "OTHERSScannedCopyFile":
+            if (applicationDto.EducationInformation?.OTHERSInformation != null)
+              applicationDto.EducationInformation.OTHERSInformation.OTHERSScannedCopyPath = relativePath;
+            break;
+          case "StatementOfPurposeFile":
+            if (applicationDto.AdditionalInformation?.StatementOfPurpose != null)
+              applicationDto.AdditionalInformation.StatementOfPurpose.StatementOfPurposeFilePath = relativePath;
+            break;
+          default:
+            // Handle education documents and additional documents
+            if (file.Name.StartsWith("EducationDocumentFile_"))
+            {
+              // Handle education document files
+            }
+            else if (file.Name.StartsWith("WorkExperienceDocumentFile_"))
+            {
+              // Handle work experience document files
+            }
+            else if (file.Name.StartsWith("AdditionalDocumentFile_"))
+            {
+              // Handle additional document files
+            }
+            break;
+        }
+      }
+    }
+  }
+
+
+
+  private (bool IsValid, string ErrorMessage) ValidateFileUploads(IFormFileCollection files)
+  {
+    return (true, string.Empty);
+  }
+
+
 }
+
+
+
+
 
 

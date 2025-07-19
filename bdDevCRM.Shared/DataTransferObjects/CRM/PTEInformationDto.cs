@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -20,7 +21,11 @@ public class PTEInformationDto
 
   public DateTime? PTEDate { get; set; }
 
+
+  public IFormFile? PTEScannedCopyFile { get; set; }
+  public string? PTEScannedCopyFileName { get; set; }
   public string? PTEScannedCopyPath { get; set; }
+
 
   public string? PTEAdditionalInformation { get; set; }
 

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -16,11 +17,13 @@ public class EducationHistoryDto
 
   public string? Grade { get; set; }
 
-  public string? AttachedDocument { get; set; }
 
+  public IFormFile? AttachedDocumentFile { get; set; }
   public string? DocumentName { get; set; }
-
+  public string? AttachedDocument { get; set; }
   public string? PdfThumbnail { get; set; }
+
+
 
   public DateTime CreatedDate { get; set; }
 
@@ -30,3 +33,4 @@ public class EducationHistoryDto
 
   public int? UpdatedBy { get; set; }
 }
+

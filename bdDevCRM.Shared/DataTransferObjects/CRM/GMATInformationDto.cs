@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -20,6 +21,8 @@ public class GMATInformationDto
 
   public DateTime? GMATDate { get; set; }
 
+  public IFormFile? GMATScannedCopyFile { get; set; }
+  public string? GMATScannedCopyFileName { get; set; }
   public string? GMATScannedCopyPath { get; set; }
 
   public string? GMATAdditionalInformation { get; set; }

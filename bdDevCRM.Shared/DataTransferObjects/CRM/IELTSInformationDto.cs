@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -20,6 +21,8 @@ public class IELTSInformationDto
 
   public DateTime? IELTSDate { get; set; }
 
+  public IFormFile? IELTSScannedCopyFile { get; set; }
+  public string? IELTSScannedCopyFileName { get; set; }
   public string? IELTSScannedCopyPath { get; set; }
 
   public string? IELTSAdditionalInformation { get; set; }

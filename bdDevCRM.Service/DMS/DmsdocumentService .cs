@@ -158,7 +158,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   {
     if (file == null || file.Length == 0) return null;
 
-    var dmsDto = JsonConvert.DeserializeObject<DMSDto>(allAboutDMS);
+    var dmsDto = JsonSafeDeserializer.SafeDeserialize<DMSDto>(allAboutDMS);
     if (dmsDto == null)
       throw new ArgumentException("DMS data are not deserialize");
 
