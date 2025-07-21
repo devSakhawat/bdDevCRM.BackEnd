@@ -53,6 +53,7 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<ICRMYearRepository> _crmyearRepository;
 
   // Existing CRM repositories
+  private readonly Lazy<ICRMApplicationRepository> _crmApplicationRepository;
   private readonly Lazy<IApplicantCourseRepository> _applicantCourseRepository;
   private readonly Lazy<IApplicantInfoRepository> _applicantInfoRepository;
   private readonly Lazy<IPermanentAddressRepository> _permanentAddressRepository;
@@ -118,6 +119,7 @@ public class RepositoryManager : IRepositoryManager
     // HR area end
 
     #region CRM
+    _crmApplicationRepository = new Lazy<ICRMApplicationRepository>(() => new CRMApplicationRepository(_repositoryContext));
     _crminstituteTypeRepository = new Lazy<ICRMInstituteTypeRepository>(() => new CRMInstituteTypeRepository(_repositoryContext));
     _crmcourseRepository = new Lazy<ICRMCourseRepository>(() => new CRMCourseRepository(_repositoryContext));
     _crmmonthRepository = new Lazy<ICRMMonthRepository>(() => new CRMMonthRepository(_repositoryContext));
@@ -191,6 +193,7 @@ public class RepositoryManager : IRepositoryManager
   public ICRMYearRepository CRMYear => _crmyearRepository.Value;
 
   // Existing CRM repository properties
+  public ICRMApplicationRepository CRMApplication => _crmApplicationRepository.Value;
   public IApplicantCourseRepository ApplicantCourse => _applicantCourseRepository.Value;
   public IApplicantInfoRepository ApplicantInfo => _applicantInfoRepository.Value;
   public IPermanentAddressRepository PermanentAddress => _permanentAddressRepository.Value;

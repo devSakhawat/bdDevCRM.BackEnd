@@ -349,9 +349,6 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
             var encytpass = EncryptDecryptHelper.Encrypt(usersDto.Password);
             usersDto.Password = encytpass;
 
-            //GetDbHelper();
-            //SqlDbHelper.BeginTransaction();
-
             Users objUsers = MyMapper.JsonClone<UsersDto, Users>(usersDto);
             int lastCreatedUserId = await _repository.Users.CreateAndGetIdAsync(objUsers);
 
@@ -365,7 +362,6 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
               await _repository.GroupMembers.BulkInsertAsync(groupMembers);
             }
 
-            // commit transaction with save changes.
             await _repository.GroupMembers.TransactionCommitAsync();
 
             return OperationMessage.Success;

@@ -7,5 +7,4 @@ public class WorkExperienceDto
 {
   public List<WorkExperienceHistoryDto>? WorkExperienceHistory { get; set; }
   public int TotalWorkExperienceRecords { get; set; }
-  public List<IFormFile>? ScannedCopyFileList { get; set; }
 }

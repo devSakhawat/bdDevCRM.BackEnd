@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -11,7 +12,8 @@ public class AdditionalDocumentDto
   public string? DocumentName { get; set; }
   public string? FileThumbnail { get; set; }
   public string? RecordType { get; set; } = "Document"; // To distinguish from AdditionalInfo
-  
+  public IFormFile? UploadFileFormFile { get; set; }
+
   // Common fields
   public DateTime CreatedDate { get; set; }
   public int CreatedBy { get; set; }

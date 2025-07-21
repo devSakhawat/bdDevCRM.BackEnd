@@ -43,6 +43,7 @@ public interface IRepositoryManager : IDisposable
   ICRMYearRepository CRMYear { get; }
   
   // Existing CRM repositories
+  ICRMApplicationRepository CRMApplication { get; }
   IApplicantCourseRepository ApplicantCourse { get; }
   IApplicantInfoRepository ApplicantInfo { get; }
   IPermanentAddressRepository PermanentAddress { get; }

@@ -7,6 +7,4 @@ public class EducationDetailsDto
 {
   public List<EducationHistoryDto>? EducationHistory { get; set; }
   public int TotalEducationRecords { get; set; }
-
-  public List<IFormFile>? AttachedDocumentFileList { get; set; }
 }

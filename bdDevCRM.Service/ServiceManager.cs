@@ -52,6 +52,7 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICRMYearService> _crmyear;
 
   // Existing CRM services
+  private readonly Lazy<ICRMApplicationService> _crmApplicationService;
   private readonly Lazy<IApplicantCourseService> _applicantCourseService;
   private readonly Lazy<IApplicantInfoService> _applicantInfoService;
   private readonly Lazy<IPermanentAddressService> _permanentAddressService;
@@ -111,6 +112,7 @@ public sealed class ServiceManager : IServiceManager
     _crmyear = new Lazy<ICRMYearService>(() => new CRMYearService(repository, logger, configuration));
 
     // Existing CRM services initialization
+    _crmApplicationService = new Lazy<ICRMApplicationService>(() => new CRMApplicationService(repository, logger, configuration, httpContextAccessor));
     _applicantCourseService = new Lazy<IApplicantCourseService>(() => new ApplicantCourseService(repository, logger, configuration, httpContextAccessor));
     _applicantInfoService = new Lazy<IApplicantInfoService>(() => new ApplicantInfoService(repository, logger, configuration, httpContextAccessor));
     _permanentAddressService = new Lazy<IPermanentAddressService>(() => new PermanentAddressService(repository, logger, configuration, httpContextAccessor));
@@ -168,6 +170,7 @@ public sealed class ServiceManager : IServiceManager
   public ICRMYearService CRMYears => _crmyear.Value;
 
   // Existing CRM service properties
+  public ICRMApplicationService CRMApplication => _crmApplicationService.Value;
   public IApplicantCourseService ApplicantCourses => _applicantCourseService.Value;
   public IApplicantInfoService ApplicantInfos => _applicantInfoService.Value;
   public IPermanentAddressService PermanentAddresses => _permanentAddressService.Value;

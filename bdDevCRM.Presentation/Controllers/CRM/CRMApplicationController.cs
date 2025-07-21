@@ -1,7 +1,10 @@
 ﻿using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
+using bdDevCRM.Shared.DataTransferObjects.DMS;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +13,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Security.Principal;
-//using System.Text.Json;
 
 public class CRMApplicationController : BaseApiController
 {
@@ -91,79 +93,124 @@ public class CRMApplicationController : BaseApiController
 
   [HttpPost(RouteConstants.CRMApplication)]
   //public async Task<IActionResult> CreateApplication([FromForm] string ApplicationData, [FromForm] IFormFileCollection files)
-  public async Task<IActionResult> CreateApplication([FromForm] string ApplicationData, [FromForm] IFormFileCollection files)
+  [RequestSizeLimit(50_000_000)] // Increased limit for multiple files
+  public async Task<IActionResult> CreateApplication([FromForm] CrmApplicationDto applicationData)
   {
-    try
+    if (applicationData == null)
+      throw new NullModelBadRequestException(nameof(CrmApplicationDto));
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    if (!Request.HasFormContentType)
+      throw new GenericBadRequestException("Invalid content type. Expected multipart/form-data.");
+
+    // Validate application data
+    var validationResult = ValidateApplicationData(applicationData);
+    if (!validationResult.IsValid)
+      throw new GenericBadRequestException(validationResult.ErrorMessage);
+
+    // Set default values
+    applicationData.ApplicationDate = DateTime.UtcNow;
+    applicationData.ApplicationStatus = "Draft";
+    applicationData.ApplicationId = 0; // Ensure ApplicationId is 0 for new record
+    applicationData.CreatedDate = DateTime.UtcNow;
+    applicationData.CreatedBy = userId;
+    applicationData.UpdatedDate = null;
+    applicationData.UpdatedBy = null;
+
+    // Initialize nested DTOs if null
+    InitializeNestedDtos(applicationData);
+
+    // Save CRM application record
+    CrmApplicationDto savedDto = await _serviceManager.CRMApplication.CreateNewRecordAsync(applicationData, currentUser);
+
+    // Save attached files using DMS
+    await SaveCrmApplicationFilesAsync(savedDto, currentUser);
+
+    if (savedDto.ApplicationId <= 0)
+      throw new InvalidCreateOperationException("Failed to create application record.");
+
+    return Ok(ResponseHelper.Created(savedDto, "Application created successfully."));
+  }
+
+  /// <summary>
+  /// Initialize nested DTOs to avoid null reference exceptions
+  /// </summary>
+  private void InitializeNestedDtos(CrmApplicationDto applicationData)
+  {
+    applicationData.CourseInformation ??= new CourseInformationDto();
+    applicationData.CourseInformation.PersonalDetails ??= new ApplicantInfoDto();
+    applicationData.CourseInformation.ApplicantCourse ??= new ApplicantCourseDto();
+    applicationData.CourseInformation.ApplicantAddress ??= new ApplicantAddressDto();
+    applicationData.CourseInformation.ApplicantAddress.PermanentAddress ??= new PermanentAddressDto();
+    applicationData.CourseInformation.ApplicantAddress.PresentAddress ??= new PresentAddressDto();
+
+    applicationData.EducationInformation ??= new EducationInformationDto();
+    applicationData.EducationInformation.EducationDetails ??= new EducationDetailsDto();
+    applicationData.EducationInformation.EducationDetails.EducationHistory ??= new List<EducationHistoryDto>();
+    applicationData.EducationInformation.IELTSInformation ??= new IELTSInformationDto();
+    applicationData.EducationInformation.TOEFLInformation ??= new TOEFLInformationDto();
+    applicationData.EducationInformation.PTEInformation ??= new PTEInformationDto();
+    applicationData.EducationInformation.GMATInformation ??= new GMATInformationDto();
+    applicationData.EducationInformation.OTHERSInformation ??= new OTHERSInformationDto();
+    applicationData.EducationInformation.WorkExperience ??= new WorkExperienceDto();
+    applicationData.EducationInformation.WorkExperience.WorkExperienceHistory ??= new List<WorkExperienceHistoryDto>();
+
+    applicationData.AdditionalInformation ??= new AdditionalInformationDto();
+    applicationData.AdditionalInformation.ReferenceDetails ??= new ReferenceDetailsDto();
+    applicationData.AdditionalInformation.ReferenceDetails.References ??= new List<ApplicantReferenceDto>();
+    applicationData.AdditionalInformation.StatementOfPurpose ??= new StatementOfPurposeDto();
+    applicationData.AdditionalInformation.AdditionalInformation ??= new AdditionalInfoDto();
+    applicationData.AdditionalInformation.AdditionalDocuments ??= new AdditionalDocumentsDto();
+    applicationData.AdditionalInformation.AdditionalDocuments.Documents ??= new List<AdditionalDocumentDto>();
+  }
+
+  /// <summary>
+  /// Validates application data
+  /// </summary>
+  private (bool IsValid, string ErrorMessage) ValidateApplicationData(CrmApplicationDto applicationDto)
+  {
+    // Personal Details Validation
+    if (applicationDto.CourseInformation?.PersonalDetails != null)
     {
-      _logger.LogInformation("Creating new CRM Application");
+      var personalDetails = applicationDto.CourseInformation.PersonalDetails;
+      if (string.IsNullOrWhiteSpace(personalDetails.FirstName))
+        return (false, "First Name is required in Personal Details");
 
-      if (!TryGetLoggedInUser(out UsersDto currentUser))
-      {
-        return Unauthorized("User authentication failed.");
-      }
+      if (string.IsNullOrWhiteSpace(personalDetails.LastName))
+        return (false, "Last Name is required in Personal Details");
 
-      var applicationDto = JsonSafeDeserializer.SafeDeserialize<CrmApplicationDto>(ApplicationData);
+      if (personalDetails.GenderId <= 0)
+        return (false, "Gender selection is required in Personal Details");
 
-      if (applicationDto == null)
-      {
-        return BadRequest(new
-        {
-          IsSuccess = false,
-          Message = "Invalid application data",
-          ErrorType = "ValidationError"
-        });
-      }
-
-      var currentDateTime = DateTime.UtcNow;
-      var userId = currentUser.UserId ?? 0;
-
-      applicationDto.ApplicationDate = currentDateTime;
-      applicationDto.CreatedDate = currentDateTime;
-      applicationDto.CreatedBy = userId;
-
-      var validationResult = ValidateApplicationData(applicationDto);
-      if (!validationResult.IsValid)
-      {
-        return BadRequest(new
-        {
-          IsSuccess = false,
-          Message = validationResult.ErrorMessage,
-          ErrorType = "ValidationError"
-        });
-      }
-
-      var fileValidationResult = ValidateFileUploads(files);
-      if (!fileValidationResult.IsValid)
-      {
-        return BadRequest(new
-        {
-          IsSuccess = false,
-          Message = fileValidationResult.ErrorMessage,
-          ErrorType = "FileValidationError"
-        });
-      }
-
-      await HandleApplicationFileUploads(applicationDto, files);
-
-      var newApplicationId = new Random().Next(1000, 9999);
-
-      return Ok(new
-      {
-        IsSuccess = true,
-        Message = "Application created successfully",
-        Data = new { ApplicationId = newApplicationId }
-      });
+      if (personalDetails.DateOfBirth == null)
+        return (false, "Date of Birth is required in Personal Details");
     }
-    catch (Exception ex)
+
+    // Course Information Validation
+    if (applicationDto.CourseInformation?.ApplicantCourse != null)
     {
-      _logger.LogError(ex, "Error creating CRM Application");
-      return StatusCode(500, new
-      {
-        IsSuccess = false,
-        Message = "An unexpected error occurred while creating the application",
-        ErrorType = "InternalServerError"
-      });
+      var courseDetails = applicationDto.CourseInformation.ApplicantCourse;
+      if (courseDetails.CountryId <= 0)
+        return (false, "Country selection is required in Course Information");
+
+      if (courseDetails.InstituteId <= 0)
+        return (false, "Institute selection is required in Course Information");
+
+      if (courseDetails.CourseId <= 0)
+        return (false, "Course selection is required in Course Information");
     }
+
+    return (true, string.Empty);
   }
 
   [HttpPut("{id}")]
@@ -339,60 +386,6 @@ public class CRMApplicationController : BaseApiController
 
 
   /// <summary>
-  /// Validates application data
-  /// </summary>
-  private (bool IsValid, string ErrorMessage) ValidateApplicationData(CrmApplicationDto applicationDto)
-  {
-    if (applicationDto.CourseInformation?.ApplicantCourse != null)
-    {
-      var courseDetails = applicationDto.CourseInformation.ApplicantCourse;
-      if (courseDetails.CountryId <= 0)
-        return (false, "Country selection is required");
-      if (courseDetails.InstituteId <= 0)
-        return (false, "Institute selection is required");
-      if (courseDetails.CourseId <= 0)
-        return (false, "Course selection is required");
-    }
-
-
-    // Course Information Validation
-    if (applicationDto.CourseInformation?.ApplicantCourse != null)
-    {
-      var courseDetails = applicationDto.CourseInformation.ApplicantCourse;
-      if (courseDetails.CountryId <= 0)
-      {
-        return (false, "Country selection is required in Course Information");
-      }
-    }
-
-    // Personal Details Validation
-    if (applicationDto.CourseInformation?.PersonalDetails != null)
-    {
-      var personalDetails = applicationDto.CourseInformation.PersonalDetails;
-      if (string.IsNullOrWhiteSpace(personalDetails.FirstName))
-      {
-        return (false, "First Name is required in Personal Details");
-      }
-      if (string.IsNullOrWhiteSpace(personalDetails.LastName))
-      {
-        return (false, "Last Name is required in Personal Details");
-      }
-      if (personalDetails.GenderId <= 0)
-      {
-        return (false, "Gender selection is required in Personal Details");
-      }
-      if (personalDetails.DateOfBirth == null)
-      {
-        return (false, "Date of Birth is required in Personal Details");
-      }
-    }
-
-    // Additional validations can be added here for other sections
-
-    return (true, string.Empty);
-  }
-
-  /// <summary>
   /// Handles all file uploads for the application
   /// </summary>
   private async Task HandleApplicationFileUploads(CrmApplicationDto applicationDto, IFormFileCollection files)
@@ -467,12 +460,453 @@ public class CRMApplicationController : BaseApiController
     }
   }
 
-
-
   private (bool IsValid, string ErrorMessage) ValidateFileUploads(IFormFileCollection files)
   {
     return (true, string.Empty);
   }
+
+
+
+  /* ========================================
+     APPLICATION FILES 
+  ======================================== */
+  private async Task<CrmApplicationDto> SaveCrmApplicationFilesAsync(CrmApplicationDto dto, UsersDto currentUser)
+  {
+    // Get application ID - use override or dto's ApplicationId
+    int applicantId = dto.CourseInformation.PersonalDetails.ApplicantId;
+
+    /* ========================================
+       COURSE INFORMATION SECTION FILES
+    ======================================== */
+
+    /* ---------- Save Applicant Image File (ApplicantInfo Entity) ---------- */
+    if (dto.CourseInformation?.PersonalDetails?.ApplicantImageFile != null)
+    {
+      var applicantImageDMSDto = new DMSDto
+      {
+        // DocumentType properties
+        DocumentTypeName = "Applicant_Image",
+        DocumentType = "Applicant_Image",
+        IsMandatory = false,
+        AcceptedExtensions = ".jpg,.jpeg,.png",
+        MaxFileSizeMb = 2,
+
+        // Document properties
+        Title = $"{dto.CourseInformation.PersonalDetails.FirstName} {dto.CourseInformation.PersonalDetails.LastName} {DateTime.Now:yyyyMMdd:FFFFF}",
+        Description = $"Applicant image for {dto.CourseInformation.PersonalDetails.FirstName} {dto.CourseInformation.PersonalDetails.LastName}",
+        ReferenceEntityType = "ApplicantInfo", // Entity name
+        ReferenceEntityId = applicantId.ToString(),
+        UploadedByUserId = currentUser.UserId.ToString(),
+        SystemTags = "ApplicantImagePath", // DTO field name
+
+        // Folder properties
+        FolderName = $"ApplicantInfo_{applicantId}",
+        OwnerId = applicantId.ToString(),
+
+        // Access Log properties when user accesses the document
+        AccessedByUserId = currentUser.UserId.ToString(),
+        AccessDateTime = DateTime.UtcNow,
+        Action = "Upload",
+
+        // Tag properties
+        DocumentTagName = "Image,Applicant,Personal",
+
+        // Version properties
+        VersionNumber = 1,
+        UploadedBy = currentUser.UserId.ToString(),
+        UploadedDate = DateTime.UtcNow
+      };
+
+      string applicantImageDMSJson = JsonConvert.SerializeObject(applicantImageDMSDto);
+      string applicantImagePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+          dto.CourseInformation.PersonalDetails.ApplicantImageFile, applicantImageDMSJson);
+
+      if (!string.IsNullOrEmpty(applicantImagePath))
+      {
+        dto.CourseInformation.PersonalDetails.ApplicantImagePath = applicantImagePath;
+      }
+    }
+
+    /* ========================================
+       EDUCATION INFORMATION SECTION FILES
+    ======================================== */
+
+    /* ---------- Save Education History Documents (EducationHistory Entity) ---------- */
+    if (dto.EducationInformation?.EducationDetails?.EducationHistory != null)
+    {
+      foreach (var educationRecord in dto.EducationInformation.EducationDetails.EducationHistory)
+      {
+        if (educationRecord.AttachedDocumentFile != null)
+        {
+          var educationDocumentDMSDto = new DMSDto
+          {
+            // DocumentType properties
+            DocumentTypeName = "Education_Document",
+            DocumentType = "Document",
+            IsMandatory = false,
+            AcceptedExtensions = ".pdf,.doc,.docx,.jpg,.jpeg,.png",
+            MaxFileSizeMb = 5,
+
+            // Document properties
+            Title = $"EducationDocument_{educationRecord.Institution}_{DateTime.Now:yyyyMMdd:FFFFF}",
+            Description = $"Education document for {educationRecord.Institution} - {educationRecord.Qualification} - {educationRecord.PassingYear}",
+            ReferenceEntityType = "EducationHistory", // Entity name
+            ReferenceEntityId = applicantId.ToString(),
+            UploadedByUserId = currentUser.UserId.ToString(),
+            SystemTags = "AttachedDocument", // File path property name
+
+            // Folder properties
+            FolderName = $"EducationHistory_{applicantId}",
+            OwnerId = currentUser.UserId.ToString(),
+
+            // Access Log properties
+            AccessedByUserId = currentUser.UserId.ToString(),
+            AccessDateTime = DateTime.UtcNow,
+            Action = "Upload",
+
+            // Tag properties
+            DocumentTagName = "Document,Education,Academic",
+
+            // Version properties
+            VersionNumber = 1,
+            UploadedBy = currentUser.UserId.ToString(),
+            UploadedDate = DateTime.UtcNow
+          };
+
+          string educationDocumentDMSJson = JsonConvert.SerializeObject(educationDocumentDMSDto);
+          string educationDocumentPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+              educationRecord.AttachedDocumentFile, educationDocumentDMSJson);
+
+          if (!string.IsNullOrEmpty(educationDocumentPath))
+          {
+            educationRecord.AttachedDocument = educationDocumentPath;
+          }
+        }
+      }
+    }
+
+    /* ---------- Save IELTS Scanned Copy (IELTSInformation Entity) ---------- */
+    if (dto.EducationInformation?.IELTSInformation?.IELTSScannedCopyFile != null)
+    {
+      dto.EducationInformation.IELTSInformation.IELTSScannedCopyPath = await SaveLanguageTestDocumentAsync(
+          "IELTSInformation", // Entity name
+          "IELTSScannedCopyPath", // DTO field name
+          "IELTS",
+          dto.EducationInformation.IELTSInformation.IELTSScannedCopyFile,
+          applicantId,
+          currentUser
+      );
+    }
+
+    /* ---------- Save TOEFL Scanned Copy (TOEFLInformation Entity) ---------- */
+    if (dto.EducationInformation?.TOEFLInformation?.TOEFLScannedCopyFile != null)
+    {
+      dto.EducationInformation.TOEFLInformation.TOEFLScannedCopyPath = await SaveLanguageTestDocumentAsync(
+          "TOEFLInformation", // Entity name
+          "TOEFLScannedCopyPath", // DTO field name
+          "TOEFL",
+          dto.EducationInformation.TOEFLInformation.TOEFLScannedCopyFile,
+          applicantId,
+          currentUser
+      );
+    }
+
+    /* ---------- Save PTE Scanned Copy (PTEInformation Entity) ---------- */
+    if (dto.EducationInformation?.PTEInformation?.PTEScannedCopyFile != null)
+    {
+      dto.EducationInformation.PTEInformation.PTEScannedCopyPath = await SaveLanguageTestDocumentAsync(
+          "PTEInformation", // Entity name
+          "PTEScannedCopyPath", // DTO field name
+          "PTE",
+          dto.EducationInformation.PTEInformation.PTEScannedCopyFile,
+          applicantId,
+          currentUser
+      );
+    }
+
+    /* ---------- Save GMAT Scanned Copy (GMATInformation Entity) ---------- */
+    if (dto.EducationInformation?.GMATInformation?.GMATScannedCopyFile != null)
+    {
+      dto.EducationInformation.GMATInformation.GMATScannedCopyPath = await SaveLanguageTestDocumentAsync(
+          "GMATInformation", // Entity name
+          "GMATScannedCopyPath", // DTO field name
+          "GMAT",
+          dto.EducationInformation.GMATInformation.GMATScannedCopyFile,
+          applicantId,
+          currentUser
+      );
+    }
+
+    /* ---------- Save OTHERS Language Test Scanned Copy (OTHERSInformation Entity) ---------- */
+    if (dto.EducationInformation?.OTHERSInformation?.OTHERSScannedCopyFile != null)
+    {
+      dto.EducationInformation.OTHERSInformation.OTHERSScannedCopyPath = await SaveLanguageTestDocumentAsync(
+          "OTHERSInformation", // Entity name
+          "OTHERSScannedCopyPath", // DTO field name
+          "OTHERS",
+          dto.EducationInformation.OTHERSInformation.OTHERSScannedCopyFile,
+          applicantId,
+          currentUser
+      );
+    }
+
+    /* ---------- Save Work Experience Documents (WorkExperience Entity) ---------- */
+    if (dto.EducationInformation?.WorkExperience?.WorkExperienceHistory != null)
+    {
+      foreach (var workExpRecord in dto.EducationInformation.WorkExperience.WorkExperienceHistory)
+      {
+        if (workExpRecord.ScannedCopyFile != null)
+        {
+          var workExperienceDMSDto = new DMSDto
+          {
+            // DocumentType properties
+            DocumentTypeName = "Work_Experience_Document",
+            DocumentType = "Document",
+            IsMandatory = false,
+            AcceptedExtensions = ".pdf,.doc,.docx,.jpg,.jpeg,.png",
+            MaxFileSizeMb = 5,
+
+            // Document properties
+            Title = $"WorkExperience_{workExpRecord.NameOfEmployer}_{DateTime.Now:yyyyMMdd:FFFFF}",
+            Description = $"Work experience document for {workExpRecord.NameOfEmployer} - {workExpRecord.Position}",
+            ReferenceEntityType = "WorkExperience", // Entity name
+            ReferenceEntityId = applicantId.ToString(),
+            UploadedByUserId = currentUser.UserId.ToString(),
+            SystemTags = "ScannedCopyPath", // DTO field name
+
+            // Folder properties
+            FolderName = $"WorkExperience_{applicantId}",
+            OwnerId = currentUser.UserId.ToString(),
+
+            // Access Log properties
+            AccessedByUserId = currentUser.UserId.ToString(),
+            AccessDateTime = DateTime.UtcNow,
+            Action = "Upload",
+
+            // Tag properties
+            DocumentTagName = "Document,WorkExperience,Professional",
+
+            // Version properties
+            VersionNumber = 1,
+            UploadedBy = currentUser.UserId.ToString(),
+            UploadedDate = DateTime.UtcNow
+          };
+
+          string workExperienceDMSJson = JsonConvert.SerializeObject(workExperienceDMSDto);
+          string workExperiencePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+              workExpRecord.ScannedCopyFile, workExperienceDMSJson);
+
+          if (!string.IsNullOrEmpty(workExperiencePath))
+          {
+            workExpRecord.ScannedCopyPath = workExperiencePath;
+          }
+        }
+      }
+    }
+
+    /* ========================================
+       ADDITIONAL INFORMATION SECTION FILES
+    ======================================== */
+
+    /* ---------- Save Statement of Purpose File (StatementOfPurpose Entity) ---------- */
+    if (dto.AdditionalInformation?.StatementOfPurpose?.StatementOfPurposeFile != null)
+    {
+      var statementDMSDto = new DMSDto
+      {
+        // DocumentType properties
+        DocumentTypeName = "Statement_Of_Purpose",
+        DocumentType = "Document",
+        IsMandatory = false,
+        AcceptedExtensions = ".pdf,.doc,.docx",
+        MaxFileSizeMb = 5,
+
+        // Document properties
+        Title = $"StatementOfPurpose_{DateTime.Now:yyyyMMdd:FFFFF}",
+        Description = $"Statement of Purpose for application {applicantId}",
+        ReferenceEntityType = "StatementOfPurpose", // Entity name
+        ReferenceEntityId = applicantId.ToString(),
+        UploadedByUserId = currentUser.UserId.ToString(),
+        SystemTags = "StatementOfPurposeFile", // DTO field name
+
+        // Folder properties
+        FolderName = $"StatementOfPurpose_{applicantId}",
+        OwnerId = currentUser.UserId.ToString(),
+
+        // Access Log properties
+        AccessedByUserId = currentUser.UserId.ToString(),
+        AccessDateTime = DateTime.UtcNow,
+        Action = "Upload",
+
+        // Tag properties
+        DocumentTagName = "Document,StatementOfPurpose,Additional",
+
+        // Version properties
+        VersionNumber = 1,
+        UploadedBy = currentUser.UserId.ToString(),
+        UploadedDate = DateTime.UtcNow
+      };
+
+      string statementDMSJson = JsonConvert.SerializeObject(statementDMSDto);
+      string statementPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+          dto.AdditionalInformation.StatementOfPurpose.StatementOfPurposeFile, statementDMSJson);
+
+      if (!string.IsNullOrEmpty(statementPath))
+      {
+        dto.AdditionalInformation.StatementOfPurpose.StatementOfPurposeFilePath = statementPath;
+      }
+    }
+
+    /* ---------- Save Additional Information File (AdditionalInfo Entity) ---------- */
+    if (dto.AdditionalInformation?.AdditionalInformation?.UploadFileFormFile != null)
+    {
+      var additionalInfoDMSDto = new DMSDto
+      {
+        // DocumentType properties
+        DocumentTypeName = "Additional_Information_Document",
+        DocumentType = "Document",
+        IsMandatory = false,
+        AcceptedExtensions = ".pdf,.doc,.docx,.jpg,.jpeg,.png",
+        MaxFileSizeMb = 5,
+
+        // Document properties
+        Title = $"AdditionalInfo_{dto.AdditionalInformation.AdditionalInformation.DocumentTitle}_{DateTime.Now:yyyyMMdd:FFFFF}",
+        Description = $"Additional information document for application {applicantId}",
+        ReferenceEntityType = "AdditionalInfo", // Entity name
+        ReferenceEntityId = applicantId.ToString(),
+        UploadedByUserId = currentUser.UserId.ToString(),
+        SystemTags = "UploadFileFormFile", // DTO field name
+
+        // Folder properties
+        FolderName = $"AdditionalInfo_{applicantId}",
+        OwnerId = currentUser.UserId.ToString(),
+
+        // Access Log properties
+        AccessedByUserId = currentUser.UserId.ToString(),
+        AccessDateTime = DateTime.UtcNow,
+        Action = "Upload",
+
+        // Tag properties
+        DocumentTagName = "Document,AdditionalInfo,Miscellaneous",
+
+        // Version properties
+        VersionNumber = 1,
+        UploadedBy = currentUser.UserId.ToString(),
+        UploadedDate = DateTime.UtcNow
+      };
+
+      string additionalInfoDMSJson = JsonConvert.SerializeObject(additionalInfoDMSDto);
+      string additionalInfoPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+          dto.AdditionalInformation.AdditionalInformation.UploadFileFormFile, additionalInfoDMSJson);
+
+      if (!string.IsNullOrEmpty(additionalInfoPath))
+      {
+        dto.AdditionalInformation.AdditionalInformation.UploadFile = additionalInfoPath;
+      }
+    }
+
+    /* ---------- Save Additional Documents (AdditionalDocument Entity) ---------- */
+    if (dto.AdditionalInformation?.AdditionalDocuments?.Documents != null &&
+        dto.AdditionalInformation.AdditionalDocuments.Documents.Any())
+    {
+      foreach (var additionalDoc in dto.AdditionalInformation.AdditionalDocuments.Documents)
+      {
+        if (additionalDoc.UploadFileFormFile != null)
+        {
+          var additionalDocDMSDto = new DMSDto
+          {
+            // DocumentType properties
+            DocumentTypeName = "Additional_Document",
+            DocumentType = "Document",
+            IsMandatory = false,
+            AcceptedExtensions = ".pdf,.doc,.docx,.jpg,.jpeg,.png",
+            MaxFileSizeMb = 5,
+
+            // Document properties
+            Title = $"AdditionalDocument_{additionalDoc.Title}_{DateTime.Now:yyyyMMdd:FFFFF}",
+            Description = $"Additional document: {additionalDoc.Title} for application {applicantId}",
+            ReferenceEntityType = "AdditionalDocument", // Entity name - mapped to AdditionalDocument entity
+            ReferenceEntityId = applicantId.ToString(),
+            UploadedByUserId = currentUser.UserId.ToString(),
+            SystemTags = "UploadFileFormFile", // DTO field name
+
+            // Folder properties
+            FolderName = $"AdditionalDocument_{applicantId}",
+            OwnerId = currentUser.UserId.ToString(),
+
+            // Access Log properties
+            AccessedByUserId = currentUser.UserId.ToString(),
+            AccessDateTime = DateTime.UtcNow,
+            Action = "Upload",
+
+            // Tag properties
+            DocumentTagName = "Document,Additional,Supplementary",
+
+            // Version properties
+            VersionNumber = 1,
+            UploadedBy = currentUser.UserId.ToString(),
+            UploadedDate = DateTime.UtcNow
+          };
+
+          string additionalDocDMSJson = JsonConvert.SerializeObject(additionalDocDMSDto);
+          string additionalDocPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+              additionalDoc.UploadFileFormFile, additionalDocDMSJson);
+
+          if (!string.IsNullOrEmpty(additionalDocPath))
+          {
+            additionalDoc.UploadFile = additionalDocPath;
+          }
+        }
+      }
+    }
+  
+    return dto;
+  }
+
+  /* ========================================
+     HELPER METHOD FOR LANGUAGE TEST DOCUMENTS
+  ======================================== */
+  private async Task<string> SaveLanguageTestDocumentAsync(string entityName, string fieldName, string testType, IFormFile file, int applicationId, UsersDto currentUser)
+  {
+    var languageTestDMSDto = new DMSDto
+    {
+      // DocumentType properties
+      DocumentTypeName = $"{testType}_Test_Document",
+      DocumentType = "Document",
+      IsMandatory = false,
+      AcceptedExtensions = ".pdf,.doc,.docx,.jpg,.jpeg,.png",
+      MaxFileSizeMb = 5,
+
+      // Document properties
+      Title = $"{testType}TestResult_{DateTime.Now:yyyyMMdd:FFFFF}",
+      Description = $"{testType} test result for application {applicationId}",
+      ReferenceEntityType = entityName, // Entity name (e.g., "IELTSInformation")
+      ReferenceEntityId = applicationId.ToString(),
+      UploadedByUserId = currentUser.UserId.ToString(),
+      SystemTags = fieldName, // DTO field name (e.g., "IELTSScannedCopyFile")
+
+      // Folder properties
+      FolderName = $"{entityName}_{applicationId}",
+      OwnerId = currentUser.UserId.ToString(),
+
+      // Access Log properties
+      AccessedByUserId = currentUser.UserId.ToString(),
+      AccessDateTime = DateTime.UtcNow,
+      Action = "Upload",
+
+      // Tag properties
+      DocumentTagName = $"Document,{testType},LanguageTest,TestResult",
+
+      // Version properties
+      VersionNumber = 1,
+      UploadedBy = currentUser.UserId.ToString(),
+      UploadedDate = DateTime.UtcNow
+    };
+
+    string languageTestDMSJson = JsonConvert.SerializeObject(languageTestDMSDto);
+    string languageTestPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(file, languageTestDMSJson);
+    return languageTestPath;
+  }
+
 
 
 }

@@ -38,6 +38,7 @@ public interface IServiceManager
   ICRMYearService CRMYears { get; }
   
   // Existing CRM services
+  ICRMApplicationService CRMApplication { get; }
   IApplicantCourseService ApplicantCourses { get; }
   IApplicantInfoService ApplicantInfos { get; }
   IPermanentAddressService PermanentAddresses { get; }
