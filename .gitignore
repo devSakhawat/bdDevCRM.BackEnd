@@ -361,3 +361,60 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore bin folders
+# Ignore bin folders
+# Ignore bin folders
+**/bin/
+bin/
+
+# Ignore obj folders
+**/obj/
+obj/
+
+# Ignore wwwroot/uploads folder
+**/wwwroot/uploads/
+**/wwwroot/uploads/
+bdDevCRM.Api/wwwroot/wwwroot/uploads/
+wwwroot/uploads/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+**/[Bb]in/
+**/[Oo]bj/
+
+# Visual Studio files
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.dbmdl
+*.dbproj.schemaview
+*.pfx
+*.publishsettings
+node_modules/
+
+# Uploads folder in wwwroot
+bdDevCRM.Api/wwwroot/uploads/
+**/wwwroot/uploads/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Local settings
+appsettings.Development.json
+*.local.json

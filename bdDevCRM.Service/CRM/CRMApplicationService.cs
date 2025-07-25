@@ -8,6 +8,7 @@ using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 
 namespace bdDevCRM.Service.CRM;
@@ -24,7 +25,7 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
       throw new InvalidCreateOperationException("ApplicationId must be 0 for new record.");
 
     // Begin Transaction
-    await _repository.CRMApplication.TransactionBeginAsync();
+    //await _repository.CRMApplication.TransactionBeginAsync();
 
     try
     {
@@ -33,7 +34,7 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
       dto.CreatedBy = currentUser.UserId ?? 0;
       dto.UpdatedDate = null;
       dto.UpdatedBy = null;
-      dto.ApplicationStatus = "Draft"; // Default status
+      dto.ApplicationStatus = "Draft";
 
       // 1. Save CrmApplication first to get ApplicationId
       var crmApplicationEntity = MyMapper.JsonClone<CrmApplicationDto, CrmApplication>(dto);
@@ -65,7 +66,8 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           applicantCourseDto.CreatedBy = currentUser.UserId ?? 0;
 
           var applicantCourseEntity = MyMapper.JsonClone<ApplicantCourseDto, ApplicantCourse>(applicantCourseDto);
-          await _repository.ApplicantCourse.CreateAsync(applicantCourseEntity);
+          //await _repository.ApplicantCourse.CreateAsync(applicantCourseEntity);
+          var applicantCourseId = await _repository.ApplicantCourse.CreateAndGetIdAsync(applicantCourseEntity);
         }
 
         // Save PermanentAddress
@@ -76,7 +78,9 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           permanentAddressDto.CreatedBy = currentUser.UserId ?? 0;
 
           var permanentAddressEntity = MyMapper.JsonClone<PermanentAddressDto, PermanentAddress>(permanentAddressDto);
-          await _repository.PermanentAddress.CreateAsync(permanentAddressEntity);
+          //await _repository.PermanentAddress.CreateAsync(permanentAddressEntity);
+
+          var prmanentAddressId = await _repository.PermanentAddress.CreateAndGetIdAsync(permanentAddressEntity);
         }
 
         // Save PresentAddress
@@ -87,7 +91,8 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           presentAddressDto.CreatedBy = currentUser.UserId ?? 0;
 
           var presentAddressEntity = MyMapper.JsonClone<PresentAddressDto, PresentAddress>(presentAddressDto);
-          await _repository.PresentAddress.CreateAsync(presentAddressEntity);
+          //await _repository.PresentAddress.CreateAsync(presentAddressEntity);
+          var presentAddressId = await _repository.PresentAddress.CreateAndGetIdAsync(presentAddressEntity);
         }
 
         // Save Education History
@@ -99,7 +104,9 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
             educationDto.CreatedBy = currentUser.UserId ?? 0;
 
             var educationEntity = MyMapper.JsonClone<EducationHistoryDto, EducationHistory>(educationDto);
-            await _repository.EducationHistory.CreateAsync(educationEntity);
+            //await _repository.EducationHistory.CreateAsync(educationEntity);
+            educationEntity.PdfThumbnail = null;
+            var educationHistoryId = await _repository.EducationHistory.CreateAndGetIdAsync(educationEntity);
           }
         }
 
@@ -111,7 +118,8 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           ieltsDto.CreatedBy = currentUser.UserId ?? 0;
 
           var ieltsEntity = MyMapper.JsonClone<IELTSInformationDto, IELTSInformation>(ieltsDto);
-          await _repository.IELTSInformation.CreateAsync(ieltsEntity);
+          var ieltsEntityId = await _repository.IELTSInformation.CreateAndGetIdAsync(ieltsEntity);
+          //await _repository.IELTSInformation.CreateAsync(ieltsEntity);
         }
 
         // Save TOEFL Information
@@ -122,7 +130,8 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           toeflDto.CreatedBy = currentUser.UserId ?? 0;
 
           var toeflEntity = MyMapper.JsonClone<TOEFLInformationDto, TOEFLInformation>(toeflDto);
-          await _repository.TOEFLInformation.CreateAsync(toeflEntity);
+          var toeflEntityId = await _repository.TOEFLInformation.CreateAndGetIdAsync(toeflEntity);
+          //await _repository.TOEFLInformation.CreateAsync(toeflEntity);
         }
 
         // Save PTE Information
@@ -133,7 +142,8 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           pteDto.CreatedBy = currentUser.UserId ?? 0;
 
           var pteEntity = MyMapper.JsonClone<PTEInformationDto, PTEInformation>(pteDto);
-          await _repository.PTEInformation.CreateAsync(pteEntity);
+          var pteEntityId = await _repository.PTEInformation.CreateAndGetIdAsync(pteEntity);
+          //await _repository.PTEInformation.CreateAsync(pteEntity);
         }
 
         // Save GMAT Information
@@ -144,7 +154,8 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           gmatDto.CreatedBy = currentUser.UserId ?? 0;
 
           var gmatEntity = MyMapper.JsonClone<GMATInformationDto, GMATInformation>(gmatDto);
-          await _repository.GMATInformation.CreateAsync(gmatEntity);
+          var gmatEntityId = await _repository.GMATInformation.CreateAndGetIdAsync(gmatEntity);
+          //await _repository.GMATInformation.CreateAsync(gmatEntity);
         }
 
         // Save OTHERS Information
@@ -155,7 +166,8 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           othersDto.CreatedBy = currentUser.UserId ?? 0;
 
           var othersEntity = MyMapper.JsonClone<OTHERSInformationDto, OTHERSInformation>(othersDto);
-          await _repository.OTHERSInformation.CreateAsync(othersEntity);
+          var othersEntityId = await _repository.OTHERSInformation.CreateAndGetIdAsync(othersEntity);
+          //await _repository.OTHERSInformation.CreateAsync(othersEntity);
         }
 
         // Save Work Experience
@@ -167,7 +179,9 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
             workExpDto.CreatedBy = currentUser.UserId ?? 0;
 
             var workExpEntity = MyMapper.JsonClone<WorkExperienceHistoryDto, WorkExperience>(workExpDto);
-            await _repository.WorkExperience.CreateAsync(workExpEntity);
+            workExpEntity.FileThumbnail = null;
+            var workExpEntityId = await _repository.WorkExperience.CreateAndGetIdAsync(workExpEntity);
+            //await _repository.WorkExperience.CreateAsync(workExpEntity);
           }
         }
 
@@ -180,48 +194,59 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
             referenceDto.CreatedBy = currentUser.UserId ?? 0;
 
             var referenceEntity = MyMapper.JsonClone<ApplicantReferenceDto, ApplicantReference>(referenceDto);
-            await _repository.ApplicantReference.CreateAsync(referenceEntity);
+            var referenceEntityId = await _repository.ApplicantReference.CreateAndGetIdAsync(referenceEntity);
+            //await _repository.ApplicantReference.CreateAsync(referenceEntity);
           }
         }
 
-        // Save Statement of Purpose
+        // Save Statement of Purpose - FIX: Use ApplicationId instead of ApplicantId
         if (dto.AdditionalInformation?.StatementOfPurpose != null)
         {
           var statementDto = dto.AdditionalInformation.StatementOfPurpose;
           statementDto.CreatedDate = DateTime.UtcNow;
           statementDto.CreatedBy = currentUser.UserId ?? 0;
 
+          // FIX: Set ApplicantId to ApplicationId for database constraint
+          statementDto.ApplicantId = applicationId; // This maps to ApplicationId in database
+
           var statementEntity = MyMapper.JsonClone<StatementOfPurposeDto, StatementOfPurpose>(statementDto);
-          await _repository.StatementOfPurpose.CreateAsync(statementEntity);
+          var statementEntityId = await _repository.StatementOfPurpose.CreateAndGetIdAsync(statementEntity);
+          //await _repository.StatementOfPurpose.CreateAsync(statementEntity);
         }
 
-        // Save Additional Information
+        // Save Additional Information - FIX: Use ApplicationId instead of ApplicantId
         if (dto.AdditionalInformation?.AdditionalInformation != null)
         {
           var additionalInfoDto = dto.AdditionalInformation.AdditionalInformation;
           additionalInfoDto.CreatedDate = DateTime.UtcNow;
           additionalInfoDto.CreatedBy = currentUser.UserId ?? 0;
 
+          // FIX: Set ApplicantId to ApplicationId for database constraint
+          additionalInfoDto.ApplicantId = applicationId; // This maps to ApplicationId in database
+
           var additionalInfoEntity = MyMapper.JsonClone<AdditionalInfoDto, AdditionalInfo>(additionalInfoDto);
-          await _repository.AdditionalInfo.CreateAsync(additionalInfoEntity);
+          additionalInfoEntity.AdditionalInfoId = 0;
+          additionalInfoEntity.FileThumbnail = null;
+          var additionalInfoEntityId = await _repository.AdditionalInfo.CreateAndGetIdAsync(additionalInfoEntity);
+          //await _repository.AdditionalInfo.CreateAsync(additionalInfoEntity);
         }
       }
 
       // Commit transaction
-      await _repository.CRMApplication.TransactionCommitAsync();
+      //await _repository.CRMApplication.TransactionCommitAsync();
       return dto;
     }
     catch (Exception ex)
     {
       // Rollback transaction in case of error
-      await _repository.CRMApplication.TransactionRollbackAsync();
-      _logger.LogError("Error creating CRM Application");
+      //await _repository.CRMApplication.TransactionRollbackAsync();
+      _logger.LogError($"Error creating CRM Application: {ex.Message}");
       throw;
     }
     finally
     {
       // Dispose transaction
-      await _repository.CRMApplication.TransactionDisposeAsync();
+      //await _repository.CRMApplication.TransactionDisposeAsync();
     }
   }
 
@@ -238,9 +263,6 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
       {
         dto.CourseInformation.ApplicantCourse.ApplicantId = applicantId;
       }
-
-      // PersonalDetails (ApplicantInfo) - Already set above
-      // No need to set again as it's already done
 
       // ApplicantAddress
       if (dto.CourseInformation.ApplicantAddress != null)
@@ -311,10 +333,10 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
       }
     }
 
-    // Additional Information Section
+    // Additional Information Section - Only for References and Additional Documents
     if (dto.AdditionalInformation != null)
     {
-      // Reference Details
+      // Reference Details - These use actual ApplicantId
       if (dto.AdditionalInformation.ReferenceDetails?.References != null)
       {
         foreach (var referenceDto in dto.AdditionalInformation.ReferenceDetails.References)
@@ -323,19 +345,7 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
         }
       }
 
-      // Statement of Purpose
-      if (dto.AdditionalInformation.StatementOfPurpose != null)
-      {
-        dto.AdditionalInformation.StatementOfPurpose.ApplicantId = applicantId;
-      }
-
-      // Additional Information
-      if (dto.AdditionalInformation.AdditionalInformation != null)
-      {
-        dto.AdditionalInformation.AdditionalInformation.ApplicantId = applicantId;
-      }
-
-      // Additional Documents
+      // Additional Documents - These use actual ApplicantId  
       if (dto.AdditionalInformation.AdditionalDocuments?.Documents != null)
       {
         foreach (var additionalDoc in dto.AdditionalInformation.AdditionalDocuments.Documents)
@@ -343,6 +353,8 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
           additionalDoc.ApplicantId = applicantId;
         }
       }
+
     }
   }
+
 }

@@ -6,7 +6,6 @@ public static class RouteConstants
 {
   public const string BaseRoute = "bdDevs-crm";
 
-
   #region Test
   public const string TestDDL = "test-ddl";
   public const string Tests = "tests";

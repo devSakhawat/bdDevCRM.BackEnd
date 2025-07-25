@@ -559,9 +559,9 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.RequireAccommodation).HasMaxLength(10);
       entity.Property(e => e.UploadFile).HasMaxLength(500);
 
-      entity.HasOne(d => d.Applicant).WithMany(p => p.AdditionalInfo)
-          .HasForeignKey(d => d.ApplicantId)
-          .HasConstraintName("FK_AdditionalInfo_CrmApplication");
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.AdditionalInfo)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .HasConstraintName("FK_AdditionalInfo_CrmApplication");
     });
 
     modelBuilder.Entity<ApplicantCourse>(entity =>
@@ -582,10 +582,32 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.PaymentReferenceNumber).HasMaxLength(100);
       entity.Property(e => e.Remarks).HasMaxLength(500);
 
-      entity.HasOne(d => d.Applicant).WithMany(p => p.ApplicantCourse)
-          .HasForeignKey(d => d.ApplicantId)
-          .HasConstraintName("FK_ApplicantCourse_CrmApplication");
+      // Relationship configuration 
+      entity.HasOne(d => d.Applicant)
+            .WithMany(p => p.ApplicantCourse)
+            .HasForeignKey(d => d.ApplicantId)
+            .OnDelete(DeleteBehavior.ClientSetNull)
+            .HasConstraintName("FK_ApplicantCourse_CrmApplication");
     });
+
+    //modelBuilder.Entity<ApplicantCourse>(entity =>
+    //{
+    //  entity.HasKey(e => e.ApplicantCourseId).HasName("PK__Applican__32CD933287A9B7A4");
+
+    //  entity.HasIndex(e => e.ApplicantId, "IX_ApplicantCourse_ApplicantId");
+
+    //  entity.Property(e => e.ApplicationFee).HasMaxLength(20);
+    //  entity.Property(e => e.CountryName).HasMaxLength(100);
+    //  entity.Property(e => e.CourseTitle).HasMaxLength(300);
+    //  entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+    //  entity.Property(e => e.CurrencyName).HasMaxLength(50);
+    //  entity.Property(e => e.InstituteName).HasMaxLength(200);
+    //  entity.Property(e => e.IntakeMonth).HasMaxLength(20);
+    //  entity.Property(e => e.IntakeYear).HasMaxLength(10);
+    //  entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+    //  entity.Property(e => e.PaymentReferenceNumber).HasMaxLength(100);
+    //  entity.Property(e => e.Remarks).HasMaxLength(500);
+    //});
 
     modelBuilder.Entity<ApplicantInfo>(entity =>
     {
@@ -1194,6 +1216,12 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
       entity.Property(e => e.UploadedDate).HasDefaultValueSql("(getdate())");
       entity.Property(e => e.VersionNotes).HasMaxLength(500);
+
+      entity.HasOne(d => d.Document)
+          .WithMany(p => p.DmsdocumentVersion)
+          .HasForeignKey(d => d.DocumentId)
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .HasConstraintName("FK_DmsdocumentVersion_Dmsdocument");
     });
 
     modelBuilder.Entity<DmsFileUpdateHistory>(entity =>

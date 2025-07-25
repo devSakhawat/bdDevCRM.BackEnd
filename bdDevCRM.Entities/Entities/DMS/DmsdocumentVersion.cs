@@ -26,4 +26,7 @@ public partial class DmsdocumentVersion
   public int? PreviousVersionId { get; set; }
 
   public long? FileSize { get; set; }
+
+  // Navigation Property যোগ করুন
+  public virtual Dmsdocument Document { get; set; } = null!;
 }

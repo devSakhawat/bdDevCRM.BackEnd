@@ -810,7 +810,7 @@ public class CRMApplicationController : BaseApiController
     {
       foreach (var additionalDoc in dto.AdditionalInformation.AdditionalDocuments.Documents)
       {
-        if (additionalDoc.UploadFileFormFile != null)
+        if (additionalDoc.UploadFormFile != null)
         {
           var additionalDocDMSDto = new DMSDto
           {
@@ -849,7 +849,7 @@ public class CRMApplicationController : BaseApiController
 
           string additionalDocDMSJson = JsonConvert.SerializeObject(additionalDocDMSDto);
           string additionalDocPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
-              additionalDoc.UploadFileFormFile, additionalDocDMSJson);
+              additionalDoc.UploadFormFile, additionalDocDMSJson);
 
           if (!string.IsNullOrEmpty(additionalDocPath))
           {

@@ -164,7 +164,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
 
     // Check Validation
     ValidateDMSData(dmsDto, file);
-    using var transaction = _repository.Dmsdocuments.TransactionBeginAsync();
+    //using var transaction = _repository.Dmsdocuments.TransactionBeginAsync();
     try
     {
 
@@ -190,8 +190,8 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       // 7. access log create
       await CreateAccessLog(document.DocumentId, dmsDto, "Upload");
 
-      //await _repository.SaveAsync();
-      await _repository.Dmsdocuments.TransactionCommitAsync();
+      ////await _repository.SaveAsync();
+      //await _repository.Dmsdocuments.TransactionCommitAsync();
 
       _logger.LogInfo($"DMS document created successfylly - DocumentId: {document.DocumentId}");
 
@@ -200,13 +200,13 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     catch (Exception ex)
     {
       _logger.LogError($"Error in DMS save data. Error message: {ex.Message}");
-      await _repository.Dmsdocuments.TransactionRollbackAsync();
-      await _repository.Dmsdocuments.TransactionDisposeAsync();
+      //await _repository.Dmsdocuments.TransactionRollbackAsync();
+      //await _repository.Dmsdocuments.TransactionDisposeAsync();
       throw;
     }
     finally
     {
-      await _repository.Dmsdocuments.TransactionDisposeAsync();
+      //await _repository.Dmsdocuments.TransactionDisposeAsync();
     }
   }
 
@@ -352,7 +352,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
         d.SystemTag.ToLower().Trim() == dmsDto.SystemTags.ToLower().Trim()
         );
 
-    if (document != null)
+    if (document == null)
     {
       document = new Dmsdocument
       {
@@ -382,7 +382,8 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   // generate document version
   private async Task<DmsdocumentVersion> CreateDocumentVersion(Dmsdocument document, FileInfoDto fileInfo, DMSDto dmsDto)
   {
-    var latestVersion = await _repository.DmsdocumentVersions.FirstOrDefaultWithOrderByDescAsync(expression: x => x.DocumentId == document.DocumentId, orderBy: x => x.VersionNumber == dmsDto.VersionNumber);
+
+    var latestVersion = await _repository.DmsdocumentVersions.FirstOrDefaultWithOrderByDescAsync(expression: x => x.DocumentId == document.DocumentId, orderBy: x => x.VersionNumber);
 
     var versionNumber = (latestVersion?.VersionNumber ?? 0) + 1;
 
