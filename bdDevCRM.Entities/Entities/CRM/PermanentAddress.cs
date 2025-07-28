@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
+// address should be save before applicant and two table will be one table.
 public partial class PermanentAddress
 {
     public int PermanentAddressId { get; set; }

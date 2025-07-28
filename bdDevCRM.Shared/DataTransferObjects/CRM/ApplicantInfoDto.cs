@@ -23,6 +23,8 @@ public class ApplicantInfoDto
   public string? FirstName { get; set; }
 
   public string? LastName { get; set; }
+  //Computed Property
+  public string FullName => $"{TitleText} {FirstName} {LastName}".Trim();
 
   public DateTime? DateOfBirth { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -26,6 +27,34 @@ public class CRMApplicationController : BaseApiController
     _logger = logger;
     _environment = environment;
   }
+
+
+
+  // --------- Summary Grid ----------------------------------------
+  [HttpPost(RouteConstants.CRMApplicationSummary)]
+  public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    if (options == null)
+      throw new NullModelBadRequestException(nameof(CRMGridOptions));
+
+    var summaryGrid = await _serviceManager.CRMApplication.SummaryGrid(options);
+    if (summaryGrid == null || !summaryGrid.Items.Any())
+      return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
+
+    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+  }
+
 
   #region Helper Methods
   private bool TryGetLoggedInUser(out UsersDto currentUser)

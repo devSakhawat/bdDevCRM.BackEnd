@@ -19,6 +19,127 @@ internal sealed class CRMApplicationService(IRepositoryManager repository, ILogg
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
+
+  public async Task<GridEntity<CrmApplicationGridDto>> SummaryGrid(CRMGridOptions options)
+  {
+    string condition = string.Empty;
+    string sql = string.Format(
+            @"SELECT
+    ca.ApplicationId,
+    ai.ApplicantId,
+    ac.ApplicantCourseId,
+    ac.CountryId,
+    ac.InstituteId,
+    ac.CourseId,
+    ac.CurrencyId,
+    ac.PaymentMethodId,
+    ai.GenderId,
+    ai.MaritalStatusId,
+    PermanentAddressId,
+    PresentAddressId,
+
+    -- Basic Application Info
+    ca.ApplicationDate,
+    ca.ApplicationStatus,
+
+    -- Personal Details
+    (ai.TitleText + ' ' + ai.FirstName + ' ' + ai.LastName) AS ApplicantName,
+    ai.EmailAddress,
+    ai.Mobile,
+    ai.DateOfBirth,
+    ai.GenderName,
+    ai.Nationality,
+
+    -- Passport Information
+    ai.HasValidPassport,
+    ai.PassportNumber,
+    ai.PassportExpiryDate,
+
+    -- Course Information
+    c.CountryName,
+    i.InstituteName,
+    ac.CourseTitle,
+    ac.IntakeMonth,
+    ac.IntakeYear,
+
+    -- Financial Information
+    ac.ApplicationFee,
+    curInfo.CurrencyName,
+    ac.PaymentMethod,
+    ac.PaymentDate,
+    ac.PaymentReferenceNumber,
+
+    -- Address Information
+    perCountry.CountryName AS PermanentCountryName,
+    PermanentAddress.City AS PermanentCity,
+    preCountry.CountryName AS PresentCountryName,
+    PresentAddress.City AS PresentCity,
+
+    -- English Language Tests (Summary)
+    ieltsInfo.IELTSOverallScore as IELTSOverallBand,
+    toeflInfo.TOEFLOverallScore,
+    pteInfo.PTEOverallScore,
+
+    -- Education Summary
+    '' as HighestEducationLevel,
+    '' as EducationGPA,
+
+    -- Work Experience
+    '' as TotalWorkExperience,
+
+    -- Additional Information
+   CASE 
+    WHEN EXISTS (
+        SELECT 1 
+        FROM StatementOfPurpose sp 
+        WHERE sp.ApplicantId = ai.ApplicantId
+    ) THEN CAST(1 AS BIT)
+    ELSE CAST(0 AS BIT)
+END AS HasStatementOfPurpose,
+
+--(
+--    SELECT COUNT(*) 
+--    FROM AdditionalDocument ad 
+--    WHERE ad.ApplicantId = ai.ApplicantId
+--) AS AdditionalDocumentsCount,
+
+
+    -- Photo
+    ai.ApplicantImagePath,
+    -- Remarks
+    ac.Remarks
+
+FROM
+    CrmApplication ca
+    INNER JOIN ApplicantInfo ai ON ca.ApplicationId = ai.ApplicantId
+    INNER JOIN ApplicantCourse ac ON ai.ApplicantId = ac.ApplicantId
+    INNER JOIN CRMInstitute i ON ac.InstituteId = i.InstituteId
+    INNER JOIN Country c ON ac.CountryId = c.CountryId
+    LEFT JOIN CurrencyInfo curInfo ON ac.CurrencyId = curInfo.CurrencyId
+    LEFT JOIN PresentAddress ON PresentAddress.ApplicantId = ai.ApplicantId
+    LEFT JOIN Country preCountry ON preCountry.CountryId = PresentAddress.CountryId
+    LEFT JOIN PermanentAddress ON PermanentAddress.ApplicantId = ai.ApplicantId
+    LEFT JOIN Country perCountry ON perCountry.CountryId = PermanentAddress.CountryId    
+
+    LEFT JOIN EducationHistory edu ON ai.ApplicantId = edu.ApplicantId
+    LEFT JOIN IELTSInformation ieltsInfo ON ca.ApplicationId = ieltsInfo.ApplicantId
+    LEFT JOIN TOEFLInformation toeflInfo ON ca.ApplicationId = toeflInfo.ApplicantId
+    LEFT JOIN PTEInformation pteInfo ON ca.ApplicationId = pteInfo.ApplicantId
+    LEFT JOIN OTHERSInformation othersInfo ON ca.ApplicationId = othersInfo.ApplicantId
+    LEFT JOIN WorkExperience workEx ON ca.ApplicationId = workEx.ApplicantId
+    
+    LEFT JOIN ApplicantReference  ON ApplicantReference.ApplicantId = ai.ApplicantId
+    LEFT JOIN StatementOfPurpose  ON StatementOfPurpose.ApplicantId = ai.ApplicantId
+    LEFT JOIN AdditionalInfo  ON AdditionalInfo.ApplicantId = ai.ApplicantId
+" );
+    string orderBy = " InstituteName asc ";
+    return await _repository.CRMApplication.GridData<CrmApplicationGridDto>(sql, options, orderBy, condition);
+  }
+
+
+
+
+
   public async Task<CrmApplicationDto> CreateNewRecordAsync(CrmApplicationDto dto, UsersDto currentUser)
   {
     if (dto.ApplicationId != 0)

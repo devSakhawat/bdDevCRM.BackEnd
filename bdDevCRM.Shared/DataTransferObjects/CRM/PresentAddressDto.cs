@@ -29,4 +29,7 @@ public class PresentAddressDto
   public DateTime? UpdatedDate { get; set; }
 
   public int? UpdatedBy { get; set; }
+
+  // Permanent Full Address
+  public string PermanentFullAddress => $"{Address} {City} {CountryName} {PostalCode}".Trim();
 }
