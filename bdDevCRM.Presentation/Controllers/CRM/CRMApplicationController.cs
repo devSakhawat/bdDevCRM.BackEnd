@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities.Core;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -121,7 +122,6 @@ public class CRMApplicationController : BaseApiController
   #endregion Course Details end
 
   [HttpPost(RouteConstants.CRMApplication)]
-  //public async Task<IActionResult> CreateApplication([FromForm] string ApplicationData, [FromForm] IFormFileCollection files)
   [RequestSizeLimit(50_000_000)] // Increased limit for multiple files
   public async Task<IActionResult> CreateApplication([FromForm] CrmApplicationDto applicationData)
   {
@@ -170,6 +170,32 @@ public class CRMApplicationController : BaseApiController
 
     return Ok(ResponseHelper.Created(savedDto, "Application created successfully."));
   }
+
+
+  [HttpGet(RouteConstants.CRMApplicationByApplicationId)]
+  public async Task<IActionResult> GetApplication([FromRoute] int applicationId)
+  {
+    if (applicationId <= 0)
+      throw new GenericBadRequestException("Invalid application ID. Application ID must be greater than 0.");
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    var res = await _serviceManager.CRMApplication.GetApplication(applicationId, trackChanges: false);
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found for the specified country"));
+
+    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
+  }
+
 
   /// <summary>
   /// Initialize nested DTOs to avoid null reference exceptions
@@ -312,46 +338,6 @@ public class CRMApplicationController : BaseApiController
       {
         IsSuccess = false,
         Message = "An unexpected error occurred while updating the application",
-        ErrorType = "InternalServerError"
-      });
-    }
-  }
-
-  [HttpGet("{id}")]
-  public async Task<IActionResult> GetApplication(int id)
-  {
-    try
-    {
-      if (id <= 0)
-      {
-        return BadRequest(new
-        {
-          IsSuccess = false,
-          Message = "Invalid application ID",
-          ErrorType = "ValidationError"
-        });
-      }
-
-      var sampleApplication = new CrmApplicationDto
-      {
-        ApplicationId = id,
-        ApplicationDate = DateTime.UtcNow,
-        ApplicationStatus = "Draft"
-      };
-
-      return Ok(new
-      {
-        IsSuccess = true,
-        Data = sampleApplication
-      });
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, $"Error getting CRM Application with ID: {id}");
-      return StatusCode(500, new
-      {
-        IsSuccess = false,
-        Message = "An unexpected error occurred while retrieving the application",
         ErrorType = "InternalServerError"
       });
     }

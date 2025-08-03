@@ -8,4 +8,5 @@ public sealed class CRMApplicationRepository : RepositoryBase<CrmApplication>, I
 {
   public CRMApplicationRepository(CRMContext context) : base(context) { }
 
+
 }

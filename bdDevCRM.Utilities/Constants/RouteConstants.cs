@@ -170,6 +170,7 @@ public static class RouteConstants
   #region CRMApplication
   public const string CRMApplicationSummary = "crm-application-summary";
   public const string CRMApplication= "crm-application";
+  public const string CRMApplicationByKey = "crm-application/key/{key}";
   public const string CRMUpdateApplication = "crm-Application/{key}";
   public const string CRMDeleteApplication = "crm-Application/{key}";
   public const string CRMCountryDLL = "crm-countryddl";
@@ -178,6 +179,7 @@ public static class RouteConstants
   public const string CRMMonthDLL = "crm-monthddl";
   public const string CRMYearDLL = "crm-yearddl";
   public const string CRMInstituteTypeDDL = "crm-institute-type/";
+  public const string CRMApplicationByApplicationId = "crm-application-by-applicationId/{applicationId:int}";
   #endregion CRMApplication
 
   #region ApplicantCourse

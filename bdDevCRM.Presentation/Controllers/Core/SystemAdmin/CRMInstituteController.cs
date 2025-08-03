@@ -493,15 +493,12 @@ public class CRMInstituteController : BaseApiController
   //}
 
 
-
-
   private async Task SaveInstituteFilesAsync2(CrmInstituteDto dto, int? idOverride = null)
   {
-    // 🔔 ইনস্টিটিউট আইডি—নতুন হলে GuidHash (temp) ব্যবহার
+
     int id = idOverride ?? dto.InstituteId;
     if (id == 0) id = Guid.NewGuid().GetHashCode();
 
-    // 📂 রুট ফোল্ডার: wwwroot/uploads/institutes/{id}
     string root = Path.Combine(_env.WebRootPath, "uploads", "institutes", id.ToString());
     if (!Directory.Exists(root))
       Directory.CreateDirectory(root);

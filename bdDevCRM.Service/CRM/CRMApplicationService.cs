@@ -8,6 +8,7 @@ using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 
@@ -136,9 +137,338 @@ FROM
     return await _repository.CRMApplication.GridData<CrmApplicationGridDto>(sql, options, orderBy, condition);
   }
 
+  public async Task<CrmApplicationDto> GetApplication(int applicationId, bool trackChanges)
+  {
+    var query = string.Format(@" 
+      SELECT
+        -- CrmApplicationDto
+        ca.ApplicationId,
+        ca.ApplicationDate,
+        ca.ApplicationStatus,
+        ca.CreatedDate AS AppCreatedDate,
+        ca.CreatedBy AS AppCreatedBy,
+        ca.UpdatedDate AS AppUpdatedDate,
+        ca.UpdatedBy AS AppUpdatedBy,
+
+        -- ApplicantCourseDto (CourseInformation -> ApplicantCourse)
+        ac.ApplicantCourseId,
+        ac.CountryId,
+        c.CountryName,
+        ac.InstituteId,
+        i.InstituteName,
+        ac.CourseTitle,
+        ac.IntakeMonthId,
+        ac.IntakeMonth,
+        ac.IntakeYearId,
+        ac.IntakeYear,
+        ac.ApplicationFee,
+        ac.CurrencyId,
+        curInfo.CurrencyName,
+        ac.PaymentMethodId,
+        ac.PaymentMethod,
+        ac.PaymentReferenceNumber,
+        ac.PaymentDate,
+        ac.Remarks AS CourseRemarks,
+        ac.CreatedDate AS CourseCreatedDate,
+        ac.CreatedBy AS CourseCreatedBy,
+        ac.UpdatedDate AS CourseUpdatedDate,
+        ac.UpdatedBy AS CourseUpdatedBy,
+        ac.CourseId,
+
+        -- ApplicantInfoDto (CourseInformation -> PersonalDetails)
+        ai.ApplicantId,
+        ai.GenderId,
+        ai.GenderName,
+        ai.TitleValue,
+        ai.TitleText,
+        ai.FirstName,
+        ai.LastName,
+        (ai.TitleText + ' ' + ai.FirstName + ' ' + ai.LastName) AS ApplicantName,
+        ai.DateOfBirth,
+        ai.MaritalStatusId,
+        ai.MaritalStatusName,
+        ai.Nationality,
+        ai.HasValidPassport,
+        ai.PassportNumber,
+        ai.PassportIssueDate,
+        ai.PassportExpiryDate,
+        ai.PhoneCountryCode,
+        ai.PhoneAreaCode,
+        ai.PhoneNumber,
+        ai.Mobile,
+        ai.EmailAddress,
+        ai.SkypeId,
+        ai.ApplicantImagePath,
+        ai.CreatedDate AS ApplicantCreatedDate,
+        ai.CreatedBy AS ApplicantCreatedBy,
+        ai.UpdatedDate AS ApplicantUpdatedDate,
+        ai.UpdatedBy AS ApplicantUpdatedBy,
+
+        -- PermanentAddressDto
+        pAddr.PermanentAddressId,
+        pAddr.Address AS PermanentAddress,
+        pAddr.City AS PermanentCity,
+        pAddr.State AS PermanentState,
+        pAddr.CountryId AS PermanentCountryId,
+        perCountry.CountryName AS PermanentCountryName,
+        pAddr.PostalCode AS PermanentPostalCode,
+        pAddr.CreatedDate AS PermanentCreatedDate,
+        pAddr.CreatedBy AS PermanentCreatedBy,
+        pAddr.UpdatedDate AS PermanentUpdatedDate,
+        pAddr.UpdatedBy AS PermanentUpdatedBy,
+
+        -- PresentAddressDto
+        prAddr.PresentAddressId,
+        prAddr.SameAsPermanentAddress,
+        prAddr.Address AS PresentAddress,
+        prAddr.City AS PresentCity,
+        prAddr.State AS PresentState,
+        prAddr.CountryId AS PresentCountryId,
+        preCountry.CountryName AS PresentCountryName,
+        prAddr.PostalCode AS PresentPostalCode,
+        prAddr.CreatedDate AS PresentCreatedDate,
+        prAddr.CreatedBy AS PresentCreatedBy,
+        prAddr.UpdatedDate AS PresentUpdatedDate,
+        prAddr.UpdatedBy AS PresentUpdatedBy,
+
+        -- EducationHistoryDto
+        edu.EducationHistoryId,
+        edu.ApplicantId AS Education_ApplicantId,
+        edu.Institution as EducationInstitution,
+        edu.Qualification,
+        edu.PassingYear,
+        edu.Grade,
+        edu.DocumentName AS EducationDocumentName,
+        edu.AttachedDocument,
+        edu.PdfThumbnail,
+        edu.CreatedDate AS EducationCreatedDate,
+        edu.CreatedBy AS EducationCreatedBy,
+        edu.UpdatedDate AS EducationUpdatedDate,
+        edu.UpdatedBy AS EducationUpdatedBy,
+
+        -- IELTSInformationDto
+        ielts.IELTSInformationId,
+        ielts.ApplicantId AS IELTS_ApplicantId,
+        ielts.IELTSListening,
+        ielts.IELTSReading,
+        ielts.IELTSWriting,
+        ielts.IELTSSpeaking,
+        ielts.IELTSOverallScore,
+        ielts.IELTSDate,
+        ielts.IELTSScannedCopyPath,
+        ielts.IELTSAdditionalInformation,
+        ielts.CreatedDate AS IELTS_CreatedDate,
+        ielts.CreatedBy AS IELTS_CreatedBy,
+        ielts.UpdatedDate AS IELTS_UpdatedDate,
+        ielts.UpdatedBy AS IELTS_UpdatedBy,
+
+        -- TOEFLInformationDto
+        toefl.TOEFLInformationId,
+        toefl.ApplicantId AS TOEFL_ApplicantId,
+        toefl.TOEFLListening,
+        toefl.TOEFLReading,
+        toefl.TOEFLWriting,
+        toefl.TOEFLSpeaking,
+        toefl.TOEFLOverallScore,
+        toefl.TOEFLDate,
+        toefl.TOEFLScannedCopyPath,
+        toefl.TOEFLAdditionalInformation,
+        toefl.CreatedDate AS TOEFL_CreatedDate,
+        toefl.CreatedBy AS TOEFL_CreatedBy,
+        toefl.UpdatedDate AS TOEFL_UpdatedDate,
+        toefl.UpdatedBy AS TOEFL_UpdatedBy,
+
+        -- PTEInformationDto
+        pte.PTEInformationId,
+        pte.ApplicantId AS PTE_ApplicantId,
+        pte.PTEListening,
+        pte.PTEReading,
+        pte.PTEWriting,
+        pte.PTESpeaking,
+        pte.PTEOverallScore,
+        pte.PTEDate,
+        pte.PTEScannedCopyPath,
+        pte.PTEAdditionalInformation,
+        pte.CreatedDate AS PTE_CreatedDate,
+        pte.CreatedBy AS PTE_CreatedBy,
+        pte.UpdatedDate AS PTE_UpdatedDate,
+        pte.UpdatedBy AS PTE_UpdatedBy,
+
+        -- GMATInformationDto
+        gmat.GMATInformationId,
+        gmat.ApplicantId AS GMAT_ApplicantId,
+        gmat.GMATListening,
+        gmat.GMATReading,
+        gmat.GMATWriting,
+        gmat.GMATSpeaking,
+        gmat.GMATOverallScore,
+        gmat.GMATDate,
+        gmat.GMATScannedCopyPath,
+        gmat.GMATAdditionalInformation,
+        gmat.CreatedDate AS GMAT_CreatedDate,
+        gmat.CreatedBy AS GMAT_CreatedBy,
+        gmat.UpdatedDate AS GMAT_UpdatedDate,
+        gmat.UpdatedBy AS GMAT_UpdatedBy,
+
+        -- OTHERSInformationDto
+        others.OTHERSInformationId,
+        others.ApplicantId AS OTHERS_ApplicantId,
+        others.OTHERSAdditionalInformation,
+        others.OTHERSScannedCopyPath,
+        others.CreatedDate AS OTHERS_CreatedDate,
+        others.CreatedBy AS OTHERS_CreatedBy,
+        others.UpdatedDate AS OTHERS_UpdatedDate,
+        others.UpdatedBy AS OTHERS_UpdatedBy,
+
+        -- WorkExperienceHistoryDto
+        work.WorkExperienceId,
+        work.ApplicantId AS Work_ApplicantId,
+        work.NameOfEmployer,
+        work.Position,
+        work.StartDate,
+        work.EndDate,
+        work.Period,
+        work.MainResponsibility,
+        work.DocumentName AS WorkDocumentName,
+        work.FileThumbnail,
+        work.CreatedDate AS WorkCreatedDate,
+        work.CreatedBy AS WorkCreatedBy,
+        work.UpdatedDate AS WorkUpdatedDate,
+        work.UpdatedBy AS WorkUpdatedBy,
+
+        -- ApplicantReferenceDto
+        ref.ApplicantReferenceId,
+        ref.ApplicantId AS Ref_ApplicantId,
+        ref.Name AS ReferenceName,
+        ref.Designation,
+        ref.Institution,
+        ref.EmailID,
+        ref.PhoneNo,
+        ref.FaxNo,
+        ref.Address AS RefAddress,
+        ref.City AS RefCity,
+        ref.State AS RefState,
+        ref.Country AS RefCountry,
+        ref.PostOrZipCode,
+        ref.CreatedDate AS RefCreatedDate,
+        ref.CreatedBy AS RefCreatedBy,
+        ref.UpdatedDate AS RefUpdatedDate,
+        ref.UpdatedBy AS RefUpdatedBy,
+
+        -- StatementOfPurposeDto
+        sop.StatementOfPurposeId,
+        sop.ApplicantId AS SOP_ApplicantId,
+        sop.StatementOfPurposeRemarks,
+        sop.StatementOfPurposeFilePath,
+        sop.CreatedDate AS SOP_CreatedDate,
+        sop.CreatedBy AS SOP_CreatedBy,
+        sop.UpdatedDate AS SOP_UpdatedDate,
+        sop.UpdatedBy AS SOP_UpdatedBy,
+
+        -- AdditionalInfoDto
+        addInfo.AdditionalInfoId,
+        addInfo.ApplicantId AS AddInfo_ApplicantId,
+        addInfo.RequireAccommodation,
+        addInfo.HealthNMedicalNeeds,
+        addInfo.HealthNMedicalNeedsRemarks,
+        addInfo.AdditionalInformationRemarks,
+        addInfo.DocumentTitle AS AddInfoDocTitle,
+        addInfo.UploadFile AS AddInfoUploadFile,
+        addInfo.DocumentName AS AddInfoDocumentName,
+        addInfo.FileThumbnail AS AddInfoFileThumbnail,
+        addInfo.RecordType AS AddInfoRecordType,
+        addInfo.CreatedDate AS AddInfoCreatedDate,
+        addInfo.CreatedBy AS AddInfoCreatedBy,
+        addInfo.UpdatedDate AS AddInfoUpdatedDate,
+        addInfo.UpdatedBy AS AddInfoUpdatedBy
+
+    FROM CrmApplication ca
+    INNER JOIN ApplicantInfo ai ON ca.ApplicationId = ai.ApplicationId
+    INNER JOIN ApplicantCourse ac ON ai.ApplicantId = ac.ApplicantId
+    INNER JOIN Country c ON ac.CountryId = c.CountryId
+    INNER JOIN CRMInstitute i ON ac.InstituteId = i.InstituteId
+    LEFT JOIN CurrencyInfo curInfo ON ac.CurrencyId = curInfo.CurrencyId
+    LEFT JOIN PermanentAddress pAddr ON ai.ApplicantId = pAddr.ApplicantId
+    LEFT JOIN Country perCountry ON pAddr.CountryId = perCountry.CountryId
+    LEFT JOIN PresentAddress prAddr ON ai.ApplicantId = prAddr.ApplicantId
+    LEFT JOIN Country preCountry ON prAddr.CountryId = preCountry.CountryId
+    LEFT JOIN EducationHistory edu ON ai.ApplicantId = edu.ApplicantId
+    LEFT JOIN IELTSInformation ielts ON ai.ApplicantId = ielts.ApplicantId
+    LEFT JOIN TOEFLInformation toefl ON ai.ApplicantId = toefl.ApplicantId
+    LEFT JOIN PTEInformation pte ON ai.ApplicantId = pte.ApplicantId
+    LEFT JOIN GMATInformation gmat ON ai.ApplicantId = gmat.ApplicantId
+    LEFT JOIN OTHERSInformation others ON ai.ApplicantId = others.ApplicantId
+    LEFT JOIN WorkExperience work ON ai.ApplicantId = work.ApplicantId
+    LEFT JOIN ApplicantReference ref ON ai.ApplicantId = ref.ApplicantId
+    LEFT JOIN StatementOfPurpose sop ON ai.ApplicantId = sop.ApplicantId
+    LEFT JOIN AdditionalInfo addInfo ON ai.ApplicantId = addInfo.ApplicantId
+
+    WHERE ca.ApplicationId = @ApplicationId
+    ", applicationId);
+
+    // Execute the query using RepositoryBase method
+    var parameters = new SqlParameter[]
+    {
+        new SqlParameter("@ApplicationId", applicationId)
+    };
+
+    GetApplicationDto result = await _repository.CRMApplication.ExecuteSingleData<GetApplicationDto>(query, parameters);
+
+    // If no data found, return an empty DTO
+    if (result == null)
+    {
+      _logger.LogWarn($"No application found with ApplicationId: {applicationId}");
+      return new CrmApplicationDto(); // Return empty DTO if no data found
+    }
+
+    CrmApplicationDto crmApplicationDto = new CrmApplicationDto();
+    crmApplicationDto = MyMapper.JsonClone<GetApplicationDto, CrmApplicationDto>(result);
+    // Map the result to ApplicationDto, ApplicantCourseDto, and other nested DTOs using MyMapper
+    // Note: MyMapper.JsonClone is assumed to be a method that maps one DTO to another using JSON serialization/deserialization
+    // Applicant Personal Info with course information
+    
+    crmApplicationDto.CourseInformation.PersonalDetails = MyMapper.JsonClone<GetApplicationDto, ApplicantInfoDto>(result); ;
+    crmApplicationDto.CourseInformation.ApplicantCourse = MyMapper.JsonClone<GetApplicationDto, ApplicantCourseDto>(result);
+    crmApplicationDto.CourseInformation.ApplicantAddress.PresentAddress = MyMapper.JsonClone<GetApplicationDto, PresentAddressDto>(result);
+    crmApplicationDto.CourseInformation.ApplicantAddress.PermanentAddress = MyMapper.JsonClone<GetApplicationDto, PermanentAddressDto>(result);
+
+    // English Language Test Information
+    crmApplicationDto.EducationInformation.IELTSInformation = MyMapper.JsonClone<GetApplicationDto, IELTSInformationDto>(result);
+    crmApplicationDto.EducationInformation.TOEFLInformation = MyMapper.JsonClone<GetApplicationDto, TOEFLInformationDto>(result);
+    crmApplicationDto.EducationInformation.PTEInformation = MyMapper.JsonClone<GetApplicationDto, PTEInformationDto>(result);
+    crmApplicationDto.EducationInformation.GMATInformation = MyMapper.JsonClone<GetApplicationDto, GMATInformationDto>(result);
+    crmApplicationDto.EducationInformation.OTHERSInformation = MyMapper.JsonClone<GetApplicationDto, OTHERSInformationDto>(result);
+
+    // Education HistoryList and  Work Experience List
+    IEnumerable<EducationHistory> education = await _repository.EducationHistory.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.EducationHistoryId, trackChanges: false);
+    crmApplicationDto.EducationInformation.EducationDetails.EducationHistory 
+      = MyMapper.JsonCloneIEnumerableToList<EducationHistory, EducationHistoryDto>(education);
+    crmApplicationDto.EducationInformation.EducationDetails.TotalEducationRecords = education.Count();
 
 
+    IEnumerable<WorkExperience> workExperiences = await _repository.WorkExperience.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.WorkExperienceId, trackChanges: false);
+    crmApplicationDto.EducationInformation.WorkExperience.WorkExperienceHistory 
+      = MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceHistoryDto>(workExperiences);
+    crmApplicationDto.EducationInformation.WorkExperience.TotalWorkExperienceRecords = workExperiences.Count();
 
+
+    // Additional Information Section DTOs
+    // Applicant Reference List
+    IEnumerable<ApplicantReference> applicantReferences = await _repository.ApplicantReference.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.ApplicantReferenceId, trackChanges: false);
+    crmApplicationDto.AdditionalInformation.ReferenceDetails.References
+      = MyMapper.JsonCloneIEnumerableToList<ApplicantReference, ApplicantReferenceDto>(applicantReferences);
+    crmApplicationDto.AdditionalInformation.ReferenceDetails.TotalReferenceRecords = applicantReferences.Count();
+
+    // Additional Information Section DTOs
+    crmApplicationDto.AdditionalInformation.StatementOfPurpose = MyMapper.JsonClone<GetApplicationDto, StatementOfPurposeDto>(result);
+    crmApplicationDto.AdditionalInformation.AdditionalInformation = MyMapper.JsonClone<GetApplicationDto, AdditionalInfoDto>(result);
+
+    // If you have AdditionalDocumentDto, you can map it similarly
+    // Additional Document List
+    //AdditionalDocumentDto additionalDocumentDto = MyMapper.JsonClone<GetApplicationDto, AdditionalDocumentDto>(result);
+
+    return crmApplicationDto;
+  }
 
   public async Task<CrmApplicationDto> CreateNewRecordAsync(CrmApplicationDto dto, UsersDto currentUser)
   {

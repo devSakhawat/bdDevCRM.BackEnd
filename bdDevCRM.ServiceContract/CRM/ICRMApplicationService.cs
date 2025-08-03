@@ -6,6 +6,7 @@ namespace bdDevCRM.ServiceContract.CRM;
 
 public interface ICRMApplicationService
 {
+  Task<CrmApplicationDto> GetApplication(int applicationId, bool trackChanges);
   Task<GridEntity<CrmApplicationGridDto>> SummaryGrid(CRMGridOptions options);
   Task<CrmApplicationDto> CreateNewRecordAsync(CrmApplicationDto dto, UsersDto currentUser);
 }
