@@ -123,7 +123,7 @@ public static class RouteConstants
   public const string DeleteCountry = "country/{key}";
 
   public const string CreateOrUpdateCountry = "country/{key}";
-  #endregion Country
+  #endregion CrmCountry
 
   #region InstituteType
   public const string InstituteTypeDDL = "crm-institutetype-ddl";

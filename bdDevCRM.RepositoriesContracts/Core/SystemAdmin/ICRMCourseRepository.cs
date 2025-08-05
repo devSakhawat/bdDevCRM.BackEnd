@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 
-public interface ICRMCourseRepository : IRepositoryBase<Crmcourse>
+public interface ICrmCourseRepository : IRepositoryBase<CrmCourse>
 {
-  Task<IEnumerable<Crmcourse>> GetActiveCoursesAsync(bool track);
-  Task<IEnumerable<Crmcourse>> GetCoursesAsync(bool track);
+  Task<IEnumerable<CrmCourse>> GetActiveCoursesAsync(bool track);
+  Task<IEnumerable<CrmCourse>> GetCoursesAsync(bool track);
 
-  Task<Crmcourse?> GetCourseAsync(int id, bool track);
+  Task<CrmCourse?> GetCourseAsync(int id, bool track);
 }

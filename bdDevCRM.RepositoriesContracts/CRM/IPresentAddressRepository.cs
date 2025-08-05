@@ -2,11 +2,11 @@ using bdDevCRM.Entities.Entities.CRM;
 
 namespace bdDevCRM.RepositoriesContracts.CRM;
 
-public interface IPresentAddressRepository : IRepositoryBase<PresentAddress>
+public interface ICrmPresentAddressRepository : IRepositoryBase<CrmPresentAddress>
 {
-  Task<IEnumerable<PresentAddress>> GetActivePresentAddressesAsync(bool track);
-  Task<IEnumerable<PresentAddress>> GetPresentAddressesAsync(bool track);
-  Task<PresentAddress?> GetPresentAddressAsync(int id, bool track);
-  Task<PresentAddress?> GetPresentAddressByApplicantIdAsync(int applicantId, bool track);
-  Task<IEnumerable<PresentAddress>> GetPresentAddressesByCountryIdAsync(int countryId, bool track);
+  Task<IEnumerable<CrmPresentAddress>> GetActivePresentAddressesAsync(bool track);
+  Task<IEnumerable<CrmPresentAddress>> GetPresentAddressesAsync(bool track);
+  Task<CrmPresentAddress?> GetPresentAddressAsync(int id, bool track);
+  Task<CrmPresentAddress?> GetPresentAddressByApplicantIdAsync(int applicantId, bool track);
+  Task<IEnumerable<CrmPresentAddress>> GetPresentAddressesByCountryIdAsync(int countryId, bool track);
 }

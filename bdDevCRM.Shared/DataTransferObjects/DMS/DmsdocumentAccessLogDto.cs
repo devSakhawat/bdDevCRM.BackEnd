@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Shared.DataTransferObjects.DMS;
 
-public class DmsdocumentAccessLogDto
+public class DmsDocumentAccessLogDto
 {
   public long LogId { get; set; }
 

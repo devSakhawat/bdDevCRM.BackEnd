@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
-public partial class Crmmonth
+public partial class CrmMonth
 {
     public int MonthId { get; set; }
 

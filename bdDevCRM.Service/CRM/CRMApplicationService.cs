@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 
 namespace bdDevCRM.Service.CRM;
-internal sealed class CRMApplicationService(IRepositoryManager repository, ILoggerManager logger, IConfiguration config, IHttpContextAccessor httpContextAccessor) : ICRMApplicationService
+internal sealed class CrmApplicationService(IRepositoryManager repository, ILoggerManager logger, IConfiguration config, IHttpContextAccessor httpContextAccessor) : ICrmApplicationService
 {
   private readonly IRepositoryManager _repository = repository;
   private readonly ILoggerManager _logger = logger;
@@ -116,7 +116,7 @@ FROM
     INNER JOIN ApplicantCourse ac ON ai.ApplicantId = ac.ApplicantId
     INNER JOIN CRMInstitute i ON ac.InstituteId = i.InstituteId
     INNER JOIN Country c ON ac.CountryId = c.CountryId
-    LEFT JOIN CurrencyInfo curInfo ON ac.CurrencyId = curInfo.CurrencyId
+    LEFT JOIN CrmCurrencyInfo curInfo ON ac.CurrencyId = curInfo.CurrencyId
     LEFT JOIN PresentAddress ON PresentAddress.ApplicantId = ai.ApplicantId
     LEFT JOIN Country preCountry ON preCountry.CountryId = PresentAddress.CountryId
     LEFT JOIN PermanentAddress ON PermanentAddress.ApplicantId = ai.ApplicantId
@@ -129,12 +129,12 @@ FROM
     LEFT JOIN OTHERSInformation othersInfo ON ca.ApplicationId = othersInfo.ApplicantId
     LEFT JOIN WorkExperience workEx ON ca.ApplicationId = workEx.ApplicantId
     
-    LEFT JOIN ApplicantReference  ON ApplicantReference.ApplicantId = ai.ApplicantId
+    LEFT JOIN ApplicantReference  ON CrmApplicantReferences.ApplicantId = ai.ApplicantId
     LEFT JOIN StatementOfPurpose  ON StatementOfPurpose.ApplicantId = ai.ApplicantId
     LEFT JOIN AdditionalInfo  ON AdditionalInfo.ApplicantId = ai.ApplicantId
 " );
     string orderBy = " InstituteName asc ";
-    return await _repository.CRMApplication.GridData<CrmApplicationGridDto>(sql, options, orderBy, condition);
+    return await _repository.CrmApplications.GridData<CrmApplicationGridDto>(sql, options, orderBy, condition);
   }
 
   public async Task<CrmApplicationDto> GetApplication(int applicationId, bool trackChanges)
@@ -387,7 +387,7 @@ FROM
     INNER JOIN ApplicantCourse ac ON ai.ApplicantId = ac.ApplicantId
     INNER JOIN Country c ON ac.CountryId = c.CountryId
     INNER JOIN CRMInstitute i ON ac.InstituteId = i.InstituteId
-    LEFT JOIN CurrencyInfo curInfo ON ac.CurrencyId = curInfo.CurrencyId
+    LEFT JOIN CrmCurrencyInfo curInfo ON ac.CurrencyId = curInfo.CurrencyId
     LEFT JOIN PermanentAddress pAddr ON ai.ApplicantId = pAddr.ApplicantId
     LEFT JOIN Country perCountry ON pAddr.CountryId = perCountry.CountryId
     LEFT JOIN PresentAddress prAddr ON ai.ApplicantId = prAddr.ApplicantId
@@ -412,7 +412,7 @@ FROM
         new SqlParameter("@ApplicationId", applicationId)
     };
 
-    GetApplicationDto result = await _repository.CRMApplication.ExecuteSingleData<GetApplicationDto>(query, parameters);
+    GetApplicationDto result = await _repository.CrmApplications.ExecuteSingleData<GetApplicationDto>(query, parameters);
 
     // If no data found, return an empty DTO
     if (result == null)
@@ -440,23 +440,23 @@ FROM
     crmApplicationDto.EducationInformation.OTHERSInformation = MyMapper.JsonClone<GetApplicationDto, OTHERSInformationDto>(result);
 
     // Education HistoryList and  Work Experience List
-    IEnumerable<EducationHistory> education = await _repository.EducationHistory.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.EducationHistoryId, trackChanges: false);
+    IEnumerable<CrmEducationHistory> education = await _repository.CrmEducationHistories.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.EducationHistoryId, trackChanges: false);
     crmApplicationDto.EducationInformation.EducationDetails.EducationHistory 
-      = MyMapper.JsonCloneIEnumerableToList<EducationHistory, EducationHistoryDto>(education);
+      = MyMapper.JsonCloneIEnumerableToList<CrmEducationHistory, EducationHistoryDto>(education);
     crmApplicationDto.EducationInformation.EducationDetails.TotalEducationRecords = education.Count();
 
 
-    IEnumerable<WorkExperience> workExperiences = await _repository.WorkExperience.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.WorkExperienceId, trackChanges: false);
+    IEnumerable<CrmWorkExperience> workExperiences = await _repository.CrmWorkExperiences.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.WorkExperienceId, trackChanges: false);
     crmApplicationDto.EducationInformation.WorkExperience.WorkExperienceHistory 
-      = MyMapper.JsonCloneIEnumerableToList<WorkExperience, WorkExperienceHistoryDto>(workExperiences);
+      = MyMapper.JsonCloneIEnumerableToList<CrmWorkExperience, WorkExperienceHistoryDto>(workExperiences);
     crmApplicationDto.EducationInformation.WorkExperience.TotalWorkExperienceRecords = workExperiences.Count();
 
 
     // Additional Information Section DTOs
     // Applicant Reference List
-    IEnumerable<ApplicantReference> applicantReferences = await _repository.ApplicantReference.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.ApplicantReferenceId, trackChanges: false);
+    IEnumerable<CrmApplicantReference> applicantReferences = await _repository.CrmApplicantReferences.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.ApplicantReferenceId, trackChanges: false);
     crmApplicationDto.AdditionalInformation.ReferenceDetails.References
-      = MyMapper.JsonCloneIEnumerableToList<ApplicantReference, ApplicantReferenceDto>(applicantReferences);
+      = MyMapper.JsonCloneIEnumerableToList<CrmApplicantReference, ApplicantReferenceDto>(applicantReferences);
     crmApplicationDto.AdditionalInformation.ReferenceDetails.TotalReferenceRecords = applicantReferences.Count();
 
     // Additional Information Section DTOs
@@ -485,11 +485,10 @@ FROM
       dto.CreatedBy = currentUser.UserId ?? 0;
       dto.UpdatedDate = null;
       dto.UpdatedBy = null;
-      dto.ApplicationStatus = "Draft";
 
       // 1. Save CrmApplication first to get ApplicationId
       var crmApplicationEntity = MyMapper.JsonClone<CrmApplicationDto, CrmApplication>(dto);
-      int applicationId = await _repository.CRMApplication.CreateAndGetIdAsync(crmApplicationEntity);
+      int applicationId = await _repository.CrmApplications.CreateAndGetIdAsync(crmApplicationEntity);
       dto.ApplicationId = applicationId;
 
       // 2. Save ApplicantInfo with ApplicationId to get ApplicantId
@@ -500,8 +499,8 @@ FROM
         applicantInfoDto.CreatedDate = DateTime.UtcNow;
         applicantInfoDto.CreatedBy = currentUser.UserId ?? 0;
 
-        var applicantInfoEntity = MyMapper.JsonClone<ApplicantInfoDto, ApplicantInfo>(applicantInfoDto);
-        int applicantId = await _repository.ApplicantInfo.CreateAndGetIdAsync(applicantInfoEntity);
+        var applicantInfoEntity = MyMapper.JsonClone<ApplicantInfoDto, CrmApplicantInfo>(applicantInfoDto);
+        int applicantId = await _repository.CrmApplicantInfoes.CreateAndGetIdAsync(applicantInfoEntity);
         applicantInfoDto.ApplicantId = applicantId;
 
         // **Set ApplicantId in all nested DTOs that have ApplicantId property**
@@ -516,9 +515,9 @@ FROM
           applicantCourseDto.CreatedDate = DateTime.UtcNow;
           applicantCourseDto.CreatedBy = currentUser.UserId ?? 0;
 
-          var applicantCourseEntity = MyMapper.JsonClone<ApplicantCourseDto, ApplicantCourse>(applicantCourseDto);
+          var applicantCourseEntity = MyMapper.JsonClone<ApplicantCourseDto, CrmApplicantCourse>(applicantCourseDto);
           //await _repository.ApplicantCourse.CreateAsync(applicantCourseEntity);
-          var applicantCourseId = await _repository.ApplicantCourse.CreateAndGetIdAsync(applicantCourseEntity);
+          var applicantCourseId = await _repository.CrmApplicantCourses.CreateAndGetIdAsync(applicantCourseEntity);
         }
 
         // Save PermanentAddress
@@ -528,10 +527,10 @@ FROM
           permanentAddressDto.CreatedDate = DateTime.UtcNow;
           permanentAddressDto.CreatedBy = currentUser.UserId ?? 0;
 
-          var permanentAddressEntity = MyMapper.JsonClone<PermanentAddressDto, PermanentAddress>(permanentAddressDto);
+          var permanentAddressEntity = MyMapper.JsonClone<PermanentAddressDto, CrmPermanentAddress>(permanentAddressDto);
           //await _repository.PermanentAddress.CreateAsync(permanentAddressEntity);
 
-          var prmanentAddressId = await _repository.PermanentAddress.CreateAndGetIdAsync(permanentAddressEntity);
+          var prmanentAddressId = await _repository.CrmPermanentAddresses.CreateAndGetIdAsync(permanentAddressEntity);
         }
 
         // Save PresentAddress
@@ -541,9 +540,9 @@ FROM
           presentAddressDto.CreatedDate = DateTime.UtcNow;
           presentAddressDto.CreatedBy = currentUser.UserId ?? 0;
 
-          var presentAddressEntity = MyMapper.JsonClone<PresentAddressDto, PresentAddress>(presentAddressDto);
+          var presentAddressEntity = MyMapper.JsonClone<PresentAddressDto, CrmPresentAddress>(presentAddressDto);
           //await _repository.PresentAddress.CreateAsync(presentAddressEntity);
-          var presentAddressId = await _repository.PresentAddress.CreateAndGetIdAsync(presentAddressEntity);
+          var presentAddressId = await _repository.CrmPresentAddresses.CreateAndGetIdAsync(presentAddressEntity);
         }
 
         // Save Education History
@@ -554,10 +553,9 @@ FROM
             educationDto.CreatedDate = DateTime.UtcNow;
             educationDto.CreatedBy = currentUser.UserId ?? 0;
 
-            var educationEntity = MyMapper.JsonClone<EducationHistoryDto, EducationHistory>(educationDto);
-            //await _repository.EducationHistory.CreateAsync(educationEntity);
-            educationEntity.PdfThumbnail = null;
-            var educationHistoryId = await _repository.EducationHistory.CreateAndGetIdAsync(educationEntity);
+            var educationEntity = MyMapper.JsonClone<EducationHistoryDto, CrmEducationHistory>(educationDto);
+            //await _repository.CrmEducationHistories.CreateAsync(educationEntity);
+            var educationHistoryId = await _repository.CrmEducationHistories.CreateAndGetIdAsync(educationEntity);
           }
         }
 
@@ -568,8 +566,8 @@ FROM
           ieltsDto.CreatedDate = DateTime.UtcNow;
           ieltsDto.CreatedBy = currentUser.UserId ?? 0;
 
-          var ieltsEntity = MyMapper.JsonClone<IELTSInformationDto, IELTSInformation>(ieltsDto);
-          var ieltsEntityId = await _repository.IELTSInformation.CreateAndGetIdAsync(ieltsEntity);
+          var ieltsEntity = MyMapper.JsonClone<IELTSInformationDto, CrmIELTSInformation>(ieltsDto);
+          var ieltsEntityId = await _repository.CrmIELTSInformations.CreateAndGetIdAsync(ieltsEntity);
           //await _repository.IELTSInformation.CreateAsync(ieltsEntity);
         }
 
@@ -580,8 +578,8 @@ FROM
           toeflDto.CreatedDate = DateTime.UtcNow;
           toeflDto.CreatedBy = currentUser.UserId ?? 0;
 
-          var toeflEntity = MyMapper.JsonClone<TOEFLInformationDto, TOEFLInformation>(toeflDto);
-          var toeflEntityId = await _repository.TOEFLInformation.CreateAndGetIdAsync(toeflEntity);
+          var toeflEntity = MyMapper.JsonClone<TOEFLInformationDto, CrmTOEFLInformation>(toeflDto);
+          var toeflEntityId = await _repository.CrmTOEFLInformations.CreateAndGetIdAsync(toeflEntity);
           //await _repository.TOEFLInformation.CreateAsync(toeflEntity);
         }
 
@@ -592,8 +590,8 @@ FROM
           pteDto.CreatedDate = DateTime.UtcNow;
           pteDto.CreatedBy = currentUser.UserId ?? 0;
 
-          var pteEntity = MyMapper.JsonClone<PTEInformationDto, PTEInformation>(pteDto);
-          var pteEntityId = await _repository.PTEInformation.CreateAndGetIdAsync(pteEntity);
+          var pteEntity = MyMapper.JsonClone<PTEInformationDto, CrmPTEInformation>(pteDto);
+          var pteEntityId = await _repository.CrmPTEInformations.CreateAndGetIdAsync(pteEntity);
           //await _repository.PTEInformation.CreateAsync(pteEntity);
         }
 
@@ -604,8 +602,8 @@ FROM
           gmatDto.CreatedDate = DateTime.UtcNow;
           gmatDto.CreatedBy = currentUser.UserId ?? 0;
 
-          var gmatEntity = MyMapper.JsonClone<GMATInformationDto, GMATInformation>(gmatDto);
-          var gmatEntityId = await _repository.GMATInformation.CreateAndGetIdAsync(gmatEntity);
+          var gmatEntity = MyMapper.JsonClone<GMATInformationDto, CrmGMATInformation>(gmatDto);
+          var gmatEntityId = await _repository.CrmGMATInformations.CreateAndGetIdAsync(gmatEntity);
           //await _repository.GMATInformation.CreateAsync(gmatEntity);
         }
 
@@ -616,8 +614,8 @@ FROM
           othersDto.CreatedDate = DateTime.UtcNow;
           othersDto.CreatedBy = currentUser.UserId ?? 0;
 
-          var othersEntity = MyMapper.JsonClone<OTHERSInformationDto, OTHERSInformation>(othersDto);
-          var othersEntityId = await _repository.OTHERSInformation.CreateAndGetIdAsync(othersEntity);
+          var othersEntity = MyMapper.JsonClone<OTHERSInformationDto, CrmOthersInformation>(othersDto);
+          var othersEntityId = await _repository.CrmOthersInformations.CreateAndGetIdAsync(othersEntity);
           //await _repository.OTHERSInformation.CreateAsync(othersEntity);
         }
 
@@ -629,9 +627,8 @@ FROM
             workExpDto.CreatedDate = DateTime.UtcNow;
             workExpDto.CreatedBy = currentUser.UserId ?? 0;
 
-            var workExpEntity = MyMapper.JsonClone<WorkExperienceHistoryDto, WorkExperience>(workExpDto);
-            workExpEntity.FileThumbnail = null;
-            var workExpEntityId = await _repository.WorkExperience.CreateAndGetIdAsync(workExpEntity);
+            var workExpEntity = MyMapper.JsonClone<WorkExperienceHistoryDto, CrmWorkExperience>(workExpDto);
+            var workExpEntityId = await _repository.CrmWorkExperiences.CreateAndGetIdAsync(workExpEntity);
             //await _repository.WorkExperience.CreateAsync(workExpEntity);
           }
         }
@@ -644,9 +641,9 @@ FROM
             referenceDto.CreatedDate = DateTime.UtcNow;
             referenceDto.CreatedBy = currentUser.UserId ?? 0;
 
-            var referenceEntity = MyMapper.JsonClone<ApplicantReferenceDto, ApplicantReference>(referenceDto);
-            var referenceEntityId = await _repository.ApplicantReference.CreateAndGetIdAsync(referenceEntity);
-            //await _repository.ApplicantReference.CreateAsync(referenceEntity);
+            var referenceEntity = MyMapper.JsonClone<ApplicantReferenceDto, CrmApplicantReference>(referenceDto);
+            var referenceEntityId = await _repository.CrmApplicantReferences.CreateAndGetIdAsync(referenceEntity);
+            //await _repository.CrmApplicantReferences.CreateAsync(referenceEntity);
           }
         }
 
@@ -660,8 +657,8 @@ FROM
           // FIX: Set ApplicantId to ApplicationId for database constraint
           statementDto.ApplicantId = applicationId; // This maps to ApplicationId in database
 
-          var statementEntity = MyMapper.JsonClone<StatementOfPurposeDto, StatementOfPurpose>(statementDto);
-          var statementEntityId = await _repository.StatementOfPurpose.CreateAndGetIdAsync(statementEntity);
+          var statementEntity = MyMapper.JsonClone<StatementOfPurposeDto, CrmStatementOfPurpose>(statementDto);
+          var statementEntityId = await _repository.CrmStatementOfPurposes.CreateAndGetIdAsync(statementEntity);
           //await _repository.StatementOfPurpose.CreateAsync(statementEntity);
         }
 
@@ -675,10 +672,9 @@ FROM
           // FIX: Set ApplicantId to ApplicationId for database constraint
           additionalInfoDto.ApplicantId = applicationId; // This maps to ApplicationId in database
 
-          var additionalInfoEntity = MyMapper.JsonClone<AdditionalInfoDto, AdditionalInfo>(additionalInfoDto);
+          var additionalInfoEntity = MyMapper.JsonClone<AdditionalInfoDto, CrmAdditionalInfo>(additionalInfoDto);
           additionalInfoEntity.AdditionalInfoId = 0;
-          additionalInfoEntity.FileThumbnail = null;
-          var additionalInfoEntityId = await _repository.AdditionalInfo.CreateAndGetIdAsync(additionalInfoEntity);
+          var additionalInfoEntityId = await _repository.CrmAdditionalInfoes.CreateAndGetIdAsync(additionalInfoEntity);
           //await _repository.AdditionalInfo.CreateAsync(additionalInfoEntity);
         }
       }

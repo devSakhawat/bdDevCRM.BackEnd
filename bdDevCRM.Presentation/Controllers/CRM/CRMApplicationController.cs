@@ -1,5 +1,4 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.Core;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -7,14 +6,12 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.Exceptions;
-using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System.Security.Principal;
 
 public class CRMApplicationController : BaseApiController
 {
@@ -49,7 +46,7 @@ public class CRMApplicationController : BaseApiController
     if (options == null)
       throw new NullModelBadRequestException(nameof(CRMGridOptions));
 
-    var summaryGrid = await _serviceManager.CRMApplication.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.CrmApplications.SummaryGrid(options);
     if (summaryGrid == null || !summaryGrid.Items.Any())
       return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
 
@@ -80,7 +77,7 @@ public class CRMApplicationController : BaseApiController
       return Unauthorized("User not found in cache.");
     }
 
-    var groupSummary = await _serviceManager.Countries.GetCountriesDDLAsync(trackChanges: false);
+    var groupSummary = await _serviceManager.CrmCountries.GetCountriesDDLAsync(trackChanges: false);
     return (groupSummary != null) ? Ok(groupSummary) : NoContent();
   }
 
@@ -92,7 +89,7 @@ public class CRMApplicationController : BaseApiController
       return Unauthorized("User not found in cache.");
     }
 
-    var res = await _serviceManager.CRMInstitutes.GetInstitutesDDLAsync(trackChanges: false);
+    var res = await _serviceManager.CrmInstitutes.GetInstitutesDDLAsync(trackChanges: false);
     return Ok(res);
   }
 
@@ -104,7 +101,7 @@ public class CRMApplicationController : BaseApiController
       return Unauthorized("User not found in cache.");
     }
 
-    var res = await _serviceManager.CRMCourses.GetCourseByInstituteIdDDLAsync(instituteId, trackChanges: false);
+    var res = await _serviceManager.CrmCourses.GetCourseByInstituteIdDDLAsync(instituteId, trackChanges: false);
     return Ok(res);
   }
 
@@ -116,7 +113,7 @@ public class CRMApplicationController : BaseApiController
       return Unauthorized("User not found in cache.");
     }
 
-    var res = await _serviceManager.CRMInstituteTypes.GetInstituteTypesDDLAsync();
+    var res = await _serviceManager.CrmInstituteTypes.GetInstituteTypesDDLAsync();
     return Ok(res);
   }
   #endregion Course Details end
@@ -149,7 +146,6 @@ public class CRMApplicationController : BaseApiController
 
     // Set default values
     applicationData.ApplicationDate = DateTime.UtcNow;
-    applicationData.ApplicationStatus = "Draft";
     applicationData.ApplicationId = 0; // Ensure ApplicationId is 0 for new record
     applicationData.CreatedDate = DateTime.UtcNow;
     applicationData.CreatedBy = userId;
@@ -160,7 +156,7 @@ public class CRMApplicationController : BaseApiController
     InitializeNestedDtos(applicationData);
 
     // Save CRM application record
-    CrmApplicationDto savedDto = await _serviceManager.CRMApplication.CreateNewRecordAsync(applicationData, currentUser);
+    CrmApplicationDto savedDto = await _serviceManager.CrmApplications.CreateNewRecordAsync(applicationData, currentUser);
 
     // Save attached files using DMS
     await SaveCrmApplicationFilesAsync(savedDto, currentUser);
@@ -189,7 +185,7 @@ public class CRMApplicationController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.CRMApplication.GetApplication(applicationId, trackChanges: false);
+    var res = await _serviceManager.CrmApplications.GetApplication(applicationId, trackChanges: false);
     if (res == null)
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found for the specified country"));
 
@@ -533,7 +529,7 @@ public class CRMApplicationController : BaseApiController
       };
 
       string applicantImageDMSJson = JsonConvert.SerializeObject(applicantImageDMSDto);
-      string applicantImagePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+      string applicantImagePath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
           dto.CourseInformation.PersonalDetails.ApplicantImageFile, applicantImageDMSJson);
 
       if (!string.IsNullOrEmpty(applicantImagePath))
@@ -589,7 +585,7 @@ public class CRMApplicationController : BaseApiController
           };
 
           string educationDocumentDMSJson = JsonConvert.SerializeObject(educationDocumentDMSDto);
-          string educationDocumentPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+          string educationDocumentPath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
               educationRecord.AttachedDocumentFile, educationDocumentDMSJson);
 
           if (!string.IsNullOrEmpty(educationDocumentPath))
@@ -708,7 +704,7 @@ public class CRMApplicationController : BaseApiController
           };
 
           string workExperienceDMSJson = JsonConvert.SerializeObject(workExperienceDMSDto);
-          string workExperiencePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+          string workExperiencePath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
               workExpRecord.ScannedCopyFile, workExperienceDMSJson);
 
           if (!string.IsNullOrEmpty(workExperiencePath))
@@ -762,7 +758,7 @@ public class CRMApplicationController : BaseApiController
       };
 
       string statementDMSJson = JsonConvert.SerializeObject(statementDMSDto);
-      string statementPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+      string statementPath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
           dto.AdditionalInformation.StatementOfPurpose.StatementOfPurposeFile, statementDMSJson);
 
       if (!string.IsNullOrEmpty(statementPath))
@@ -810,7 +806,7 @@ public class CRMApplicationController : BaseApiController
       };
 
       string additionalInfoDMSJson = JsonConvert.SerializeObject(additionalInfoDMSDto);
-      string additionalInfoPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+      string additionalInfoPath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
           dto.AdditionalInformation.AdditionalInformation.UploadFileFormFile, additionalInfoDMSJson);
 
       if (!string.IsNullOrEmpty(additionalInfoPath))
@@ -863,7 +859,7 @@ public class CRMApplicationController : BaseApiController
           };
 
           string additionalDocDMSJson = JsonConvert.SerializeObject(additionalDocDMSDto);
-          string additionalDocPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(
+          string additionalDocPath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
               additionalDoc.UploadFormFile, additionalDocDMSJson);
 
           if (!string.IsNullOrEmpty(additionalDocPath))
@@ -873,7 +869,7 @@ public class CRMApplicationController : BaseApiController
         }
       }
     }
-  
+
     return dto;
   }
 
@@ -918,7 +914,7 @@ public class CRMApplicationController : BaseApiController
     };
 
     string languageTestDMSJson = JsonConvert.SerializeObject(languageTestDMSDto);
-    string languageTestPath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(file, languageTestDMSJson);
+    string languageTestPath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(file, languageTestDMSJson);
     return languageTestPath;
   }
 

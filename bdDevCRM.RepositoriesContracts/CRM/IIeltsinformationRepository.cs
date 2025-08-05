@@ -2,11 +2,11 @@ using bdDevCRM.Entities.Entities.CRM;
 
 namespace bdDevCRM.RepositoriesContracts.CRM;
 
-public interface IIELTSInformationRepository : IRepositoryBase<IELTSInformation>
+public interface ICrmIELTSInformationRepository : IRepositoryBase<CrmIELTSInformation>
 {
-  Task<IEnumerable<IELTSInformation>> GetActiveIeltsinformationsAsync(bool track);
-  Task<IEnumerable<IELTSInformation>> GetIeltsinformationsAsync(bool track);
-  Task<IELTSInformation?> GetIeltsinformationAsync(int id, bool track);
-  Task<IEnumerable<IELTSInformation>> GetIeltsinformationsByApplicantIdAsync(int applicantId, bool track);
-  Task<IELTSInformation?> GetIeltsinformationByApplicantIdAsync(int applicantId, bool track);
+  Task<IEnumerable<CrmIELTSInformation>> GetActiveIeltsinformationsAsync(bool track);
+  Task<IEnumerable<CrmIELTSInformation>> GetIeltsinformationsAsync(bool track);
+  Task<CrmIELTSInformation?> GetIeltsinformationAsync(int id, bool track);
+  Task<IEnumerable<CrmIELTSInformation>> GetIeltsinformationsByApplicantIdAsync(int applicantId, bool track);
+  Task<CrmIELTSInformation?> GetIeltsinformationByApplicantIdAsync(int applicantId, bool track);
 }

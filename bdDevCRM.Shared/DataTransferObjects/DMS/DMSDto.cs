@@ -9,7 +9,7 @@ namespace bdDevCRM.Shared.DataTransferObjects.DMS;
 
 public class DMSDto
 {
-  // DmsdocumentTypeDto -----------------------
+  // DmsDocumentTypeDto -----------------------
   //public int DocumentTypeId { get; set; }
 
   public string DocumentTypeName { get; set; } = null!;
@@ -34,7 +34,7 @@ public class DMSDto
 
   public string SystemTags { get; set; } = null!;
 
-  // DmsdocumentAccessLogDto -----------------------
+  // DmsDocumentAccessLogDto -----------------------
   //public long LogId { get; set; }
 
   //public int DocumentId { get; set; }
@@ -52,7 +52,7 @@ public class DMSDto
 
   public string? Notes { get; set; }
 
-  // DmsdocumentFolderDto -----------------------
+  // DmsDocumentFolderDto -----------------------
   //public int FolderId { get; set; }
 
   public int? ParentFolderId { get; set; }
@@ -66,13 +66,13 @@ public class DMSDto
   //public string ReferenceEntityId { get; set; } = null!;
 
 
-  // DmsdocumentTagDto-----------------------
+  // DmsDocumentTagDto-----------------------
 
   public int TagId { get; set; }
 
   public string DocumentTagName { get; set; } = null!;
 
-  // DmsdocumentVersionDto -----------------------
+  // DmsDocumentVersionDto -----------------------
   public int VersionId { get; set; }
   //public int DocumentId { get; set; }
   public int VersionNumber { get; set; }

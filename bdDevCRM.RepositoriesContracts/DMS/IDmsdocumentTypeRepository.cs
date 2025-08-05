@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.RepositoriesContracts.DMS;
 
-public interface IDmsdocumentTypeRepository : IRepositoryBase<DmsdocumentType>
+public interface IDmsDocumentTypeRepository : IRepositoryBase<DmsDocumentType>
 {
-  Task<IEnumerable<DmsdocumentType>> GetAllDocumentTypesAsync(bool trackChanges);
-  void CreateDocumentType(DmsdocumentType type);
-  void UpdateDocumentType(DmsdocumentType type);
-  void DeleteDocumentType(DmsdocumentType type);
+  Task<IEnumerable<DmsDocumentType>> GetAllDocumentTypesAsync(bool trackChanges);
+  void CreateDocumentType(DmsDocumentType type);
+  void UpdateDocumentType(DmsDocumentType type);
+  void DeleteDocumentType(DmsDocumentType type);
 }

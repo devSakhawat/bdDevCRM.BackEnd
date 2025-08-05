@@ -3,12 +3,12 @@ using bdDevCRM.Shared.DataTransferObjects.DMS;
 
 namespace bdDevCRM.ServiceContract.DMS;
 
-public interface IDmsdocumentTypeService
+public interface IDmsDocumentTypeService
 {
-  Task<IEnumerable<DmsdocumentTypeDDL>> GetTypesDDLAsync(bool trackChanges);
-  Task<GridEntity<DmsdocumentTypeDto>> SummaryGrid(CRMGridOptions options);
-  Task<string> CreateNewRecordAsync(DmsdocumentTypeDto modelDto);
-  Task<string> UpdateNewRecordAsync(int key, DmsdocumentTypeDto modelDto, bool trackChanges);
-  Task<string> DeleteRecordAsync(int key, DmsdocumentTypeDto modelDto);
-  Task<string> SaveOrUpdate(int key, DmsdocumentTypeDto modelDto);
+  Task<IEnumerable<DmsDocumentTypeDDL>> GetTypesDDLAsync(bool trackChanges);
+  Task<GridEntity<DmsDocumentTypeDto>> SummaryGrid(CRMGridOptions options);
+  Task<string> CreateNewRecordAsync(DmsDocumentTypeDto modelDto);
+  Task<string> UpdateNewRecordAsync(int key, DmsDocumentTypeDto modelDto, bool trackChanges);
+  Task<string> DeleteRecordAsync(int key, DmsDocumentTypeDto modelDto);
+  Task<string> SaveOrUpdate(int key, DmsDocumentTypeDto modelDto);
 }

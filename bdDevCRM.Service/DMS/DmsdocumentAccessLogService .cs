@@ -18,49 +18,49 @@ namespace bdDevCRM.Service.DMS;
 
 
 
-internal sealed class DmsdocumentAccessLogService : IDmsdocumentAccessLogService
+internal sealed class DmsDocumentAccessLogService : IDmsDocumentAccessLogService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
 
-  public DmsdocumentAccessLogService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DmsDocumentAccessLogService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<DmsdocumentAccessLogDDL>> GetAccessLogsDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<DmsDocumentAccessLogDDL>> GetAccessLogsDDLAsync(bool trackChanges = false)
   {
-    var logs = await _repository.DmsdocumentAccessLogs.ListAsync(trackChanges:trackChanges);
+    var logs = await _repository.DmsDocumentAccessLogs.ListAsync(trackChanges:trackChanges);
 
     if (!logs.Any())
-      throw new GenericListNotFoundException("DmsdocumentAccessLog");
+      throw new GenericListNotFoundException("DmsDocumentAccessLog");
 
-    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<DmsdocumentAccessLog, DmsdocumentAccessLogDDL>(logs);
+    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<DmsDocumentAccessLog, DmsDocumentAccessLogDDL>(logs);
 
     return ddlDtos;
   }
 
-  public async Task<GridEntity<DmsdocumentAccessLogDto>> SummaryGrid(CRMGridOptions options)
+  public async Task<GridEntity<DmsDocumentAccessLogDto>> SummaryGrid(CRMGridOptions options)
   {
-    string query = "SELECT * FROM DmsdocumentAccessLog";  // adjust if needed
+    string query = "SELECT * FROM DmsDocumentAccessLog";  // adjust if needed
     string orderBy = "AccessDateTime desc";
 
-    var gridEntity = await _repository.DmsdocumentAccessLogs.GridData<DmsdocumentAccessLogDto>(query, options, orderBy, "");
+    var gridEntity = await _repository.DmsDocumentAccessLogs.GridData<DmsDocumentAccessLogDto>(query, options, orderBy, "");
 
     return gridEntity;
   }
 
-  public async Task<string> CreateNewRecordAsync(DmsdocumentAccessLogDto modelDto)
+  public async Task<string> CreateNewRecordAsync(DmsDocumentAccessLogDto modelDto)
   {
     if (modelDto.LogId != 0)
       throw new InvalidCreateOperationException("LogId must be 0 when creating a new log.");
 
-    var log = MyMapper.JsonClone<DmsdocumentAccessLogDto, DmsdocumentAccessLog>(modelDto);
+    var log = MyMapper.JsonClone<DmsDocumentAccessLogDto, DmsDocumentAccessLog>(modelDto);
 
-    var createdId = await _repository.DmsdocumentAccessLogs.CreateAndGetIdAsync(log);
+    var createdId = await _repository.DmsDocumentAccessLogs.CreateAndGetIdAsync(log);
     if (createdId == 0)
       throw new InvalidCreateOperationException();
 
@@ -70,38 +70,38 @@ internal sealed class DmsdocumentAccessLogService : IDmsdocumentAccessLogService
     return OperationMessage.Success;
   }
 
-  public async Task<string> UpdateNewRecordAsync(int key, DmsdocumentAccessLogDto modelDto, bool trackChanges)
+  public async Task<string> UpdateNewRecordAsync(int key, DmsDocumentAccessLogDto modelDto, bool trackChanges)
   {
     if (key <= 0 || key != modelDto.LogId)
       return "Invalid update attempt: key does not match the LogId.";
 
-    bool exists = await _repository.DmsdocumentAccessLogs.ExistsAsync(x => x.LogId == key);
+    bool exists = await _repository.DmsDocumentAccessLogs.ExistsAsync(x => x.LogId == key);
     if (!exists)
       return "Update failed: log not found.";
 
-    var log = MyMapper.JsonClone<DmsdocumentAccessLogDto, DmsdocumentAccessLog>(modelDto);
+    var log = MyMapper.JsonClone<DmsDocumentAccessLogDto, DmsDocumentAccessLog>(modelDto);
 
-    _repository.DmsdocumentAccessLogs.Update(log);
+    _repository.DmsDocumentAccessLogs.Update(log);
     await _repository.SaveAsync();
     _logger.LogWarn($"Access log with Id: {key} updated.");
 
     return OperationMessage.Success;
   }
 
-  public async Task<string> DeleteRecordAsync(int key, DmsdocumentAccessLogDto modelDto)
+  public async Task<string> DeleteRecordAsync(int key, DmsDocumentAccessLogDto modelDto)
   {
     if (modelDto == null)
-      throw new NullModelBadRequestException(nameof(DmsdocumentAccessLogDto));
+      throw new NullModelBadRequestException(nameof(DmsDocumentAccessLogDto));
 
     if (key != modelDto.LogId)
-      throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsdocumentAccessLogDto));
+      throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsDocumentAccessLogDto));
 
-    var log = await _repository.DmsdocumentAccessLogs.FirstOrDefaultAsync(x => x.LogId == key, false);
+    var log = await _repository.DmsDocumentAccessLogs.FirstOrDefaultAsync(x => x.LogId == key, false);
 
     if (log == null)
-      throw new GenericNotFoundException("DmsdocumentAccessLog", "LogId", key.ToString());
+      throw new GenericNotFoundException("DmsDocumentAccessLog", "LogId", key.ToString());
 
-    await _repository.DmsdocumentAccessLogs.DeleteAsync(x => x.LogId == key, true);
+    await _repository.DmsDocumentAccessLogs.DeleteAsync(x => x.LogId == key, true);
     await _repository.SaveAsync();
 
     _logger.LogWarn($"Access log with Id: {key} deleted.");
@@ -109,13 +109,13 @@ internal sealed class DmsdocumentAccessLogService : IDmsdocumentAccessLogService
     return OperationMessage.Success;
   }
 
-  public async Task<string> SaveOrUpdate(int key, DmsdocumentAccessLogDto modelDto)
+  public async Task<string> SaveOrUpdate(int key, DmsDocumentAccessLogDto modelDto)
   {
     if (modelDto.LogId == 0 && key == 0)
     {
-      var newLog = MyMapper.JsonClone<DmsdocumentAccessLogDto, DmsdocumentAccessLog>(modelDto);
+      var newLog = MyMapper.JsonClone<DmsDocumentAccessLogDto, DmsDocumentAccessLog>(modelDto);
 
-      var createdId = await _repository.DmsdocumentAccessLogs.CreateAndGetIdAsync(newLog);
+      var createdId = await _repository.DmsDocumentAccessLogs.CreateAndGetIdAsync(newLog);
       if (createdId == 0)
         throw new InvalidCreateOperationException();
 
@@ -125,11 +125,11 @@ internal sealed class DmsdocumentAccessLogService : IDmsdocumentAccessLogService
     }
     else if (key > 0 && key == modelDto.LogId)
     {
-      var exists = await _repository.DmsdocumentAccessLogs.ExistsAsync(x => x.LogId == key);
+      var exists = await _repository.DmsDocumentAccessLogs.ExistsAsync(x => x.LogId == key);
       if (!exists)
       {
-        var updateLog = MyMapper.JsonClone<DmsdocumentAccessLogDto, DmsdocumentAccessLog>(modelDto);
-        _repository.DmsdocumentAccessLogs.Update(updateLog);
+        var updateLog = MyMapper.JsonClone<DmsDocumentAccessLogDto, DmsDocumentAccessLog>(modelDto);
+        _repository.DmsDocumentAccessLogs.Update(updateLog);
         await _repository.SaveAsync();
 
         _logger.LogWarn($"Access log with Id: {key} updated.");

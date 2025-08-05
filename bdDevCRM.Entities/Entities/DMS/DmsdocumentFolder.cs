@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
 
-public partial class DmsdocumentFolder
+public partial class DmsDocumentFolder
 {
     public int FolderId { get; set; }
 
@@ -11,15 +11,15 @@ public partial class DmsdocumentFolder
 
     public string FolderName { get; set; } = null!;
 
-    public string? OwnerId { get; set; } = null!;
+    public string? OwnerId { get; set; }
 
-    public string ReferenceEntityType { get; set; } = null!;
+    public string? ReferenceEntityType { get; set; }
 
-    public string ReferenceEntityId { get; set; } = null!;
+    public string? ReferenceEntityId { get; set; }
 
     public int? DocumentId { get; set; }
 
-    public virtual ICollection<DmsdocumentFolder> InverseParentFolder { get; set; } = new List<DmsdocumentFolder>();
+    public virtual ICollection<DmsDocumentFolder> InverseParentFolder { get; set; } = new List<DmsDocumentFolder>();
 
-    public virtual DmsdocumentFolder? ParentFolder { get; set; }
+    public virtual DmsDocumentFolder? ParentFolder { get; set; }
 }

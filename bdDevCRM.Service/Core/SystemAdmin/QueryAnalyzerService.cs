@@ -27,7 +27,7 @@ internal sealed class QueryAnalyzerService : IQueryAnalyzerService
 
   public async Task<IEnumerable<QueryAnalyzerDto>> CustomizedReportInfo(bool trackChanges)
   {
-    IEnumerable<QueryAnalyzerRepositoryDto> queryAnalyzers = await _repository.QueryAnalyzer.CustomizedReportInfo(trackChanges);
+    IEnumerable<QueryAnalyzerRepositoryDto> queryAnalyzers = await _repository.QueryAnalyzers.CustomizedReportInfo(trackChanges);
     IEnumerable<QueryAnalyzerDto> queryAnalyzersDto = MyMapper.JsonCloneIEnumerableToList<QueryAnalyzerRepositoryDto, QueryAnalyzerDto>(queryAnalyzers);
 
     return queryAnalyzersDto;

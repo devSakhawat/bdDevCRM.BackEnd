@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.RepositoriesContracts.DMS;
 
-public interface IDmsdocumentAccessLogRepository : IRepositoryBase<DmsdocumentAccessLog>
+public interface IDmsDocumentAccessLogRepository : IRepositoryBase<DmsDocumentAccessLog>
 {
-  Task<IEnumerable<DmsdocumentAccessLog>> GetLogsByDocumentIdAsync(int documentId, bool trackChanges);
-  void CreateLog(DmsdocumentAccessLog log);
+  Task<IEnumerable<DmsDocumentAccessLog>> GetLogsByDocumentIdAsync(int documentId, bool trackChanges);
+  void CreateLog(DmsDocumentAccessLog log);
 }

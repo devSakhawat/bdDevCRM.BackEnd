@@ -17,14 +17,14 @@ using System.Net.NetworkInformation;
 namespace bdDevCRM.Service.DMS;
 
 
-internal sealed class DmsdocumentService : IDmsdocumentService
+internal sealed class DmsDocumentService : IDmsDocumentService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
   private readonly IHttpContextAccessor _httpContextAccessor;
 
-  public DmsdocumentService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+  public DmsDocumentService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
   {
     _repository = repository;
     _logger = logger;
@@ -32,24 +32,24 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     _httpContextAccessor = httpContextAccessor;
   }
 
-  public async Task<IEnumerable<DmsdocumentDDL>> GetDocumentsDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<DmsDocumentDDL>> GetDocumentsDDLAsync(bool trackChanges = false)
   {
-    var documents = await _repository.Dmsdocuments.ListAsync(trackChanges: trackChanges);
+    var documents = await _repository.DmsDocuments.ListAsync(trackChanges: trackChanges);
 
     if (!documents.Any())
       throw new GenericListNotFoundException("DmsDocument");
 
-    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<Dmsdocument, DmsdocumentDDL>(documents);
+    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<DmsDocument, DmsDocumentDDL>(documents);
 
     return ddlDtos;
   }
 
   public async Task<GridEntity<DmsDocumentDto>> SummaryGrid(CRMGridOptions options)
   {
-    string query = "SELECT * FROM Dmsdocument";  // Adjust if needed
+    string query = "SELECT * FROM DmsDocument";  // Adjust if needed
     string orderBy = "Title asc";
 
-    var gridEntity = await _repository.Dmsdocuments.GridData<DmsDocumentDto>(query, options, orderBy, "");
+    var gridEntity = await _repository.DmsDocuments.GridData<DmsDocumentDto>(query, options, orderBy, "");
 
     return gridEntity;
   }
@@ -59,12 +59,12 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     if (modelDto.DocumentId != 0)
       throw new InvalidCreateOperationException("DocumentId must be 0 when creating a new document.");
 
-    bool isExist = await _repository.Dmsdocuments.ExistsAsync(x => x.Title.Trim().ToLower() == modelDto.Title.Trim().ToLower());
+    bool isExist = await _repository.DmsDocuments.ExistsAsync(x => x.Title.Trim().ToLower() == modelDto.Title.Trim().ToLower());
     if (isExist) throw new DuplicateRecordException("DmsDocument", "Title");
 
-    var document = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(modelDto);
+    var document = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(modelDto);
 
-    var createdId = await _repository.Dmsdocuments.CreateAndGetIdAsync(document);
+    var createdId = await _repository.DmsDocuments.CreateAndGetIdAsync(document);
     if (createdId == 0)
       throw new InvalidCreateOperationException();
 
@@ -79,13 +79,13 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     if (key <= 0 || key != modelDto.DocumentId)
       return "Invalid update attempt: key does not match the DocumentId.";
 
-    bool exists = await _repository.Dmsdocuments.ExistsAsync(x => x.DocumentId == key);
+    bool exists = await _repository.DmsDocuments.ExistsAsync(x => x.DocumentId == key);
     if (!exists)
       return "Update failed: document not found.";
 
-    var document = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(modelDto);
+    var document = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(modelDto);
 
-    _repository.Dmsdocuments.Update(document);
+    _repository.DmsDocuments.Update(document);
     await _repository.SaveAsync();
 
     _logger.LogWarn($"Document with Id: {key} updated.");
@@ -101,12 +101,12 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     if (key != modelDto.DocumentId)
       throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsDocumentDto));
 
-    var document = await _repository.Dmsdocuments.FirstOrDefaultAsync(x => x.DocumentId == key, false);
+    var document = await _repository.DmsDocuments.FirstOrDefaultAsync(x => x.DocumentId == key, false);
 
     if (document == null)
       throw new GenericNotFoundException("DmsDocument", "DocumentId", key.ToString());
 
-    await _repository.Dmsdocuments.DeleteAsync(x => x.DocumentId == key, true);
+    await _repository.DmsDocuments.DeleteAsync(x => x.DocumentId == key, true);
     await _repository.SaveAsync();
 
     _logger.LogWarn($"Document with Id: {key} deleted.");
@@ -118,12 +118,12 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   {
     if (modelDto.DocumentId == 0 && key == 0)
     {
-      bool isExist = await _repository.Dmsdocuments.ExistsAsync(x => x.Title.Trim().ToLower() == modelDto.Title.Trim().ToLower());
+      bool isExist = await _repository.DmsDocuments.ExistsAsync(x => x.Title.Trim().ToLower() == modelDto.Title.Trim().ToLower());
       if (isExist) throw new DuplicateRecordException("DmsDocument", "Title");
 
-      var newDoc = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(modelDto);
+      var newDoc = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(modelDto);
 
-      var createdId = await _repository.Dmsdocuments.CreateAndGetIdAsync(newDoc);
+      var createdId = await _repository.DmsDocuments.CreateAndGetIdAsync(newDoc);
       if (createdId == 0)
         throw new InvalidCreateOperationException();
 
@@ -133,11 +133,11 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     }
     else if (key > 0 && key == modelDto.DocumentId)
     {
-      var exists = await _repository.Dmsdocuments.ExistsAsync(x => x.DocumentId == key);
+      var exists = await _repository.DmsDocuments.ExistsAsync(x => x.DocumentId == key);
       if (!exists)
       {
-        var updateDoc = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(modelDto);
-        _repository.Dmsdocuments.Update(updateDoc);
+        var updateDoc = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(modelDto);
+        _repository.DmsDocuments.Update(updateDoc);
         await _repository.SaveAsync();
 
         _logger.LogWarn($"Document with Id: {key} updated.");
@@ -164,7 +164,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
 
     // Check Validation
     ValidateDMSData(dmsDto, file);
-    //using var transaction = _repository.Dmsdocuments.TransactionBeginAsync();
+    //using var transaction = _repository.DmsDocuments.TransactionBeginAsync();
     try
     {
 
@@ -191,7 +191,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       await CreateAccessLog(document.DocumentId, dmsDto, "Upload");
 
       ////await _repository.SaveAsync();
-      //await _repository.Dmsdocuments.TransactionCommitAsync();
+      //await _repository.DmsDocuments.TransactionCommitAsync();
 
       _logger.LogInfo($"DMS document created successfylly - DocumentId: {document.DocumentId}");
 
@@ -200,13 +200,13 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     catch (Exception ex)
     {
       _logger.LogError($"Error in DMS save data. Error message: {ex.Message}");
-      //await _repository.Dmsdocuments.TransactionRollbackAsync();
-      //await _repository.Dmsdocuments.TransactionDisposeAsync();
+      //await _repository.DmsDocuments.TransactionRollbackAsync();
+      //await _repository.DmsDocuments.TransactionDisposeAsync();
       throw;
     }
     finally
     {
-      //await _repository.Dmsdocuments.TransactionDisposeAsync();
+      //await _repository.DmsDocuments.TransactionDisposeAsync();
     }
   }
 
@@ -238,14 +238,14 @@ internal sealed class DmsdocumentService : IDmsdocumentService
 
 
   // 01. create document version with duplicate check
-  private async Task<DmsdocumentType> CreateOrGetDocumentType(DMSDto dmsDto)
+  private async Task<DmsDocumentType> CreateOrGetDocumentType(DMSDto dmsDto)
   {
-    var documentType = await _repository.DmsdocumentTypes.FirstOrDefaultAsync(dt => dt.Name.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim()
+    var documentType = await _repository.DmsDocumentTypes.FirstOrDefaultAsync(dt => dt.Name.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim()
                                 && dt.DocumentType.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim());
 
     if (documentType == null)
     {
-      documentType = new DmsdocumentType
+      documentType = new DmsDocumentType
       {
         Name = dmsDto.DocumentTypeName ?? "Default Document Type",
         DocumentType = dmsDto.DocumentType,
@@ -258,7 +258,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
         //MaxFileSizeMb = (!dmsDto.AcceptedExtensions.Contains(".pdf")) ? 1 : dmsDto.MaxFileSizeMb ?? 10
       };
 
-      documentType.DocumentTypeId = await _repository.DmsdocumentTypes.CreateAndGetIdAsync(documentType);
+      documentType.DocumentTypeId = await _repository.DmsDocumentTypes.CreateAndGetIdAsync(documentType);
       //await _repository.SaveAsync();
     }
 
@@ -271,15 +271,15 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   /// </summary>
   /// <param name="dmsDto">  </param>
   /// <returns>  </returns>
-  private async Task<DmsdocumentFolder> CreateFolderStructure(DMSDto dmsDto)
+  private async Task<DmsDocumentFolder> CreateFolderStructure(DMSDto dmsDto)
   {
     // Check Parent (For Entity Type)
-    var parentFolder = await _repository.DmsdocumentFolders
+    var parentFolder = await _repository.DmsDocumentFolders
         .FirstOrDefaultAsync(f => f.FolderName.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim() && f.ParentFolderId == null);
 
     if (parentFolder == null)
     {
-      parentFolder = new DmsdocumentFolder
+      parentFolder = new DmsDocumentFolder
       {
         FolderName = dmsDto.ReferenceEntityType,
         ParentFolderId = null,
@@ -288,16 +288,16 @@ internal sealed class DmsdocumentService : IDmsdocumentService
         ReferenceEntityId = null
       };
 
-      parentFolder.FolderId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(parentFolder);
+      parentFolder.FolderId = await _repository.DmsDocumentFolders.CreateAndGetIdAsync(parentFolder);
     }
 
-    var entityFolder = await _repository.DmsdocumentFolders
+    var entityFolder = await _repository.DmsDocumentFolders
         .FirstOrDefaultAsync(f => f.ParentFolderId == parentFolder.FolderId
                                 && f.ReferenceEntityId == dmsDto.ReferenceEntityId);
 
     if (entityFolder == null)
     {
-      entityFolder = new DmsdocumentFolder
+      entityFolder = new DmsDocumentFolder
       {
         FolderName = $"{dmsDto.ReferenceEntityType}_{dmsDto.ReferenceEntityId}",
         ParentFolderId = parentFolder.FolderId,
@@ -306,7 +306,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
         ReferenceEntityId = dmsDto.ReferenceEntityId
       };
 
-      entityFolder.FolderId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(entityFolder);
+      entityFolder.FolderId = await _repository.DmsDocumentFolders.CreateAndGetIdAsync(entityFolder);
     }
 
     return entityFolder;
@@ -343,9 +343,9 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   }
 
   // generate document with all information
-  private async Task<Dmsdocument> CreateDocument(DMSDto dmsDto, DmsdocumentType documentType, DmsdocumentFolder folder, FileInfoDto fileInfo)
+  private async Task<DmsDocument> CreateDocument(DMSDto dmsDto, DmsDocumentType documentType, DmsDocumentFolder folder, FileInfoDto fileInfo)
   {
-    var document = await _repository.Dmsdocuments.FirstOrDefaultAsync(d =>
+    var document = await _repository.DmsDocuments.FirstOrDefaultAsync(d =>
         d.ReferenceEntityId == dmsDto.ReferenceEntityId &&
         d.FolderId == folder.FolderId &&
         d.FilePath == fileInfo.RelativePath &&
@@ -354,7 +354,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
 
     if (document == null)
     {
-      document = new Dmsdocument
+      document = new DmsDocument
       {
         Title = dmsDto.Title ?? Path.GetFileNameWithoutExtension(fileInfo.FileName),
         Description = dmsDto.Description,
@@ -371,7 +371,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
         SystemTag = dmsDto.SystemTags ?? string.Empty
       };
     }
-    document.DocumentId = await _repository.Dmsdocuments.CreateAndGetIdAsync(document);
+    document.DocumentId = await _repository.DmsDocuments.CreateAndGetIdAsync(document);
     if (document.DocumentId == 0)
       throw new InvalidCreateOperationException("Failed to create document.");
 
@@ -380,14 +380,14 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   }
 
   // generate document version
-  private async Task<DmsdocumentVersion> CreateDocumentVersion(Dmsdocument document, FileInfoDto fileInfo, DMSDto dmsDto)
+  private async Task<DmsDocumentVersion> CreateDocumentVersion(DmsDocument document, FileInfoDto fileInfo, DMSDto dmsDto)
   {
 
-    var latestVersion = await _repository.DmsdocumentVersions.FirstOrDefaultWithOrderByDescAsync(expression: x => x.DocumentId == document.DocumentId, orderBy: x => x.VersionNumber);
+    var latestVersion = await _repository.DmsDocumentVersions.FirstOrDefaultWithOrderByDescAsync(expression: x => x.DocumentId == document.DocumentId, orderBy: x => x.VersionNumber);
 
     var versionNumber = (latestVersion?.VersionNumber ?? 0) + 1;
 
-    var version = new DmsdocumentVersion
+    var version = new DmsDocumentVersion
     {
       DocumentId = document.DocumentId,
       VersionNumber = versionNumber,
@@ -401,7 +401,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       FileSize = fileInfo.FileSize,
     };
 
-    version.VersionId = await _repository.DmsdocumentVersions.CreateAndGetIdAsync(version);
+    version.VersionId = await _repository.DmsDocumentVersions.CreateAndGetIdAsync(version);
     await _repository.SaveAsync();
 
     return version;
@@ -421,32 +421,32 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     foreach (var tagName in tagNames)
     {
 
-      var tag = await _repository.DmsdocumentTags
+      var tag = await _repository.DmsDocumentTags
           .FirstOrDefaultAsync(t => t.DocumentTagName.ToLower().Trim() == tagName.ToLower().Trim());
 
       if (tag == null)
       {
-        tag = new DmsdocumentTag
+        tag = new DmsDocumentTag
         {
           DocumentTagName = tagName
         };
-        tag.TagId = await _repository.DmsdocumentTags.CreateAndGetIdAsync(tag);
+        tag.TagId = await _repository.DmsDocumentTags.CreateAndGetIdAsync(tag);
         await _repository.SaveAsync();
       }
 
 
-      var existingMapping = await _repository.DmsdocumentTagMaps
+      var existingMapping = await _repository.DmsDocumentTagMaps
           .FirstOrDefaultAsync(tm => tm.DocumentId == documentId && tm.TagId == tag.TagId);
 
       if (existingMapping == null)
       {
-        var tagMap = new DmsdocumentTagMap
+        var tagMap = new DmsDocumentTagMap
         {
           DocumentId = documentId,
           TagId = tag.TagId
         };
 
-        await _repository.DmsdocumentTagMaps.CreateAsync(tagMap);
+        await _repository.DmsDocumentTagMaps.CreateAsync(tagMap);
       }
     }
 
@@ -472,7 +472,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       
     }
 
-    var accessLog = new DmsdocumentAccessLog
+    var accessLog = new DmsDocumentAccessLog
     {
       DocumentId = documentId,
       AccessedByUserId = dmsDto.UploadedByUserId?.ToString() ?? "System",
@@ -484,7 +484,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       Notes = $"Action: {action}, User: {dmsDto.UploadedByUserId}, IP: {ipAddress}"
     };
 
-    await _repository.DmsdocumentAccessLogs.CreateAsync(accessLog);
+    await _repository.DmsDocumentAccessLogs.CreateAsync(accessLog);
   }
 
 
@@ -501,16 +501,16 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     // Check Validation
     ValidateDMSData(dmsDto, file);
 
-    using var transaction = _repository.Dmsdocuments.TransactionBeginAsync();
+    using var transaction = _repository.DmsDocuments.TransactionBeginAsync();
     try
     {
-      Dmsdocument document = new Dmsdocument();
+      DmsDocument document = new DmsDocument();
       FileInfoDto fileInfo = new FileInfoDto();
       // Check if this is an update to existing document
       if (dmsDto.ExistingDocumentId.HasValue && dmsDto.ExistingDocumentId > 0)
       {
         // Get existing document
-        var existingDocument = await _repository.Dmsdocuments.GetByIdAsync(x => x.DocumentId == dmsDto.ExistingDocumentId);
+        var existingDocument = await _repository.DmsDocuments.GetByIdAsync(x => x.DocumentId == dmsDto.ExistingDocumentId);
         if (existingDocument == null)
           throw new ArgumentException("Existing document not found for versioning");
 
@@ -539,7 +539,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       // Mark previous version as not current (if exists)
       await MarkPreviousVersionAsNotCurrent(document.DocumentId, version.VersionNumber);
 
-      await _repository.Dmsdocuments.TransactionCommitAsync();
+      await _repository.DmsDocuments.TransactionCommitAsync();
 
       _logger.LogInfo($"DMS document updated with versioning - DocumentId: {document.DocumentId}, Version: {version.VersionNumber}");
 
@@ -548,17 +548,17 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     catch (Exception ex)
     {
       _logger.LogError($"Error in DMS version control save data. Error message: {ex.Message}");
-      await _repository.Dmsdocuments.TransactionRollbackAsync();
+      await _repository.DmsDocuments.TransactionRollbackAsync();
       throw;
     }
     finally
     {
-      await _repository.Dmsdocuments.TransactionDisposeAsync();
+      await _repository.DmsDocuments.TransactionDisposeAsync();
     }
   }
 
   // Update existing document with new version info
-  private async Task<Dmsdocument> UpdateExistingDocumentWithNewVersion(Dmsdocument existingDocument, DMSDto dmsDto, IFormFile file)
+  private async Task<DmsDocument> UpdateExistingDocumentWithNewVersion(DmsDocument existingDocument, DMSDto dmsDto, IFormFile file)
   {
     var fileInfo = await SaveFileToSystemWithVersioning(file, dmsDto);
 
@@ -572,7 +572,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     existingDocument.UploadDate = DateTime.UtcNow;
     existingDocument.UploadedByUserId = dmsDto.UploadedByUserId?.ToString();
 
-    _repository.Dmsdocuments.Update(existingDocument);
+    _repository.DmsDocuments.Update(existingDocument);
     await _repository.SaveAsync();
 
     return existingDocument;
@@ -611,9 +611,9 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   }
 
   // Enhanced document version creation
-  private async Task<DmsdocumentVersion> CreateDocumentVersionWithVersioning(Dmsdocument document, FileInfoDto fileInfo, DMSDto dmsDto)
+  private async Task<DmsDocumentVersion> CreateDocumentVersionWithVersioning(DmsDocument document, FileInfoDto fileInfo, DMSDto dmsDto)
   {
-    var version = new DmsdocumentVersion
+    var version = new DmsDocumentVersion
     {
       DocumentId = document.DocumentId,
       VersionNumber = dmsDto.VersionNumber,
@@ -627,7 +627,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       PreviousVersionId = await GetPreviousVersionIdAsync(document.DocumentId)
     };
 
-    version.VersionId = await _repository.DmsdocumentVersions.CreateAndGetIdAsync(version);
+    version.VersionId = await _repository.DmsDocumentVersions.CreateAndGetIdAsync(version);
     await _repository.SaveAsync();
 
     return version;
@@ -635,9 +635,9 @@ internal sealed class DmsdocumentService : IDmsdocumentService
 
   #region Helper Mehtod: Update documents with versioning
 
-  private async Task<Dmsdocument> GetExistingDocumentAsync(string entityId, string entityType, string documentType)
+  private async Task<DmsDocument> GetExistingDocumentAsync(string entityId, string entityType, string documentType)
   {
-    return await _repository.Dmsdocuments.FirstOrDefaultAsync(d =>
+    return await _repository.DmsDocuments.FirstOrDefaultAsync(d =>
         d.ReferenceEntityId == entityId &&
         d.ReferenceEntityType == entityType &&
         d.DocumentType.DocumentType == documentType);
@@ -648,7 +648,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   {
     if (documentId == 0) return 1;
 
-    var latestVersion = await _repository.DmsdocumentVersions
+    var latestVersion = await _repository.DmsDocumentVersions
         .FirstOrDefaultWithOrderByDescAsync(
             expression: v => v.DocumentId == documentId,
             orderBy: v => v.VersionNumber);
@@ -659,7 +659,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   // Get previous version ID for linking
   private async Task<int?> GetPreviousVersionIdAsync(int documentId)
   {
-    var previousVersion = await _repository.DmsdocumentVersions
+    var previousVersion = await _repository.DmsDocumentVersions
         .FirstOrDefaultWithOrderByDescAsync(
             expression: v => v.DocumentId == documentId && v.IsCurrentVersion == true,
             orderBy: v => v.VersionNumber);
@@ -671,13 +671,13 @@ internal sealed class DmsdocumentService : IDmsdocumentService
   // Mark previous version as not current
   private async Task MarkPreviousVersionAsNotCurrent(int documentId, int currentVersionNumber)
   {
-    var previousVersions = await _repository.DmsdocumentVersions
+    var previousVersions = await _repository.DmsDocumentVersions
         .ListByConditionAsync(v => v.DocumentId == documentId && v.VersionNumber < currentVersionNumber);
 
     foreach (var version in previousVersions)
     {
       version.IsCurrentVersion = false;
-      _repository.DmsdocumentVersions.Update(version);
+      _repository.DmsDocumentVersions.Update(version);
     }
 
     await _repository.SaveAsync();
@@ -702,7 +702,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       Notes = $"File updated from version {versionNumber - 1} to {versionNumber}"
     };
 
-    await _repository.IDmsFileUpdateHistories.CreateAsync(updateHistory);
+    await _repository.DmsFileUpdateHistories.CreateAsync(updateHistory);
     await _repository.SaveAsync();
   }
 
@@ -712,7 +712,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
     string ipAddress = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "Unknown";
     string userAgent = _httpContextAccessor?.HttpContext?.Request?.Headers["User-Agent"].ToString() ?? "Unknown";
 
-    var accessLog = new DmsdocumentAccessLog
+    var accessLog = new DmsDocumentAccessLog
     {
       DocumentId = documentId,
       AccessedByUserId = dmsDto.UploadedByUserId?.ToString() ?? "System",
@@ -723,7 +723,7 @@ internal sealed class DmsdocumentService : IDmsdocumentService
       Notes = $"Version Control - {action}: Version {dmsDto.VersionNumber}, User: {dmsDto.UploadedByUserId}"
     };
 
-    await _repository.DmsdocumentAccessLogs.CreateAsync(accessLog);
+    await _repository.DmsDocumentAccessLogs.CreateAsync(accessLog);
   }
 
   // Update tag mapping for versioning
@@ -741,31 +741,31 @@ internal sealed class DmsdocumentService : IDmsdocumentService
 
     foreach (var tagName in tagNames)
     {
-      var tag = await _repository.DmsdocumentTags
+      var tag = await _repository.DmsDocumentTags
           .FirstOrDefaultAsync(t => t.DocumentTagName.ToLower().Trim() == tagName.ToLower().Trim());
 
       if (tag == null)
       {
-        tag = new DmsdocumentTag
+        tag = new DmsDocumentTag
         {
           DocumentTagName = tagName
         };
-        tag.TagId = await _repository.DmsdocumentTags.CreateAndGetIdAsync(tag);
+        tag.TagId = await _repository.DmsDocumentTags.CreateAndGetIdAsync(tag);
         await _repository.SaveAsync();
       }
 
-      var existingMapping = await _repository.DmsdocumentTagMaps
+      var existingMapping = await _repository.DmsDocumentTagMaps
           .FirstOrDefaultAsync(tm => tm.DocumentId == documentId && tm.TagId == tag.TagId);
 
       if (existingMapping == null)
       {
-        var tagMap = new DmsdocumentTagMap
+        var tagMap = new DmsDocumentTagMap
         {
           DocumentId = documentId,
           TagId = tag.TagId
         };
 
-        await _repository.DmsdocumentTagMaps.CreateAsync(tagMap);
+        await _repository.DmsDocumentTagMaps.CreateAsync(tagMap);
       }
     }
 

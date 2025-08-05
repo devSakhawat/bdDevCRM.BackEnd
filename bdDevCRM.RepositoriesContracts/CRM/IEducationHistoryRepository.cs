@@ -2,11 +2,11 @@ using bdDevCRM.Entities.Entities.CRM;
 
 namespace bdDevCRM.RepositoriesContracts.CRM;
 
-public interface IEducationHistoryRepository : IRepositoryBase<EducationHistory>
+public interface ICrmEducationHistoryRepository : IRepositoryBase<CrmEducationHistory>
 {
-  Task<IEnumerable<EducationHistory>> GetActiveEducationHistoriesAsync(bool track);
-  Task<IEnumerable<EducationHistory>> GetEducationHistoriesAsync(bool track);
-  Task<EducationHistory?> GetEducationHistoryAsync(int id, bool track);
-  Task<IEnumerable<EducationHistory>> GetEducationHistoriesByApplicantIdAsync(int applicantId, bool track);
-  Task<EducationHistory?> GetEducationHistoryByInstitutionAsync(string institution, bool track);
+  Task<IEnumerable<CrmEducationHistory>> GetActiveEducationHistoriesAsync(bool track);
+  Task<IEnumerable<CrmEducationHistory>> GetEducationHistoriesAsync(bool track);
+  Task<CrmEducationHistory?> GetEducationHistoryAsync(int id, bool track);
+  Task<IEnumerable<CrmEducationHistory>> GetEducationHistoriesByApplicantIdAsync(int applicantId, bool track);
+  Task<CrmEducationHistory?> GetEducationHistoryByInstitutionAsync(string institution, bool track);
 }

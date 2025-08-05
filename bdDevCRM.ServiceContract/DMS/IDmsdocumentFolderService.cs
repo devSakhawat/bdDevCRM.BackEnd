@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.ServiceContract.DMS;
 
-public interface IDmsdocumentFolderService
+public interface IDmsDocumentFolderService
 {
-  Task<IEnumerable<DmsdocumentFolderDDL>> GetFoldersDDLAsync(bool trackChanges);
-  Task<GridEntity<DmsdocumentFolderDto>> SummaryGrid(CRMGridOptions options);
-  Task<string> CreateNewRecordAsync(DmsdocumentFolderDto modelDto);
-  Task<string> UpdateNewRecordAsync(int key, DmsdocumentFolderDto modelDto, bool trackChanges);
-  Task<string> DeleteRecordAsync(int key, DmsdocumentFolderDto modelDto);
-  Task<string> SaveOrUpdate(int key, DmsdocumentFolderDto modelDto);
+  Task<IEnumerable<DmsDocumentFolderDDL>> GetFoldersDDLAsync(bool trackChanges);
+  Task<GridEntity<DmsDocumentFolderDto>> SummaryGrid(CRMGridOptions options);
+  Task<string> CreateNewRecordAsync(DmsDocumentFolderDto modelDto);
+  Task<string> UpdateNewRecordAsync(int key, DmsDocumentFolderDto modelDto, bool trackChanges);
+  Task<string> DeleteRecordAsync(int key, DmsDocumentFolderDto modelDto);
+  Task<string> SaveOrUpdate(int key, DmsDocumentFolderDto modelDto);
 }

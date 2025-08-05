@@ -9,7 +9,7 @@ namespace bdDevCRM.RepositoryDtos.DMS;
 
 public class DMSRepositoryDto
 {
-  // DmsdocumentTypeDto -----------------------
+  // DmsDocumentTypeDto -----------------------
   //public int DocumentTypeId { get; set; }
 
   public string DocumentTypeName { get; set; } = null!;
@@ -32,7 +32,7 @@ public class DMSRepositoryDto
   public string ReferenceEntityType { get; set; } = null!;
   public string ReferenceEntityId { get; set; } = null!;
 
-  // DmsdocumentAccessLogDto -----------------------
+  // DmsDocumentAccessLogDto -----------------------
   //public long LogId { get; set; }
 
   //public int DocumentId { get; set; }
@@ -50,7 +50,7 @@ public class DMSRepositoryDto
 
   public string? Notes { get; set; }
 
-  // DmsdocumentFolderDto -----------------------
+  // DmsDocumentFolderDto -----------------------
   //public int FolderId { get; set; }
 
   public int? ParentFolderId { get; set; }
@@ -64,13 +64,13 @@ public class DMSRepositoryDto
   //public string ReferenceEntityId { get; set; } = null!;
 
 
-  // DmsdocumentTagDto-----------------------
+  // DmsDocumentTagDto-----------------------
 
   public int TagId { get; set; }
 
   public string DocumentTagName { get; set; } = null!;
 
-  // DmsdocumentVersionDto -----------------------
+  // DmsDocumentVersionDto -----------------------
   public int VersionId { get; set; }
   //public int DocumentId { get; set; }
   public int VersionNumber { get; set; }

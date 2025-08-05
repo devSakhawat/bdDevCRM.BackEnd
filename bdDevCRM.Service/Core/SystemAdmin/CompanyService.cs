@@ -77,7 +77,7 @@ internal sealed class CompanyService : ICompanyService
 
   public async Task<IEnumerable<CompanyDto>> GetMotherCompany(int companyId, UsersDto users)
   {
-    string additionalCondition = await _repository.AccessRestriction.GenerateAccessRestrictionConditionForCompany((int)users.EmployeeId);
+    string additionalCondition = await _repository.AccessRestrictions.GenerateAccessRestrictionConditionForCompany((int)users.EmployeeId);
     if (additionalCondition != "") additionalCondition = " or " + additionalCondition;
 
     if (users.AccessParentCompany == 1 && additionalCondition == "")
@@ -90,7 +90,7 @@ internal sealed class CompanyService : ICompanyService
     {
       int controlPanelModuleId = Convert.ToInt32(_configuration["AppSettings:controlPanelModuleId"]);
 
-      var res = await _repository.GroupPermission.GetAccessPermisionForCurrentUser(controlPanelModuleId, (int)users.UserId);
+      var res = await _repository.GroupPermissiones.GetAccessPermisionForCurrentUser(controlPanelModuleId, (int)users.UserId);
       var isHr = res.Any(groupPermission => groupPermission.ReferenceID == 22);
       if (isHr && additionalCondition == "")
       {

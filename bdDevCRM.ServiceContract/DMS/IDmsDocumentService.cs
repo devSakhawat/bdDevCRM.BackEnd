@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.ServiceContract.DMS;
 
-public interface IDmsdocumentService
+public interface IDmsDocumentService
 {
-  Task<IEnumerable<DmsdocumentDDL>> GetDocumentsDDLAsync(bool trackChanges);
+  Task<IEnumerable<DmsDocumentDDL>> GetDocumentsDDLAsync(bool trackChanges);
   Task<GridEntity<DmsDocumentDto>> SummaryGrid(CRMGridOptions options);
   Task<string> CreateNewRecordAsync(DmsDocumentDto modelDto);
   Task<string> UpdateNewRecordAsync(int key, DmsDocumentDto modelDto, bool trackChanges);
   Task<string> DeleteRecordAsync(int key, DmsDocumentDto modelDto);
   Task<string> SaveOrUpdate(int key, DmsDocumentDto modelDto);
   //// single record
-  //Task<Dmsdocument> GetExistingDocumentAsync(string entityId, string entityType, string documentType);
+  //Task<DmsDocument> GetExistingDocumentAsync(string entityId, string entityType, string documentType);
 
   Task<string> SaveFileAndDocumentWithAllDmsAsync(IFormFile file, string allAboutDMS);
 }

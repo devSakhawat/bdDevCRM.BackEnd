@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.RepositoriesContracts.DMS;
 
-public interface IDmsdocumentRepository : IRepositoryBase<Dmsdocument>
+public interface IDmsDocumentRepository : IRepositoryBase<DmsDocument>
 {
-  Task<IEnumerable<Dmsdocument>> GetAllDocumentsAsync(bool trackChanges);
-  Task<Dmsdocument> GetDocumentByIdAsync(int documentId, bool trackChanges);
-  void CreateDocument(Dmsdocument document);
-  void UpdateDocument(Dmsdocument document);
-  void DeleteDocument(Dmsdocument document);
+  Task<IEnumerable<DmsDocument>> GetAllDocumentsAsync(bool trackChanges);
+  Task<DmsDocument> GetDocumentByIdAsync(int documentId, bool trackChanges);
+  void CreateDocument(DmsDocument document);
+  void UpdateDocument(DmsDocument document);
+  void DeleteDocument(DmsDocument document);
 }
 

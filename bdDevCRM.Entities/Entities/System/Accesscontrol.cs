@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.System;
 
-public partial class Accesscontrol
+public partial class AccessControl
 {
     public int AccessId { get; set; }
 

@@ -4,22 +4,22 @@ using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.CRM;
 
-public sealed class EducationHistoryRepository : RepositoryBase<EducationHistory>, IEducationHistoryRepository
+public sealed class CrmEducationHistoryRepository : RepositoryBase<CrmEducationHistory>, ICrmEducationHistoryRepository
 {
-  public EducationHistoryRepository(CRMContext context) : base(context) { }
+  public CrmEducationHistoryRepository(CRMContext context) : base(context) { }
 
-  public async Task<IEnumerable<EducationHistory>> GetActiveEducationHistoriesAsync(bool track) =>
+  public async Task<IEnumerable<CrmEducationHistory>> GetActiveEducationHistoriesAsync(bool track) =>
       await ListAsync(c => c.EducationHistoryId, track);
 
-  public async Task<IEnumerable<EducationHistory>> GetEducationHistoriesAsync(bool track) =>
+  public async Task<IEnumerable<CrmEducationHistory>> GetEducationHistoriesAsync(bool track) =>
       await ListAsync(c => c.EducationHistoryId, track);
 
-  public async Task<EducationHistory?> GetEducationHistoryAsync(int id, bool track) =>
+  public async Task<CrmEducationHistory?> GetEducationHistoryAsync(int id, bool track) =>
       await FirstOrDefaultAsync(c => c.EducationHistoryId == id, track);
 
-  public async Task<IEnumerable<EducationHistory>> GetEducationHistoriesByApplicantIdAsync(int applicantId, bool track) =>
+  public async Task<IEnumerable<CrmEducationHistory>> GetEducationHistoriesByApplicantIdAsync(int applicantId, bool track) =>
       await ListByConditionAsync(x => x.ApplicantId == applicantId, c => c.EducationHistoryId, track);
 
-  public async Task<EducationHistory?> GetEducationHistoryByInstitutionAsync(string institution, bool track) =>
+  public async Task<CrmEducationHistory?> GetEducationHistoryByInstitutionAsync(string institution, bool track) =>
       await FirstOrDefaultAsync(c => c.Institution != null && c.Institution.ToLower() == institution.ToLower(), track);
 }

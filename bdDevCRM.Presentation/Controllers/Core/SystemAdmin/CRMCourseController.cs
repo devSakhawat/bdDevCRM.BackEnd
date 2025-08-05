@@ -1,5 +1,4 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.Core;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
@@ -8,7 +7,6 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.Exceptions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +38,7 @@ public class CRMCourseController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.CRMCourses.GetCoursesDDLAsync(trackChanges: false);
+    var res = await _serviceManager.CrmCourses.GetCoursesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
 
@@ -65,7 +63,7 @@ public class CRMCourseController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.CRMCourses.GetCourseByInstituteIdDDLAsync(instituteId, trackChanges: false);
+    var res = await _serviceManager.CrmCourses.GetCourseByInstituteIdDDLAsync(instituteId, trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
 
@@ -88,14 +86,14 @@ public class CRMCourseController : BaseApiController
     if (options == null)
       return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
 
-    var summaryGrid = await _serviceManager.CRMCourses.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.CrmCourses.SummaryGrid(options);
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
   [HttpPost(RouteConstants.CreateCourse)]
   [RequestSizeLimit(1_000_000)]
-  public async Task<IActionResult> CreateNewRecord([FromBody]  CrmCourseDto modelDto)
+  public async Task<IActionResult> CreateNewRecord([FromBody] CrmCourseDto modelDto)
   {
     try
     {
@@ -111,7 +109,7 @@ public class CRMCourseController : BaseApiController
       if (modelDto == null)
         return BadRequest(ResponseHelper.BadRequest("Course data is required"));
 
-      CrmCourseDto res = await _serviceManager.CRMCourses.CreateNewRecordAsync(modelDto, currentUser);
+      CrmCourseDto res = await _serviceManager.CrmCourses.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.CourseId > 0)
         return Ok(ResponseHelper.Created(res, "Course created successfully"));
@@ -140,7 +138,7 @@ public class CRMCourseController : BaseApiController
       if (currentUser == null)
         return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
 
-      var res = await _serviceManager.CRMCourses.UpdateRecordAsync(key, modelDto, false);
+      var res = await _serviceManager.CrmCourses.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "Course updated successfully"));
@@ -163,7 +161,7 @@ public class CRMCourseController : BaseApiController
       int userId = HttpContext.GetUserId();
       var currentUser = HttpContext.GetCurrentUser();
 
-      var res = await _serviceManager.CRMCourses.DeleteRecordAsync(key, modelDto);
+      var res = await _serviceManager.CrmCourses.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "Course deleted successfully"));

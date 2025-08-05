@@ -2,10 +2,10 @@ using bdDevCRM.Entities.Entities.CRM;
 
 namespace bdDevCRM.RepositoriesContracts.CRM;
 
-public interface IApplicantReferenceRepository : IRepositoryBase<ApplicantReference>
+public interface ICrmApplicantReferenceRepository : IRepositoryBase<CrmApplicantReference>
 {
-  Task<IEnumerable<ApplicantReference>> GetActiveApplicantReferencesAsync(bool track);
-  Task<IEnumerable<ApplicantReference>> GetApplicantReferencesAsync(bool track);
-  Task<ApplicantReference?> GetApplicantReferenceAsync(int id, bool track);
-  Task<IEnumerable<ApplicantReference>> GetApplicantReferencesByApplicantIdAsync(int applicantId, bool track);
+  Task<IEnumerable<CrmApplicantReference>> GetActiveApplicantReferencesAsync(bool track);
+  Task<IEnumerable<CrmApplicantReference>> GetApplicantReferencesAsync(bool track);
+  Task<CrmApplicantReference?> GetApplicantReferenceAsync(int id, bool track);
+  Task<IEnumerable<CrmApplicantReference>> GetApplicantReferencesByApplicantIdAsync(int applicantId, bool track);
 }

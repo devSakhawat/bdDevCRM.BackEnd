@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
 
-public class AccessControlRepository : RepositoryBase<Accesscontrol>, IAccessControlRepository
+public class AccessControlRepository : RepositoryBase<AccessControl>, IAccessControlRepository
 {
   public AccessControlRepository(CRMContext context) : base(context) { }
 

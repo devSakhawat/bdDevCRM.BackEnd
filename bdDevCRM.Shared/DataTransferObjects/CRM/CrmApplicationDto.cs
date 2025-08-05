@@ -11,7 +11,7 @@ public class CrmApplicationDto
 
   public DateTime ApplicationDate { get; set; }
 
-  public string ApplicationStatus { get; set; } = null!;
+  public string StatusId { get; set; }
 
   public DateTime CreatedDate { get; set; }
 

@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
-public sealed class CRMInstituteRepository : RepositoryBase<Crminstitute>, ICRMInstituteRepository
+public sealed class CRMInstituteRepository : RepositoryBase<CrmInstitute>, ICrmInstituteRepository
 {
   public CRMInstituteRepository(CRMContext context) : base(context) { }
 
-  public async Task<IEnumerable<Crminstitute>> GetActiveInstitutesAsync(bool track) => await ListByConditionAsync(x => x.Status == true, c => c.InstituteId, track);
+  public async Task<IEnumerable<CrmInstitute>> GetActiveInstitutesAsync(bool track) => await ListByConditionAsync(x => x.Status == true, c => c.InstituteId, track);
 
-  public async Task<IEnumerable<Crminstitute>> GetInstitutesAsync(bool track) => await ListAsync(c => c.InstituteId, track);
+  public async Task<IEnumerable<CrmInstitute>> GetInstitutesAsync(bool track) => await ListAsync(c => c.InstituteId, track);
 
-  public async Task<Crminstitute?> GetInstituteAsync(int id, bool track) => await FirstOrDefaultAsync(c => c.InstituteId == id, track);
+  public async Task<CrmInstitute?> GetInstituteAsync(int id, bool track) => await FirstOrDefaultAsync(c => c.InstituteId == id, track);
 }
 

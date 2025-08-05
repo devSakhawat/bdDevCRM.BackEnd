@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.RepositoriesContracts.DMS;
 
-public interface IDmsdocumentFolderRepository : IRepositoryBase<DmsdocumentFolder>
+public interface IDmsDocumentFolderRepository : IRepositoryBase<DmsDocumentFolder>
 {
-  Task<IEnumerable<DmsdocumentFolder>> GetFoldersByParentIdAsync(int? parentId, bool trackChanges);
-  void CreateFolder(DmsdocumentFolder folder);
-  void UpdateFolder(DmsdocumentFolder folder);
-  void DeleteFolder(DmsdocumentFolder folder);
+  Task<IEnumerable<DmsDocumentFolder>> GetFoldersByParentIdAsync(int? parentId, bool trackChanges);
+  void CreateFolder(DmsDocumentFolder folder);
+  void UpdateFolder(DmsDocumentFolder folder);
+  void DeleteFolder(DmsDocumentFolder folder);
 }

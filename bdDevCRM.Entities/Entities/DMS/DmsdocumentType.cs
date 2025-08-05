@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
 
-public partial class DmsdocumentType
+public partial class DmsDocumentType
 {
     public int DocumentTypeId { get; set; }
 
@@ -17,5 +17,5 @@ public partial class DmsdocumentType
 
     public int? MaxFileSizeMb { get; set; }
 
-    public virtual ICollection<Dmsdocument> Dmsdocument { get; set; } = new List<Dmsdocument>();
+    public virtual ICollection<DmsDocument> DmsDocument { get; set; } = new List<DmsDocument>();
 }

@@ -29,7 +29,7 @@ public class GetApplicationDto
   public string? IntakeMonth { get; set; }
   public int IntakeYearId { get; set; }
   public string? IntakeYear { get; set; }
-  public string? ApplicationFee { get; set; }
+  public decimal? ApplicationFee { get; set; }
   public int CurrencyId { get; set; }
   public string? CurrencyName { get; set; }
   public int PaymentMethodId { get; set; }
@@ -58,7 +58,7 @@ public class GetApplicationDto
   public int MaritalStatusId { get; set; }
   public string? MaritalStatusName { get; set; }
   public string? Nationality { get; set; }
-  public string? HasValidPassport { get; set; }
+  public bool? HasValidPassport { get; set; }
   public string? PassportNumber { get; set; }
   public DateTime? PassportIssueDate { get; set; }
   public DateTime? PassportExpiryDate { get; set; }
@@ -229,7 +229,7 @@ public class GetApplicationDto
   // ================================
   public int ApplicantReferenceId { get; set; }
   public int Ref_ApplicantId { get; set; }
-  public string ReferenceName { get; set; } = null!;
+  public string? ReferenceName { get; set; } = null!;
   public string? Designation { get; set; }
   public string? Institution { get; set; }
   public string? EmailID { get; set; }
@@ -262,8 +262,8 @@ public class GetApplicationDto
   // ================================
   public int AdditionalInfoId { get; set; }
   public int AddInfo_ApplicantId { get; set; }
-  public string? RequireAccommodation { get; set; }
-  public string? HealthNMedicalNeeds { get; set; }
+  public bool? RequireAccommodation { get; set; }
+  public bool? HealthNMedicalNeeds { get; set; }
   public string? HealthNMedicalNeedsRemarks { get; set; }
   public string? AdditionalInformationRemarks { get; set; }
   public string? AddInfoDocTitle { get; set; }

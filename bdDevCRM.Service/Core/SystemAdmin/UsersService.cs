@@ -165,7 +165,7 @@ left join Employment on Employment.HRRecordId=Users.EmployeeId where Users.Emplo
   // from users settings page
   public async Task<GridEntity<UsersDto>> UsersSummary(int companyId, bool trackChanges, CRMGridOptions options, UsersDto user)
   {
-    IEnumerable<GroupsRepositoryDto> objGroups = await _repository.AccessRestriction.AccessRestrictionGroupsByHrrecordId((int)user.HrRecordId);
+    IEnumerable<GroupsRepositoryDto> objGroups = await _repository.AccessRestrictions.AccessRestrictionGroupsByHrrecordId((int)user.HrRecordId);
     string condition = "";
     var newCondition = "";
     string groupCondition = string.Empty;
@@ -175,7 +175,7 @@ left join Employment on Employment.HRRecordId=Users.EmployeeId where Users.Emplo
       if (!string.IsNullOrEmpty(groupIds)) groupCondition = $" or GroupId in ({groupIds})";
     }
 
-    var accessRestrictionRepositoryDto = await _repository.AccessRestriction.AccessRestrictionByHrRecordId((int)user.HrRecordId, groupCondition);
+    var accessRestrictionRepositoryDto = await _repository.AccessRestrictions.AccessRestrictionByHrRecordId((int)user.HrRecordId, groupCondition);
 
     if (accessRestrictionRepositoryDto.Count() > 0)
     {

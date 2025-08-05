@@ -19,31 +19,29 @@ public partial class CrmApplication
 
     public int? UpdatedBy { get; set; }
 
-    public virtual ICollection<AdditionalInfo> AdditionalInfo { get; set; } = new List<AdditionalInfo>();
+    public virtual ICollection<CrmAdditionalInfo> CrmAdditionalInfo { get; set; } = new List<CrmAdditionalInfo>();
 
-    public virtual ICollection<ApplicantCourse> ApplicantCourse { get; set; } = new List<ApplicantCourse>();
+    public virtual ICollection<CrmApplicantCourse> CrmApplicantCourse { get; set; } = new List<CrmApplicantCourse>();
 
-    public virtual ICollection<ApplicantInfo> ApplicantInfo { get; set; } = new List<ApplicantInfo>();
+    public virtual ICollection<CrmApplicantInfo> CrmApplicantInfo { get; set; } = new List<CrmApplicantInfo>();
 
-    public virtual ICollection<ApplicantReference> ApplicantReference { get; set; } = new List<ApplicantReference>();
+    public virtual ICollection<CrmApplicantReference> CrmApplicantReference { get; set; } = new List<CrmApplicantReference>();
 
-    public virtual ICollection<EducationHistory> EducationHistory { get; set; } = new List<EducationHistory>();
+    public virtual ICollection<CrmEducationHistory> CrmEducationHistory { get; set; } = new List<CrmEducationHistory>();
 
-    public virtual ICollection<GMATInformation> GMATInformation { get; set; } = new List<GMATInformation>();
+    public virtual ICollection<CrmGMATInformation> CrmGmatinformation { get; set; } = new List<CrmGMATInformation>();
 
-    public virtual ICollection<IELTSInformation> IELTSInformation { get; set; } = new List<IELTSInformation>();
+    public virtual ICollection<CrmIELTSInformation> CrmIELTSInformation { get; set; } = new List<CrmIELTSInformation>();
 
-    public virtual ICollection<OTHERSInformation> OTHERSInformation { get; set; } = new List<OTHERSInformation>();
+    public virtual ICollection<CrmOthersInformation> CrmOthersInformation { get; set; } = new List<CrmOthersInformation>();
 
-    public virtual ICollection<PTEInformation> PTEInformation { get; set; } = new List<PTEInformation>();
+    public virtual ICollection<CrmPermanentAddress> CrmPermanentAddress { get; set; } = new List<CrmPermanentAddress>();
 
-    public virtual ICollection<PermanentAddress> PermanentAddress { get; set; } = new List<PermanentAddress>();
+    public virtual ICollection<CrmPresentAddress> CrmPresentAddress { get; set; } = new List<CrmPresentAddress>();
 
-    public virtual ICollection<PresentAddress> PresentAddress { get; set; } = new List<PresentAddress>();
+    public virtual ICollection<CrmPTEInformation> CrmPteinformation { get; set; } = new List<CrmPTEInformation>();
 
-    public virtual ICollection<StatementOfPurpose> StatementOfPurpose { get; set; } = new List<StatementOfPurpose>();
+    public virtual ICollection<CrmTOEFLInformation> CrmToeflinformation { get; set; } = new List<CrmTOEFLInformation>();
 
-    public virtual ICollection<TOEFLInformation> TOEFLInformation { get; set; } = new List<TOEFLInformation>();
-
-    public virtual ICollection<WorkExperience> WorkExperience { get; set; } = new List<WorkExperience>();
+    public virtual ICollection<CrmWorkExperience> CrmWorkExperience { get; set; } = new List<CrmWorkExperience>();
 }

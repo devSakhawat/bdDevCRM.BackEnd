@@ -34,7 +34,7 @@ public class CRMInstituteTypeController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.CRMInstituteTypes.GetInstituteTypesDDLAsync(trackChanges: false);
+    var res = await _serviceManager.CrmInstituteTypes.GetInstituteTypesDDLAsync(trackChanges: false);
     //return Ok(res);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CRMInstituteTypeDto>>("No institute type found"));
@@ -56,7 +56,7 @@ public class CRMInstituteTypeController : BaseApiController
 
     if (options == null) return BadRequest("CRMGridOptions cannot be null.");
 
-    var summary = await _serviceManager.CRMInstituteTypes.SummaryGrid(options);
+    var summary = await _serviceManager.CrmInstituteTypes.SummaryGrid(options);
     return (summary != null) ? Ok(summary) : NoContent();
   }
 
@@ -73,7 +73,7 @@ public class CRMInstituteTypeController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.CRMInstituteTypes.CreateNewRecordAsync(dto);
+    var res = await _serviceManager.CrmInstituteTypes.CreateNewRecordAsync(dto);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
   }
 
@@ -90,7 +90,7 @@ public class CRMInstituteTypeController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.CRMInstituteTypes.UpdateRecordAsync(key, dto, false);
+    var res = await _serviceManager.CrmInstituteTypes.UpdateRecordAsync(key, dto, false);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
   }
 
@@ -107,7 +107,7 @@ public class CRMInstituteTypeController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("UnAuthorized attempted");
 
-    var res = await _serviceManager.CRMInstituteTypes.DeleteRecordAsync(key, dto);
+    var res = await _serviceManager.CrmInstituteTypes.DeleteRecordAsync(key, dto);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
   }
 
@@ -125,7 +125,7 @@ public class CRMInstituteTypeController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.CRMInstituteTypes.SaveOrUpdateAsync(key, dto);
+    var res = await _serviceManager.CrmInstituteTypes.SaveOrUpdateAsync(key, dto);
     return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
   }
 }

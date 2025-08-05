@@ -9,21 +9,21 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.DMS;
 
-public class DmsdocumentTypeRepository : RepositoryBase<DmsdocumentType>, IDmsdocumentTypeRepository
+public class DmsDocumentTypeRepository : RepositoryBase<DmsDocumentType>, IDmsDocumentTypeRepository
 {
-  public DmsdocumentTypeRepository(CRMContext context) : base(context) { }
+  public DmsDocumentTypeRepository(CRMContext context) : base(context) { }
 
   // Get all document types
-  public async Task<IEnumerable<DmsdocumentType>> GetAllDocumentTypesAsync(bool trackChanges) =>
+  public async Task<IEnumerable<DmsDocumentType>> GetAllDocumentTypesAsync(bool trackChanges) =>
       await ListAsync(x => x.DocumentTypeId, trackChanges);
 
   // Create document type
-  public void CreateDocumentType(DmsdocumentType type) => Create(type);
+  public void CreateDocumentType(DmsDocumentType type) => Create(type);
 
   // Update document type
-  public void UpdateDocumentType(DmsdocumentType type) => UpdateByState(type);
+  public void UpdateDocumentType(DmsDocumentType type) => UpdateByState(type);
 
   // Delete document type
-  public void DeleteDocumentType(DmsdocumentType type) => Delete(type);
+  public void DeleteDocumentType(DmsDocumentType type) => Delete(type);
 }
 

@@ -40,11 +40,11 @@ public class CountryController : BaseApiController
     }
 
     //var res = await _serviceManager.Currencies.GetCurrenciesDDLAsync();
-    var res = await _serviceManager.Countries.GetCountriesDDLAsync(trackChanges: false);
+    var res = await _serviceManager.CrmCountries.GetCountriesDDLAsync(trackChanges: false);
 
     //return Ok(res);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CountryDDL>>("No country found"));
+      return Ok(ResponseHelper.NoContent<IEnumerable<CrmCountryDDL>>("No country found"));
 
     return Ok(ResponseHelper.Success(res, "Country retrieved successfully"));
   }
@@ -69,14 +69,14 @@ public class CountryController : BaseApiController
     {
       return BadRequest("CRMGridOptions cannot be null.");
     }
-    var summaryGrid = await _serviceManager.Countries.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.CrmCountries.SummaryGrid(options);
     return (summaryGrid != null) ? Ok(summaryGrid) : NoContent();
   }
 
 
   [HttpPost(RouteConstants.CreateCountry)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> CreateNewRcord([FromBody] CountryDto modelDto)
+  public async Task<IActionResult> CreateNewRcord([FromBody] CrmCountryDto modelDto)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
@@ -92,7 +92,7 @@ public class CountryController : BaseApiController
       return Unauthorized("User not found in cache.");
     }
 
-    var res = await _serviceManager.Countries.CreateNewRecordAsync(modelDto);
+    var res = await _serviceManager.CrmCountries.CreateNewRecordAsync(modelDto);
 
     if (res == OperationMessage.Success)
     {
@@ -107,7 +107,7 @@ public class CountryController : BaseApiController
 
   [HttpPut(RouteConstants.UpdateCountry)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> UpdateCountry([FromRoute] int key, [FromBody] CountryDto modelDto)
+  public async Task<IActionResult> UpdateCountry([FromRoute] int key, [FromBody] CrmCountryDto modelDto)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
@@ -123,7 +123,7 @@ public class CountryController : BaseApiController
     {
       return Unauthorized("User not found in cache.");
     }
-    var res = await _serviceManager.Countries.UpdateNewRecordAsync(key, modelDto, false);
+    var res = await _serviceManager.CrmCountries.UpdateNewRecordAsync(key, modelDto, false);
 
     if (res == OperationMessage.Success)
     {
@@ -138,7 +138,7 @@ public class CountryController : BaseApiController
 
   [HttpDelete(RouteConstants.DeleteCountry)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> DeleteCountry([FromRoute] int key, [FromBody] CountryDto modelDto)
+  public async Task<IActionResult> DeleteCountry([FromRoute] int key, [FromBody] CrmCountryDto modelDto)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
@@ -154,7 +154,7 @@ public class CountryController : BaseApiController
     {
       return Unauthorized("UnAuthorized attempted");
     }
-    var res = await _serviceManager.Countries.DeleteRecordAsync(key, modelDto);
+    var res = await _serviceManager.CrmCountries.DeleteRecordAsync(key, modelDto);
 
     if (res == OperationMessage.Success)
     {
@@ -169,7 +169,7 @@ public class CountryController : BaseApiController
 
   [HttpPost(RouteConstants.CreateOrUpdateCountry)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> SaveOrUpdate([FromRoute] int key, [FromBody] CountryDto modelDto)
+  public async Task<IActionResult> SaveOrUpdate([FromRoute] int key, [FromBody] CrmCountryDto modelDto)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
@@ -184,7 +184,7 @@ public class CountryController : BaseApiController
     {
       return Unauthorized("User not found in cache.");
     }
-    var res = await _serviceManager.Countries.SaveOrUpdate(key, modelDto);
+    var res = await _serviceManager.CrmCountries.SaveOrUpdate(key, modelDto);
 
     if (res == OperationMessage.Success)
     {

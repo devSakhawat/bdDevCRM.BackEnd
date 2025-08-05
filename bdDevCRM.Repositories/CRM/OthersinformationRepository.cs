@@ -4,22 +4,22 @@ using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.CRM;
 
-public sealed class OTHERSInformationRepository : RepositoryBase<OTHERSInformation>, IOTHERSInformationRepository
+public sealed class CrmOthersInformationRepository : RepositoryBase<CrmOthersInformation>, ICrmOthersInformationRepository
 {
-  public OTHERSInformationRepository(CRMContext context) : base(context) { }
+  public CrmOthersInformationRepository(CRMContext context) : base(context) { }
 
-  public async Task<IEnumerable<OTHERSInformation>> GetActiveOthersinformationsAsync(bool track) =>
-      await ListAsync(c => c.OTHERSInformationId, track);
+  public async Task<IEnumerable<CrmOthersInformation>> GetActiveOthersinformationsAsync(bool track) =>
+      await ListAsync(c => c.OthersInformationId, track);
 
-  public async Task<IEnumerable<OTHERSInformation>> GetOthersinformationsAsync(bool track) =>
-      await ListAsync(c => c.OTHERSInformationId, track);
+  public async Task<IEnumerable<CrmOthersInformation>> GetOthersinformationsAsync(bool track) =>
+      await ListAsync(c => c.OthersInformationId, track);
 
-  public async Task<OTHERSInformation?> GetOthersinformationAsync(int id, bool track) =>
-      await FirstOrDefaultAsync(c => c.OTHERSInformationId == id, track);
+  public async Task<CrmOthersInformation?> GetOthersinformationAsync(int id, bool track) =>
+      await FirstOrDefaultAsync(c => c.OthersInformationId == id, track);
 
-  public async Task<IEnumerable<OTHERSInformation>> GetOthersinformationsByApplicantIdAsync(int applicantId, bool track) =>
-      await ListByConditionAsync(x => x.ApplicantId == applicantId, c => c.OTHERSInformationId, track);
+  public async Task<IEnumerable<CrmOthersInformation>> GetOthersinformationsByApplicantIdAsync(int applicantId, bool track) =>
+      await ListByConditionAsync(x => x.ApplicantId == applicantId, c => c.OthersInformationId, track);
 
-  public async Task<OTHERSInformation?> GetOthersinformationByApplicantIdAsync(int applicantId, bool track) =>
+  public async Task<CrmOthersInformation?> GetOthersinformationByApplicantIdAsync(int applicantId, bool track) =>
       await FirstOrDefaultAsync(c => c.ApplicantId == applicantId, track);
 }

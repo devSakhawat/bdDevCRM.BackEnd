@@ -1,55 +1,51 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Entities.Entities.Core;
-
+using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects;
-using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
-using System.Runtime.InteropServices;
-using bdDevCRM.Utilities.Exceptions;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
 
-internal sealed class CountryService : ICountryService
+internal sealed class CrmCountryService : ICrmCountryService
 {
 
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
 
-  public CountryService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public CrmCountryService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<CountryDDL>> GetCountriesDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<CrmCountryDDL>> GetCountriesDDLAsync(bool trackChanges = false)
   {
-    IEnumerable<Country> countries = await _repository.Countries.GetActiveCountriesAsync(trackChanges);
-    if (countries.Count() == 0) throw new GenericListNotFoundException("Country");
+    IEnumerable<CrmCountry> countries = await _repository.Countries.GetActiveCountriesAsync(trackChanges);
+    if (countries.Count() == 0) throw new GenericListNotFoundException("CrmCountry");
 
-    List<CountryDDL> countryDtos = MyMapper.JsonCloneIEnumerableToList<Country, CountryDDL>(countries);
+    List<CrmCountryDDL> countryDtos = MyMapper.JsonCloneIEnumerableToList<CrmCountry, CrmCountryDDL>(countries);
     return countryDtos;
   }
 
-  public async Task<GridEntity<CountryDto>> SummaryGrid(CRMGridOptions options)
+  public async Task<GridEntity<CrmCountryDto>> SummaryGrid(CRMGridOptions options)
   {
-    string query = "Select * from Country";
+    string query = "Select * from CrmCountry";
     string orderBy = " CountryName asc ";
-    var gridEntity = await _repository.Countries.GridData<CountryDto>(query, options, orderBy, "");
+    var gridEntity = await _repository.Countries.GridData<CrmCountryDto>(query, options, orderBy, "");
 
     return gridEntity;
   }
 
-  public async Task<string> CreateNewRecordAsync(CountryDto modelDto)
+  public async Task<string> CreateNewRecordAsync(CrmCountryDto modelDto)
   {
     string res = string.Empty;
 
@@ -62,18 +58,18 @@ internal sealed class CountryService : ICountryService
     else
     {
       bool isCountryExist = await _repository.Countries.ExistsAsync(x => x.CountryName.Trim().ToLower() == modelDto.CountryName.Trim().ToLower());
-      if (isCountryExist) throw new DuplicateRecordException("Country", "CountryName");
+      if (isCountryExist) throw new DuplicateRecordException("CrmCountry", "CountryName");
 
       if (!isCountryExist)
       {
-        Country country = MyMapper.JsonClone<CountryDto, Country>(modelDto);
+        CrmCountry country = MyMapper.JsonClone<CrmCountryDto, CrmCountry>(modelDto);
         int lastCreatedId = await _repository.Countries.CreateAndGetIdAsync(country);
         if (string.IsNullOrEmpty(lastCreatedId.ToString()))
         {
           throw new InvalidCreateOperationException();
         }
 
-        _logger.LogWarn($"New record create to Country. New id: {lastCreatedId} by .");
+        _logger.LogWarn($"New record create to CrmCountry. New id: {lastCreatedId} by .");
         return OperationMessage.Success;
       }
       else
@@ -86,18 +82,18 @@ internal sealed class CountryService : ICountryService
     #endregion New Record
   }
 
-  public async Task<string> UpdateNewRecordAsync(int key, CountryDto modelDto, bool trackChanges)
+  public async Task<string> UpdateNewRecordAsync(int key, CrmCountryDto modelDto, bool trackChanges)
   {
     string res = string.Empty;
 
-    #region Update Country
+    #region Update CrmCountry
     if (key > 0 && key == modelDto.CountryId)
     {
-      Expression<Func<Country, bool>> expression = e => e.CountryId == key;
+      Expression<Func<CrmCountry, bool>> expression = e => e.CountryId == key;
       bool exists = await _repository.Countries.ExistsAsync(expression);
       if (exists)
       {
-        Country countryObj = MyMapper.JsonClone<CountryDto, Country>(modelDto);
+        CrmCountry countryObj = MyMapper.JsonClone<CrmCountryDto, CrmCountry>(modelDto);
         _repository.Countries.Update(countryObj);
         await _repository.SaveAsync();
 
@@ -118,12 +114,12 @@ internal sealed class CountryService : ICountryService
     return res;
   }
 
-  public async Task<string> DeleteRecordAsync(int key, CountryDto modelDto)
+  public async Task<string> DeleteRecordAsync(int key, CrmCountryDto modelDto)
   {
-    if (modelDto == null) throw new NullModelBadRequestException(new CountryDto().GetType().Name.ToString());
-    if (key != modelDto.CountryId) throw new IdMismatchBadRequestException(key.ToString(), new CountryDto().GetType().Name.ToString());
+    if (modelDto == null) throw new NullModelBadRequestException(new CrmCountryDto().GetType().Name.ToString());
+    if (key != modelDto.CountryId) throw new IdMismatchBadRequestException(key.ToString(), new CrmCountryDto().GetType().Name.ToString());
 
-    Country country = await _repository.Countries.FirstOrDefaultAsync(m => m.CountryId == key, trackChanges: false);
+    CrmCountry country = await _repository.Countries.FirstOrDefaultAsync(m => m.CountryId == key, trackChanges: false);
     if (country == null) throw new GenericNotFoundException("Country", "CountryId", key.ToString());
 
     await _repository.Countries.DeleteAsync(x => x.CountryId == modelDto.CountryId, trackChanges: true);
@@ -132,7 +128,7 @@ internal sealed class CountryService : ICountryService
     return OperationMessage.Success;
   }
 
-  public async Task<string> SaveOrUpdate(int key, CountryDto modelDto)
+  public async Task<string> SaveOrUpdate(int key, CrmCountryDto modelDto)
   {
     string res = string.Empty;
     bool isCountryExist = await _repository.Countries.ExistsAsync(x => x.CountryName.Trim().ToLower() == modelDto.CountryName.Trim().ToLower());
@@ -144,7 +140,7 @@ internal sealed class CountryService : ICountryService
 
       if (!isCountryExist)
       {
-        Country country = MyMapper.JsonClone<CountryDto, Country>(modelDto);
+        CrmCountry country = MyMapper.JsonClone<CrmCountryDto, CrmCountry>(modelDto);
         int lastCreatedId = await _repository.Countries.CreateAndGetIdAsync(country);
         if (string.IsNullOrEmpty(lastCreatedId.ToString()))
         {
@@ -170,7 +166,7 @@ internal sealed class CountryService : ICountryService
       {
         if (!isCountryExist)
         {
-          Country country = MyMapper.JsonClone<CountryDto, Country>(modelDto);
+          CrmCountry country = MyMapper.JsonClone<CrmCountryDto, CrmCountry>(modelDto);
           _repository.Countries.Update(country);
           await _repository.SaveAsync();
 
@@ -208,31 +204,31 @@ internal sealed class CountryService : ICountryService
     await _repository.SaveAsync();
   }
 
-  public async Task<CountryDto> CreateCountryAsync(CountryDto entityForCreate)
+  public async Task<CrmCountryDto> CreateCountryAsync(CrmCountryDto entityForCreate)
   {
-    Country country = MyMapper.JsonClone<CountryDto, Country>(entityForCreate);
+    CrmCountry country = MyMapper.JsonClone<CrmCountryDto, CrmCountry>(entityForCreate);
     _repository.Countries.CreateCountry(country);
     await _repository.SaveAsync();
     return entityForCreate;
   }
 
-  public async Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges)
+  public async Task<IEnumerable<CrmCountryDto>> GetCountriesAsync(bool trackChanges)
   {
-    IEnumerable<Country> countries = await _repository.Countries.GetCountriesAsync(trackChanges);
-    if (countries.Count() == 0) throw new GenericListNotFoundException("Country");
+    IEnumerable<CrmCountry> countries = await _repository.Countries.GetCountriesAsync(trackChanges);
+    if (countries.Count() == 0) throw new GenericListNotFoundException("CrmCountry");
 
-    List<CountryDto> countryDtos = MyMapper.JsonCloneIEnumerableToList<Country, CountryDto>(countries);
+    List<CrmCountryDto> countryDtos = MyMapper.JsonCloneIEnumerableToList<CrmCountry, CrmCountryDto>(countries);
     return countryDtos;
   }
 
-  public async Task<CountryDto> GetCountryAsync(int countryId, bool trackChanges)
+  public async Task<CrmCountryDto> GetCountryAsync(int countryId, bool trackChanges)
   {
     if (countryId <= 0) throw new ArgumentOutOfRangeException(nameof(countryId), "Country ID must be be zero or non-negative integer.");
 
-    Country country = await _repository.Countries.GetCountryAsync(countryId, trackChanges);
+    CrmCountry country = await _repository.Countries.GetCountryAsync(countryId, trackChanges);
     if (country == null) throw new GenericNotFoundException("Country", "CountryId", countryId.ToString());
 
-    CountryDto countryDto = MyMapper.JsonClone<Country, CountryDto>(country);
+    CrmCountryDto countryDto = MyMapper.JsonClone<CrmCountry, CrmCountryDto>(country);
     return countryDto;
   }
 

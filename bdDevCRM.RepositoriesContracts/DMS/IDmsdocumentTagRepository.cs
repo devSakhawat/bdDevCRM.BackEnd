@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.RepositoriesContracts.DMS;
 
-public interface IDmsdocumentTagRepository : IRepositoryBase<DmsdocumentTag>
+public interface IDmsDocumentTagRepository : IRepositoryBase<DmsDocumentTag>
 {
-  Task<IEnumerable<DmsdocumentTag>> GetAllTagsAsync(bool trackChanges);
-  void CreateTag(DmsdocumentTag tag);
-  void DeleteTag(DmsdocumentTag tag);
+  Task<IEnumerable<DmsDocumentTag>> GetAllTagsAsync(bool trackChanges);
+  void CreateTag(DmsDocumentTag tag);
+  void DeleteTag(DmsDocumentTag tag);
 }

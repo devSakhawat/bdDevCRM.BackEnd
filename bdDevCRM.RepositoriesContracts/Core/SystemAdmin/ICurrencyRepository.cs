@@ -1,8 +1,8 @@
-﻿using bdDevCRM.Entities.Entities.Core;
+﻿using bdDevCRM.Entities.Entities.CRM;
 
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 
-public interface ICurrencyRepository : IRepositoryBase<CurrencyInfo>
+public interface ICurrencyRepository : IRepositoryBase<CrmCurrencyInfo>
 {
 
   //void UpdateCurrency(Currency currency);

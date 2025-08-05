@@ -35,13 +35,13 @@ public class TokenBlacklistService : ITokenBlacklistService
       ExpiryDate = expiryDate
     };
 
-    await _repository.TokenBlacklist.AddToBlacklistAsync(tokenBlacklist);
+    await _repository.TokenBlacklists.AddToBlacklistAsync(tokenBlacklist);
     await _repository.SaveAsync();
   }
 
   public Task<bool> IsTokenBlacklisted(string token)
   {
-    var isBlacklisted = _repository.TokenBlacklist.IsTokenBlacklistedAsync(token);
+    var isBlacklisted = _repository.TokenBlacklists.IsTokenBlacklistedAsync(token);
     return isBlacklisted;
   }
 }

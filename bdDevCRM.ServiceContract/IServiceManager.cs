@@ -11,7 +11,7 @@ namespace bdDevCRM.ServicesContract;
 public interface IServiceManager
 {
   ITokenBlacklistService TokenBlacklist { get; }
-  ICountryService Countries { get; }
+  ICrmCountryService CrmCountries { get; }
   ICurrencyService Currencies { get; }
   ICompanyService Companies { get; }
   ISystemSettingsService SystemSettings { get; }
@@ -30,41 +30,41 @@ public interface IServiceManager
   IDepartmentService departments { get; }
   #endregion HR
 
-  #region CRM
-  ICRMInstituteService CRMInstitutes { get; }
-  ICRMInstituteTypeService CRMInstituteTypes { get; }
-  ICRMCourseService CRMCourses { get; }
-  ICRMMonthService CRMMonths { get; }
-  ICRMYearService CRMYears { get; }
+  #region Crm
+  ICrmInstituteService CrmInstitutes { get; }
+  ICrmInstituteTypeService CrmInstituteTypes { get; }
+  ICrmCourseService CrmCourses { get; }
+  ICrmMonthService CrmMonths { get; }
+  ICrmYearService CrmYears { get; }
   
-  // Existing CRM services
-  ICRMApplicationService CRMApplication { get; }
-  IApplicantCourseService ApplicantCourses { get; }
-  IApplicantInfoService ApplicantInfos { get; }
-  IPermanentAddressService PermanentAddresses { get; }
-  IPresentAddressService PresentAddresses { get; }
+  // Existing Crm services
+  ICrmApplicationService CrmApplications { get; }
+  ICrmApplicantCourseService ApplicantCourses { get; }
+  ICrmApplicantInfoService ApplicantInfos { get; }
+  ICrmPermanentAddressService PermanentAddresses { get; }
+  ICrmPresentAddressService PresentAddresses { get; }
   
-  // New 10 CRM services
-  IEducationHistoryService EducationHistories { get; }
-  IIELTSInformationService IELTSInformations { get; }
-  ITOEFLInformationService TOEFLInformations { get; }
-  IPTEInformationService PTEInformations { get; }
-  IGMATInformationService GMATInformations { get; }
-  IOTHERSInformationService OTHERSInformations { get; }
-  IWorkExperienceService WorkExperiences { get; }
-  IApplicantReferenceService ApplicantReferences { get; }
-  IStatementOfPurposeService StatementOfPurposes { get; }
-  IAdditionalInfoService AdditionalInfos { get; }
-  #endregion CRM
+  // New 10 Crm services
+  ICrmEducationHistoryService EducationHistories { get; }
+  ICrmIELTSInformationService IELTSInformations { get; }
+  ICrmTOEFLInformationService TOEFLInformations { get; }
+  ICrmPTEInformationService PTEInformations { get; }
+  ICrmGmatinformationService GMATInformations { get; }
+  ICrmOthersInformationService OTHERSInformations { get; }
+  ICrmWorkExperienceService WorkExperiences { get; }
+  ICrmApplicantReferenceService ApplicantReferences { get; }
+  ICrmStatementOfPurposeService StatementOfPurposes { get; }
+  ICrmAdditionalInfoService AdditionalInfos { get; }
+  #endregion Crm
 
   #region DMS
-  IDmsdocumentService Dmsdocuments { get; }
-  IDmsdocumentTypeService DmsdocumentTypes { get; }
-  IDmsdocumentTagService DmsdocumentTags { get; }
-  IDmsdocumentTagMapService DmsdocumentTagMaps { get; }
-  IDmsdocumentFolderService DmsdocumentFolders { get; }
-  IDmsdocumentVersionService DmsdocumentVersions { get; }
-  IDmsdocumentAccessLogService DmsdocumentAccessLogs { get; }
+  IDmsDocumentService DmsDocuments { get; }
+  IDmsDocumentTypeService DmsDocumentTypes { get; }
+  IDmsDocumentTagService DmsDocumentTags { get; }
+  IDmsDocumentTagMapService DmsDocumentTagMaps { get; }
+  IDmsDocumentFolderService DmsDocumentFolders { get; }
+  IDmsDocumentVersionService DmsDocumentVersions { get; }
+  IDmsDocumentAccessLogService DmsDocumentAccessLogs { get; }
   #endregion
 
   T GetCache<T>(int key);

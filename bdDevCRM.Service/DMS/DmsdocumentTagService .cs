@@ -16,51 +16,51 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Service.DMS;
 
-internal sealed class DmsdocumentTagService : IDmsdocumentTagService
+internal sealed class DmsDocumentTagService : IDmsDocumentTagService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
 
-  public DmsdocumentTagService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DmsDocumentTagService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<DmsdocumentTagDDL>> GetTagsDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<DmsDocumentTagDDL>> GetTagsDDLAsync(bool trackChanges = false)
   {
-    var tags = await _repository.DmsdocumentTags.ListAsync(trackChanges:trackChanges);
+    var tags = await _repository.DmsDocumentTags.ListAsync(trackChanges:trackChanges);
 
     if (!tags.Any())
-      throw new GenericListNotFoundException("DmsdocumentTag");
+      throw new GenericListNotFoundException("DmsDocumentTag");
 
-    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<DmsdocumentTag, DmsdocumentTagDDL>(tags);
+    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<DmsDocumentTag, DmsDocumentTagDDL>(tags);
     return ddlDtos;
   }
 
-  public async Task<GridEntity<DmsdocumentTagDto>> SummaryGrid(CRMGridOptions options)
+  public async Task<GridEntity<DmsDocumentTagDto>> SummaryGrid(CRMGridOptions options)
   {
-    string query = "SELECT * FROM DmsdocumentTag";
+    string query = "SELECT * FROM DmsDocumentTag";
     string orderBy = "Name asc";
 
-    var gridEntity = await _repository.DmsdocumentTags.GridData<DmsdocumentTagDto>(query, options, orderBy, "");
+    var gridEntity = await _repository.DmsDocumentTags.GridData<DmsDocumentTagDto>(query, options, orderBy, "");
 
     return gridEntity;
   }
 
-  public async Task<string> CreateNewRecordAsync(DmsdocumentTagDto modelDto)
+  public async Task<string> CreateNewRecordAsync(DmsDocumentTagDto modelDto)
   {
     if (modelDto.TagId != 0)
       throw new InvalidCreateOperationException("TagId must be 0 when creating a new tag.");
 
-    bool isExist = await _repository.DmsdocumentTags.ExistsAsync(x => x.DocumentTagName.Trim().ToLower() == modelDto.Name.Trim().ToLower());
-    if (isExist) throw new DuplicateRecordException("DmsdocumentTag", "Name");
+    bool isExist = await _repository.DmsDocumentTags.ExistsAsync(x => x.DocumentTagName.Trim().ToLower() == modelDto.Name.Trim().ToLower());
+    if (isExist) throw new DuplicateRecordException("DmsDocumentTag", "Name");
 
-    var tag = MyMapper.JsonClone<DmsdocumentTagDto, DmsdocumentTag>(modelDto);
+    var tag = MyMapper.JsonClone<DmsDocumentTagDto, DmsDocumentTag>(modelDto);
 
-    var createdId = await _repository.DmsdocumentTags.CreateAndGetIdAsync(tag);
+    var createdId = await _repository.DmsDocumentTags.CreateAndGetIdAsync(tag);
     if (createdId == 0)
       throw new InvalidCreateOperationException();
 
@@ -70,38 +70,38 @@ internal sealed class DmsdocumentTagService : IDmsdocumentTagService
     return OperationMessage.Success;
   }
 
-  public async Task<string> UpdateNewRecordAsync(int key, DmsdocumentTagDto modelDto, bool trackChanges)
+  public async Task<string> UpdateNewRecordAsync(int key, DmsDocumentTagDto modelDto, bool trackChanges)
   {
     if (key <= 0 || key != modelDto.TagId)
       return "Invalid update attempt: key does not match the TagId.";
 
-    bool exists = await _repository.DmsdocumentTags.ExistsAsync(x => x.TagId == key);
+    bool exists = await _repository.DmsDocumentTags.ExistsAsync(x => x.TagId == key);
     if (!exists)
       return "Update failed: tag not found.";
 
-    var tag = MyMapper.JsonClone<DmsdocumentTagDto, DmsdocumentTag>(modelDto);
+    var tag = MyMapper.JsonClone<DmsDocumentTagDto, DmsDocumentTag>(modelDto);
 
-    _repository.DmsdocumentTags.Update(tag);
+    _repository.DmsDocumentTags.Update(tag);
     await _repository.SaveAsync();
     _logger.LogWarn($"Tag with Id: {key} updated.");
 
     return OperationMessage.Success;
   }
 
-  public async Task<string> DeleteRecordAsync(int key, DmsdocumentTagDto modelDto)
+  public async Task<string> DeleteRecordAsync(int key, DmsDocumentTagDto modelDto)
   {
     if (modelDto == null)
-      throw new NullModelBadRequestException(nameof(DmsdocumentTagDto));
+      throw new NullModelBadRequestException(nameof(DmsDocumentTagDto));
 
     if (key != modelDto.TagId)
-      throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsdocumentTagDto));
+      throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsDocumentTagDto));
 
-    var tag = await _repository.DmsdocumentTags.FirstOrDefaultAsync(x => x.TagId == key, false);
+    var tag = await _repository.DmsDocumentTags.FirstOrDefaultAsync(x => x.TagId == key, false);
 
     if (tag == null)
-      throw new GenericNotFoundException("DmsdocumentTag", "TagId", key.ToString());
+      throw new GenericNotFoundException("DmsDocumentTag", "TagId", key.ToString());
 
-    await _repository.DmsdocumentTags.DeleteAsync(x => x.TagId == key, true);
+    await _repository.DmsDocumentTags.DeleteAsync(x => x.TagId == key, true);
     await _repository.SaveAsync();
 
     _logger.LogWarn($"Tag with Id: {key} deleted.");
@@ -109,16 +109,16 @@ internal sealed class DmsdocumentTagService : IDmsdocumentTagService
     return OperationMessage.Success;
   }
 
-  public async Task<string> SaveOrUpdate(int key, DmsdocumentTagDto modelDto)
+  public async Task<string> SaveOrUpdate(int key, DmsDocumentTagDto modelDto)
   {
     if (modelDto.TagId == 0 && key == 0)
     {
-      bool isExist = await _repository.DmsdocumentTags.ExistsAsync(x => x.DocumentTagName.Trim().ToLower() == modelDto.Name.Trim().ToLower());
-      if (isExist) throw new DuplicateRecordException("DmsdocumentTag", "Name");
+      bool isExist = await _repository.DmsDocumentTags.ExistsAsync(x => x.DocumentTagName.Trim().ToLower() == modelDto.Name.Trim().ToLower());
+      if (isExist) throw new DuplicateRecordException("DmsDocumentTag", "Name");
 
-      var newTag = MyMapper.JsonClone<DmsdocumentTagDto, DmsdocumentTag>(modelDto);
+      var newTag = MyMapper.JsonClone<DmsDocumentTagDto, DmsDocumentTag>(modelDto);
 
-      var createdId = await _repository.DmsdocumentTags.CreateAndGetIdAsync(newTag);
+      var createdId = await _repository.DmsDocumentTags.CreateAndGetIdAsync(newTag);
       if (createdId == 0)
         throw new InvalidCreateOperationException();
 
@@ -128,11 +128,11 @@ internal sealed class DmsdocumentTagService : IDmsdocumentTagService
     }
     else if (key > 0 && key == modelDto.TagId)
     {
-      var exists = await _repository.DmsdocumentTags.ExistsAsync(x => x.TagId == key);
+      var exists = await _repository.DmsDocumentTags.ExistsAsync(x => x.TagId == key);
       if (!exists)
       {
-        var updateTag = MyMapper.JsonClone<DmsdocumentTagDto, DmsdocumentTag>(modelDto);
-        _repository.DmsdocumentTags.Update(updateTag);
+        var updateTag = MyMapper.JsonClone<DmsDocumentTagDto, DmsDocumentTag>(modelDto);
+        _repository.DmsDocumentTags.Update(updateTag);
         await _repository.SaveAsync();
 
         _logger.LogWarn($"Tag with Id: {key} updated.");

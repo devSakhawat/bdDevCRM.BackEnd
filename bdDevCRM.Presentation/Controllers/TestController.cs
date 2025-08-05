@@ -40,7 +40,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //    int userId = HttpContext.GetUserId();
 //    var currentUser = HttpContext.GetCurrentUser();
 
-//    var res = await _serviceManager.CRMInstitutes.GetInstitutesDDLAsync(trackChanges: false);
+//    var res = await _serviceManager.CrmInstitutes.GetInstitutesDDLAsync(trackChanges: false);
 //    if (res == null || !res.Any())
 //      return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found"));
 
@@ -64,7 +64,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
 
 
-//    var summaryGrid = await _serviceManager.CRMInstitutes.SummaryGrid(options);
+//    var summaryGrid = await _serviceManager.CrmInstitutes.SummaryGrid(options);
 //    //return (summaryGrid != null) ? Ok(summaryGrid) : NoContent();
 //    if (summaryGrid == null || !summaryGrid.Items.Any())
 //      return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
@@ -97,7 +97,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //    instituteModel.InstitutionLogoFile = logoFile;
 //    instituteModel.InstitutionProspectusFile = prospectusFile;
 
-//    CrmInstituteDto res = await _serviceManager.CRMInstitutes.CreateNewRecordAsync(instituteModel, currentUser);
+//    CrmInstituteDto res = await _serviceManager.CrmInstitutes.CreateNewRecordAsync(instituteModel, currentUser);
 //    // DMS call
 
 //    if (res.InstituteId > 0)
@@ -122,7 +122,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //      if (currentUser == null)
 //        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
 
-//      var res = await _serviceManager.CRMInstitutes.UpdateRecordAsync(key, modelDto, false);
+//      var res = await _serviceManager.CrmInstitutes.UpdateRecordAsync(key, modelDto, false);
 
 //      return Ok(ResponseHelper.Success(res, "Institute updated successfully"));
 //    }
@@ -143,7 +143,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //      int userId = HttpContext.GetUserId();
 //      var currentUser = HttpContext.GetCurrentUser();
 
-//      var res = await _serviceManager.CRMInstitutes.DeleteRecordAsync(key, modelDto);
+//      var res = await _serviceManager.CrmInstitutes.DeleteRecordAsync(key, modelDto);
 //      return Ok(ResponseHelper.Success("Institute deleted successfully"));
 //    }
 //    catch (Exception ex)
@@ -156,7 +156,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //  [HttpGet(RouteConstants.TestSearch)]
 //  public async Task<IActionResult> SearchInstitutes(string query)
 //  {
-//    var results = await _serviceManager.CRMInstitutes.GetInstitutesDDLAsync();
+//    var results = await _serviceManager.CrmInstitutes.GetInstitutesDDLAsync();
 //    if (!results.Any())
 //      return Ok(ResponseHelper.NoContent<List<CrmInstituteDto>>("No institutes found"));
 

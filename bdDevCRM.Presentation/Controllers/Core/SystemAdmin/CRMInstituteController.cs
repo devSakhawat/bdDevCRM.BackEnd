@@ -47,7 +47,7 @@ public class CRMInstituteController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.CRMInstitutes.GetInstitutesDDLAsync(trackChanges: false);
+    var res = await _serviceManager.CrmInstitutes.GetInstitutesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found"));
 
@@ -72,7 +72,7 @@ public class CRMInstituteController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.CRMInstitutes.GetInstitutesByCountryIdDDLAsync(countryId, trackChanges: false);
+    var res = await _serviceManager.CrmInstitutes.GetInstitutesByCountryIdDDLAsync(countryId, trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found for the specified country"));
 
@@ -97,7 +97,7 @@ public class CRMInstituteController : BaseApiController
     if (options == null)
       throw new NullModelBadRequestException(nameof(CRMGridOptions));
 
-    var summaryGrid = await _serviceManager.CRMInstitutes.SummaryGrid(options);
+    var summaryGrid = await _serviceManager.CrmInstitutes.SummaryGrid(options);
     if (summaryGrid == null || !summaryGrid.Items.Any())
       return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
 
@@ -129,7 +129,7 @@ public class CRMInstituteController : BaseApiController
       throw new GenericBadRequestException("Invalid content type. Expected multipart/form-data.");
 
     // Save institute record
-    CrmInstituteDto savedDto = await _serviceManager.CRMInstitutes.CreateNewRecordAsync(form, currentUser);
+    CrmInstituteDto savedDto = await _serviceManager.CrmInstitutes.CreateNewRecordAsync(form, currentUser);
 
     // Save attached files (Logo, Prospectus)
     await SaveInstituteFilesAsync(savedDto, currentUser);
@@ -164,7 +164,7 @@ public class CRMInstituteController : BaseApiController
   //    instituteModel.InstitutionLogoFile = logoFile;
   //    instituteModel.InstitutionProspectusFile = prospectusFile;
 
-  //    CrmInstituteDto res = await _serviceManager.CRMInstitutes.CreateNewRecordAsync(instituteModel, currentUser);
+  //    CrmInstituteDto res = await _serviceManager.CrmInstitutes.CreateNewRecordAsync(instituteModel, currentUser);
   //    await SaveInstituteFilesAsync(res, currentUser);
 
   //    if (res.InstituteId > 0)
@@ -202,7 +202,7 @@ public class CRMInstituteController : BaseApiController
       throw new GenericBadRequestException("Invalid content type. Expected multipart/form-data.");
 
     // Get existing institute record
-    CrmInstituteDto updatedDto = await _serviceManager.CRMInstitutes.UpdateRecordAsync(key, modelDto, false);
+    CrmInstituteDto updatedDto = await _serviceManager.CrmInstitutes.UpdateRecordAsync(key, modelDto, false);
 
 
     // Save attached files (Logo, Prospectus)
@@ -226,7 +226,7 @@ public class CRMInstituteController : BaseApiController
       int userId = HttpContext.GetUserId();
       var currentUser = HttpContext.GetCurrentUser();
 
-      var res = await _serviceManager.CRMInstitutes.DeleteRecordAsync(key, modelDto);
+      var res = await _serviceManager.CrmInstitutes.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "Institute deleted successfully"));
@@ -295,7 +295,7 @@ public class CRMInstituteController : BaseApiController
       string logoDMSJson = JsonConvert.SerializeObject(logoDMSDto);
 
       // Call DMS service to save file and create all DMS entities
-      string logoFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync( dto.InstitutionLogoFile, logoDMSJson );
+      string logoFilePath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync( dto.InstitutionLogoFile, logoDMSJson );
 
       // Update DTO with the returned file path
       if (!string.IsNullOrEmpty(logoFilePath))
@@ -347,7 +347,7 @@ public class CRMInstituteController : BaseApiController
       string prospectusDMSJson = JsonConvert.SerializeObject(prospectusDMSDto);
 
       // Call DMS service to save file and create all DMS entities
-      string prospectusFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithAllDmsAsync(dto.InstitutionProspectusFile, prospectusDMSJson
+      string prospectusFilePath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(dto.InstitutionProspectusFile, prospectusDMSJson
       );
 
       // Update DTO with the returned file path
@@ -410,7 +410,7 @@ public class CRMInstituteController : BaseApiController
   //    };
 
   //    string logoDMSJson = JsonConvert.SerializeObject(logoDMSDto);
-  //    string logoFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithVersioningAsync(
+  //    string logoFilePath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithVersioningAsync(
   //        updatedDto.InstitutionLogoFile,
   //        logoDMSJson
   //    );
@@ -419,7 +419,7 @@ public class CRMInstituteController : BaseApiController
   //    {
   //      updatedDto.InstitutionLogo = logoFilePath;
   //      // Update database with new logo path
-  //      await _serviceManager.CRMInstitutes.UpdateLogoPathAsync(id, logoFilePath);
+  //      await _serviceManager.CrmInstitutes.UpdateLogoPathAsync(id, logoFilePath);
 
   //      // Create file update history
   //      await CreateFileUpdateHistoryAsync(id.ToString(), "CRMInstitute", "Logo",
@@ -474,7 +474,7 @@ public class CRMInstituteController : BaseApiController
   //    };
 
   //    string prospectusDMSJson = JsonConvert.SerializeObject(prospectusDMSDto);
-  //    string prospectusFilePath = await _serviceManager.Dmsdocuments.SaveFileAndDocumentWithVersioningAsync(
+  //    string prospectusFilePath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithVersioningAsync(
   //        updatedDto.InstitutionProspectusFile,
   //        prospectusDMSJson
   //    );
@@ -483,7 +483,7 @@ public class CRMInstituteController : BaseApiController
   //    {
   //      updatedDto.InstitutionProspectus = prospectusFilePath;
   //      // Update database with new prospectus path
-  //      await _serviceManager.CRMInstitutes.UpdateProspectusPathAsync(id, prospectusFilePath);
+  //      await _serviceManager.CrmInstitutes.UpdateProspectusPathAsync(id, prospectusFilePath);
 
   //      // Create file update history
   //      await CreateFileUpdateHistoryAsync(id.ToString(), "CRMInstitute", "Prospectus",

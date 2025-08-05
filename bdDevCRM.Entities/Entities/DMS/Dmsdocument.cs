@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
 
-public partial class Dmsdocument
+public partial class DmsDocument
 {
     public int DocumentId { get; set; }
 
@@ -31,13 +31,13 @@ public partial class Dmsdocument
 
     public int? FolderId { get; set; }
 
-    public string SystemTag { get; set; }
+    public string? SystemTag { get; set; }
 
-    public virtual ICollection<DmsdocumentAccessLog> DmsdocumentAccessLog { get; set; } = new List<DmsdocumentAccessLog>();
+    public virtual ICollection<DmsDocumentAccessLog> DmsDocumentAccessLog { get; set; } = new List<DmsDocumentAccessLog>();
 
-    public virtual ICollection<DmsdocumentTagMap> DmsdocumentTagMap { get; set; } = new List<DmsdocumentTagMap>();
+    public virtual ICollection<DmsDocumentTagMap> DmsDocumentTagMap { get; set; } = new List<DmsDocumentTagMap>();
 
-    public virtual ICollection<DmsdocumentVersion> DmsdocumentVersion { get; set; } = new List<DmsdocumentVersion>();
+    public virtual ICollection<DmsDocumentVersion> DmsDocumentVersion { get; set; } = new List<DmsDocumentVersion>();
 
-    public virtual DmsdocumentType DocumentType { get; set; } = null!;
+    public virtual DmsDocumentType DocumentType { get; set; } = null!;
 }

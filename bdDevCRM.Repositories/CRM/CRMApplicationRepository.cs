@@ -4,9 +4,9 @@ using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.CRM;
 
-public sealed class CRMApplicationRepository : RepositoryBase<CrmApplication>, ICRMApplicationRepository
+public sealed class CrmApplicationRepository : RepositoryBase<CrmApplication>, ICrmApplicationRepository
 {
-  public CRMApplicationRepository(CRMContext context) : base(context) { }
+  public CrmApplicationRepository(CRMContext context) : base(context) { }
 
 
 }

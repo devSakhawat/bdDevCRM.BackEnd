@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Shared.DataTransferObjects.DMS;
 
-public class DmsdocumentVersionDDL
+public class DmsDocumentVersionDDL
 {
   public int VersionId { get; set; }
   public int DocumentId { get; set; }
