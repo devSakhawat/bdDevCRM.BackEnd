@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
-public class StatusRepository : RepositoryBase<Wfstate>, IStatusRepository
+public class StatusRepository : RepositoryBase<WfState>, IStatusRepository
 {
   public StatusRepository(CRMContext context) : base(context) { }
 

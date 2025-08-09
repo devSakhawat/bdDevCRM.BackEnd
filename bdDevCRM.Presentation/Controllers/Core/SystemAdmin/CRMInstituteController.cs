@@ -202,18 +202,18 @@ public class CRMInstituteController : BaseApiController
       throw new GenericBadRequestException("Invalid content type. Expected multipart/form-data.");
 
     // Get existing institute record
-    CrmInstituteDto updatedDto = await _serviceManager.CrmInstitutes.UpdateRecordAsync(key, modelDto, false);
+    CrmInstituteDto res = await _serviceManager.CrmInstitutes.UpdateRecordAsync(key, modelDto, false);
 
 
     // Save attached files (Logo, Prospectus)
     await SaveInstituteFilesAsync(modelDto, currentUser);
 
     //
-    if (updatedDto.InstituteId <= 0)
+    if (res.InstituteId <= 0)
       throw new InvalidUpdateOperationException("Failed to update institute record.");
 
     // Return success response
-    return Ok(ResponseHelper.Success(updatedDto, "Institute updated successfully"));
+    return Ok(ResponseHelper.Success(res, "Institute updated successfully"));
   }
 
 

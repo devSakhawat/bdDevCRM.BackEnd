@@ -49,5 +49,5 @@ public partial class CrmApplicantCourse
 
     public int? CourseId { get; set; }
 
-    public virtual CrmApplication Applicant { get; set; } = null!;
+    //public virtual CrmApplication Applicant { get; set; } = null!;
 }

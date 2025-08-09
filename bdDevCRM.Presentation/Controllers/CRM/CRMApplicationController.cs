@@ -48,7 +48,7 @@ public class CRMApplicationController : BaseApiController
 
     var summaryGrid = await _serviceManager.CrmApplications.SummaryGrid(options);
     if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
+      return Ok(ResponseHelper.NoContent<GridEntity<CrmApplicationDto>>("No data found"));
 
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }

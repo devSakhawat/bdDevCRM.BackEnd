@@ -28,10 +28,10 @@ internal sealed class StatusService : IStatusService
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<WfstateDto>> StatusByMenuId(int menuId, bool trackChanges)
+  public async Task<IEnumerable<WfStateDto>> StatusByMenuId(int menuId, bool trackChanges)
   {
     IEnumerable<WfStateRepositoryDto> wfstates = await _repository.WfStates.StatusByMenuId(menuId, trackChanges);
-    IEnumerable<WfstateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToList<WfStateRepositoryDto, WfstateDto>(wfstates);
+    IEnumerable<WfStateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToList<WfStateRepositoryDto, WfStateDto>(wfstates);
     return wfstatesDto;
   }
 
@@ -43,16 +43,16 @@ internal sealed class StatusService : IStatusService
   }
 
   #region Workflow start
-  public async Task<GridEntity<WfstateDto>> WorkflowSummary(bool trackChanges, CRMGridOptions options)
+  public async Task<GridEntity<WfStateDto>> WorkflowSummary(bool trackChanges, CRMGridOptions options)
   {
     string query = "Select WFSTATE.WFSTATEID,WFSTATE.STATENAME,WFSTATE.MENUID,WFSTATE.ISDEFAULTSTART,WFSTATE.ISCLOSED,MENU.MODULEID,MENU.MENUNAME,MODULE.MODULENAME \r\nfrom WFSTATE ,MENU ,MODULE  \r\nwhere WFSTATE.MENUID = MENU.MENUID and MENU.MODULEID = MODULE.MODULEID";
     string orderBy = " MENUNAME,ISDEFAULTSTART,STATENAME asc ";
-    var gridEntity = await _repository.Workflowes.GridData<WfstateDto>(query, options, orderBy, "");
+    var gridEntity = await _repository.Workflowes.GridData<WfStateDto>(query, options, orderBy, "");
 
     return gridEntity;
   }
 
-  public async Task<string> SaveWorkflow(WfstateDto modelDto)
+  public async Task<string> SaveWorkflow(WfStateDto modelDto)
   {
     string res = string.Empty;
 
@@ -67,7 +67,7 @@ internal sealed class StatusService : IStatusService
         //if (!IsExistsUserByEmployee(usersDto.EmployeeId))
         if (!await _repository.WfStates.ExistsAsync(x => x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim()))
         {
-          Wfstate wfstate = MyMapper.JsonClone<WfstateDto, Wfstate>(modelDto);
+          WfState wfstate = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);
           int lastCreatedWfStateId = await _repository.WfStates.CreateAndGetIdAsync(wfstate);
           await _repository.SaveAsync();
           return OperationMessage.Success;
@@ -94,7 +94,7 @@ internal sealed class StatusService : IStatusService
       {
 
 
-        Wfstate wfstate = MyMapper.JsonClone<WfstateDto, Wfstate>(modelDto);
+        WfState wfstate = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);
         _repository.WfStates.Update(wfstate);
         await _repository.SaveAsync();
 
@@ -122,7 +122,7 @@ internal sealed class StatusService : IStatusService
       if (!isActionExistByStateId)
       {
 
-        Wfaction wfAcation = MyMapper.JsonClone<WfActionDto, Wfaction>(modelDto);
+        WfAction wfAcation = MyMapper.JsonClone<WfActionDto, WfAction>(modelDto);
         int lastCreatedWfActionId = await _repository.WfActions.CreateAndGetIdAsync(wfAcation);
         await _repository.SaveAsync();
         return OperationMessage.Success;
@@ -142,7 +142,7 @@ internal sealed class StatusService : IStatusService
 
       if (!isActionExistByStateId)
       {
-        Wfaction wfAction = MyMapper.JsonClone<WfActionDto, Wfaction>(modelDto);
+        WfAction wfAction = MyMapper.JsonClone<WfActionDto, WfAction>(modelDto);
         _repository.WfActions.Update(wfAction);
         await _repository.SaveAsync();
 
@@ -162,18 +162,18 @@ internal sealed class StatusService : IStatusService
     if (modelDto == null) throw new NullModelBadRequestException(new WfActionDto().GetType().Name.ToString());
     if (key != modelDto.WfactionId) throw new IdMismatchBadRequestException(key.ToString(), new ModuleDto().GetType().Name.ToString());
 
-    Wfaction wfactionData = await _repository.WfActions.FirstOrDefaultAsync(m => m.WfactionId == key, trackChanges: false);
-    if (wfactionData == null) throw new GenericNotFoundException("Wfaction", "ActionId", key.ToString());
+    WfAction wfactionData = await _repository.WfActions.FirstOrDefaultAsync(m => m.WfactionId == key, trackChanges: false);
+    if (wfactionData == null) throw new GenericNotFoundException("WfAction", "ActionId", key.ToString());
 
     await _repository.WfActions.DeleteAsync(x => x.WfactionId == modelDto.WfactionId, trackChanges: true);
     await _repository.SaveAsync();
     return OperationMessage.Success;
   }
 
-  public async Task<IEnumerable<WfstateDto>> GetNextStatesByMenu(int menuId)
+  public async Task<IEnumerable<WfStateDto>> GetNextStatesByMenu(int menuId)
   {
-    IEnumerable<Wfstate> wfstates = await _repository.WfStates.ListByWhereWithSelectAsync(
-      selector: x => new Wfstate { 
+    IEnumerable<WfState> wfstates = await _repository.WfStates.ListByWhereWithSelectAsync(
+      selector: x => new WfState { 
       WfstateId = x.WfstateId,
       StateName = x.StateName
       }, 
@@ -182,7 +182,7 @@ internal sealed class StatusService : IStatusService
       trackChanges: false
       );
 
-    IEnumerable<WfstateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToIEnumerable<Wfstate, WfstateDto>(wfstates);
+    IEnumerable<WfStateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToIEnumerable<WfState, WfStateDto>(wfstates);
     return wfstatesDto;
   }
 

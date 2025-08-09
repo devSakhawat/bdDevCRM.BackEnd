@@ -117,11 +117,11 @@ internal sealed class MenuService : IMenuService
   public async Task<MenuDto> CreateAsync(MenuDto modelDto)
   {
     if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
-    bool isModuleExists = await _repository.Menus.ExistsAsync(m => m.MenuName == modelDto.MenuName);
-    if (isModuleExists) throw new DuplicateRecordException("Menu", "MenuName");
+    bool ismenuExists = await _repository.Menus.ExistsAsync(m => m.MenuName.Trim().ToLower() == modelDto.MenuName.Trim().ToLower());
+    if (ismenuExists) throw new DuplicateRecordException("Menu", "MenuName");
 
     Menu entity = MyMapper.JsonClone<MenuDto, Menu>(modelDto);
-    await _repository.Menus.CreateAsync(entity);
+    modelDto.MenuId = await _repository.Menus.CreateAndGetIdAsync(entity);
     await _repository.SaveAsync();
     return modelDto;
   }

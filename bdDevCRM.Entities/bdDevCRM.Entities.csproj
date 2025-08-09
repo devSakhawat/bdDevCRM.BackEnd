@@ -30,6 +30,7 @@
   <ItemGroup>
     <Folder Include="Entities\Core\" />
     <Folder Include="Entities\Entities\CRM\" />
+    <Folder Include="Repository\Context\" />
   </ItemGroup>
 
 </Project>

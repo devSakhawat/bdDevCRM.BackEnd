@@ -15,9 +15,12 @@ namespace bdDevCRM.Service.Core.HR;
 
 internal sealed class BranchService : IBranchService
 {
-  private const string SELECT_BRANCH_BY_COMPANYID =
-    "Select Branch.* from Branch inner join CompanyLocationMap on CompanyLocationMap.BranchId=Branch.BranchId where CompanyId = {0}{1} order by BranchName asc";
-
+  private const string SELECT_BRANCH_BY_COMPANYID = @"
+SELECT Branch.* 
+FROM Branch 
+INNER JOIN CompanyLocationMap ON CompanyLocationMap.BranchId = Branch.BranchId 
+WHERE CompanyId = {0}{1} 
+ORDER BY BranchName ASC";
 
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;

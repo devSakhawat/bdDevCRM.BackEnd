@@ -102,7 +102,7 @@ public sealed class ServiceManager : IServiceManager
     // HR Area
     _employeeService = new Lazy<IEmployeeService>(() => new EmployeeService(repository, logger, configuration));
     _branchService = new Lazy<IBranchService>(() => new BranchService(repository, logger, configuration));
-    //_departmentService = new Lazy<IDepartmentService>(() => new DepartmentService(repository, logger, configuration));
+    _departmentService = new Lazy<IDepartmentService>(() => new DepartmentService(repository, logger, configuration));
 
     #region CRM
     _crminstitute = new Lazy<ICrmInstituteService>(() => new CrmInstituteService(repository, logger, configuration, httpContextAccessor));

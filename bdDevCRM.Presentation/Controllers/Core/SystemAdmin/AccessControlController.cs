@@ -22,7 +22,16 @@ public class AccessControlController : BaseApiController
   [HttpPost(RouteConstants.CreateAccessControl)]
   public async Task<IActionResult> SaveAccessControl([FromBody] AccessControlDto modelDto)
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    //int userId = HttpContext.GetUserId();
+    //var currentUser = HttpContext.GetCurrentUser();
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      return Unauthorized("Unauthorized attempt to get data!");
+
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null) return Unauthorized("User not found in cache.");
 
     var model = await _serviceManager.AccessControl.CreateAsync(modelDto);
     return (model != null) ? Ok(model) : NoContent();

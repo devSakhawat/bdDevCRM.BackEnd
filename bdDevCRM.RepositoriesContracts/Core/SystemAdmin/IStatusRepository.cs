@@ -4,8 +4,8 @@ using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 
-public interface IStatusRepository : IRepositoryBase<Wfstate>
-{
+  public interface IStatusRepository : IRepositoryBase<WfState>
+  {
   Task<IEnumerable<WfStateRepositoryDto>> StatusByMenuId(int menuId, bool trackChanges);
   Task<IEnumerable<WfActionRepositoryDto>> ActionsByStatusIdForGroup(int statusId, bool trackChanges);
 }

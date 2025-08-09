@@ -99,6 +99,7 @@ public static class RouteConstants
   public const string UserSummary = "user-summary";
   public const string Users = "users";
   public const string SaveUser = "user";
+  public const string UpdateUser = "user/{key}";
   #endregion user
 
   #region Employee

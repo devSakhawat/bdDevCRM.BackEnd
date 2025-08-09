@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.System;
 
-public partial class Wfaction
+public partial class WfAction
 {
     public int WfactionId { get; set; }
 

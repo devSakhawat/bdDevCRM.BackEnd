@@ -31,7 +31,7 @@ public class StatusController : BaseApiController
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
     if (menuId == 0 || menuId == null) throw new IdParametersBadRequestException();
 
-    IEnumerable<WfstateDto> groupPermissions = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
+    IEnumerable<WfStateDto> groupPermissions = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
     return Ok(groupPermissions);
   }
 
@@ -59,7 +59,7 @@ public class StatusController : BaseApiController
 
   [HttpPost(RouteConstants.CreateWorkFlow)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> SaveState([FromBody] WfstateDto modelDto)
+  public async Task<IActionResult> SaveState([FromBody] WfStateDto modelDto)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))

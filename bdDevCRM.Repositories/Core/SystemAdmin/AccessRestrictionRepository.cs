@@ -16,7 +16,8 @@ public class AccessRestrictionRepository : RepositoryBase<AccessRestriction>, IA
 
   public async Task<IEnumerable<GroupsRepositoryDto>> AccessRestrictionGroupsByHrrecordId(int hrRecordId)
   {
-    string query = string.Format(@"Select GroupId from GroupMember
+    string query = string.Format(@"Select GroupId 
+from GroupMember
 inner join Users on Users.UserId = GroupMember.UserId
 inner join Employment on Employment.HRRecordId = Users.EmployeeId
 where HRRecordId = {0}", hrRecordId);

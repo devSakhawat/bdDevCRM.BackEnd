@@ -22,7 +22,7 @@ public class CRMInstituteTypeController : BaseApiController
     _cache = cache;
   }
 
-  // 1️⃣ DDL ------------------------------------------------------------
+  // 1️ DDL ------------------------------------------------------------
   [HttpGet(RouteConstants.InstituteTypeDDL)]
   public async Task<IActionResult> InstituteTypeDDL()
   {

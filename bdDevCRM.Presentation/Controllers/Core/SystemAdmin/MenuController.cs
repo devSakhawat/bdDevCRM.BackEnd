@@ -1,7 +1,9 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -127,7 +129,11 @@ public class EmployeeController : BaseApiController
     }
 
     var model = await _serviceManager.Menus.CreateAsync(modelDto);
-    return (model != null) ? Ok(model) : NoContent();
+    //return (model != null) ? Ok(model) : NoContent();
+    if (model.MenuId <= 0)
+      throw new InvalidCreateOperationException("Failed to create record.");
+
+    return Ok(ResponseHelper.Created(model, "Menu created successfully."));
   }
 
 
@@ -135,10 +141,25 @@ public class EmployeeController : BaseApiController
   //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> UpdateMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("UserId not found in token.");
+    }
+
+    var userId = Convert.ToInt32(userIdClaim);
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
 
     MenuDto returnData = await _serviceManager.Menus.UpdateAsync(key, modelDto);
-    return (returnData != null) ? Ok(OperationMessage.Success) : NoContent();
+    if (returnData.MenuId <= 0)
+      throw new InvalidCreateOperationException("Failed to create record.");
+
+    return Ok(ResponseHelper.Updated(returnData, "Menu created successfully."));
   }
 
   [HttpDelete(RouteConstants.DeleteMenu)]

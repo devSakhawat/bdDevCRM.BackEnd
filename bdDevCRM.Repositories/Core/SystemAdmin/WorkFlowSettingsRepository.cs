@@ -7,7 +7,7 @@ using bdDevCRM.Sql.Context;
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
 
-public class WorkFlowSettingsRepository : RepositoryBase<Wfstate>, IWorkFlowSettingsRepository
+public class WorkFlowSettingsRepository : RepositoryBase<WfState>, IWorkFlowSettingsRepository
 {
   public WorkFlowSettingsRepository(CRMContext context) : base(context) { }
 

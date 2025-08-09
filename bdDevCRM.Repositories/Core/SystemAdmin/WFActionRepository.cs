@@ -7,7 +7,7 @@ using bdDevCRM.Sql.Context;
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
 
-public class WFActionRepository : RepositoryBase<Wfaction>, IWFActionRepository
+public class WFActionRepository : RepositoryBase<WfAction>, IWFActionRepository
 {
   public WFActionRepository(CRMContext context) : base(context) { }
 

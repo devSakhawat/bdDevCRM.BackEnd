@@ -36,13 +36,13 @@ internal sealed class EmployeeService : IEmployeeService
     return employmentDto;
   }
 
-  public async Task<WfstateDto> GetEmployeeCurrentStatusByHrRecordId(int hrRecordId)
+  public async Task<WfStateDto> GetEmployeeCurrentStatusByHrRecordId(int hrRecordId)
   {
-    Wfstate wfstate = await _repository.Employees.GetEmployeeCurrentStatusByHrRecordId(hrRecordId);
+    WfState wfstate = await _repository.Employees.GetEmployeeCurrentStatusByHrRecordId(hrRecordId);
     //Check if the result is null
-    if (wfstate == null) throw new GenericNotFoundException("Wfstate", "Employee.StateId", hrRecordId.ToString());
+    if (wfstate == null) throw new GenericNotFoundException("WfState", "Employee.StateId", hrRecordId.ToString());
 
-    WfstateDto wfstateDto = MyMapper.JsonClone<Wfstate, WfstateDto>(wfstate);
+    WfStateDto wfstateDto = MyMapper.JsonClone<WfState, WfStateDto>(wfstate);
     return wfstateDto;
   }
 
@@ -139,6 +139,7 @@ internal sealed class EmployeeService : IEmployeeService
     }
 
     IEnumerable<EmployeesByCompanyBranchDepartmentRepositoroyDto> employeeTypes = await _repository.Employees.GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(condition);
+
     IEnumerable<EmployeesByCompanyBranchDepartmentDto> result = MyMapper.JsonCloneIEnumerableToList<EmployeesByCompanyBranchDepartmentRepositoroyDto, EmployeesByCompanyBranchDepartmentDto>(employeeTypes);
     
     return result;

@@ -1,7 +1,7 @@
 ﻿namespace bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 
 
-public class WfstateDto
+public class WfStateDto
 {
   public int WfstateId { get; set; }
 

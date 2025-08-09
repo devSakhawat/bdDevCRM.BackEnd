@@ -25,5 +25,5 @@ public partial class CrmAdditionalInfo
 
     public int? UpdateBy { get; set; }
 
-    public virtual CrmApplication Applicant { get; set; } = null!;
+    //public virtual CrmApplication Applicant { get; set; } = null!;
 }

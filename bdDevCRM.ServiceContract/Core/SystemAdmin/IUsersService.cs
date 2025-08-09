@@ -23,7 +23,7 @@ public interface IUsersService
   Task<UsersDto> CreateUserAsync(UsersDto entityForCreate);
   Task DeleteUserAsync(int userId, bool trackChanges);
   Task UpdateUserAsync(int userId, UsersDto model, bool trackChanges);
-  Task<string> SaveUser(UsersDto usersDto);
+  Task<UsersDto> SaveUser(UsersDto usersDto);
 
 
 

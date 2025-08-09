@@ -33,5 +33,5 @@ public partial class CrmTOEFLInformation
 
     public int? UpdatedBy { get; set; }
 
-    public virtual CrmApplication Applicant { get; set; } = null!;
+    //public virtual CrmApplication Applicant { get; set; } = null!;
 }
