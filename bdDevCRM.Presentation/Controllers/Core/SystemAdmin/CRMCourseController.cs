@@ -65,7 +65,7 @@ public class CRMCourseController : BaseApiController
 
     var res = await _serviceManager.CrmCourses.GetCourseByInstituteIdDDLAsync(instituteId, trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
+      return Ok(ResponseHelper.NoContent<IEnumerable<CRMCourseDDLDto>>("No course found"));
 
     return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
   }

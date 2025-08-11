@@ -51,6 +51,11 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICrmMonthService> _crmmonth;
   private readonly Lazy<ICrmYearService> _crmyear;
 
+  // New CRM services for Intake and Payment Method
+  private readonly Lazy<ICrmIntakeMonthService> _crmIntakeMonthService;
+  private readonly Lazy<ICrmIntakeYearService> _crmIntakeYearService;
+  private readonly Lazy<ICrmPaymentMethodService> _crmPaymentMethodService;
+
   // Existing Crm services
   private readonly Lazy<ICrmApplicationService> _crmApplicationService;
   private readonly Lazy<ICrmApplicantCourseService> _applicantCourseService;
@@ -111,6 +116,11 @@ public sealed class ServiceManager : IServiceManager
     _crmmonth = new Lazy<ICrmMonthService>(() => new CrmMonthService(repository, logger, configuration));
     _crmyear = new Lazy<ICrmYearService>(() => new CrmYearService(repository, logger, configuration));
 
+    // New CRM services initialization
+    _crmIntakeMonthService = new Lazy<ICrmIntakeMonthService>(() => new CrmIntakeMonthService(repository, logger, configuration));
+    _crmIntakeYearService = new Lazy<ICrmIntakeYearService>(() => new CrmIntakeYearService(repository, logger, configuration));
+    _crmPaymentMethodService = new Lazy<ICrmPaymentMethodService>(() => new CrmPaymentMethodService(repository, logger, configuration));
+
     // Existing Crm services initialization
     _crmApplicationService = new Lazy<ICrmApplicationService>(() => new CrmApplicationService(repository, logger, configuration, httpContextAccessor));
     _applicantCourseService = new Lazy<ICrmApplicantCourseService>(() => new CrmApplicantCourseService(repository, logger, configuration, httpContextAccessor));
@@ -168,6 +178,11 @@ public sealed class ServiceManager : IServiceManager
   public ICrmCourseService CrmCourses => _crmcourse.Value;
   public ICrmMonthService CrmMonths => _crmmonth.Value;
   public ICrmYearService CrmYears => _crmyear.Value;
+
+  // New CRM service properties
+  public ICrmIntakeMonthService CrmIntakeMonths => _crmIntakeMonthService.Value;
+  public ICrmIntakeYearService CrmIntakeYears => _crmIntakeYearService.Value;
+  public ICrmPaymentMethodService CrmPaymentMethods => _crmPaymentMethodService.Value;
 
   // Existing Crm service properties
   public ICrmApplicationService CrmApplications => _crmApplicationService.Value;

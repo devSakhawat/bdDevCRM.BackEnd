@@ -61,6 +61,10 @@ public interface IRepositoryManager : IDisposable
   ICrmApplicantReferenceRepository CrmApplicantReferences { get; }
   ICrmStatementOfPurposeRepository CrmStatementOfPurposes { get; }
   ICrmAdditionalInfoRepository CrmAdditionalInfoes { get; }
+  // New CRM repositories
+  ICrmIntakeMonthRepository CrmIntakeMonths { get; }
+  ICrmIntakeYearRepository CrmIntakeYears { get; }
+  ICrmPaymentMethodRepository CrmPaymentMethods { get; }
   #endregion CRM
 
   #region DMS

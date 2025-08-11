@@ -1,8 +1,8 @@
 ﻿using bdDevCRM.Entities.Entities.CRM;
-using bdDevCRM.RepositoriesContracts.CRM;
+using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 
-namespace bdDevCRM.Repositories.CRM;
+namespace bdDevCRM.Repositories.Core.SystemAdmin;
 public class CrmMonthRepository : RepositoryBase<CrmMonth>, ICrmMonthRepository
 {
   public CrmMonthRepository(CRMContext context) : base(context) { }
