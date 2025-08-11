@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace bdDevCRM.Entities.Entities.CRM;
+﻿namespace bdDevCRM.Entities.Entities.CRM;
 
 public partial class CrmMonth
 {
-    public int MonthId { get; set; }
+  public int MonthId { get; set; }
 
-    public string CrmmonthName { get; set; } = null!;
+  public string MonthName { get; set; } = null!;
 
-    public string? MonthCode { get; set; }
+  public string? MonthCode { get; set; }
 
-    public bool? Status { get; set; }
+  public bool? Status { get; set; }
+
+  //public DateTime CreatedDate { get; init; }
+  //public int CreatedBy { get; init; }
+  //public DateTime? UpdatedDate { get; init; }
+  //public int? UpdatedBy { get; init; }
 }

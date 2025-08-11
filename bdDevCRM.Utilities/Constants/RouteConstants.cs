@@ -166,6 +166,38 @@ public static class RouteConstants
   public const string DeleteCurrency = "currency/{key}";
   #endregion Currency
 
+  // routes for Intake Month, Year and Payment Method
+  #region IntakeMonth
+  // use this for passing id in query
+  public const string IntakeMonthByKey = "intake-month/key";
+  public const string IntakeMonthDDL = "intake-month-ddl";
+  public const string IntakeMonthSummary = "intake-month-summary";
+  public const string CreateIntakeMonth = "intake-month";
+  public const string UpdateIntakeMonth = "intake-month/{key:int}";
+  public const string DeleteIntakeMonth = "intake-month/{key:int}";
+  public const string CreateOrUpdateIntakeMonth = "intake-month-saveORupdate/{key:int}";
+  #endregion IntakeMonth
+
+  #region IntakeYear
+  public const string IntakeYearByKey = "intake-year/key";
+  public const string IntakeYearDDL = "intake-year-ddl";
+  public const string IntakeYearSummary = "intake-year-summary";
+  public const string CreateIntakeYear = "intake-year";
+  public const string UpdateIntakeYear = "intake-year/{key:int}";
+  public const string DeleteIntakeYear = "intake-year/{key:int}";
+  public const string CreateOrUpdateIntakeYear = "intake-year-saveORupdate/{key:int}";
+  #endregion IntakeYear
+
+  #region PaymentMethod
+  public const string PaymentMethodByKey = "payment-method/key";
+  public const string PaymentMethodDDL = "payment-method-ddl";
+  public const string OnlinePaymentMethodDDL = "online-payment-method-ddl";
+  public const string PaymentMethodSummary = "payment-method-summary";
+  public const string CreatePaymentMethod = "payment-method";
+  public const string UpdatePaymentMethod = "payment-method/{key:int}";
+  public const string DeletePaymentMethod = "payment-method/{key:int}";
+  public const string CreateOrUpdatePaymentMethod = "payment-method-saveORupdate/{key:int}";
+  #endregion PaymentMethod
 
   // CRM Application related routes
   #region CRMApplication

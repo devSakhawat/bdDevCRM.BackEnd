@@ -38,7 +38,9 @@ internal sealed class CrmCourseService(
       selector: x => new CRMCourseDDLDto
       {
         CourseId = x.CourseId,
-        CourseTitle = x.CourseTitle
+        CourseTitle = x.CourseTitle,
+        ApplicationFee = x.ApplicationFee,
+        CurrencyId = x.CurrencyId
       },
       orderBy: x => x.CourseTitle,
       trackChanges: trackChanges

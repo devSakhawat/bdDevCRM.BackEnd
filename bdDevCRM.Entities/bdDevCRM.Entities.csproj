@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <Folder Include="Entities\Core\" />
-    <Folder Include="Entities\Entities\CRM\" />
+    <Folder Include="Entities\Entities\" />
     <Folder Include="Repository\Context\" />
   </ItemGroup>
 

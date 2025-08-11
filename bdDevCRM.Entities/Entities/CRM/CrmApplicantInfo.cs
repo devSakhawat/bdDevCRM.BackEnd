@@ -11,8 +11,6 @@ public partial class CrmApplicantInfo
 
     public int GenderId { get; set; }
 
-    public string? GenderName { get; set; }
-
     public string? TitleValue { get; set; }
 
     public string? TitleText { get; set; }
@@ -25,11 +23,11 @@ public partial class CrmApplicantInfo
 
     public int MaritalStatusId { get; set; }
 
-    public string? MaritalStatusName { get; set; }
+    //public string? MaritalStatusName { get; set; }
 
     public string? Nationality { get; set; }
 
-    public string? HasValidPassport { get; set; }
+    public bool? HasValidPassport { get; set; }
 
     public string? PassportNumber { get; set; }
 
