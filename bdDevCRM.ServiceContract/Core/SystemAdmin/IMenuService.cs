@@ -34,4 +34,8 @@ public interface IMenuService
 
   Task DeleteMenuAsync(int MenuId, bool trackChanges);
   Task UpdateMenuAsync(int MenuId, MenuDto MenuForUpdate, bool trackChanges);
+
+
+
+  Task<IEnumerable<MenuForDDLDto>> MenuForDDL();
 }

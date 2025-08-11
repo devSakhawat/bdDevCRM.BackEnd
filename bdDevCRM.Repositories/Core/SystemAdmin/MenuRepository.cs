@@ -1,12 +1,9 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
@@ -52,7 +49,7 @@ public class MenuRepository : RepositoryBase<Menu>, IMenuRepository
     return menusDto.ToList();
   }
 
-  public async Task<IEnumerable<Menu>> GetMenus(bool trackChanges) => await ListAsync(x => x.MenuName ,trackChanges);
+  public async Task<IEnumerable<Menu>> GetMenus(bool trackChanges) => await ListAsync(x => x.MenuName, trackChanges);
 
   //public async Task<IEnumerable<Menu>> GetAllMenus(bool trackChanges) => await ListAsync(trackChanges).OrderBy(c => c.MenuName).ToList();
 
@@ -62,7 +59,7 @@ public class MenuRepository : RepositoryBase<Menu>, IMenuRepository
 
 
   public Menu? GetMenu(int MenuId, bool trackChanges) => FirstOrDefault(c => c.MenuId.Equals(MenuId), trackChanges);
-      
+
 
   // Get all Menus
   public async Task<IEnumerable<Menu>> GetMenusAsync(bool trackChanges)
@@ -79,7 +76,7 @@ public class MenuRepository : RepositoryBase<Menu>, IMenuRepository
   }
 
   public async Task<IEnumerable<Menu>> MenusByModuleId(int moduleId, bool trackChanges)
-    => await ListByConditionAsync(c => c.ModuleId.Equals(moduleId), orderBy:x => x.ModuleId, trackChanges: trackChanges);
+    => await ListByConditionAsync(c => c.ModuleId.Equals(moduleId), orderBy: x => x.ModuleId, trackChanges: trackChanges);
 
   // Add a new Menu
   public void CreateMenu(Menu Menu) => Create(Menu);
@@ -89,5 +86,7 @@ public class MenuRepository : RepositoryBase<Menu>, IMenuRepository
 
   // Delete a Menu by ID
   public void DeleteMenu(Menu Menu) => Delete(Menu);
+
+
 
 }

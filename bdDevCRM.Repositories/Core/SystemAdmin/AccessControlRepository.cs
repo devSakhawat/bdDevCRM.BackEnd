@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
 
-public class AccessControlRepository : RepositoryBase<Accesscontrol>, IAccessControlRepository
+public class AccessControlRepository : RepositoryBase<AccessControl>, IAccessControlRepository
 {
   public AccessControlRepository(CRMContext context) : base(context) { }
 

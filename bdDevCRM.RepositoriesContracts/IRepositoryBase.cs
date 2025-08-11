@@ -36,6 +36,7 @@ public interface IRepositoryBase<T>
   Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges = false);
   T FirstOrDefault(Expression<Func<T, bool>>? expression = null, bool trackChanges = false);
   Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> expression, bool trackChanges = false);
+  Task<T> FirstOrDefaultWithOrderByDescAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
 
   IEnumerable<T> GetListByIds(Expression<Func<T, bool>> expression, bool trackChanges = false);
   Task<IEnumerable<T>> GetListByIdsAsync(Expression<Func<T, bool>> expression, bool trackChanges = false);
@@ -44,7 +45,7 @@ public interface IRepositoryBase<T>
   Task<IEnumerable<T>> ListAsync(Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
 
   IEnumerable<T> ListByCondition(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
-  Task<IEnumerable<T>> ListByConditionAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);
+  Task<IEnumerable<T>> ListByConditionAsync(Expression<Func<T, bool>> expression, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false, bool descending = false);
 
 
   IEnumerable<T> ListWithSelect<TResult>(Expression<Func<T, TResult>> selector, Expression<Func<T, object>>? orderBy = null, bool trackChanges = false);

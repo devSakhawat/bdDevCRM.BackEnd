@@ -1,15 +1,21 @@
-﻿using bdDevCRM.Shared.DataTransferObjects;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Shared.DataTransferObjects;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 
 namespace bdDevCRM.ServicesContract.Core.SystemAdmin;
 
-public interface ICountryService
+public interface ICrmCountryService
 {
-  Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges);
-  Task<CountryDto> GetCountryAsync(int countryId, bool trackChanges);
-  Task<CountryDto> CreateCountryAsync(CountryDto entityForCreate);
-  Task<IEnumerable<CountryDto>> GetByIdsAsync(IEnumerable<int> ids, bool trackChanges);
-  Task<(IEnumerable<CountryDto> countries, string ids)> CreateCountryCollectionAsync
-    (IEnumerable<CountryDto> countryCollection);
-  Task DeleteCountryAsync(int countryId, bool trackChanges);
-  Task UpdateCountryAsync(int countryId, CountryDto countryForUpdate, bool trackChanges);
+  Task<IEnumerable<CrmCountryDDL>> GetCountriesDDLAsync(bool trackChanges);
+  Task<GridEntity<CrmCountryDto>> SummaryGrid(CRMGridOptions options);
+  Task<string> CreateNewRecordAsync(CrmCountryDto modelDto);
+  Task<string> UpdateNewRecordAsync(int key, CrmCountryDto modelDto, bool trackChanges);
+  Task<string> DeleteRecordAsync(int key, CrmCountryDto modelDto);
+  Task<string> SaveOrUpdate(int key, CrmCountryDto modelDto);
+
+
+  Task<IEnumerable<CrmCountryDto>> GetCountriesAsync(bool trackChanges);
+  Task<CrmCountryDto> GetCountryAsync(int countryId, bool trackChanges);
+  Task<CrmCountryDto> CreateCountryAsync(CrmCountryDto entityForCreate);
 }

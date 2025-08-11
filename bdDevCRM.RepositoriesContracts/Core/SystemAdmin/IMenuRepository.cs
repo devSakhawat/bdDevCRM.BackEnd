@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
@@ -26,4 +27,5 @@ public interface IMenuRepository : IRepositoryBase<Menu>
   Task<IEnumerable<Menu>> MenusByModuleId(int moduleId, bool trackChanges);
   void UpdateMenu(Menu Menu);
   void DeleteMenu(Menu Menu);
+
 }

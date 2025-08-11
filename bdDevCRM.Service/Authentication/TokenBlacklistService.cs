@@ -1,7 +1,9 @@
-﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Exceptions;
+﻿using bdDevCRM.Entities.Entities.System;
+using bdDevCRM.Entities.Entities.System;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.Authentication;
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -33,13 +35,13 @@ public class TokenBlacklistService : ITokenBlacklistService
       ExpiryDate = expiryDate
     };
 
-    await _repository.TokenBlacklist.AddToBlacklistAsync(tokenBlacklist);
+    await _repository.TokenBlacklists.AddToBlacklistAsync(tokenBlacklist);
     await _repository.SaveAsync();
   }
 
   public Task<bool> IsTokenBlacklisted(string token)
   {
-    var isBlacklisted = _repository.TokenBlacklist.IsTokenBlacklistedAsync(token);
+    var isBlacklisted = _repository.TokenBlacklists.IsTokenBlacklistedAsync(token);
     return isBlacklisted;
   }
 }

@@ -1,11 +1,12 @@
-﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Exceptions;
+﻿using bdDevCRM.Entities.Entities.System;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos;
 using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 
@@ -14,6 +15,13 @@ namespace bdDevCRM.Service.Core.HR;
 
 internal sealed class BranchService : IBranchService
 {
+  private const string SELECT_BRANCH_BY_COMPANYID = @"
+SELECT Branch.* 
+FROM Branch 
+INNER JOIN CompanyLocationMap ON CompanyLocationMap.BranchId = Branch.BranchId 
+WHERE CompanyId = {0}{1} 
+ORDER BY BranchName ASC";
+
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
@@ -36,28 +44,16 @@ internal sealed class BranchService : IBranchService
       throw new IdParametersBadRequestException();
     }
 
-    string query = string.Format(@"
-select Distinct ReferenceId,ReferenceType,ParentReference,ChiledParentReference 
-from AccessRestriction 
-where (HrRecordId = {0} or GroupId in (
-	Select GroupId 
-	from GroupMember
-	inner join Users on Users.UserId = GroupMember.UserId
-	inner join Employment on Employment.HRRecordId = Users.EmployeeId
-	where HRRecordId = {0}
-	)
-) and ReferenceType=2 and ParentReference = {1}" , user.HrRecordId, companyId);
+    string query = string.Format(SELECT_BRANCH_BY_COMPANYID, companyId, "");
 
     IEnumerable<BranchRepositoryDto> queryResult = await _repository.Branches.ExecuteListQuery<BranchRepositoryDto>(query, null);
     IEnumerable<BranchDto> result = Enumerable.Empty<BranchDto>();
-    if (queryResult == null)
-    {
-      return new List<BranchDto>();
-    }
-    else
+
+    if (queryResult.Count() > 0)
     {
       result = MyMapper.JsonCloneIEnumerableToList<BranchRepositoryDto, BranchDto>(queryResult);
     }
+
     return result;
   }
 

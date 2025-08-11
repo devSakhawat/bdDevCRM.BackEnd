@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 
 namespace bdDevCRM.ServiceContract.Core.SystemAdmin;

@@ -6,12 +6,22 @@ public static class RouteConstants
 {
   public const string BaseRoute = "bdDevs-crm";
 
+  #region Test
+  public const string TestDDL = "test-ddl";
+  public const string Tests = "tests";
+  public const string GetTest = "get-test";
+  public const string ReadTest = "test/key/{key}";
+  public const string TestCreate = "test";
+  public const string TestUpdate = "test/{key:int}";
+  public const string TestDelete = "test/{key:int}";
+  public const string TestSearch = "test/{key:int}";
+  #endregion Test
+
   #region Authentication
   public const string Login = "login";
   public const string GetUserInfo = "user-info";
   public const string Logout = "logout";
   #endregion Authentication
-
 
   #region Module
   public const string ModuleSummary = "module-summary";
@@ -31,6 +41,7 @@ public static class RouteConstants
   public const string ReadMenu = "menu/key/{key}";
   public const string UpdateMenu = "menu/{key}";
   public const string DeleteMenu = "menu/{key}";
+  public const string MenuForDDL = "menus-4-ddl";
   #endregion Menu
 
   #region Companies
@@ -51,6 +62,8 @@ public static class RouteConstants
   public const string UpdateGroup = "group/{key}";
   public const string DeleteGroup = "group/{key}";
   public const string GroupsByCompany = "groups/companyId";
+
+  public const string GroupMemberByUserId = "groups/group-members-by-userId/";
   #endregion Group
 
   #region QueryAnalyzer
@@ -63,6 +76,17 @@ public static class RouteConstants
   public const string ActionsByStatusIdForGroup = "actions-4-group/status/";
   #endregion Status
 
+  #region WorkFlow
+  public const string WorkFlowSummary = "workflow-summary";
+  public const string CreateWorkFlow = "workflow";
+  public const string CreateAction = "wf-action";
+  public const string UpdateAction = "wf-action/{key}";
+  public const string DeleteAction = "wf-action/{key}";
+  public const string GetNextStatesByMenu = "next-states-by-menu/";
+  public const string GetActionSummaryByStatusId = "get-action-summary-by-statusId/";
+  //public const string ActionsByStatusIdForGroup = "actions-4-group/status/";
+  #endregion WorkFlow
+
   #region AccessControl
   public const string AccessControlSummary = "access-control-summary";
   public const string ReadAccessControls = "access-control-list";
@@ -71,9 +95,249 @@ public static class RouteConstants
   public const string DeleteAccessControl = "access-control/{key}";
   #endregion AccessControl
 
-  #region Employee
+  #region user
   public const string UserSummary = "user-summary";
   public const string Users = "users";
+  public const string SaveUser = "user";
+  public const string UpdateUser = "user/{key}";
+  #endregion user
+
+  #region Employee
   public const string EmployeeTypes = "employeetypes";
+  // Indentity means : companyId, branchId, departmentId
+  public const string EmployeesByCompanyIdAndBranchIdAndDepartmentId = "employees-by-indentities";
   #endregion Employee
+
+  #region Branch
+  public const string BranchByCompanyIdForCombo = "branches-by-compnayId-for-combo/companyId/";
+  #endregion Branch
+
+  #region Department
+  public const string DepartmentByCompanyIdForCombo = "departments-by-compnayId-for-combo/companyId/";
+  #endregion Department
+
+  #region Country
+  public const string CountryDDL = "countryddl";
+  public const string CountrySummary = "country-summary";
+  public const string CreateCountry = "country";
+  public const string UpdateCountry = "country/{key}";
+  public const string DeleteCountry = "country/{key}";
+
+  public const string CreateOrUpdateCountry = "country/{key}";
+  #endregion CrmCountry
+
+  #region InstituteType
+  public const string InstituteTypeDDL = "crm-institutetype-ddl";
+  public const string InstituteTypeSummary = "crm-institutetype-summary";
+  public const string CreateInstituteType = "crm-institutetype";
+  public const string UpdateInstituteType = "crm-institutetype/{key:int}";
+  public const string DeleteInstituteType = "crm-institutetype/{key:int}";
+  public const string CreateOrUpdateInstituteType = "crm-institutetype-saveORupdate/{key:int}";
+  #endregion InstituteType
+
+  #region Institute
+  public const string InstituteDDL = "crm-institute-ddl";
+  public const string InstituteSummary = "crm-institute-summary";
+  public const string CreateInstitute = "crm-institute";
+  public const string UpdateInstitute = "crm-institute/{key:int}";
+  public const string DeleteInstitute = "crm-institute/{key:int}";
+  public const string CreateOrUpdateInstitute = "institute-saveORupdate/{key:int}";
+
+  public const string InstituteDDLByCountryId = "crm-institut-by-countryid-ddl/{countryId:int}";
+  #endregion Institute
+
+  #region Course
+  public const string CourseDDL = "crm-course-ddl";
+  public const string CourseSummary = "crm-course-summary";
+  public const string CreateCourse = "crm-course";
+  public const string UpdateCourse = "crm-course/{key:int}";
+  public const string DeleteCourse = "crm-course/{key:int}";
+  public const string CreateOrUpdateCourse = "course-saveORupdate/{key:int}";
+
+
+  public const string CourseByInstituteIdDDL = "crm-course-by-instituteid-ddl/{instituteId:int}";
+  #endregion Course
+
+  #region Currency
+  public const string CurrencyDDL = "currencyddl";
+  public const string CurrencySummary = "currency-summary";
+  public const string CreateCurrency = "currency";
+  public const string CreateOrUpdateCurrency = "currency/{key}";
+  public const string DeleteCurrency = "currency/{key}";
+  #endregion Currency
+
+  // routes for Intake Month, Year and Payment Method
+  #region IntakeMonth
+  // use this for passing id in query
+  public const string IntakeMonthByKey = "intake-month/key";
+  public const string IntakeMonthDDL = "intake-month-ddl";
+  public const string IntakeMonthSummary = "intake-month-summary";
+  public const string CreateIntakeMonth = "intake-month";
+  public const string UpdateIntakeMonth = "intake-month/{key:int}";
+  public const string DeleteIntakeMonth = "intake-month/{key:int}";
+  public const string CreateOrUpdateIntakeMonth = "intake-month-saveORupdate/{key:int}";
+  #endregion IntakeMonth
+
+  #region IntakeYear
+  public const string IntakeYearByKey = "intake-year/key";
+  public const string IntakeYearDDL = "intake-year-ddl";
+  public const string IntakeYearSummary = "intake-year-summary";
+  public const string CreateIntakeYear = "intake-year";
+  public const string UpdateIntakeYear = "intake-year/{key:int}";
+  public const string DeleteIntakeYear = "intake-year/{key:int}";
+  public const string CreateOrUpdateIntakeYear = "intake-year-saveORupdate/{key:int}";
+  #endregion IntakeYear
+
+  #region PaymentMethod
+  public const string PaymentMethodByKey = "payment-method/key";
+  public const string PaymentMethodDDL = "payment-method-ddl";
+  public const string OnlinePaymentMethodDDL = "online-payment-method-ddl";
+  public const string PaymentMethodSummary = "payment-method-summary";
+  public const string CreatePaymentMethod = "payment-method";
+  public const string UpdatePaymentMethod = "payment-method/{key:int}";
+  public const string DeletePaymentMethod = "payment-method/{key:int}";
+  public const string CreateOrUpdatePaymentMethod = "payment-method-saveORupdate/{key:int}";
+  #endregion PaymentMethod
+
+  // CRM Application related routes
+  #region CRMApplication
+  public const string CRMApplicationSummary = "crm-application-summary";
+  public const string CRMApplication= "crm-application";
+  public const string CRMApplicationByKey = "crm-application/key/{key}";
+  public const string CRMUpdateApplication = "crm-Application/{key}";
+  public const string CRMDeleteApplication = "crm-Application/{key}";
+  public const string CRMCountryDLL = "crm-countryddl";
+  public const string CRMInstituteDLLByCountry = "crm-instituteddl-country";
+  public const string CRMCourseDLLByInstitute = "crm-courseddl-institute";
+  public const string CRMMonthDLL = "crm-monthddl";
+  public const string CRMYearDLL = "crm-yearddl";
+  public const string CRMInstituteTypeDDL = "crm-institute-type/";
+  public const string CRMApplicationByApplicationId = "crm-application-by-applicationId/{applicationId:int}";
+  #endregion CRMApplication
+
+  #region ApplicantCourse
+  public const string ApplicantCourseDDL = "applicant-course-ddl";
+  public const string ApplicantCourseSummary = "applicant-course-summary";
+  public const string CreateApplicantCourse = "applicant-course";
+  public const string UpdateApplicantCourse = "applicant-course/{key:int}";
+  public const string DeleteApplicantCourse = "applicant-course/{key:int}";
+  public const string ApplicantCoursesByApplicantId = "applicant-courses-by-applicantid/{applicantId:int}";
+  #endregion ApplicantCourse
+
+  #region ApplicantInfo
+  public const string ApplicantInfoDDL = "applicant-info-ddl";
+  public const string ApplicantInfoSummary = "applicant-info-summary";
+  public const string CreateApplicantInfo = "applicant-info";
+  public const string UpdateApplicantInfo = "applicant-info/{key:int}";
+  public const string DeleteApplicantInfo = "applicant-info/{key:int}";
+  public const string ApplicantInfoByApplicationId = "applicant-info-by-applicationid/{applicationId:int}";
+  #endregion ApplicantInfo
+
+  #region PermanentAddress
+  public const string PermanentAddressDDL = "permanent-address-ddl";
+  public const string PermanentAddressSummary = "permanent-address-summary";
+  public const string CreatePermanentAddress = "permanent-address";
+  public const string UpdatePermanentAddress = "permanent-address/{key:int}";
+  public const string DeletePermanentAddress = "permanent-address/{key:int}";
+  public const string PermanentAddressByApplicantId = "permanent-address-by-applicantid/{applicantId:int}";
+  #endregion PermanentAddress
+
+  #region PresentAddress
+  public const string PresentAddressDDL = "present-address-ddl";
+  public const string PresentAddressSummary = "present-address-summary";
+  public const string CreatePresentAddress = "present-address";
+  public const string UpdatePresentAddress = "present-address/{key:int}";
+  public const string DeletePresentAddress = "present-address/{key:int}";
+  public const string PresentAddressByApplicantId = "present-address-by-applicantid/{applicantId:int}";
+  #endregion PresentAddress
+
+  #region EducationHistory
+  public const string EducationHistoryDDL = "education-history-ddl";
+  public const string EducationHistorySummary = "education-history-summary";
+  public const string CreateEducationHistory = "education-history";
+  public const string UpdateEducationHistory = "education-history/{key:int}";
+  public const string DeleteEducationHistory = "education-history/{key:int}";
+  public const string EducationHistoryByApplicantId = "education-history-by-applicantid/{applicantId:int}";
+  #endregion EducationHistory
+
+  #region IELTSInformation
+  public const string IeltsInformationDDL = "ielts-information-ddl";
+  public const string IeltsInformationSummary = "ielts-information-summary";
+  public const string CreateIeltsInformation = "ielts-information";
+  public const string UpdateIeltsInformation = "ielts-information/{key:int}";
+  public const string DeleteIeltsInformation = "ielts-information/{key:int}";
+  public const string IeltsInformationByApplicantId = "ielts-information-by-applicantid/{applicantId:int}";
+  #endregion IELTSInformation
+
+  #region TOEFLInformation
+  public const string ToeflInformationDDL = "toefl-information-ddl";
+  public const string ToeflInformationSummary = "toefl-information-summary";
+  public const string CreateToeflInformation = "toefl-information";
+  public const string UpdateToeflInformation = "toefl-information/{key:int}";
+  public const string DeleteToeflInformation = "toefl-information/{key:int}";
+  public const string ToeflInformationByApplicantId = "toefl-information-by-applicantid/{applicantId:int}";
+  #endregion TOEFLInformation
+
+  #region PTEInformation
+  public const string PteInformationDDL = "pte-information-ddl";
+  public const string PteInformationSummary = "pte-information-summary";
+  public const string CreatePteInformation = "pte-information";
+  public const string UpdatePteInformation = "pte-information/{key:int}";
+  public const string DeletePteInformation = "pte-information/{key:int}";
+  public const string PteInformationByApplicantId = "pte-information-by-applicantid/{applicantId:int}";
+  #endregion PTEInformation
+
+  #region GMATInformation
+  public const string GmatInformationDDL = "gmat-information-ddl";
+  public const string GmatInformationSummary = "gmat-information-summary";
+  public const string CreateGmatInformation = "gmat-information";
+  public const string UpdateGmatInformation = "gmat-information/{key:int}";
+  public const string DeleteGmatInformation = "gmat-information/{key:int}";
+  public const string GmatInformationByApplicantId = "gmat-information-by-applicantid/{applicantId:int}";
+  #endregion GMATInformation
+
+  #region OTHERSInformation
+  public const string OthersInformationDDL = "others-information-ddl";
+  public const string OthersInformationSummary = "others-information-summary";
+  public const string CreateOthersInformation = "others-information";
+  public const string UpdateOthersInformation = "others-information/{key:int}";
+  public const string DeleteOthersInformation = "others-information/{key:int}";
+  public const string OthersInformationByApplicantId = "others-information-by-applicantid/{applicantId:int}";
+  #endregion OTHERSInformation
+
+  #region WorkExperience
+  public const string WorkExperienceDDL = "work-experience-ddl";
+  public const string WorkExperienceSummary = "work-experience-summary";
+  public const string CreateWorkExperience = "work-experience";
+  public const string UpdateWorkExperience = "work-experience/{key:int}";
+  public const string DeleteWorkExperience = "work-experience/{key:int}";
+  public const string WorkExperienceByApplicantId = "work-experience-by-applicantid/{applicantId:int}";
+  #endregion WorkExperience
+
+  #region ApplicantReference
+  public const string ApplicantReferenceDDL = "applicant-reference-ddl";
+  public const string ApplicantReferenceSummary = "applicant-reference-summary";
+  public const string CreateApplicantReference = "applicant-reference";
+  public const string UpdateApplicantReference = "applicant-reference/{key:int}";
+  public const string DeleteApplicantReference = "applicant-reference/{key:int}";
+  public const string ApplicantReferenceByApplicantId = "applicant-reference-by-applicantid/{applicantId:int}";
+  #endregion ApplicantReference
+
+  #region StatementOfPurpose
+  public const string StatementOfPurposeDDL = "statement-of-purpose-ddl";
+  public const string StatementOfPurposeSummary = "statement-of-purpose-summary";
+  public const string CreateStatementOfPurpose = "statement-of-purpose";
+  public const string UpdateStatementOfPurpose = "statement-of-purpose/{key:int}";
+  public const string DeleteStatementOfPurpose = "statement-of-purpose/{key:int}";
+  public const string StatementOfPurposeByApplicantId = "statement-of-purpose-by-applicantid/{applicantId:int}";
+  #endregion StatementOfPurpose
+
+  #region AdditionalInfo
+  public const string AdditionalInfoDDL = "additional-info-ddl";
+  public const string AdditionalInfoSummary = "additional-info-summary";
+  public const string CreateAdditionalInfo = "additional-info";
+  public const string UpdateAdditionalInfo = "additional-info/{key:int}";
+  public const string DeleteAdditionalInfo = "additional-info/{key:int}";
+  public const string AdditionalInfoByApplicantId = "additional-info-by-applicantid/{applicantId:int}";
+  #endregion AdditionalInfo
 }

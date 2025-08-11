@@ -1,10 +1,6 @@
-﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.RepositoriesContracts;
+﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.Authentication;
 using bdDevCRM.Sql.Context;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.Core.Authentication;
 

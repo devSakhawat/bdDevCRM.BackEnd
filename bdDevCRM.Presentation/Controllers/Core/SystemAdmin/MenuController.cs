@@ -1,7 +1,9 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,24 +14,14 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 public class EmployeeController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
+  //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
 
-  public EmployeeController(IServiceManager serviceManager, IMemoryCache cache)
+  public EmployeeController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
     _cache = cache;
   }
-
-  //  public class EmployeeController : BaseApiController
-  //{
-  //  private readonly IServiceManager _serviceManager;
-  //  private readonly IMemoryCache _cache;
-  //  public EmployeeController(IServiceManager serviceManager, IMemoryCache cache)
-  //  {
-  //    _serviceManager = serviceManager;
-  //    _cache = cache;
-  //  }
 
 
   [HttpGet(RouteConstants.SelectMenuByUserPermission)]
@@ -80,7 +72,7 @@ public class EmployeeController : BaseApiController
   [HttpGet(RouteConstants.GetMenus)]
   [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
   //[IgnoreMediaTypeValidation]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> GetMenus()
   {
     var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -121,19 +113,53 @@ public class EmployeeController : BaseApiController
   [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> SaveMenu([FromBody] MenuDto modelDto)
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("UserId not found in token.");
+    }
+
+    var userId = Convert.ToInt32(userIdClaim);
+    // userId : which key is responsible to when cache was created.
+    // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
+
     var model = await _serviceManager.Menus.CreateAsync(modelDto);
-    return (model != null) ? Ok(model) : NoContent();
+    //return (model != null) ? Ok(model) : NoContent();
+    if (model.MenuId <= 0)
+      throw new InvalidCreateOperationException("Failed to create record.");
+
+    return Ok(ResponseHelper.Created(model, "Menu created successfully."));
   }
+
 
   [HttpPut(RouteConstants.UpdateMenu)]
   //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   public async Task<IActionResult> UpdateMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("UserId not found in token.");
+    }
+
+    var userId = Convert.ToInt32(userIdClaim);
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
 
     MenuDto returnData = await _serviceManager.Menus.UpdateAsync(key, modelDto);
-    return (returnData != null) ? Ok(returnData) : NoContent();
+    if (returnData.MenuId <= 0)
+      throw new InvalidCreateOperationException("Failed to create record.");
+
+    return Ok(ResponseHelper.Updated(returnData, "Menu created successfully."));
   }
 
   [HttpDelete(RouteConstants.DeleteMenu)]
@@ -148,6 +174,31 @@ public class EmployeeController : BaseApiController
 
 
 
+
+
+  [HttpGet(RouteConstants.MenuForDDL)]
+  //[ResponseCache(Duration = 60)] // Browser caching for 5 minutes
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  public async Task<IActionResult> MenuForDDL()
+  {
+    // from claim.
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      return Unauthorized("UserId not found in token.");
+    }
+    var userId = Convert.ToInt32(userIdClaim);
+    // userId : which key is reponsible to when cache was created .
+    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+    {
+      return Unauthorized("User not found in cache.");
+    }
+
+    IEnumerable<MenuForDDLDto> menusDto = await _serviceManager.Menus.MenuForDDL();
+    return Ok(menusDto.ToList());
+  }
 
 
 

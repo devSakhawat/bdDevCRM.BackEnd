@@ -1,9 +1,10 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 
 public interface ISystemSettingsRepository : IRepositoryBase<SystemSettings>
 {
-  Task<SystemSettings?> GetSystemSettingsDataByCompanyId(int companyId);
+  Task<SystemSettings> GetSystemSettingsDataByCompanyId(int companyId);
   Task<AssemblyInfo?> GetAssemblyInfoResult();
 }

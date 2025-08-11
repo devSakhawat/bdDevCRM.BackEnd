@@ -1,9 +1,10 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,12 +12,12 @@ using Microsoft.Extensions.Caching.Memory;
 
 public class GroupController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
+  //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
 
-  public GroupController(IServiceManager serviceManager, IMemoryCache cache)
+  public GroupController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
     _cache = cache;
   }
 
@@ -80,6 +81,23 @@ public class GroupController : BaseApiController
     UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
 
     IEnumerable<GroupForUserSettings> groupForUserSettings = await _serviceManager.Groups.GetGroups(trackChanges: false);
+    return Ok(groupForUserSettings.ToList());
+  }
+
+
+  //[HttpGet(RouteConstants.GetGroupMemberByUserId)]
+  //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
+
+  [HttpGet(RouteConstants.GroupMemberByUserId)]
+  public async Task<IActionResult> GroupMemberByUserId([FromQuery] int userId)
+  {
+    // from claim.
+    var userIdFromSession = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    // userId : which key is reponsible to when cache was created .
+    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
+    UsersDto user = _serviceManager.GetCache<UsersDto>(userIdFromSession);
+
+    IEnumerable<GroupMemberDto> groupForUserSettings = await _serviceManager.Groups.GroupMemberByUserId( userId ,trackChanges: false);
     return Ok(groupForUserSettings.ToList());
   }
 

@@ -2,7 +2,7 @@
 
 public class WfStateRepositoryDto
 {
-  public int WfstateId { get; set; }
+  public int WfStateId { get; set; }
   public string StateName { get; set; } = null!;
   public int MenuId { get; set; }
   public bool? IsDefaultStart { get; set; }

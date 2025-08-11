@@ -1,7 +1,6 @@
-﻿using bdDevCRM.Entities.Entities;
+﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.Authentication;
 using bdDevCRM.Sql.Context;
-using Microsoft.EntityFrameworkCore;
 
 namespace bdDevCRM.Repositories.Core.Authentication;
 
@@ -16,7 +15,7 @@ public class AuthenticationRepository : RepositoryBase<Users>, IAuthenticationRe
 
     Users user = FirstOrDefault(u => u.LoginId == loginId, true);
 
-    if (user == null )
+    if (user == null)
       return null;
 
     return user;

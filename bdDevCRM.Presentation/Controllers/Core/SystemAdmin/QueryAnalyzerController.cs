@@ -1,6 +1,6 @@
 ﻿using bdDevCRM.Entities.CRMGrid;
 using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -12,12 +12,12 @@ using Microsoft.Extensions.Caching.Memory;
 
 public class QueryAnalyzerController : BaseApiController
 {
-  private readonly IServiceManager _serviceManager;
+  //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
 
-  public QueryAnalyzerController(IServiceManager serviceManager, IMemoryCache cache)
+  public QueryAnalyzerController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
   {
-    _serviceManager = serviceManager;
+    //_serviceManager = serviceManager;
     _cache = cache;
   }
 

@@ -19,4 +19,11 @@ public class CommonHelper
   {
     return value.StartsWith("enc_");
   }
+
+  public static string ToRelativeUrl(string fullPath)
+  {
+    var rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+    return fullPath.Replace(rootPath, "").Replace("\\", "/");
+  }
+
 }

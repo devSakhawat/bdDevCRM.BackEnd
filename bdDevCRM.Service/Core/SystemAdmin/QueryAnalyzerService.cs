@@ -1,5 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
@@ -27,7 +27,7 @@ internal sealed class QueryAnalyzerService : IQueryAnalyzerService
 
   public async Task<IEnumerable<QueryAnalyzerDto>> CustomizedReportInfo(bool trackChanges)
   {
-    IEnumerable<QueryAnalyzerRepositoryDto> queryAnalyzers = await _repository.QueryAnalyzer.CustomizedReportInfo(trackChanges);
+    IEnumerable<QueryAnalyzerRepositoryDto> queryAnalyzers = await _repository.QueryAnalyzers.CustomizedReportInfo(trackChanges);
     IEnumerable<QueryAnalyzerDto> queryAnalyzersDto = MyMapper.JsonCloneIEnumerableToList<QueryAnalyzerRepositoryDto, QueryAnalyzerDto>(queryAnalyzers);
 
     return queryAnalyzersDto;

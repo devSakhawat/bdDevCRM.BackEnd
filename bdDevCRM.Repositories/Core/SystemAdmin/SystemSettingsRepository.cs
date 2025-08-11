@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.Entities;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using System;
@@ -78,7 +79,7 @@ public class SystemSettingsRepository : RepositoryBase<SystemSettings>, ISystemS
 
   #endregion
 
-  public async Task<SystemSettings?> GetSystemSettingsDataByCompanyId(int companyId)
+  public async Task<SystemSettings> GetSystemSettingsDataByCompanyId(int companyId)
   {
     // Define the query
     var query = string.Format(@"SELECT * FROM SystemSettings WHERE CompanyId = '{0}'", companyId);

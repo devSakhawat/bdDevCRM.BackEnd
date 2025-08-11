@@ -1,10 +1,12 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Entities.Entities.System;
+using bdDevCRM.Entities.Entities.System;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Runtime.CompilerServices;
@@ -41,7 +43,7 @@ internal sealed class GroupService : IGroupService
 
     try
     {
-      using var transaction = _repository.GroupPermission.TransactionBeginAsync();
+      using var transaction = _repository.GroupPermissiones.TransactionBeginAsync();
       
       Groups entity = MyMapper.JsonClone<GroupDto, Groups>(modelDto);
       int groupId = await _repository.Groups.CreateAndGetIdAsync(entity);
@@ -49,64 +51,64 @@ internal sealed class GroupService : IGroupService
       // insert modulesPermission to GroupPermission table with currently inserted GroupId
       if (groupId > 0 && modelDto.ModuleList.Count > 0)
       {
-        IEnumerable<GroupPermission> modulesPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ModuleList);
+        IEnumerable<GroupPermission> modulesPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ModuleList);
         foreach (var item in modulesPermission) item.Groupid = groupId;
-        await _repository.GroupPermission.BulkInsertAsync(modulesPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(modulesPermission);
       }
 
       // insert menusPermission to GroupPermission table with currently inserted GroupId
       if (groupId > 0 && modelDto.MenuList.Count > 0)
       {
-        IEnumerable<GroupPermission> menusPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.MenuList);
+        IEnumerable<GroupPermission> menusPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.MenuList);
         foreach (var item in menusPermission) item.Groupid = groupId;
-        await _repository.GroupPermission.BulkInsertAsync(menusPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(menusPermission);
       }
 
       // insert accessesPermission to GroupPermission table with currently inserted GroupId
       if (groupId > 0 && modelDto.AccessList.Count > 0)
       {
-        IEnumerable<GroupPermission> accessesPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.AccessList);
+        IEnumerable<GroupPermission> accessesPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.AccessList);
         foreach (var item in accessesPermission) item.Groupid = groupId;
-        await _repository.GroupPermission.BulkInsertAsync(accessesPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(accessesPermission);
       }
 
       // insert statusPermission to GroupPermission table with currently inserted GroupId
       if (groupId > 0 && modelDto.StatusList.Count > 0)
       {
-        IEnumerable<GroupPermission> statusPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.StatusList);
+        IEnumerable<GroupPermission> statusPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.StatusList);
         foreach (var item in statusPermission) item.Groupid = groupId;
-        await _repository.GroupPermission.BulkInsertAsync(statusPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(statusPermission);
       }
 
       // insert actionsPermission to GroupPermission table with currently inserted GroupId
       if (groupId > 0 && modelDto.ActionList.Count > 0)
       {
-        IEnumerable<GroupPermission> actionsPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ActionList);
+        IEnumerable<GroupPermission> actionsPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ActionList);
         foreach (var item in actionsPermission) item.Groupid = groupId;
-        await _repository.GroupPermission.BulkInsertAsync(actionsPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(actionsPermission);
       }
 
       // insert reportListPermission to GroupPermission table with currently inserted GroupId
       if (groupId > 0 && modelDto.ActionList.Count > 0)
       {
-        IEnumerable<GroupPermission> reportListPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ReportList);
+        IEnumerable<GroupPermission> reportListPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ReportList);
         foreach (var item in reportListPermission) item.Groupid = groupId;
-        await _repository.GroupPermission.BulkInsertAsync(reportListPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(reportListPermission);
       }
 
-      await _repository.GroupPermission.TransactionCommitAsync();
+      await _repository.GroupPermissiones.TransactionCommitAsync();
       //await _repository.SaveAsync();
       return modelDto;
 
     }
     catch (Exception)
     {
-      await _repository.GroupPermission.TransactionRollbackAsync();
+      await _repository.GroupPermissiones.TransactionRollbackAsync();
       throw;
     }
     finally
     {
-      await _repository.GroupPermission.TransactionDisposeAsync();
+      await _repository.GroupPermissiones.TransactionDisposeAsync();
     }
   }
 
@@ -127,7 +129,7 @@ internal sealed class GroupService : IGroupService
 
     try
     {
-      using var transaction = _repository.GroupPermission.TransactionBeginAsync();
+      using var transaction = _repository.GroupPermissiones.TransactionBeginAsync();
 
       if (!isModuleExists)
       {
@@ -137,73 +139,73 @@ internal sealed class GroupService : IGroupService
       }
 
       // delete all permissions of this group using ef core not sql query
-      IEnumerable<GroupPermission> groupPermissions = await _repository.GroupPermission.ListByConditionAsync(x => x.Groupid.Equals(modelDto.GroupId));
+      IEnumerable<GroupPermission> groupPermissions = await _repository.GroupPermissiones.ListByConditionAsync(x => x.Groupid.Equals(modelDto.GroupId));
       if(groupPermissions.Count() > 0)
       {
-        _repository.GroupPermission.BulkDelete(groupPermissions);
+        _repository.GroupPermissiones.BulkDelete(groupPermissions);
       }
 
 
       // insert modulesPermission to GroupPermission table with currently inserted GroupId
       if (key > 0 && modelDto.ModuleList.Count > 0)
       {
-        IEnumerable<GroupPermission> modulesPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ModuleList);
+        IEnumerable<GroupPermission> modulesPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ModuleList);
         foreach (var item in modulesPermission) item.Groupid = key;
-        await _repository.GroupPermission.BulkInsertAsync(modulesPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(modulesPermission);
       }
 
       // insert menusPermission to GroupPermission table with currently inserted GroupId
       if (key > 0 && modelDto.MenuList.Count > 0)
       {
-        IEnumerable<GroupPermission> menusPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.MenuList);
+        IEnumerable<GroupPermission> menusPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.MenuList);
         foreach (var item in menusPermission) item.Groupid = key;
-        await _repository.GroupPermission.BulkInsertAsync(menusPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(menusPermission);
       }
 
       // insert accessesPermission to GroupPermission table with currently inserted GroupId
       if (key > 0 && modelDto.AccessList.Count > 0)
       {
-        IEnumerable<GroupPermission> accessesPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.AccessList);
+        IEnumerable<GroupPermission> accessesPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.AccessList);
         foreach (var item in accessesPermission) item.Groupid = key;
-        await _repository.GroupPermission.BulkInsertAsync(accessesPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(accessesPermission);
       }
 
       // insert statusPermission to GroupPermission table with currently inserted GroupId
       if (key > 0 && modelDto.StatusList.Count > 0)
       {
-        IEnumerable<GroupPermission> statusPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.StatusList);
+        IEnumerable<GroupPermission> statusPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.StatusList);
         foreach (var item in statusPermission) item.Groupid = key;
-        await _repository.GroupPermission.BulkInsertAsync(statusPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(statusPermission);
       }
 
       // insert actionsPermission to GroupPermission table with currently inserted GroupId
       if (key > 0 && modelDto.ActionList.Count > 0)
       {
-        IEnumerable<GroupPermission> actionsPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ActionList);
+        IEnumerable<GroupPermission> actionsPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ActionList);
         foreach (var item in actionsPermission) item.Groupid = key;
-        await _repository.GroupPermission.BulkInsertAsync(actionsPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(actionsPermission);
       }
 
       // insert reportListPermission to GroupPermission table with currently inserted GroupId
       if (key > 0 && modelDto.ReportList.Count > 0)
       {
-        IEnumerable<GroupPermission> reportListPermission = MyMapper.JsonCloneListToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ReportList);
+        IEnumerable<GroupPermission> reportListPermission = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionDto, GroupPermission>(modelDto.ReportList);
         foreach (var item in reportListPermission) item.Groupid = key;
-        await _repository.GroupPermission.BulkInsertAsync(reportListPermission);
+        await _repository.GroupPermissiones.BulkInsertAsync(reportListPermission);
       }
 
-      await _repository.GroupPermission.TransactionCommitAsync();
+      await _repository.GroupPermissiones.TransactionCommitAsync();
       return modelDto;
 
     }
     catch (Exception)
     {
-      await _repository.GroupPermission.TransactionRollbackAsync();
+      await _repository.GroupPermissiones.TransactionRollbackAsync();
       throw;
     }
     finally
     {
-      await _repository.GroupPermission.TransactionDisposeAsync();
+      await _repository.GroupPermissiones.TransactionDisposeAsync();
     }
   }
 
@@ -240,7 +242,7 @@ internal sealed class GroupService : IGroupService
 
   public async Task<IEnumerable<GroupPermissionDto>> GetAccessPermisionForCurrentUser(int moduleId, int userId)
   {
-    IEnumerable<GroupPermissionRepositoryDto> groupMemeberRepositoriesDto = await _repository.GroupPermission.GetAccessPermisionForCurrentUser(moduleId, userId);
+    IEnumerable<GroupPermissionRepositoryDto> groupMemeberRepositoriesDto = await _repository.GroupPermissiones.GetAccessPermisionForCurrentUser(moduleId, userId);
     IEnumerable<GroupPermissionDto> groupMemeberDtos = MyMapper.JsonCloneIEnumerableToList<GroupPermissionRepositoryDto, GroupPermissionDto>(groupMemeberRepositoriesDto);
     return groupMemeberDtos;
   }
@@ -253,6 +255,14 @@ internal sealed class GroupService : IGroupService
 
     IEnumerable<GroupForUserSettings> groupForUserSettings = MyMapper.JsonCloneIEnumerableToList<Groups, GroupForUserSettings>(groups);
     return groupForUserSettings;
+  }
+
+  public async Task<IEnumerable<GroupMemberDto>> GroupMemberByUserId(int userId, bool trackChanges)
+  {
+    // ListByConditionAsync must be call by only enitiy name not dto. 
+    IEnumerable<GroupMember> groupMembers = await _repository.GroupMembers.ListByConditionAsync(expression: x => x.UserId == userId, trackChanges: false);
+    IEnumerable<GroupMemberDto> resultData = MyMapper.JsonCloneIEnumerableToList<GroupMember, GroupMemberDto>(groupMembers);
+    return resultData;
   }
 
   //public async Task<IEnumerable<GroupDto>> GroupsByModuleId(int moduleId, bool trackChanges)

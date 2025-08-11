@@ -1,10 +1,11 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Entities.Entities.System;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Utilities.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
@@ -116,11 +117,11 @@ internal sealed class MenuService : IMenuService
   public async Task<MenuDto> CreateAsync(MenuDto modelDto)
   {
     if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
-    bool isModuleExists = await _repository.Menus.ExistsAsync(m => m.MenuName == modelDto.MenuName);
-    if (isModuleExists) throw new DuplicateRecordException("Menu", "MenuName");
+    bool ismenuExists = await _repository.Menus.ExistsAsync(m => m.MenuName.Trim().ToLower() == modelDto.MenuName.Trim().ToLower());
+    if (ismenuExists) throw new DuplicateRecordException("Menu", "MenuName");
 
     Menu entity = MyMapper.JsonClone<MenuDto, Menu>(modelDto);
-    await _repository.Menus.CreateAsync(entity);
+    modelDto.MenuId = await _repository.Menus.CreateAndGetIdAsync(entity);
     await _repository.SaveAsync();
     return modelDto;
   }
@@ -211,6 +212,28 @@ internal sealed class MenuService : IMenuService
 
     await _repository.Menus.DeleteAsync(x => x.MenuId == modelDto.MenuId, trackChanges: true);
     await _repository.SaveAsync();
+  }
+
+
+
+
+  public async Task<IEnumerable<MenuForDDLDto>> MenuForDDL()
+  {
+    // Corrected the initialization of the Menu object to use a constructor instead of a collection initializer.
+    IEnumerable<Menu> menus = await _repository.Menus.ListWithSelectAsync(
+        x => new Menu
+        {
+          MenuId = x.MenuId,
+          MenuName = x.MenuName
+        },
+        orderBy: x => x.Sororder,
+        trackChanges: false
+    );
+
+    if (menus.Count() == 0) return new List<MenuForDDLDto>();
+
+    IEnumerable<MenuForDDLDto> menusForDDLDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuForDDLDto>(menus);
+    return menusForDDLDto;
   }
 
 }

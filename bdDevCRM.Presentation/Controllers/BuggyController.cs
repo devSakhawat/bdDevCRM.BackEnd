@@ -1,11 +1,7 @@
-﻿
-using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Exceptions;
-using bdDevCRM.Entities.Exceptions.BaseException;
+﻿using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using Microsoft.AspNetCore.Http.HttpResults;
+using bdDevCRM.Utilities.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
 using System.Security.Claims;
 
 namespace bdDevCRM.Presentation.Controllers;
@@ -13,107 +9,112 @@ namespace bdDevCRM.Presentation.Controllers;
 
 public class BuggyController : BaseApiController
 {
-   [HttpGet("unauthorized")]
-   public IActionResult GetUnauthorized()
-   {
-      return Unauthorized();
-   }
+  public BuggyController(IServiceManager serviceManager) : base(serviceManager)
+  {
 
-   [HttpGet("badrequest")]
-   public IActionResult GetBadRequest()
-   {
-      return BadRequest("Not a good request");
-   }
+  }
 
-   [HttpGet("notfound")]
-   public IActionResult GetNotFound()
-   {
-      return NotFound();
-   }
+  [HttpGet("unauthorized")]
+  public IActionResult GetUnauthorized()
+  {
+    return Unauthorized();
+  }
 
-   [HttpGet("internalerror")]
-   public IActionResult GetInternalError()
-   {
-      throw new Exception("This is a test exception");
-   }
+  [HttpGet("badrequest")]
+  public IActionResult GetBadRequest()
+  {
+    return BadRequest("Not a good request");
+  }
 
-   [HttpPost("validationerror")]
-   public IActionResult GetValidationError(UsersDto product)
-   {
-      return Ok();
-   }
+  [HttpGet("notfound")]
+  public IActionResult GetNotFound()
+  {
+    return NotFound();
+  }
 
-   //[Authorize]
-   [HttpGet("secret")]
-   public IActionResult GetSecret()
-   {
-      var name = User.FindFirst(ClaimTypes.Name)?.Value;
-      var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+  [HttpGet("internalerror")]
+  public IActionResult GetInternalError()
+  {
+    throw new Exception("This is a test exception");
+  }
 
-      return Ok("Hello " + name + " with the id of " + id);
-   }
+  [HttpPost("validationerror")]
+  public IActionResult GetValidationError(UsersDto product)
+  {
+    return Ok();
+  }
 
-   //[Authorize(Roles = "Admin")]
-   [HttpGet("admin-secret")]
-   public IActionResult GetAdminSecret()
-   {
-      var name = User.FindFirst(ClaimTypes.Name)?.Value;
-      var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-      var isAdmin = User.IsInRole("Admin");
-      var roles = User.FindFirstValue(ClaimTypes.Role);
+  //[Authorize]
+  [HttpGet("secret")]
+  public IActionResult GetSecret()
+  {
+    var name = User.FindFirst(ClaimTypes.Name)?.Value;
+    var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-      return Ok(new
-      {
-         name,
-         id,
-         isAdmin,
-         roles
-      });
-   }
+    return Ok("Hello " + name + " with the id of " + id);
+  }
 
-   //[Authorize(Roles = "Admin")]
-   [HttpGet("GenericNotFoundException")]
-   public IActionResult GenericNotFoundException()
-   {
-      throw new GenericNotFoundException("Menu", "MenuId", "10");
-   }
+  //[Authorize(Roles = "Admin")]
+  [HttpGet("admin-secret")]
+  public IActionResult GetAdminSecret()
+  {
+    var name = User.FindFirst(ClaimTypes.Name)?.Value;
+    var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var roles = User.FindFirstValue(ClaimTypes.Role);
 
-   [HttpGet("GenericListNotFoundException")]
-   public IActionResult GenericListNotFoundException()
-   {
-      throw new GenericListNotFoundException("Menu"); 
-   }
+    return Ok(new
+    {
+      name,
+      id,
+      isAdmin,
+      roles
+    });
+  }
 
-   [HttpGet("IdParametersBadRequestException")]
-   public IActionResult IdParametersBadRequestException()
-   {
-      throw new IdParametersBadRequestException();
-   }
+  //[Authorize(Roles = "Admin")]
+  [HttpGet("GenericNotFoundException")]
+  public IActionResult GenericNotFoundException()
+  {
+    throw new GenericNotFoundException("Menu", "MenuId", "10");
+  }
 
-   [HttpGet("CollectionByIdsBadRequestException")]
-   public IActionResult CollectionByIdsBadRequestException()
-   {
-      throw new CollectionByIdsBadRequestException("Menus");
-   }
+  [HttpGet("GenericListNotFoundException")]
+  public IActionResult GenericListNotFoundException()
+  {
+    throw new GenericListNotFoundException("Menu");
+  }
 
-   [HttpGet("NullModelBadRequestException")]
-   public IActionResult NullModelBadRequestException()
-   {
-      throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
-   }
+  [HttpGet("IdParametersBadRequestException")]
+  public IActionResult IdParametersBadRequestException()
+  {
+    throw new IdParametersBadRequestException();
+  }
 
-   [HttpGet("ArgumentOutOfRangeException")]
-   public IActionResult ArgumentOutOfRangeException(int moduleId)
-   {
-      throw new ArgumentOutOfRangeException(nameof(moduleId), "Module ID must be a positive integer.");
+  [HttpGet("CollectionByIdsBadRequestException")]
+  public IActionResult CollectionByIdsBadRequestException()
+  {
+    throw new CollectionByIdsBadRequestException("Menus");
+  }
 
-   }
+  [HttpGet("NullModelBadRequestException")]
+  public IActionResult NullModelBadRequestException()
+  {
+    throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
+  }
 
-   //[HttpGet("NotFoundException")]
-   //public IActionResult NotFoundException(int moduleId)
-   //{
-   //   return NotFoundException();
+  [HttpGet("ArgumentOutOfRangeException")]
+  public IActionResult ArgumentOutOfRangeException(int moduleId)
+  {
+    throw new ArgumentOutOfRangeException(nameof(moduleId), "Module ID must be a positive integer.");
 
-   //}
+  }
+
+  //[HttpGet("NotFoundException")]
+  //public IActionResult NotFoundException(int moduleId)
+  //{
+  //   return NotFoundException();
+
+  //}
 }
 

@@ -1,5 +1,6 @@
 ﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.RepositoryDtos;
+using bdDevCRM.Entities.Entities.System;
+using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using System;
 using System.Collections.Generic;

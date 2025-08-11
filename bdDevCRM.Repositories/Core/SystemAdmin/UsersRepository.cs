@@ -1,6 +1,6 @@
-﻿using bdDevCRM.Entities.Entities;
+﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
-using bdDevCRM.RepositoryDtos;
+using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.EntityFrameworkCore;
@@ -20,25 +20,25 @@ public class UsersRepository : RepositoryBase<Users>, IUsersRepository
   private const string SELECT_USERS_BY_LOGINID_SQL =
            "Select Users.UserId, Users.CompanyID, Users.LoginId, Users.UserName, Users.Password, Users.EmployeeId, Users.CreatedDate ,Employee.HRRecordId\r\n,Users.LastUpdateDate ,Users.LastLoginDate, Users.FailedLoginNo, Users.IsActive, Users.IsExpired , Users.THEME ,Employment.EmployeeId as Employee_Id\r\n,Users.AccessParentCompany ,Users.DefaultDashboard ,Employee.PROFILEPICTURE as ProfilePicture  \r\nfrom Users \r\ninner join Employee on Users.EmployeeId = Employee.HRRecordId\r\ninner join Employment on Employee.HRRecordId = Employment.HRRecordId\r\nwhere rtrim(ltrim(Lower(LoginId))) = '{0}'";
 
-  public IEnumerable<Users> GetUsers(bool trackChanges) => List(u => u.UserId ,trackChanges);
+  public IEnumerable<Users> GetUsers(bool trackChanges) => List(u => u.UserId, trackChanges);
 
   public Users GetUser(int UsersId, bool trackChanges)
   {
     return FirstOrDefault(c => c.UserId.Equals(UsersId), trackChanges);
   }
 
-  public IEnumerable<Users> GetByIds(IEnumerable<int> ids, bool trackChanges) 
+  public IEnumerable<Users> GetByIds(IEnumerable<int> ids, bool trackChanges)
     => GetListByIds(x => ids.Contains(x.UserId), trackChanges);
 
   // Get all Users
-  public async Task<IEnumerable<Users>> GetUsersAsync(bool trackChanges) => await ListAsync(c => c.UserId ,trackChanges);
+  public async Task<IEnumerable<Users>> GetUsersAsync(bool trackChanges) => await ListAsync(c => c.UserId, trackChanges);
 
   // Get a single Users by ID
   public async Task<Users> GetUserAsync(int usersId, bool trackChanges) => await FirstOrDefaultAsync(c => c.UserId.Equals(usersId), trackChanges);
 
 
   // Get a single Users by LoginId
-  public UsersRepositoryDto? GetUserByLoginIdAsync(string loginId, bool trackChanges) 
+  public UsersRepositoryDto? GetUserByLoginIdAsync(string loginId, bool trackChanges)
   {
     string quary = string.Format(SELECT_USERS_BY_LOGINID_SQL, loginId);
     UsersRepositoryDto userRepositoryDto = ExecuteSingleDataSyncronous<UsersRepositoryDto>(quary);
@@ -77,7 +77,7 @@ public class UsersRepository : RepositoryBase<Users>, IUsersRepository
     if (passwordHistory != null)
     {
       passwordHistory.PasswordChangeDate = DateTime.Now;
-      
+
     }
     if (passwordHistory != null)
     {

@@ -60,7 +60,17 @@ public class MyMapper
     return targetList;
   }
 
-  public static IEnumerable<TTarget> JsonCloneListToIEnumerable<TSource, TTarget>(List<TSource> sourceList)
+  public static IEnumerable<TTarget> JsonCloneIEnumerableToIEnumerable<TSource, TTarget>(List<TSource> sourceList)
+  {
+    if (sourceList == null) throw new ArgumentNullException(nameof(sourceList));
+
+    var serialized = JsonConvert.SerializeObject(sourceList);
+    var targetList = JsonConvert.DeserializeObject<IEnumerable<TTarget>>(serialized);
+
+    return targetList;
+  }
+
+  public static List<TTarget> JsonCloneListToList<TSource, TTarget>(List<TSource> sourceList)
   {
     if (sourceList == null) throw new ArgumentNullException(nameof(sourceList));
 
@@ -69,4 +79,36 @@ public class MyMapper
 
     return targetList;
   }
+
+  public static IEnumerable<TTarget> JsonCloneIEnumerableToIEnumerable<TSource, TTarget>(IEnumerable<TSource> sourceList)
+  {
+    if (sourceList == null) throw new ArgumentNullException(nameof(sourceList));
+
+    var serialized = JsonConvert.SerializeObject(sourceList);
+    var targetList = JsonConvert.DeserializeObject<IEnumerable<TTarget>>(serialized);
+
+    return targetList;
+  }
 }
+
+
+public static class JsonSafeDeserializer
+{
+  public static T SafeDeserialize<T>(string json) where T : new()
+  {
+    var settings = new JsonSerializerSettings
+    {
+      NullValueHandling = NullValueHandling.Ignore,
+      MissingMemberHandling = MissingMemberHandling.Ignore,
+      Error = (sender, args) =>
+      {
+        Console.WriteLine("JSON Error at: " + args.ErrorContext.Path);
+        args.ErrorContext.Handled = true;
+      }
+    };
+
+    return JsonConvert.DeserializeObject<T>(json, settings) ?? new T();
+  }
+}
+
+

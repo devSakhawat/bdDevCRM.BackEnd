@@ -1,24 +1,26 @@
-﻿using bdDevCRM.Entities.Entities;
+﻿using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
-using Microsoft.EntityFrameworkCore;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
-public class CountryRepository : RepositoryBase<Country>, ICountryRepository
+public class CrmCountryRepository : RepositoryBase<CrmCountry>, ICrmCountryRepository
 {
-  public CountryRepository(CRMContext context) : base(context) { }
+  public CrmCountryRepository(CRMContext context) : base(context) { }
 
   // Get all countries
-  public async Task<IEnumerable<Country>> GetCountriesAsync(bool trackChanges) => await ListAsync(c => c.CountryId, trackChanges);
+  public async Task<IEnumerable<CrmCountry>> GetCountriesAsync(bool trackChanges) => await ListAsync(c => c.CountryId, trackChanges);
+
+  // Get all Active countries
+  public async Task<IEnumerable<CrmCountry>> GetActiveCountriesAsync(bool trackChanges) => await ListByConditionAsync(x => x.Status == 1, c => c.CountryId, trackChanges);
   // Get a single country by ID
-  public async Task<Country> GetCountryAsync(int companyId, bool trackChanges) => await FirstOrDefaultAsync(x => x.CountryId.Equals(companyId), trackChanges);
+  public async Task<CrmCountry> GetCountryAsync(int companyId, bool trackChanges) => await FirstOrDefaultAsync(x => x.CountryId.Equals(companyId), trackChanges);
 
   // Add a new country
-  public void CreateCountry(Country country) => Create(country);
+  public void CreateCountry(CrmCountry country) => Create(country);
 
   // Update an existing country
-  public void UpdateCountry(Country country) => UpdateByState(country);
+  public void UpdateCountry(CrmCountry country) => UpdateByState(country);
 
   // Delete a country by ID
-  public void DeleteCountry(Country country) => Delete(country);
+  public void DeleteCountry(CrmCountry country) => Delete(country);
 }

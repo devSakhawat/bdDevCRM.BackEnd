@@ -1,6 +1,6 @@
-﻿using Microsoft.Practices.EnterpriseLibrary.Validation;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Resources;
-using ValidationResult = Microsoft.Practices.EnterpriseLibrary.Validation.ValidationResult;
+//using ValidationResult = Microsoft.Practices.EnterpriseLibrary.Validation.ValidationResult;
 
 namespace bdDevCRM.Utilities.Common;
 
@@ -24,37 +24,74 @@ public class ValidationHelper
   {
   }
 
-  public List<AppValidationResult> Validate<T>(T entity)
+  public static List<AppValidationResult> Validate<T>(T entity)
   {
-    ValidationResults results =
-        Microsoft.Practices.EnterpriseLibrary.Validation.Validation.ValidateFromAttributes(entity);
-    var validationResults = new List<AppValidationResult>();
-    foreach (Microsoft.Practices.EnterpriseLibrary.Validation.ValidationResult result in results)
-    {
-      var pvr = new AppValidationResult();
-      pvr.Key = result.Key;
-      pvr.localizedMessage = buildMessage(result.Message, result.Tag);
-      validationResults.Add(pvr);
-    }
-    return validationResults;
-  }
+    var validationResults = new List<ValidationResult>();
+    var context = new ValidationContext(entity, null, null);
 
-  public List<AppValidationResult> Validate<T>(List<T> entities)
-  {
-    var validationResults = new List<AppValidationResult>();
-    foreach (T entity in entities)
+    Validator.TryValidateObject(entity, context, validationResults, true);
+
+    var appValidationResults = new List<AppValidationResult>();
+
+    foreach (var result in validationResults)
     {
-      ValidationResults results = Validation.ValidateFromAttributes(entity);
-      foreach (ValidationResult result in results)
+      foreach (var memberName in result.MemberNames)
       {
-        var pvr = new AppValidationResult();
-        pvr.Key = result.Key;
-        pvr.localizedMessage = buildMessage(result.Message, result.Tag);
-        validationResults.Add(pvr);
+        appValidationResults.Add(new AppValidationResult
+        {
+          Key = memberName,
+          localizedMessage = result.ErrorMessage
+        });
       }
     }
-    return validationResults;
+
+    return appValidationResults;
   }
+
+  public static List<AppValidationResult> ValidateList<T>(List<T> entities)
+  {
+    var allErrors = new List<AppValidationResult>();
+
+    foreach (var entity in entities)
+    {
+      var errors = Validate(entity);
+      allErrors.AddRange(errors);
+    }
+
+    return allErrors;
+  }
+
+  //public List<AppValidationResult> Validate<T>(T entity)
+  //{
+  //  ValidationResults results =
+  //      Microsoft.Practices.EnterpriseLibrary.Validation.Validation.ValidateFromAttributes(entity);
+  //  var validationResults = new List<AppValidationResult>();
+  //  foreach (Microsoft.Practices.EnterpriseLibrary.Validation.ValidationResult result in results)
+  //  {
+  //    var pvr = new AppValidationResult();
+  //    pvr.Key = result.Key;
+  //    pvr.localizedMessage = buildMessage(result.Message, result.Tag);
+  //    validationResults.Add(pvr);
+  //  }
+  //  return validationResults;
+  //}
+
+  //public List<AppValidationResult> Validate<T>(List<T> entities)
+  //{
+  //  var validationResults = new List<AppValidationResult>();
+  //  foreach (T entity in entities)
+  //  {
+  //    ValidationResults results = Validation.ValidateFromAttributes(entity);
+  //    foreach (ValidationResult result in results)
+  //    {
+  //      var pvr = new AppValidationResult();
+  //      pvr.Key = result.Key;
+  //      pvr.localizedMessage = buildMessage(result.Message, result.Tag);
+  //      validationResults.Add(pvr);
+  //    }
+  //  }
+  //  return validationResults;
+  //}
 
   private string buildMessage(string MessageTemplateKey, string replacement)
   {
