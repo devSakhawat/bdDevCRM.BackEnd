@@ -47,7 +47,7 @@ INNER JOIN EMPLOYEETYPE ON EMPLOYEETYPE.EMPLOYEETYPEID = Employment.EmployeeType
     string sql = string.Format(@"Select case when (WFState.IsClosed =3 and Employment.JobEndDate<'{1}') then WFState.StateName else '' end as StateName ,Employment.JobEndDate,GetDate() as CurrentDate  
 from Employee 
 inner join Employment on Employment.HRRecordId=Employee.HRRecordId 
-left outer join WFState on WFState.WFStateId=Employee.StateId where Employment.HRRecordId={0} ", hrRecordId, DateTime.Today.ToString("MM-dd-yyyy"));
+left outer join WFState on WFState.WfStateId=Employee.StateId where Employment.HRRecordId={0} ", hrRecordId, DateTime.Today.ToString("MM-dd-yyyy"));
 
     var data = await ExecuteSingleData<WfState>(sql);
     return data;

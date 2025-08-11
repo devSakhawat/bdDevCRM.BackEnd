@@ -60,10 +60,10 @@ internal sealed class CrmInstituteService : ICrmInstituteService
     string sql =
             @"select InstituteId ,CRMInstitute.CountryId ,InstituteName ,Campus ,Website ,MonthlyLivingCost ,FundsRequirementforVisa ,ApplicationFee
 ,CRMInstitute.CurrencyId ,IsLanguageMandatory ,LanguagesRequirement ,InstitutionalBenefits ,PartTimeWorkDetails ,ScholarshipsPolicy ,InstitutionStatusNotes
-,CRMInstitute.InstituteTypeId ,InstituteCode ,InstituteEmail ,InstituteAddress ,InstitutePhoneNO ,InstituteMobileNo,CRMInstitute.Status ,Country.CountryName 
+,CRMInstitute.InstituteTypeId ,InstituteCode ,InstituteEmail ,InstituteAddress ,InstitutePhoneNO ,InstituteMobileNo,CRMInstitute.Status ,CrmCountry.CountryName 
 ,CrmCurrencyInfo.CurrencyName ,CRMInstituteType.InstituteTypeName ,docLogo.FilePath as InstitutionLogo , docProspectus.FilePath as InstitutionProspectus
 from CRMInstitute
-left join Country on CRMInstitute.CountryId = Country.CountryId
+left join CrmCountry on CRMInstitute.CountryId = CrmCountry.CountryId
 left join CrmCurrencyInfo on CRMInstitute.CountryId = CrmCurrencyInfo.CurrencyId
 left join CRMInstituteType on CRMInstitute.InstituteTypeId = CRMInstituteType.InstituteTypeId
 

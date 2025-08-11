@@ -1,5 +1,4 @@
 using bdDevCRM.Entities.Entities.CRM;
-using bdDevCRM.Entities.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts.CRM;
 using bdDevCRM.Sql.Context;
 

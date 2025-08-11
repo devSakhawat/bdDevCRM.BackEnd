@@ -18,7 +18,7 @@ public class StatusRepository : RepositoryBase<WfState>, IStatusRepository
   private const string SELECT_STATUS_BY_MENUID = "Select WFState.*, Menu.MenuName \r\nfrom WFState \r\ninner join Menu on Menu.MenuID = WFState.MenuId\r\nwhere WFState.MenuId = {0}";
 
   private const string SELECT_ACTION_BY_STATUSID =
-            "Select *, (Select StateName from WFState where WFStateId = NextStateId) as NEXTSTATENAME from WFAction where WFStateId = {0} order by AcSortOrder";
+            "Select *, (Select StateName from WFState where WfStateId = NextStateId) as NEXTSTATENAME from WFAction where WfStateId = {0} order by AcSortOrder";
 
 
   public async Task<IEnumerable<WfStateRepositoryDto>> StatusByMenuId(int menuId, bool trackChanges)

@@ -3,7 +3,7 @@
 
 public class WfStateDto
 {
-  public int WfstateId { get; set; }
+  public int WfStateId { get; set; }
 
   public string? StateName { get; set; } = null!;
 

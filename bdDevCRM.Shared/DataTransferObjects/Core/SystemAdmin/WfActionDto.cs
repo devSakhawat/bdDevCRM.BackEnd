@@ -8,9 +8,9 @@ namespace bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 
 public class WfActionDto
 {
-  public int WfactionId { get; set; }
+  public int WfActionId { get; set; }
 
-  public int WfstateId { get; set; }
+  public int WfStateId { get; set; }
 
   public string? ActionName { get; set; } = null!;
   public string? StateName { get; set; } = null!;

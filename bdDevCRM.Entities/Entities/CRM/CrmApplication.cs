@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace bdDevCRM.Entities.Entities.Entities.CRM;
+namespace bdDevCRM.Entities.Entities.CRM;
 
 public partial class CrmApplication
 {

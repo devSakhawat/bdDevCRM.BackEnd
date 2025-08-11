@@ -1,6 +1,5 @@
 using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
-using bdDevCRM.Entities.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -28,28 +27,26 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     string sql = string.Format(
             @"SELECT
     ca.ApplicationId,
+    ca.ApplicationDate,
+    ca.StateId,
+
     ai.ApplicantId,
     ac.ApplicantCourseId,
     ac.CountryId,
     ac.InstituteId,
     ac.CourseId,
-    ac.CurrencyId,
-    ac.PaymentMethodId,
     ai.GenderId,
     ai.MaritalStatusId,
     PermanentAddressId,
     PresentAddressId,
 
     -- Basic Application Info
-    ca.ApplicationDate,
-    ca.ApplicationStatus,
 
     -- Personal Details
     (ai.TitleText + ' ' + ai.FirstName + ' ' + ai.LastName) AS ApplicantName,
     ai.EmailAddress,
     ai.Mobile,
     ai.DateOfBirth,
-    ai.GenderName,
     ai.Nationality,
 
     -- Passport Information
@@ -64,18 +61,20 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     ac.IntakeMonth,
     ac.IntakeYear,
 
-    -- Financial Information
+    -- Financial Information    
+    ac.CurrencyId,
     ac.ApplicationFee,
     curInfo.CurrencyName,
+    ac.PaymentMethodId,
     ac.PaymentMethod,
     ac.PaymentDate,
     ac.PaymentReferenceNumber,
 
     -- Address Information
     perCountry.CountryName AS PermanentCountryName,
-    PermanentAddress.City AS PermanentCity,
+    perAddress.City AS PermanentCity,
     preCountry.CountryName AS PresentCountryName,
-    PresentAddress.City AS PresentCity,
+    preAddress.City AS PresentCity,
 
     -- English Language Tests (Summary)
     ieltsInfo.IELTSOverallScore as IELTSOverallBand,
@@ -93,7 +92,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
    CASE 
     WHEN EXISTS (
         SELECT 1 
-        FROM StatementOfPurpose sp 
+        FROM CrmStatementOfPurpose sp 
         WHERE sp.ApplicantId = ai.ApplicantId
     ) THEN CAST(1 AS BIT)
     ELSE CAST(0 AS BIT)
@@ -113,27 +112,27 @@ END AS HasStatementOfPurpose,
 
 FROM
     CrmApplication ca
-    INNER JOIN ApplicantInfo ai ON ca.ApplicationId = ai.ApplicantId
-    INNER JOIN ApplicantCourse ac ON ai.ApplicantId = ac.ApplicantId
-    INNER JOIN CRMInstitute i ON ac.InstituteId = i.InstituteId
-    INNER JOIN Country c ON ac.CountryId = c.CountryId
+    INNER JOIN CrmApplicantInfo ai ON ca.ApplicationId = ai.ApplicantId
+    INNER JOIN CrmApplicantCourse ac ON ai.ApplicantId = ac.ApplicantId
+    INNER JOIN CrmInstitute i ON ac.InstituteId = i.InstituteId
+    INNER JOIN CrmCountry c ON ac.CountryId = c.CountryId
     LEFT JOIN CrmCurrencyInfo curInfo ON ac.CurrencyId = curInfo.CurrencyId
-    LEFT JOIN PresentAddress ON PresentAddress.ApplicantId = ai.ApplicantId
-    LEFT JOIN Country preCountry ON preCountry.CountryId = PresentAddress.CountryId
-    LEFT JOIN PermanentAddress ON PermanentAddress.ApplicantId = ai.ApplicantId
-    LEFT JOIN Country perCountry ON perCountry.CountryId = PermanentAddress.CountryId    
+    LEFT JOIN CrmPresentAddress preAddress ON preAddress.ApplicantId = ai.ApplicantId
+    LEFT JOIN CrmCountry preCountry ON preCountry.CountryId = preAddress.CountryId
+    LEFT JOIN CrmPermanentAddress perAddress ON perAddress.ApplicantId = ai.ApplicantId
+    LEFT JOIN CrmCountry perCountry ON perCountry.CountryId = perAddress.CountryId    
 
-    LEFT JOIN EducationHistory edu ON ai.ApplicantId = edu.ApplicantId
-    LEFT JOIN IELTSInformation ieltsInfo ON ca.ApplicationId = ieltsInfo.ApplicantId
-    LEFT JOIN TOEFLInformation toeflInfo ON ca.ApplicationId = toeflInfo.ApplicantId
-    LEFT JOIN PTEInformation pteInfo ON ca.ApplicationId = pteInfo.ApplicantId
-    LEFT JOIN OTHERSInformation othersInfo ON ca.ApplicationId = othersInfo.ApplicantId
-    LEFT JOIN WorkExperience workEx ON ca.ApplicationId = workEx.ApplicantId
+    LEFT JOIN CrmEducationHistory edu ON ai.ApplicantId = edu.ApplicantId
+    LEFT JOIN CrmIELTSInformation ieltsInfo ON ca.ApplicationId = ieltsInfo.ApplicantId
+    LEFT JOIN CrmTOEFLInformation toeflInfo ON ca.ApplicationId = toeflInfo.ApplicantId
+    LEFT JOIN CrmPTEInformation pteInfo ON ca.ApplicationId = pteInfo.ApplicantId
+    LEFT JOIN CrmOTHERSInformation othersInfo ON ca.ApplicationId = othersInfo.ApplicantId
+    LEFT JOIN CrmWorkExperience workEx ON ca.ApplicationId = workEx.ApplicantId
     
-    LEFT JOIN ApplicantReference  ON CrmApplicantReferences.ApplicantId = ai.ApplicantId
-    LEFT JOIN StatementOfPurpose  ON StatementOfPurpose.ApplicantId = ai.ApplicantId
-    LEFT JOIN AdditionalInfo  ON AdditionalInfo.ApplicantId = ai.ApplicantId
-" );
+    LEFT JOIN CrmApplicantReference ar  ON ar.ApplicantId = ai.ApplicantId
+    LEFT JOIN CrmStatementOfPurpose sp ON sp.ApplicantId = ai.ApplicantId
+    LEFT JOIN CrmAdditionalInfo  ON CrmAdditionalInfo.ApplicantId = ai.ApplicantId
+");
     string orderBy = " InstituteName asc ";
     return await _repository.CrmApplications.GridData<CrmApplicationGridDto>(sql, options, orderBy, condition);
   }
