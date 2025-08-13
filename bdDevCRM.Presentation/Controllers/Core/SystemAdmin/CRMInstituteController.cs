@@ -263,7 +263,7 @@ public class CRMInstituteController : BaseApiController
         DocumentType = "Logo",
         IsMandatory = true,
         AcceptedExtensions = ".png",
-        MaxFileSizeMb = 1,
+        MaxFileSizeMb = 2,
 
         // Document properties
         Title = $"Logo_{dto.InstituteName}_{DateTime.Now:yyyyMMdd:FFFFF}",
