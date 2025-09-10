@@ -13,6 +13,7 @@ public partial class CrmOthersInformation
 
     public string? OthersScannedCopyPath { get; set; }
 
+
     public DateTime CreatedDate { get; set; }
 
     public int CreatedBy { get; set; }

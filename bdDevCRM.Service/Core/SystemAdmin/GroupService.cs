@@ -6,7 +6,7 @@ using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Runtime.CompilerServices;

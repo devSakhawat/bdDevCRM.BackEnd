@@ -1,6 +1,6 @@
-﻿using bdDevCRM.Utilities.Exceptions.BaseException;
+﻿using bdDevCRM.Shared.Exceptions.BaseException;
 
-namespace bdDevCRM.Utilities.Exceptions;
+namespace bdDevCRM.Shared.Exceptions;
 
 public class CollectionByIdsBadRequestException(string entityName) : BadRequestException($"The number of {entityName} returned does not match the number of {entityName} requested.")
 {

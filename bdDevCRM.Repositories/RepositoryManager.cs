@@ -92,6 +92,7 @@ public class RepositoryManager : IRepositoryManager
   public RepositoryManager(CRMContext repositoryContext)
   {
     _repositoryContext = repositoryContext;
+    
     #region System
     _countries = new Lazy<ICrmCountryRepository>(() => new CrmCountryRepository(_repositoryContext));
     _crmInstituteTypeRepository = new Lazy<ICrmInstituteTypeRepository>( () => new CRMInstituteTypeRepository(_repositoryContext));
@@ -135,6 +136,25 @@ public class RepositoryManager : IRepositoryManager
     _crmIntakeMonthRepository = new Lazy<ICrmIntakeMonthRepository>(() => new CrmIntakeMonthRepository(_repositoryContext));
     _crmIntakeYearRepository = new Lazy<ICrmIntakeYearRepository>(() => new CrmIntakeYearRepository(_repositoryContext));
     _crmPaymentMethodRepository = new Lazy<ICrmPaymentMethodRepository>(() => new CrmPaymentMethodRepository(_repositoryContext));
+
+    // FIX: Add missing CRM repositories initialization
+    _applicantCourseRepository = new Lazy<ICrmApplicantCourseRepository>(() => new CrmApplicantCourseRepository(_repositoryContext));
+    _applicantInfoRepository = new Lazy<ICrmApplicantInfoRepository>(() => new CrmApplicantInfoRepository(_repositoryContext));
+    _permanentAddressRepository = new Lazy<ICrmPermanentAddressRepository>(() => new CrmPermanentAddressRepository(_repositoryContext));
+    _presentAddressRepository = new Lazy<ICrmPresentAddressRepository>(() => new CrmPresentAddressRepository(_repositoryContext));
+
+    // Initialize the 10 new CRM repositories(FIX)
+    _educationHistoryRepository = new Lazy<ICrmEducationHistoryRepository>(() => new CrmEducationHistoryRepository(_repositoryContext));
+    _ieltsinformationRepository = new Lazy<ICrmIELTSInformationRepository>(() => new CrmIELTSInformationRepository(_repositoryContext));
+    _toeflinformationRepository = new Lazy<ICrmTOEFLInformationRepository>(() => new CrmTOEFLInformationRepository(_repositoryContext));
+    _pteinformationRepository = new Lazy<ICrmPTEInformationRepository>(() => new CrmPTEInformationRepository(_repositoryContext));
+    _gmatinformationRepository = new Lazy<ICrmGMATInformationRepository>(() => new CrmGMATInformationRepository(_repositoryContext));
+    _othersinformationRepository = new Lazy<ICrmOthersInformationRepository>(() => new CrmOthersInformationRepository(_repositoryContext));
+    _workExperienceRepository = new Lazy<ICrmWorkExperienceRepository>(() => new CrmWorkExperienceRepository(_repositoryContext));
+    _applicantReferenceRepository = new Lazy<ICrmApplicantReferenceRepository>(() => new CrmApplicantReferenceRepository(_repositoryContext));
+    _statementOfPurposeRepository = new Lazy<ICrmStatementOfPurposeRepository>(() => new CrmStatementOfPurposeRepository(_repositoryContext));
+    _additionalInfoRepository = new Lazy<ICrmAdditionalInfoRepository>(() => new CrmAdditionalInfoRepository(_repositoryContext));
+
     #endregion CRM
 
     #region DMS - Lazy Initialization

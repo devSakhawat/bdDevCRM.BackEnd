@@ -3,7 +3,7 @@ using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Authentication;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

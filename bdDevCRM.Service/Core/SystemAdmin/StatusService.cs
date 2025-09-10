@@ -1,13 +1,15 @@
 ﻿using Azure;
 using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.Entities.Entities.System;
 
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -50,6 +52,63 @@ internal sealed class StatusService : IStatusService
     var gridEntity = await _repository.Workflowes.GridData<WfStateDto>(query, options, orderBy, "");
 
     return gridEntity;
+  }
+
+  public async Task<WfStateDto> CreateNewRecordAsync(WfStateDto modelDto ,UsersDto currentUser)
+  {
+    if (modelDto.WfStateId != 0)
+      throw new InvalidCreateOperationException("CourseId must be 0.");
+
+    bool dup = await _repository.WfStates.ExistsAsync(x => x.StateName != null && x.StateName.Trim().ToLower().Equals(modelDto.StateName!.Trim().ToLower()));
+    if (dup) throw new DuplicateRecordException("Workflow", "StateName");
+
+    var entity = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);
+    modelDto.WfStateId = await _repository.WfStates.CreateAndGetIdAsync(entity);
+
+    return modelDto;
+  }
+
+  public async Task<string> UpdateRecordAsync(int key, WfStateDto modelDto, bool trackChanges, UsersDto currentUser)
+  {
+    if (key != modelDto.WfStateId) return "Key mismatch.";
+
+    bool exists = await _repository.WfStates.ExistsAsync(x => x.WfStateId == key);
+    if (!exists) throw new GenericNotFoundException("Status", "WfStateId", key.ToString());
+
+    var entity = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);
+    _repository.WfStates.Update(entity);
+    await _repository.SaveAsync();
+    _logger.LogInfo($"Status updated, id={key}");
+    return OperationMessage.Success;
+  }
+
+
+  public async Task<WfActionDto> CreateWfActionNewRecordAsync(WfActionDto modelDto, UsersDto currentUser, bool trackChanges)
+  {
+    if (modelDto.WfActionId != 0)
+      throw new InvalidCreateOperationException("CourseId must be 0.");
+
+    bool dup = await _repository.WfActions.ExistsAsync(x => x.ActionName != null && x.ActionName.Trim().ToLower().Equals(modelDto.ActionName!.Trim().ToLower()));
+    if (dup) throw new DuplicateRecordException("Workflow", "ActionName");
+
+    var entity = MyMapper.JsonClone<WfActionDto, WfAction>(modelDto);
+    modelDto.WfActionId = await _repository.WfActions.CreateAndGetIdAsync(entity);
+
+    return modelDto;
+  }
+
+  public async Task<string> UpdateWfActionRecordAsync(int key, WfActionDto modelDto, UsersDto currentUser, bool trackChanges = false)
+  {
+    if (key != modelDto.WfActionId) return "Key mismatch.";
+
+    bool exists = await _repository.WfActions.ExistsAsync(x => x.WfStateId == key);
+    if (!exists) throw new GenericNotFoundException("Status", "ActionId", key.ToString());
+
+    var entity = MyMapper.JsonClone<WfActionDto, WfAction>(modelDto);
+    _repository.WfActions.Update(entity);
+    await _repository.SaveAsync();
+    _logger.LogInfo($"Action updated, id={key}");
+    return OperationMessage.Success;
   }
 
   public async Task<string> SaveWorkflow(WfStateDto modelDto)

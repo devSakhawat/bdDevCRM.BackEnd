@@ -4,7 +4,7 @@
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants; // Add this using directive if IServiceManager depends on IMemoryCache directly
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;

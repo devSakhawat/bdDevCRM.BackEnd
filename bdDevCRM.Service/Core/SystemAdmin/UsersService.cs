@@ -8,7 +8,7 @@ using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Common;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Data;

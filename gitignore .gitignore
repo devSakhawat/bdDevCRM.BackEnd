@@ -1,40 +1,303 @@
-# Build results
+# ==========================================================================
+# bdDevCRM .NET 8 Solution - Complete .gitignore
+# ==========================================================================
+
+# ==========================================================================
+# Build Output Directories - All Projects
+# ==========================================================================
+
+# Universal bin and obj folders for all projects
+**/bin/
+**/obj/
+
+# Case-insensitive variants
 [Bb]in/
 [Oo]bj/
 [Dd]ebug/
 [Rr]elease/
+
+# Specific project build outputs
+bdDevCRM.Api/bin/
+bdDevCRM.Api/obj/
+bdDevCRM.Entities/bin/
+bdDevCRM.Entities/obj/
+bdDevCRM.Repositories/bin/
+bdDevCRM.Repositories/obj/
+bdDevCRM.RepositoriesContracts/bin/
+bdDevCRM.RepositoriesContracts/obj/
+bdDevCRM.Service/bin/
+bdDevCRM.Service/obj/
+bdDevCRM.ServiceContract/bin/
+bdDevCRM.ServiceContract/obj/
+bdDevCRM.ServicesContract/bin/
+bdDevCRM.ServicesContract/obj/
+bdDevCRM.Presentation/bin/
+bdDevCRM.Presentation/obj/
+bdDevCRM.Shared/bin/
+bdDevCRM.Shared/obj/
+bdDevCRM.Utilities/bin/
+bdDevCRM.Utilities/obj/
+bdDevCRM.Sql.Context/bin/
+bdDevCRM.Sql.Context/obj/
+
+# ==========================================================================
+# Visual Studio Files
+# ==========================================================================
+
+# Visual Studio cache/options directory
+.vs/
+.vscode/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
 x64/
 x86/
+[Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-**/[Bb]in/
-**/[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
-# Visual Studio files
-.vs/
-*.user
-*.userosscache
-*.suo
-*.userprefs
-*.dbmdl
-*.dbproj.schemaview
-*.pfx
-*.publishsettings
-node_modules/
-
-# Uploads folder in wwwroot
-bdDevCRM.Api/wwwroot/uploads/
-**/wwwroot/uploads/
-
-# MSTest test Results
-[Tt]est[Rr]esult*/
+# ==========================================================================
+# .NET Core / .NET 8 Files
+# ==========================================================================
 
 # .NET Core
 project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# Local settings
-appsettings.Development.json
-*.local.json
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# StyleCop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# ==========================================================================
+# NuGet Packages
+# ==========================================================================
+
+# NuGet v3's project.json files produces more ignorable files
+*.nuget.props
+*.nuget.targets
+
+# Microsoft Azure Build Output
+csx/
+*.build.csdef
+
+# ==========================================================================
+# File Uploads & Static Files (wwwroot specific)
+# ==========================================================================
+
+# DMS Upload directories - ignore contents but keep structure
+wwwroot/Uploads/
+wwwroot/uploads/
+
+# Specific entity upload folders from your DMS system
+wwwroot/Uploads/CRMInstitute/
+wwwroot/Uploads/institutes/
+wwwroot/Uploads/students/
+wwwroot/Uploads/agents/
+wwwroot/Uploads/courses/
+wwwroot/Uploads/documents/
+wwwroot/Uploads/applications/
+
+# File types commonly uploaded through your DMS
+wwwroot/**/*.pdf
+wwwroot/**/*.doc
+wwwroot/**/*.docx
+wwwroot/**/*.xls
+wwwroot/**/*.xlsx
+wwwroot/**/*.jpg
+wwwroot/**/*.jpeg
+wwwroot/**/*.png
+wwwroot/**/*.gif
+wwwroot/**/*.bmp
+wwwroot/**/*.webp
+wwwroot/**/*.svg
+wwwroot/**/*.zip
+wwwroot/**/*.rar
+
+# Temp and cache directories in wwwroot
+wwwroot/temp/
+wwwroot/cache/
+wwwroot/logs/
+
+# ==========================================================================
+# Database Files
+# ==========================================================================
+
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# ==========================================================================
+# Logging & Diagnostics
+# ==========================================================================
+
+# NLog logs
+logs/
+*.log
+
+# Application logs
+internal_logs/
+nlog-*.log
+
+# ==========================================================================
+# Testing
+# ==========================================================================
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResults/
+
+# Coverage reports
+coverage/
+*.coverage
+*.coveragexml
+
+# ==========================================================================
+# Security & Secrets
+# ==========================================================================
+
+# User secrets
+secrets.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Certificate files
+*.pfx
+*.p12
+*.key
+*.pem
+
+# ==========================================================================
+# Development Tools
+# ==========================================================================
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ==========================================================================
+# System Files
+# ==========================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Linux
+*~
+.nfs*
+
+# ==========================================================================
+# Backup Files
+# ==========================================================================
+
+*.bak
+*.tmp
+*.temp
+*.old
+*.orig
+*~
+
+# Crystal Reports backups
+CrystalReportsBackup*/
+CrystalReports*.rpt
+
+# ==========================================================================
+# Package Files
+# ==========================================================================
+
+# NuGet Packages
+packages/
+!packages/repositories.config
+!packages/build/
+
+# Node modules (if any frontend dependencies)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==========================================================================
+# Specific to your bdDevCRM project
+# ==========================================================================
+
+# DMS Document storage
+DocumentStorage/
+FileStorage/
+
+# Report outputs
+ReportOutputs/
+ExportedFiles/
+
+# Import/Export temporary files
+Import/
+Export/
+Temp/
+
+# Configuration override files
+local.settings.json
+connectionstrings.local.json

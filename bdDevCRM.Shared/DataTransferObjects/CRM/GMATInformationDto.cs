@@ -1,24 +1,16 @@
 using Microsoft.AspNetCore.Http;
-using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
 public class GMATInformationDto
 {
   public int GMATInformationId { get; set; }
-
   public int ApplicantId { get; set; }
-
-  public string? GMATListening { get; set; }
-
-  public string? GMATReading { get; set; }
-
-  public string? GMATWriting { get; set; }
-
-  public string? GMATSpeaking { get; set; }
-
-  public string? GMATOverallScore { get; set; }
-
+  public decimal? GMATListening { get; set; }
+  public decimal? GMATReading { get; set; }
+  public decimal? GMATWriting { get; set; }
+  public decimal? GMATSpeaking { get; set; }
+  public decimal? GMATOverallScore { get; set; }
   public DateTime? GMATDate { get; set; }
 
   public IFormFile? GMATScannedCopyFile { get; set; }
@@ -27,11 +19,15 @@ public class GMATInformationDto
 
   public string? GMATAdditionalInformation { get; set; }
 
-  public DateTime CreatedDate { get; set; }
-
+  // Existing audit (save)
+  public DateTime? CreatedDate { get; set; }
   public int CreatedBy { get; set; }
-
   public DateTime? UpdatedDate { get; set; }
-
   public int? UpdatedBy { get; set; }
+
+  // Added to align with GetApplicationDto aliases
+  public DateTime? GMAT_CreatedDate { get; set; }
+  public int GMAT_CreatedBy { get; set; }
+  public DateTime? GMAT_UpdatedDate { get; set; }
+  public int? GMAT_UpdatedBy { get; set; }
 }

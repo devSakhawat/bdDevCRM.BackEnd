@@ -1,6 +1,6 @@
-﻿using bdDevCRM.Utilities.Exceptions.BaseException;
+﻿using bdDevCRM.Shared.Exceptions.BaseException;
 
-namespace bdDevCRM.Utilities.Exceptions;
+namespace bdDevCRM.Shared.Exceptions;
 
 public sealed class GenericNotFoundException(string entityName, string propertyName, string key) : NotFoundException($"{entityName} with {propertyName} {key} was not found.")
 {

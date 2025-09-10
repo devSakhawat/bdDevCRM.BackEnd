@@ -25,6 +25,7 @@ public partial class CrmWorkExperience
 
     public string? DocumentName { get; set; }
 
+
     public DateTime CreatedDate { get; set; }
 
     public int CreatedBy { get; set; }

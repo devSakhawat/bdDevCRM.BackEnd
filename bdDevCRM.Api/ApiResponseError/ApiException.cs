@@ -1,4 +1,4 @@
-﻿namespace bdDevCRM.Api.ApiResponseError;
+﻿//namespace bdDevCRM.Api.ApiResponseError;
 
 
 //public class ApiException : ApiResponse

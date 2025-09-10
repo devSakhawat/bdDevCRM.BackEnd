@@ -3,6 +3,7 @@
 
 public class WfStateDto
 {
+  public int RowIndex { get; set; }
   public int WfStateId { get; set; }
 
   public string? StateName { get; set; } = null!;

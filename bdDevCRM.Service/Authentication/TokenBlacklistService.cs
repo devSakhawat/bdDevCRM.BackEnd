@@ -3,7 +3,7 @@ using bdDevCRM.Entities.Entities.System;
 
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.Authentication;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 

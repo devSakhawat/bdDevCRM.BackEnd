@@ -5,7 +5,7 @@ using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -89,13 +89,15 @@ internal sealed class CrmApplicantInfoService(
   {
     if (key != dto.ApplicantId) return "Key mismatch.";
 
-    bool exists = await _repository.CrmApplicantInfoes.ExistsAsync(x => x.ApplicantId == key);
-    if (!exists) throw new GenericNotFoundException("CrmApplicantInfo", "ApplicantId", key.ToString());
+    //bool exists = await _repository.CrmApplicantInfoes.ExistsAsync(x => x.ApplicantId == key);
+    var applicantInfo = await _repository.CrmApplicantInfoes.FirstOrDefaultAsync(x => x.ApplicantId == key, false);
 
-    var entity = MyMapper.JsonClone<ApplicantInfoDto, CrmApplicantInfo>(dto);
-    entity.UpdatedDate = DateTime.UtcNow;
+    if (applicantInfo == null) throw new GenericNotFoundException("CrmApplicantInfo", "ApplicantId", key.ToString());
+
+    applicantInfo = MyMapper.JsonClone<ApplicantInfoDto, CrmApplicantInfo>(dto);
+    applicantInfo.UpdatedDate = DateTime.UtcNow;
     
-    _repository.CrmApplicantInfoes.Update(entity);
+    _repository.CrmApplicantInfoes.Update(applicantInfo);
     await _repository.SaveAsync();
     _logger.LogInfo($"CrmApplicantInfo updated, id={key}");
     return OperationMessage.Success;

@@ -4,8 +4,9 @@ using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ public class CRMApplicationController : BaseApiController
   private readonly IMemoryCache _cache;
   private readonly ILogger<CRMApplicationController> _logger;
   private readonly IWebHostEnvironment _environment;
+
 
   public CRMApplicationController(IServiceManager serviceManager, IMemoryCache cache, ILogger<CRMApplicationController> logger, IWebHostEnvironment environment) : base(serviceManager)
   {
@@ -48,7 +50,7 @@ public class CRMApplicationController : BaseApiController
 
     var summaryGrid = await _serviceManager.CrmApplications.SummaryGrid(options);
     if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<CrmApplicationDto>>("No data found"));
+      return Ok(ResponseHelper.NoContent<GridEntity<CrmApplicationGridDto>>("No data found"));
 
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
@@ -118,7 +120,7 @@ public class CRMApplicationController : BaseApiController
   }
   #endregion Course Details end
 
-  [HttpPost(RouteConstants.CRMApplication)]
+  [HttpPost(RouteConstants.CRMApplicationCreate)]
   [RequestSizeLimit(50_000_000)] // Increased limit for multiple files
   public async Task<IActionResult> CreateApplication([FromForm] CrmApplicationDto applicationData)
   {
@@ -169,6 +171,7 @@ public class CRMApplicationController : BaseApiController
 
 
   [HttpGet(RouteConstants.CRMApplicationByApplicationId)]
+  [AllowAnonymous]
   public async Task<IActionResult> GetApplication([FromRoute] int applicationId)
   {
     if (applicationId <= 0)
@@ -187,7 +190,7 @@ public class CRMApplicationController : BaseApiController
 
     var res = await _serviceManager.CrmApplications.GetApplication(applicationId, trackChanges: false);
     if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found for the specified country"));
+      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
 
     return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
   }
@@ -264,79 +267,46 @@ public class CRMApplicationController : BaseApiController
     return (true, string.Empty);
   }
 
-  [HttpPut("{id}")]
-  public async Task<IActionResult> UpdateApplication(int id, [FromForm] string ApplicationData, [FromForm] IFormFileCollection files)
+  [HttpPut(RouteConstants.CRMApplicationUpdate)]
+  public async Task<IActionResult> UpdateApplication([FromRoute] int key, [FromForm] CrmApplicationDto applicationData)
   {
-    try
-    {
-      _logger.LogInformation($"Updating CRM Application with ID: {id}");
+    if (applicationData == null)
+      throw new NullModelBadRequestException(nameof(CrmApplicationDto));
 
-      if (id <= 0)
-      {
-        return BadRequest(new
-        {
-          IsSuccess = false,
-          Message = "Invalid application ID",
-          ErrorType = "ValidationError"
-        });
-      }
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
 
-      if (!TryGetLoggedInUser(out UsersDto currentUser))
-      {
-        return Unauthorized("User authentication failed.");
-      }
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
 
-      //var applicationDto = JsonSerializer.Deserialize<CrmApplicationDto>(ApplicationData, new JsonSerializerOptions
-      //{
-      //  PropertyNameCaseInsensitive = true
-      //});
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
 
-      var applicationDto = JsonConvert.DeserializeObject<CrmApplicationDto>(ApplicationData);
+    if (!Request.HasFormContentType)
+      throw new GenericBadRequestException("Invalid content type. Expected multipart/form-data.");
 
-      if (applicationDto == null)
-      {
-        return BadRequest(new
-        {
-          IsSuccess = false,
-          Message = "Invalid application data",
-          ErrorType = "ValidationError"
-        });
-      }
+    //// Validate application data
+    //var validationResult = ValidateApplicationData(applicationData);
+    //if (!validationResult.IsValid)
+    //  throw new GenericBadRequestException(validationResult.ErrorMessage);
 
-      applicationDto.ApplicationId = id;
-      applicationDto.UpdatedDate = DateTime.UtcNow;
-      applicationDto.UpdatedBy = currentUser.UserId ?? 0;
+    // Set default values
+    applicationData.UpdatedDate = DateTime.UtcNow;
+    applicationData.UpdatedBy = userId;
 
-      var validationResult = ValidateApplicationData(applicationDto);
-      if (!validationResult.IsValid)
-      {
-        return BadRequest(new
-        {
-          IsSuccess = false,
-          Message = validationResult.ErrorMessage,
-          ErrorType = "ValidationError"
-        });
-      }
 
-      await HandleApplicationFileUploads(applicationDto, files);
+    // Save CRM application record
+    CrmApplicationDto savedDto = await _serviceManager.CrmApplications.UpdateCrmApplicationAsync(key,applicationData, currentUser);
 
-      return Ok(new
-      {
-        IsSuccess = true,
-        Message = "Application updated successfully",
-        Data = new { ApplicationId = id }
-      });
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, $"Error updating CRM Application with ID: {id}");
-      return StatusCode(500, new
-      {
-        IsSuccess = false,
-        Message = "An unexpected error occurred while updating the application",
-        ErrorType = "InternalServerError"
-      });
-    }
+    // Save attached files using DMS
+    await SaveCrmApplicationFilesAsync(savedDto, currentUser);
+
+    if (savedDto.ApplicationId <= 0)
+      throw new InvalidCreateOperationException("Failed to create application record.");
+
+    return Ok(ResponseHelper.Created(savedDto, "Application created successfully."));
   }
 
   [HttpDelete("{id}")]
@@ -380,7 +350,7 @@ public class CRMApplicationController : BaseApiController
       return Ok(new
       {
         IsSuccess = true,
-        Data = new { Applications = new List<CrmApplicationDto>(), TotalCount = 0 }
+        Data = new { Applications = new List<GetApplicationDto>(), TotalCount = 0 }
       });
     }
     catch (Exception ex)
@@ -535,6 +505,7 @@ public class CRMApplicationController : BaseApiController
       if (!string.IsNullOrEmpty(applicantImagePath))
       {
         dto.CourseInformation.PersonalDetails.ApplicantImagePath = applicantImagePath;
+        var resultMessage = _serviceManager.ApplicantInfos.UpdateRecordAsync(dto.CourseInformation.PersonalDetails.ApplicantId, dto.CourseInformation.PersonalDetails, false);
       }
     }
 
@@ -543,7 +514,7 @@ public class CRMApplicationController : BaseApiController
     ======================================== */
 
     /* ---------- Save Education History Documents (EducationHistory Entity) ---------- */
-    if (dto.EducationInformation?.EducationDetails?.EducationHistory != null)
+    if (dto.EducationInformation?.EducationDetails?.EducationHistory != null && dto.EducationInformation?.EducationDetails?.EducationHistory.Count > 0)
     {
       foreach (var educationRecord in dto.EducationInformation.EducationDetails.EducationHistory)
       {
@@ -662,7 +633,7 @@ public class CRMApplicationController : BaseApiController
     }
 
     /* ---------- Save Work Experience Documents (WorkExperience Entity) ---------- */
-    if (dto.EducationInformation?.WorkExperience?.WorkExperienceHistory != null)
+    if (dto.EducationInformation?.WorkExperience?.WorkExperienceHistory != null && dto.EducationInformation?.WorkExperience?.WorkExperienceHistory.Count > 0)
     {
       foreach (var workExpRecord in dto.EducationInformation.WorkExperience.WorkExperienceHistory)
       {
@@ -767,53 +738,53 @@ public class CRMApplicationController : BaseApiController
       }
     }
 
-    /* ---------- Save Additional Information File (AdditionalInfo Entity) ---------- */
-    if (dto.AdditionalInformation?.AdditionalInformation?.UploadFileFormFile != null)
-    {
-      var additionalInfoDMSDto = new DMSDto
-      {
-        // DocumentType properties
-        DocumentTypeName = "Additional_Information_Document",
-        DocumentType = "Document",
-        IsMandatory = false,
-        AcceptedExtensions = ".pdf,.doc,.docx,.jpg,.jpeg,.png",
-        MaxFileSizeMb = 5,
+    ///* ---------- Save Additional Information File (AdditionalInfo Entity) ---------- */
+    //if (dto.AdditionalInformation?.AdditionalInformation?.UploadFileFormFile != null)
+    //{
+    //  var additionalInfoDMSDto = new DMSDto
+    //  {
+    //    // DocumentType properties
+    //    DocumentTypeName = "Additional_Information_Document",
+    //    DocumentType = "Document",
+    //    IsMandatory = false,
+    //    AcceptedExtensions = ".pdf,.doc,.docx,.jpg,.jpeg,.png",
+    //    MaxFileSizeMb = 5,
 
-        // Document properties
-        Title = $"AdditionalInfo_{dto.AdditionalInformation.AdditionalInformation.DocumentTitle}_{DateTime.Now:yyyyMMdd:FFFFF}",
-        Description = $"Additional information document for application {applicantId}",
-        ReferenceEntityType = "AdditionalInfo", // Entity name
-        ReferenceEntityId = applicantId.ToString(),
-        UploadedByUserId = currentUser.UserId.ToString(),
-        SystemTags = "UploadFileFormFile", // DTO field name
+    //    // Document properties
+    //    Title = $"AdditionalInfo_{dto.AdditionalInformation.AdditionalInformation.DocumentTitle}_{DateTime.Now:yyyyMMdd:FFFFF}",
+    //    Description = $"Additional information document for application {applicantId}",
+    //    ReferenceEntityType = "AdditionalInfo", // Entity name
+    //    ReferenceEntityId = applicantId.ToString(),
+    //    UploadedByUserId = currentUser.UserId.ToString(),
+    //    SystemTags = "UploadFileFormFile", // DTO field name
 
-        // Folder properties
-        FolderName = $"AdditionalInfo_{applicantId}",
-        OwnerId = currentUser.UserId.ToString(),
+    //    // Folder properties
+    //    FolderName = $"AdditionalInfo_{applicantId}",
+    //    OwnerId = currentUser.UserId.ToString(),
 
-        // Access Log properties
-        AccessedByUserId = currentUser.UserId.ToString(),
-        AccessDateTime = DateTime.UtcNow,
-        Action = "Upload",
+    //    // Access Log properties
+    //    AccessedByUserId = currentUser.UserId.ToString(),
+    //    AccessDateTime = DateTime.UtcNow,
+    //    Action = "Upload",
 
-        // Tag properties
-        DocumentTagName = "Document,AdditionalInfo,Miscellaneous",
+    //    // Tag properties
+    //    DocumentTagName = "Document,AdditionalInfo,Miscellaneous",
 
-        // Version properties
-        VersionNumber = 1,
-        UploadedBy = currentUser.UserId.ToString(),
-        UploadedDate = DateTime.UtcNow
-      };
+    //    // Version properties
+    //    VersionNumber = 1,
+    //    UploadedBy = currentUser.UserId.ToString(),
+    //    UploadedDate = DateTime.UtcNow
+    //  };
 
-      string additionalInfoDMSJson = JsonConvert.SerializeObject(additionalInfoDMSDto);
-      string additionalInfoPath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
-          dto.AdditionalInformation.AdditionalInformation.UploadFileFormFile, additionalInfoDMSJson);
+    //  string additionalInfoDMSJson = JsonConvert.SerializeObject(additionalInfoDMSDto);
+    //  string additionalInfoPath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
+    //      dto.AdditionalInformation.AdditionalInformation.UploadFileFormFile, additionalInfoDMSJson);
 
-      if (!string.IsNullOrEmpty(additionalInfoPath))
-      {
-        dto.AdditionalInformation.AdditionalInformation.UploadFile = additionalInfoPath;
-      }
-    }
+    //  if (!string.IsNullOrEmpty(additionalInfoPath))
+    //  {
+    //    dto.AdditionalInformation.AdditionalInformation.UploadFile = additionalInfoPath;
+    //  }
+    //}
 
     /* ---------- Save Additional Documents (AdditionalDocument Entity) ---------- */
     if (dto.AdditionalInformation?.AdditionalDocuments?.Documents != null &&

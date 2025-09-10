@@ -6,7 +6,7 @@ using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -218,7 +218,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
     // Check File size.
     var maxFileSize = dmsDto.MaxFileSizeMb ?? 10;
     if (file.Length > maxFileSize * 1024 * 1024)
-      throw new ArgumentException($"File size cannot exceed {maxFileSize} MB.");
+      throw new FileSizeExceededException(file.FileName, file.Length / (1024.0 * 1024.0), maxFileSize);
 
     // check file extension
     var fileExtension = Path.GetExtension(file.FileName).ToLower();
@@ -240,8 +240,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
   // 01. create document version with duplicate check
   private async Task<DmsDocumentType> CreateOrGetDocumentType(DMSDto dmsDto)
   {
-    var documentType = await _repository.DmsDocumentTypes.FirstOrDefaultAsync(dt => dt.Name.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim()
-                                && dt.DocumentType.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim());
+    var documentType = await _repository.DmsDocumentTypes.FirstOrDefaultAsync(dt => dt.Name.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim());
 
     if (documentType == null)
     {

@@ -14,10 +14,10 @@ public class AdditionalDocumentDto
   public string? DocumentName { get; set; }
 
   public string? FileThumbnail { get; set; }
-  public string? RecordType { get; set; } = "Document"; // To distinguish from AdditionalInfo
+  public string? RecordType { get; set; } = "Document"; 
 
   // Common fields
-  public DateTime CreatedDate { get; set; }
+  public DateTime? CreatedDate { get; set; }
   public int CreatedBy { get; set; }
   public DateTime? UpdatedDate { get; set; }
   public int? UpdatedBy { get; set; }

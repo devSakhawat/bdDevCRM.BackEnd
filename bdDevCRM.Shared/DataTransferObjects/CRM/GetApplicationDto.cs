@@ -1,4 +1,6 @@
-﻿namespace bdDevCRM.Shared.DataTransferObjects.CRM;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
 /// <summary>
 /// GetApplicationDto DTO representing a single CRM Application record (flattened from nested structure).
@@ -38,6 +40,7 @@ public class GetApplicationDto
   public DateTime? PaymentDate { get; set; }
   public string? CourseRemarks { get; set; }
   public DateTime CourseCreatedDate { get; set; }
+
   public int CourseCreatedBy { get; set; }
   public DateTime? CourseUpdatedDate { get; set; }
   public int? CourseUpdatedBy { get; set; }
@@ -69,6 +72,7 @@ public class GetApplicationDto
   public string? EmailAddress { get; set; }
   public string? SkypeId { get; set; }
   public string? ApplicantImagePath { get; set; }
+
   public DateTime ApplicantCreatedDate { get; set; }
   public int ApplicantCreatedBy { get; set; }
   public DateTime? ApplicantUpdatedDate { get; set; }
@@ -84,6 +88,7 @@ public class GetApplicationDto
   public int PermanentCountryId { get; set; }
   public string? PermanentCountryName { get; set; }
   public string? PermanentPostalCode { get; set; }
+
   public DateTime PermanentCreatedDate { get; set; }
   public int PermanentCreatedBy { get; set; }
   public DateTime? PermanentUpdatedDate { get; set; }
@@ -100,6 +105,7 @@ public class GetApplicationDto
   public int PresentCountryId { get; set; }
   public string? PresentCountryName { get; set; }
   public string? PresentPostalCode { get; set; }
+
   public DateTime PresentCreatedDate { get; set; }
   public int PresentCreatedBy { get; set; }
   public DateTime? PresentUpdatedDate { get; set; }
@@ -117,6 +123,7 @@ public class GetApplicationDto
   public string? EducationDocumentName { get; set; }
   public string? AttachedDocument { get; set; }
   public string? PdfThumbnail { get; set; }
+
   public DateTime EducationCreatedDate { get; set; }
   public int EducationCreatedBy { get; set; }
   public DateTime? EducationUpdatedDate { get; set; }
@@ -135,6 +142,7 @@ public class GetApplicationDto
   public DateTime? IELTSDate { get; set; }
   public string? IELTSScannedCopyPath { get; set; }
   public string? IELTSAdditionalInformation { get; set; }
+
   public DateTime IELTS_CreatedDate { get; set; }
   public int IELTS_CreatedBy { get; set; }
   public DateTime? IELTS_UpdatedDate { get; set; }
@@ -153,6 +161,7 @@ public class GetApplicationDto
   public DateTime? TOEFLDate { get; set; }
   public string? TOEFLScannedCopyPath { get; set; }
   public string? TOEFLAdditionalInformation { get; set; }
+
   public DateTime TOEFL_CreatedDate { get; set; }
   public int TOEFL_CreatedBy { get; set; }
   public DateTime? TOEFL_UpdatedDate { get; set; }
@@ -171,6 +180,7 @@ public class GetApplicationDto
   public DateTime? PTEDate { get; set; }
   public string? PTEScannedCopyPath { get; set; }
   public string? PTEAdditionalInformation { get; set; }
+
   public DateTime PTE_CreatedDate { get; set; }
   public int PTE_CreatedBy { get; set; }
   public DateTime? PTE_UpdatedDate { get; set; }
@@ -189,6 +199,7 @@ public class GetApplicationDto
   public DateTime? GMATDate { get; set; }
   public string? GMATScannedCopyPath { get; set; }
   public string? GMATAdditionalInformation { get; set; }
+
   public DateTime GMAT_CreatedDate { get; set; }
   public int GMAT_CreatedBy { get; set; }
   public DateTime? GMAT_UpdatedDate { get; set; }
@@ -197,10 +208,11 @@ public class GetApplicationDto
   // ================================
   // OTHERSInformationDto
   // ================================
-  public int OTHERSInformationId { get; set; }
+  public int OthersInformationId { get; set; }
   public int OTHERS_ApplicantId { get; set; }
   public string? OTHERSAdditionalInformation { get; set; }
   public string? OTHERSScannedCopyPath { get; set; }
+
   public DateTime OTHERS_CreatedDate { get; set; }
   public int OTHERS_CreatedBy { get; set; }
   public DateTime? OTHERS_UpdatedDate { get; set; }
@@ -219,6 +231,10 @@ public class GetApplicationDto
   public string? MainResponsibility { get; set; }
   public string? WorkDocumentName { get; set; }
   public string? FileThumbnail { get; set; }
+  public string? ScannedCopyPath { get; set; }
+  public string? DocumentName { get; set; }
+
+
   public DateTime WorkCreatedDate { get; set; }
   public int WorkCreatedBy { get; set; }
   public DateTime? WorkUpdatedDate { get; set; }
@@ -266,7 +282,13 @@ public class GetApplicationDto
   public bool? HealthNMedicalNeeds { get; set; }
   public string? HealthNMedicalNeedsRemarks { get; set; }
   public string? AdditionalInformationRemarks { get; set; }
-  public string? AddInfoDocTitle { get; set; }
+
+
+  // ================================
+  // AdditionalInfoDto
+  // ================================
+  public int AdditionalDocumentId { get; set; }
+  public string? AddDoc_ApplicantId { get; set; }
   public string? AddInfoUploadFile { get; set; }
   public string? AddInfoDocumentName { get; set; }
   public string? AddInfoFileThumbnail { get; set; }
@@ -275,5 +297,7 @@ public class GetApplicationDto
   public int AddInfoCreatedBy { get; set; }
   public DateTime? AddInfoUpdatedDate { get; set; }
   public int? AddInfoUpdatedBy { get; set; }
+  public string? RecordType { get; set; }
+
 }
 

@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using bdDevCRM.Shared.Exceptions.BaseException;
 
-namespace bdDevCRM.Utilities.Exceptions;
+namespace bdDevCRM.Shared.Exceptions;
 
-public class FileSizeExceededException : Exception // Or a more specific exception like InvalidOperationException
+public class FileSizeExceededException : BadRequestException
 {
-  public FileSizeExceededException() { }
+    public FileSizeExceededException(string fileName, double fileSizeMB, double maxSizeMB)
+        : base($"File '{fileName}' size ({fileSizeMB:F2} MB) exceeds the maximum allowed size of {maxSizeMB} MB.")
+    {
+    }
 
-  public FileSizeExceededException(string message) : base(message) { }
-
-  public FileSizeExceededException(string message, Exception innerException)
-      : base(message, innerException) { }
+    public FileSizeExceededException(double maxSizeMB)
+        : base($"File size cannot exceed {maxSizeMB} MB.")
+    {
+    }
 }

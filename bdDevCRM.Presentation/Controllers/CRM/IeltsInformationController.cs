@@ -6,7 +6,7 @@ using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,20 +16,20 @@ using Microsoft.Extensions.Caching.Memory;
 namespace bdDevCRM.Presentation.Controllers.CRM;
 
 [ApiController]
-public class IeltsInformationController : BaseApiController
+public class IELTSInformationController : BaseApiController
 {
   private readonly IMemoryCache _cache;
   private readonly IWebHostEnvironment _env;
 
-  public IeltsInformationController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
+  public IELTSInformationController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
   {
     _cache = cache;
     _env = env;
   }
 
   // --------- 1. DDL --------------------------------------------------
-  [HttpGet(RouteConstants.IeltsInformationDDL)]
-  public async Task<IActionResult> IeltsInformationDDL()
+  [HttpGet(RouteConstants.IELTSInformationDDL)]
+  public async Task<IActionResult> IELTSInformationDDL()
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
@@ -39,15 +39,15 @@ public class IeltsInformationController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.IELTSInformations.GetIeltsinformationsDDLAsync(trackChanges: false);
+    var res = await _serviceManager.IELTSInformations.GetIELTSinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<IELTSInformationDto>>("No IELTS information found"));
 
     return Ok(ResponseHelper.Success(res, "IELTS information retrieved successfully"));
   }
 
-  [HttpGet(RouteConstants.IeltsInformationByApplicantId)]
-  public async Task<IActionResult> IeltsInformationByApplicantId([FromRoute] int applicantId)
+  [HttpGet(RouteConstants.IELTSInformationByApplicantId)]
+  public async Task<IActionResult> IELTSInformationByApplicantId([FromRoute] int applicantId)
   {
     if (applicantId <= 0)
       throw new GenericBadRequestException("Invalid applicant ID. Applicant ID must be greater than 0.");
@@ -63,12 +63,12 @@ public class IeltsInformationController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.IELTSInformations.GetIeltsinformationByApplicantIdAsync(applicantId, trackChanges: false);
+    var res = await _serviceManager.IELTSInformations.GetIELTSinformationByApplicantIdAsync(applicantId, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "IELTS information retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
-  [HttpPost(RouteConstants.IeltsInformationSummary)]
+  [HttpPost(RouteConstants.IELTSInformationSummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
@@ -88,7 +88,7 @@ public class IeltsInformationController : BaseApiController
   }
 
   // --------- 3. Create ----------------------------------------------
-  [HttpPost(RouteConstants.CreateIeltsInformation)]
+  [HttpPost(RouteConstants.CreateIELTSInformation)]
   [RequestSizeLimit(1_000_000)]
   public async Task<IActionResult> CreateNewRecord([FromBody] IELTSInformationDto modelDto)
   {
@@ -120,9 +120,9 @@ public class IeltsInformationController : BaseApiController
   }
 
   // --------- 4. Update ----------------------------------------------
-  [HttpPut(RouteConstants.UpdateIeltsInformation)]
+  [HttpPut(RouteConstants.UpdateIELTSInformation)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> UpdateIeltsInformation([FromRoute] int key, [FromBody] IELTSInformationDto modelDto)
+  public async Task<IActionResult> UpdateIELTSInformation([FromRoute] int key, [FromBody] IELTSInformationDto modelDto)
   {
     try
     {
@@ -149,9 +149,9 @@ public class IeltsInformationController : BaseApiController
   }
 
   // --------- 5. Delete ----------------------------------------------
-  [HttpDelete(RouteConstants.DeleteIeltsInformation)]
+  [HttpDelete(RouteConstants.DeleteIELTSInformation)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> DeleteIeltsInformation([FromRoute] int key, [FromBody] IELTSInformationDto modelDto)
+  public async Task<IActionResult> DeleteIELTSInformation([FromRoute] int key, [FromBody] IELTSInformationDto modelDto)
   {
     try
     {
@@ -172,8 +172,8 @@ public class IeltsInformationController : BaseApiController
   }
 
   // --------- 6. Get Single Record -----------------------------------
-  [HttpGet(RouteConstants.UpdateIeltsInformation)]
-  public async Task<IActionResult> GetIeltsInformation([FromRoute] int key)
+  [HttpGet(RouteConstants.UpdateIELTSInformation)]
+  public async Task<IActionResult> GetIELTSInformation([FromRoute] int key)
   {
     try
     {
@@ -181,7 +181,7 @@ public class IeltsInformationController : BaseApiController
       if (string.IsNullOrEmpty(userIdClaim))
         return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
 
-      var res = await _serviceManager.IELTSInformations.GetIeltsinformationAsync(key, trackChanges: false);
+      var res = await _serviceManager.IELTSInformations.GetIELTSinformationAsync(key, trackChanges: false);
       return Ok(ResponseHelper.Success(res, "IELTS information retrieved successfully"));
     }
     catch (Exception)

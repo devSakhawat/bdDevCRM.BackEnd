@@ -5,7 +5,7 @@ using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -23,37 +23,37 @@ internal sealed class CrmIELTSInformationService(
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-  public async Task<IEnumerable<IELTSInformationDto>> GetIeltsinformationsDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<IELTSInformationDto>> GetIELTSinformationsDDLAsync(bool trackChanges = false)
   {
-    var list = await _repository.CrmIELTSInformations.GetActiveIeltsinformationsAsync(trackChanges);
+    var list = await _repository.CrmIELTSInformations.GetActiveIELTSinformationsAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("CrmIELTSInformation");
     return MyMapper.JsonCloneIEnumerableToList<CrmIELTSInformation, IELTSInformationDto>(list);
   }
 
-  public async Task<IEnumerable<IELTSInformationDto>> GetActiveIeltsinformationsAsync(bool trackChanges = false)
+  public async Task<IEnumerable<IELTSInformationDto>> GetActiveIELTSinformationsAsync(bool trackChanges = false)
   {
-    var list = await _repository.CrmIELTSInformations.GetActiveIeltsinformationsAsync(trackChanges);
+    var list = await _repository.CrmIELTSInformations.GetActiveIELTSinformationsAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("CrmIELTSInformation");
     return MyMapper.JsonCloneIEnumerableToList<CrmIELTSInformation, IELTSInformationDto>(list);
   }
 
-  public async Task<IEnumerable<IELTSInformationDto>> GetIeltsinformationsAsync(bool trackChanges = false)
+  public async Task<IEnumerable<IELTSInformationDto>> GetIELTSinformationsAsync(bool trackChanges = false)
   {
-    var list = await _repository.CrmIELTSInformations.GetIeltsinformationsAsync(trackChanges);
+    var list = await _repository.CrmIELTSInformations.GetIELTSinformationsAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("CrmIELTSInformation");
     return MyMapper.JsonCloneIEnumerableToList<CrmIELTSInformation, IELTSInformationDto>(list);
   }
 
-  public async Task<IELTSInformationDto> GetIeltsinformationAsync(int id, bool trackChanges = false)
+  public async Task<IELTSInformationDto> GetIELTSinformationAsync(int id, bool trackChanges = false)
   {
-    var entity = await _repository.CrmIELTSInformations.GetIeltsinformationAsync(id, trackChanges);
+    var entity = await _repository.CrmIELTSInformations.GetIELTSinformationAsync(id, trackChanges);
     if (entity == null) throw new GenericNotFoundException("CrmIELTSInformation", "IELTSInformationId", id.ToString());
     return MyMapper.JsonClone<CrmIELTSInformation, IELTSInformationDto>(entity);
   }
 
-  public async Task<IELTSInformationDto> GetIeltsinformationByApplicantIdAsync(int applicantId, bool trackChanges = false)
+  public async Task<IELTSInformationDto> GetIELTSinformationByApplicantIdAsync(int applicantId, bool trackChanges = false)
   {
-    var entity = await _repository.CrmIELTSInformations.GetIeltsinformationByApplicantIdAsync(applicantId, trackChanges);
+    var entity = await _repository.CrmIELTSInformations.GetIELTSinformationByApplicantIdAsync(applicantId, trackChanges);
     if (entity == null) throw new GenericNotFoundException("CrmIELTSInformation", "ApplicantId", applicantId.ToString());
     return MyMapper.JsonClone<CrmIELTSInformation, IELTSInformationDto>(entity);
   }
@@ -111,14 +111,14 @@ internal sealed class CrmIELTSInformationService(
 select 
     ii.IELTSInformationId,
     ii.ApplicantId,
-    ii.Ieltslistening,
-    ii.Ieltsreading,
-    ii.Ieltswriting,
-    ii.Ieltsspeaking,
-    ii.IeltsoverallScore,
-    ii.Ieltsdate,
-    ii.IeltsscannedCopyPath,
-    ii.IeltsadditionalInformation,
+    ii.IELTSlistening,
+    ii.IELTSreading,
+    ii.IELTSwriting,
+    ii.IELTSspeaking,
+    ii.IELTSoverallScore,
+    ii.IELTSdate,
+    ii.IELTSscannedCopyPath,
+    ii.IELTSadditionalInformation,
     ii.CreatedDate,
     ii.CreatedBy,
     ii.UpdatedDate,

@@ -1,26 +1,17 @@
 using Microsoft.AspNetCore.Http;
-using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
 public class TOEFLInformationDto
 {
   public int TOEFLInformationId { get; set; }
-
   public int ApplicantId { get; set; }
-
-  public string? TOEFLListening { get; set; }
-
-  public string? TOEFLReading { get; set; }
-
-  public string? TOEFLWriting { get; set; }
-
-  public string? TOEFLSpeaking { get; set; }
-
-  public string? TOEFLOverallScore { get; set; }
-
+  public decimal? TOEFLListening { get; set; }
+  public decimal? TOEFLReading { get; set; }
+  public decimal? TOEFLWriting { get; set; }
+  public decimal? TOEFLSpeaking { get; set; }
+  public decimal? TOEFLOverallScore { get; set; }
   public DateTime? TOEFLDate { get; set; }
-
 
   public IFormFile? TOEFLScannedCopyFile { get; set; }
   public string? TOEFLScannedCopyFileName { get; set; }
@@ -28,12 +19,16 @@ public class TOEFLInformationDto
 
   public string? TOEFLAdditionalInformation { get; set; }
 
-  public DateTime CreatedDate { get; set; }
-
+  // Existing audit (save)
+  public DateTime? CreatedDate { get; set; }
   public int CreatedBy { get; set; }
-
   public DateTime? UpdatedDate { get; set; }
-
   public int? UpdatedBy { get; set; }
+
+  // Added to align with GetApplicationDto aliases
+  public DateTime? TOEFL_CreatedDate { get; set; }
+  public int TOEFL_CreatedBy { get; set; }
+  public DateTime? TOEFL_UpdatedDate { get; set; }
+  public int? TOEFL_UpdatedBy { get; set; }
 }
 

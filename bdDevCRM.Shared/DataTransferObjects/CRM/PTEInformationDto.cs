@@ -1,39 +1,33 @@
 using Microsoft.AspNetCore.Http;
-using System;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
 public class PTEInformationDto
 {
   public int PTEInformationId { get; set; }
-
   public int ApplicantId { get; set; }
-
-  public string? PTEListening { get; set; }
-
-  public string? PTEReading { get; set; }
-
-  public string? PTEWriting { get; set; }
-
-  public string? PTESpeaking { get; set; }
-
-  public string? PTEOverallScore { get; set; }
-
+  public decimal? PTEListening { get; set; }
+  public decimal? PTEReading { get; set; }
+  public decimal? PTEWriting { get; set; }
+  public decimal? PTESpeaking { get; set; }
+  public decimal? PTEOverallScore { get; set; }
   public DateTime? PTEDate { get; set; }
-
 
   public IFormFile? PTEScannedCopyFile { get; set; }
   public string? PTEScannedCopyFileName { get; set; }
   public string? PTEScannedCopyPath { get; set; }
 
-
   public string? PTEAdditionalInformation { get; set; }
 
-  public DateTime CreatedDate { get; set; }
-
+  // Existing audit (save)
+  public DateTime? CreatedDate { get; set; }
   public int CreatedBy { get; set; }
-
   public DateTime? UpdatedDate { get; set; }
-
   public int? UpdatedBy { get; set; }
+
+  // Added to align with GetApplicationDto aliases
+  public DateTime? PTE_CreatedDate { get; set; }
+  public int PTE_CreatedBy { get; set; }
+  public DateTime? PTE_UpdatedDate { get; set; }
+  public int? PTE_UpdatedBy { get; set; }
 }

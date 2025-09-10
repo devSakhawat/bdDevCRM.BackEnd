@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace bdDevCRM.Utilities.Exceptions;
+namespace bdDevCRM.Shared.Exceptions;
 
 public class InvalidCreateOperationException : Exception
 {

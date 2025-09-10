@@ -1,6 +1,6 @@
-﻿using bdDevCRM.Utilities.Exceptions.BaseException;
+﻿using bdDevCRM.Shared.Exceptions.BaseException;
 
-namespace bdDevCRM.Utilities.Exceptions;
+namespace bdDevCRM.Shared.Exceptions;
 
 public class CommonBadReuqestException(string message) : BadRequestException(message)
 {

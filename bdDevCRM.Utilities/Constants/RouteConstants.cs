@@ -80,6 +80,7 @@ public static class RouteConstants
   public const string WorkFlowSummary = "workflow-summary";
   public const string CreateWorkFlow = "workflow";
   public const string CreateAction = "wf-action";
+  public const string UpdateWorkFlow = "workflow/{key}";
   public const string UpdateAction = "wf-action/{key}";
   public const string DeleteAction = "wf-action/{key}";
   public const string GetNextStatesByMenu = "next-states-by-menu/";
@@ -202,10 +203,10 @@ public static class RouteConstants
   // CRM Application related routes
   #region CRMApplication
   public const string CRMApplicationSummary = "crm-application-summary";
-  public const string CRMApplication= "crm-application";
+  public const string CRMApplicationCreate= "crm-application";
   public const string CRMApplicationByKey = "crm-application/key/{key}";
-  public const string CRMUpdateApplication = "crm-Application/{key}";
-  public const string CRMDeleteApplication = "crm-Application/{key}";
+  public const string CRMApplicationUpdate = "crm-Application/{key:int}";
+  public const string CRMApplicationDelete = "crm-Application/{key}";
   public const string CRMCountryDLL = "crm-countryddl";
   public const string CRMInstituteDLLByCountry = "crm-instituteddl-country";
   public const string CRMCourseDLLByInstitute = "crm-courseddl-institute";
@@ -261,12 +262,12 @@ public static class RouteConstants
   #endregion EducationHistory
 
   #region IELTSInformation
-  public const string IeltsInformationDDL = "ielts-information-ddl";
-  public const string IeltsInformationSummary = "ielts-information-summary";
-  public const string CreateIeltsInformation = "ielts-information";
-  public const string UpdateIeltsInformation = "ielts-information/{key:int}";
-  public const string DeleteIeltsInformation = "ielts-information/{key:int}";
-  public const string IeltsInformationByApplicantId = "ielts-information-by-applicantid/{applicantId:int}";
+  public const string IELTSInformationDDL = "ielts-information-ddl";
+  public const string IELTSInformationSummary = "ielts-information-summary";
+  public const string CreateIELTSInformation = "ielts-information";
+  public const string UpdateIELTSInformation = "ielts-information/{key:int}";
+  public const string DeleteIELTSInformation = "ielts-information/{key:int}";
+  public const string IELTSInformationByApplicantId = "ielts-information-by-applicantid/{applicantId:int}";
   #endregion IELTSInformation
 
   #region TOEFLInformation

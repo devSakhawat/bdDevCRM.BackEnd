@@ -1,5 +1,5 @@
 ﻿
-namespace bdDevCRM.Utilities.Exceptions;
+namespace bdDevCRM.Shared.Exceptions;
 
 
 [Serializable]

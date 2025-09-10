@@ -7,7 +7,7 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -184,8 +184,8 @@ public class CRMInstituteController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateInstitute([FromRoute] int key, [FromForm] CrmInstituteDto modelDto)
   {
-    if (modelDto == null)
-      throw new NullModelBadRequestException(nameof(CrmInstituteDto));
+    //if (modelDto == null)
+    //  throw new NullModelBadRequestException(nameof(CrmInstituteDto));
 
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))

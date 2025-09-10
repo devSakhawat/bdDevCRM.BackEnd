@@ -6,7 +6,7 @@ using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 
 //using bdDevCRM.Utilities.KendoGrid;
 using bdDevCRM.Utilities.OthersLibrary;
@@ -39,8 +39,7 @@ internal sealed class  AccessControlService : IAccessControlService
 
     AccessControl entity = MyMapper.JsonClone<AccessControlDto, AccessControl>(modelDto);
     await _repository.AccessControls.CreateAsync(entity);
-
-    await _repository.SaveAsync();
+    modelDto.AccessId = await _repository.AccessControls.CreateAndGetIdAsync(entity);
     return modelDto;
   }
 

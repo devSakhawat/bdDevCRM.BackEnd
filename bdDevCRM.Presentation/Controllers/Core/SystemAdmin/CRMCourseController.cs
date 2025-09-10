@@ -6,7 +6,7 @@ using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Utilities.Exceptions;
+using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -151,6 +151,29 @@ public class CRMCourseController : BaseApiController
     }
   }
 
+  //// --------- 5. Delete ----------------------------------------------
+  //[HttpDelete(RouteConstants.DeleteCourse)]
+  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  //public async Task<IActionResult> DeleteCourse([FromRoute] int key, [FromBody] CrmCourseDto modelDto)
+  //{
+  //  try
+  //  {
+  //    int userId = HttpContext.GetUserId();
+  //    var currentUser = HttpContext.GetCurrentUser();
+
+  //    var res = await _serviceManager.CrmCourses.DeleteRecordAsync(key, modelDto);
+
+  //    if (res == OperationMessage.Success)
+  //      return Ok(ResponseHelper.Success(res, "Course deleted successfully"));
+  //    else
+  //      return Conflict(ResponseHelper.Conflict(res));
+  //  }
+  //  catch (Exception)
+  //  {
+  //    throw;
+  //  }
+  //}
+
   // --------- 5. Delete ----------------------------------------------
   [HttpDelete(RouteConstants.DeleteCourse)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
@@ -158,9 +181,26 @@ public class CRMCourseController : BaseApiController
   {
     try
     {
-      int userId = HttpContext.GetUserId();
-      var currentUser = HttpContext.GetCurrentUser();
+      // Parameter validation
+      if (key <= 0)
+        return BadRequest(ResponseHelper.BadRequest("Invalid course ID. Course ID must be greater than 0."));
 
+      if (modelDto == null)
+        return BadRequest(ResponseHelper.BadRequest("Course data is required"));
+
+      // User authentication and validation
+      var userIdClaim = User.FindFirst("UserId")?.Value;
+      if (string.IsNullOrEmpty(userIdClaim))
+        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+
+      if (!int.TryParse(userIdClaim, out int userId))
+        return BadRequest(ResponseHelper.BadRequest("Invalid user ID format"));
+
+      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+      if (currentUser == null)
+        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+
+      // Delete operation
       var res = await _serviceManager.CrmCourses.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)

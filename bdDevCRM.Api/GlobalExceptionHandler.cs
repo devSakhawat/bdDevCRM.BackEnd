@@ -1,6 +1,6 @@
 ﻿using bdDevCRM.Entities.ExceptionEntities;
 using bdDevCRM.RepositoriesContracts;
-using bdDevCRM.Utilities.Exceptions.BaseException;
+using bdDevCRM.Shared.Exceptions.BaseException;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;

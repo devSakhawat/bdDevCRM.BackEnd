@@ -9,17 +9,22 @@ public class CrmApplicationDto
 {
   public int ApplicationId { get; set; }
 
-  public DateTime ApplicationDate { get; set; }
+  public DateTime? ApplicationDate { get; set; }
 
-  public string StatusId { get; set; }
+  public int StateId { get; set; }
 
-  public DateTime CreatedDate { get; set; }
 
+  // Existing audit (save)
+  public DateTime? CreatedDate { get; set; }
   public int CreatedBy { get; set; }
-
   public DateTime? UpdatedDate { get; set; }
-
   public int? UpdatedBy { get; set; }
+
+  // Added to align with GetApplicationDto (for read)
+  public DateTime? AppCreatedDate { get; set; }
+  public int AppCreatedBy { get; set; }
+  public DateTime? AppUpdatedDate { get; set; }
+  public int? AppUpdatedBy { get; set; }
 
   public CourseInformationDto? CourseInformation { get; set; }
   public EducationInformationDto? EducationInformation { get; set; }

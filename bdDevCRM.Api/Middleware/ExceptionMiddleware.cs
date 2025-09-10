@@ -1,12 +1,28 @@
-﻿using bdDevCRM.RepositoriesContracts;
+﻿using bdDevCRM.Api.ContentFormatter;
+using bdDevCRM.LoggerSevice;
+using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Repositories;
+using bdDevCRM.RepositoriesContracts;
+using bdDevCRM.Services;
+using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
-using bdDevCRM.Utilities.Exceptions;
-using bdDevCRM.Utilities.Exceptions.BaseException;
+//using bdDevCRM.Shared.Services.Common;
+using bdDevCRM.Sql.Context;
+using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Shared.Exceptions.BaseException;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Text;
 using System.Text.Json;
+using System.Threading.RateLimiting;
 
 namespace bdDevCRM.Api.Middleware;
 
@@ -331,6 +347,356 @@ public static class ExceptionToApiResponseMapper
     return "A database error occurred. Please verify your input.";
   }
 }
+
+/////////////////////////////////////////////////////////////////////////////
+///
+
+//using bdDevCRM.Api.ApiResponseError;
+//using bdDevCRM.Api.ContentFormatter;
+//using bdDevCRM.LoggerSevice;
+//using bdDevCRM.Repositories;
+//using bdDevCRM.RepositoriesContracts;
+//using bdDevCRM.Services;
+//using bdDevCRM.ServicesContract;
+//using bdDevCRM.Shared.ApiResponse;
+//using bdDevCRM.Sql.Context;
+//using bdDevCRM.Presentation.ActionFIlters;
+//using bdDevCRM.Services.Common;
+//using bdDevCRM.Services.Monitoring;
+//using Microsoft.AspNetCore.Authentication.JwtBearer;
+//using Microsoft.AspNetCore.Http.Features;
+//using Microsoft.AspNetCore.Mvc;
+//using Microsoft.AspNetCore.ResponseCompression;
+//using Microsoft.AspNetCore.RateLimiting;
+//using Microsoft.EntityFrameworkCore;
+//using Microsoft.IdentityModel.Tokens;
+//using System.Text;
+//using System.Threading.RateLimiting;
+//using Microsoft.Extensions.Diagnostics.HealthChecks;
+//// Remove deprecated: using Microsoft.AspNetCore.Mvc.Versioning;
+
+//namespace bdDevCRM.Api.Extensions;
+
+//public static class ServiceExtensions
+//{
+//  public static void ConfigureCors(this IServiceCollection services) => services.AddCors(options =>
+//  {
+//    options.AddPolicy("CorsPolicy", builder =>
+//    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+//  });
+
+//  public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
+//  {
+//    options.AutomaticAuthentication = false;
+//  });
+
+//  public static void ConfigureLoggerService(this IServiceCollection services)
+//  {
+//    services.AddSingleton<ILoggerManager, LoggerManager>();
+//  }
+
+//  public static void ConfigureRepositoryManager(this IServiceCollection services) => services.AddScoped<IRepositoryManager, RepositoryManager>();
+
+//  public static void ConfigureServiceManager(this IServiceCollection services) => services.AddScoped<IServiceManager, ServiceManager>();
+
+//  public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) => services.AddDbContext<CRMContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbLocation")));
+
+//  public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
+
+//  public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
+//  {
+//    services.AddAuthentication(options =>
+//    {
+//      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//    })
+//    .AddJwtBearer(options =>
+//    {
+//      options.TokenValidationParameters = new TokenValidationParameters
+//      {
+//        ValidateIssuer = true,
+//        ValidateAudience = true,
+//        ValidateLifetime = true,
+//        ValidateIssuerSigningKey = true,
+//        ValidIssuer = configuration["Jwt:Issuer"],
+//        ValidAudience = configuration["Jwt:Audience"],
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]))
+//      };
+//    });
+//  }
+
+//  public static void ConfigureApiBehaviorOptions(this IServiceCollection services, IConfiguration configuration)
+//  {
+//    services.Configure<ApiBehaviorOptions>(options =>
+//    {
+//      options.SuppressModelStateInvalidFilter = true;
+//      options.InvalidModelStateResponseFactory = actionContext =>
+//      {
+//        var errors = actionContext.ModelState
+//           .Where(e => e.Value.Errors.Count() > 0)
+//           .SelectMany(x => x.Value.Errors)
+//           .Select(y => y.ErrorMessage).ToArray();
+
+//        var errorResponse = new ApiValidationErrorResponse
+//        {
+//          Errors = errors
+//        };
+//        return new BadRequestObjectResult(errorResponse);
+//      };
+//    });
+//  }
+
+//  public static void ConfigureAuthorization(this IServiceCollection services)
+//  {
+//    services.AddAuthorization();
+//  }
+
+//  public static void ConfigureResponseCompression(this IServiceCollection services)
+//  {
+//    services.AddResponseCompression(options =>
+//    {
+//      options.EnableForHttps = true;
+//      options.Providers.Add<GzipCompressionProvider>();
+//      options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+//          new[] { "application/json" }
+//      );
+//    }
+//    );
+//  }
+
+//  public static void ConfigureGzipCompression(this IServiceCollection services)
+//  {
+//    services.Configure<GzipCompressionProviderOptions>(options =>
+//    {
+//      options.Level = System.IO.Compression.CompressionLevel.Optimal;
+//    });
+//  }
+
+//  public static void ConfigureFileLimit(this IServiceCollection services)
+//  {
+//    services.Configure<FormOptions>(options =>
+//    {
+//      options.MultipartBodyLengthLimit = 10_000_000; // 10MB
+//      options.ValueLengthLimit = int.MaxValue;
+//      options.ValueCountLimit = int.MaxValue;
+//      options.KeyLengthLimit = int.MaxValue;
+//    });
+//  }
+
+//  // ================ EXCEPTION HANDLING CONFIGURATION ================
+
+//  /// <summary>
+//  /// Configure exception handling services for enterprise-level error management
+//  /// </summary>
+//  public static void ConfigureExceptionHandling(this IServiceCollection services)
+//  {
+//    // Register global exception filter and your existing services
+//    services.AddScoped<GlobalExceptionFilter>();
+
+//    // Register your implemented services from IDESTATE
+//    services.AddScoped<IExceptionHandlingService, ExceptionHandlingService>();
+//    services.AddScoped<IErrorMonitoringService, ErrorMonitoringService>();
+
+//    // Add when you implement notification service:
+//    // services.AddScoped<INotificationService, NotificationService>();
+//  }
+
+//  /// <summary>
+//  /// Configure global filters including exception handling
+//  /// </summary>
+//  public static void ConfigureGlobalFilters(this IServiceCollection services)
+//  {
+//    services.Configure<MvcOptions>(options =>
+//    {
+//      // Add global exception filter as backup
+//      options.Filters.Add<GlobalExceptionFilter>();
+
+//      // Add other global filters
+//      options.Filters.Add<EmptyObjectFilterAttribute>();
+//    });
+//  }
+
+//  /// <summary>
+//  /// Configure health checks for monitoring - FIXED FOR .NET 8
+//  /// </summary>
+//  public static void ConfigureHealthChecks(this IServiceCollection services, IConfiguration configuration)
+//  {
+//    var healthChecksBuilder = services.AddHealthChecks();
+
+//    // Basic self check
+//    healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy("Application is running"));
+
+//    // Custom database health check
+//    healthChecksBuilder.AddCheck<DatabaseHealthCheck>("database");
+
+//    // Register the custom health check
+//    services.AddScoped<DatabaseHealthCheck>();
+//  }
+
+//  /// <summary>
+//  /// Configure monitoring - Only basic without external packages
+//  /// </summary>
+//  public static void ConfigureMonitoring(this IServiceCollection services)
+//  {
+//    // Add custom metrics collection service when you implement it:
+//    // services.AddSingleton<IMetricsCollectionService, MetricsCollectionService>();
+//  }
+
+//  /// <summary>
+//  /// Configure caching strategy - Memory cache only for now
+//  /// </summary>
+//  public static void ConfigureCaching(this IServiceCollection services, IConfiguration configuration)
+//  {
+//    // Memory cache only (no external packages required)
+//    services.AddMemoryCache(options =>
+//    {
+//      options.SizeLimit = configuration.GetValue<long?>("Cache:SizeLimit") ?? 1000;
+//      options.CompactionPercentage = configuration.GetValue<double?>("Cache:CompactionPercentage") ?? 0.25;
+//    });
+//  }
+
+//  /// <summary>
+//  /// Configure background services
+//  /// </summary>
+//  public static void ConfigureBackgroundServices(this IServiceCollection services)
+//  {
+//    // Add when you implement these background services:
+//    // services.AddHostedService<CleanupBackgroundService>();
+//    // services.AddHostedService<MonitoringBackgroundService>();
+//  }
+
+//  /// <summary>
+//  /// Configure security headers
+//  /// </summary>
+//  public static void ConfigureSecurityHeaders(this IServiceCollection services)
+//  {
+//    services.AddHsts(options =>
+//    {
+//      options.Preload = true;
+//      options.IncludeSubDomains = true;
+//      options.MaxAge = TimeSpan.FromDays(365);
+//    });
+//  }
+
+//  /// <summary>
+//  /// Configure rate limiting
+//  /// </summary>
+//  public static void ConfigureRateLimiting(this IServiceCollection services, IConfiguration configuration)
+//  {
+//    services.AddRateLimiter(options =>
+//    {
+//      options.RejectionStatusCode = 429;
+
+//      options.AddFixedWindowLimiter("GlobalLimiter", limiterOptions =>
+//      {
+//        limiterOptions.PermitLimit = configuration.GetValue<int>("RateLimit:PermitLimit", 100);
+//        limiterOptions.Window = TimeSpan.FromMinutes(configuration.GetValue<int>("RateLimit:WindowMinutes", 1));
+//        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+//        limiterOptions.QueueLimit = configuration.GetValue<int>("RateLimit:QueueLimit", 10);
+//      });
+
+//      options.AddPolicy("AuthenticatedUserPolicy", context =>
+//      {
+//        var userId = context.User?.FindFirst("UserId")?.Value;
+//        return RateLimitPartition.GetFixedWindowLimiter(
+//          partitionKey: userId ?? context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+//          factory: _ => new FixedWindowRateLimiterOptions
+//          {
+//            PermitLimit = configuration.GetValue<int>("RateLimit:AuthenticatedUserLimit", 200),
+//            Window = TimeSpan.FromMinutes(1)
+//          });
+//      });
+//    });
+//  }
+
+//  /// <summary>
+//  /// Configure essential enterprise services (working without external packages)
+//  /// </summary>
+//  public static void ConfigureEnterpriseServices(this IServiceCollection services, IConfiguration configuration)
+//  {
+//    services.ConfigureExceptionHandling();
+//    services.ConfigureGlobalFilters();
+//    services.ConfigureHealthChecks(configuration);
+//    services.ConfigureMonitoring();
+//    services.ConfigureCaching(configuration);
+//    services.ConfigureSecurityHeaders();
+//    services.ConfigureRateLimiting(configuration);
+//    services.ConfigureBackgroundServices();
+//  }
+//}
+
+//// ================ CUSTOM HEALTH CHECK IMPLEMENTATION ================
+
+///// <summary>
+///// Custom database health check implementation without external packages
+///// </summary>
+//public class DatabaseHealthCheck : IHealthCheck
+//{
+//  private readonly CRMContext _context;
+
+//  public DatabaseHealthCheck(CRMContext context)
+//  {
+//    _context = context;
+//  }
+
+//  public async Task<HealthCheckResult> CheckHealthAsync(
+//    HealthCheckContext context,
+//    CancellationToken cancellationToken = default)
+//  {
+//    try
+//    {
+//      // Try to connect to database
+//      await _context.Database.CanConnectAsync(cancellationToken);
+//      return HealthCheckResult.Healthy("Database connection is healthy");
+//    }
+//    catch (Exception ex)
+//    {
+//      return HealthCheckResult.Unhealthy("Database connection failed", ex);
+//    }
+//  }
+//}
+
+//// ================ INTERFACES (ALREADY IMPLEMENTED IN YOUR PROJECT) ================
+
+///// <summary>
+///// Interface for exception handling service - IMPLEMENTED IN YOUR PROJECT
+///// </summary>
+//public interface IExceptionHandlingService
+//{
+//  Task HandleExceptionAsync(Exception exception, HttpContext context);
+//  Task<bool> IsCriticalExceptionAsync(Exception exception);
+//  Task LogExceptionAsync(Exception exception, string correlationId, HttpContext context);
+//}
+
+///// <summary>
+///// Interface for error monitoring service - IMPLEMENTED IN YOUR PROJECT
+///// </summary>
+//public interface IErrorMonitoringService
+//{
+//  Task TrackExceptionAsync(Exception exception, string correlationId, HttpContext context);
+//  Task SendAlertAsync(Exception exception, string correlationId);
+//  Task<Dictionary<string, object>> CollectContextDataAsync(HttpContext context);
+//}
+
+///// <summary>
+///// Interface for notification service - TO BE IMPLEMENTED
+///// </summary>
+//public interface INotificationService
+//{
+//  Task SendCriticalErrorNotificationAsync(Exception exception, HttpContext context);
+//  Task SendErrorSummaryAsync(DateTime from, DateTime to);
+//}
+
+///// <summary>
+///// Interface for metrics collection service - TO BE IMPLEMENTED
+///// </summary>
+//public interface IMetricsCollectionService
+//{
+//  void IncrementExceptionCounter(string exceptionType);
+//  void RecordResponseTime(string endpoint, double milliseconds);
+//  void RecordApiCall(string endpoint, int statusCode);
+//}
+
 
 
 #region Old Code

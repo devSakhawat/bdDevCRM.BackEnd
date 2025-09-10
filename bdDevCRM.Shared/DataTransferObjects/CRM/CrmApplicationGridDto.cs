@@ -9,6 +9,7 @@ namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 public class CrmApplicationGridDto
 {
   // Hidden ID Fields
+  public int RowIndex { get; set; }
   public int ApplicationId { get; set; }
   public int ApplicantId { get; set; }
   public int ApplicantCourseId { get; set; }
@@ -24,6 +25,7 @@ public class CrmApplicationGridDto
 
   // Basic Application Info
   public DateTime ApplicationDate { get; set; }
+  public int StateId { get; set; }
   public string ApplicationStatus { get; set; } = null!;
 
   // Personal Details
@@ -39,7 +41,7 @@ public class CrmApplicationGridDto
   public string? Nationality { get; set; }
 
   // Passport Information
-  public string? HasValidPassport { get; set; }
+  public bool? HasValidPassport { get; set; }
   public string? PassportNumber { get; set; }
   public DateTime? PassportExpiryDate { get; set; }
 
