@@ -20,13 +20,13 @@ public class OTHERSInformationDto
   public string? OTHERSScannedCopyPath { get; set; }
 
   // Existing audit (save)
-  public DateTime? CreatedDate { get; set; }
+  public DateTime CreatedDate { get; set; }
   public int CreatedBy { get; set; }
   public DateTime? UpdatedDate { get; set; }
   public int? UpdatedBy { get; set; }
 
   // Added to align with GetApplicationDto aliases
-  public DateTime? OTHERS_CreatedDate { get; set; }
+  public DateTime OTHERS_CreatedDate { get; set; }
   public int OTHERS_CreatedBy { get; set; }
   public DateTime? OTHERS_UpdatedDate { get; set; }
   public int? OTHERS_UpdatedBy { get; set; }

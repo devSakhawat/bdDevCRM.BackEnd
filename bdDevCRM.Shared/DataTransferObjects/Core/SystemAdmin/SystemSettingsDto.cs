@@ -19,7 +19,7 @@ public class SystemSettingsDto
   public int OldPassUseRestriction { get; set; }
   public bool OdbcClientList { get; set; }
   public int UserId { get; set; }
-  public DateTime LastUpdateDate { get; set; }
+  public DateTime LastUpdatedDate { get; set; }
 
   public int IsPasswordChange { get; set; }
   public int IsPasswordExpire { get; set; }

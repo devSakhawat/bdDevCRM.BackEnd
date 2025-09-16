@@ -41,7 +41,7 @@ public partial class SystemSettings
 
     public int? OldPassUseRestriction { get; set; }
 
-    public DateTime? LastUpdateDate { get; set; }
+    public DateTime? LastUpdatedDate { get; set; }
 
     /// <summary>
     /// 0=Native SQL, 1=ODBC

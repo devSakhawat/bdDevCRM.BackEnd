@@ -1,6 +1,8 @@
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts.CRM;
+using bdDevCRM.RepositoryDtos.CRM;
 using bdDevCRM.Sql.Context;
+using Microsoft.Data.SqlClient;
 
 namespace bdDevCRM.Repositories.CRM;
 
@@ -22,4 +24,39 @@ public sealed class CrmEducationHistoryRepository : RepositoryBase<CrmEducationH
 
   public async Task<CrmEducationHistory?> GetEducationHistoryByInstitutionAsync(string institution, bool track) =>
       await FirstOrDefaultAsync(c => c.Institution != null && c.Institution.ToLower() == institution.ToLower(), track);
+
+  public async Task<IEnumerable<EducationHistoryRepositoryDto>> EducationHistoryByApplicantId(int applicantId)
+  {
+    string sql = string.Format(@"
+     SELECT [EducationHistoryId]
+      ,[ApplicantId]
+      ,[Institution]
+      ,[Qualification]
+      ,[PassingYear]
+      ,[Grade]
+      ,doc.FilePath as [DocumentPath]
+      ,[DocumentName]
+      ,[CreatedDate]
+      ,[CreatedBy]
+      ,[UpdatedDate]
+      ,[UpdatedBy]
+  FROM [dbDevCRM].[dbo].[CrmEducationHistory]
+  OUTER APPLY(
+        Select top 1 * 
+        From DmsDocument doc
+        where ReferenceEntityType = 'EducationHistory'
+        and doc.ReferenceEntityId = CrmEducationHistory.ApplicantId
+        Order by doc.UploadDate desc
+    ) doc
+WHERE ApplicantId = @ApplicantId", applicantId);
+
+    // Execute the query using RepositoryBase method
+    var parameters = new SqlParameter[]
+    {
+        new SqlParameter("@ApplicantId", applicantId)
+    };
+
+
+    return await ExecuteListQuery<EducationHistoryRepositoryDto>(sql, parameters);
+  }
 }

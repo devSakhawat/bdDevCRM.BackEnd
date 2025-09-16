@@ -402,9 +402,9 @@ public class AuthenticationService : IAuthenticationService
   //              user.LastLoginDate = currentDate;
   //            }
 
-  //            if (user.LastUpdateDate != DateTime.MinValue)
+  //            if (user.LastUpdatedDate != DateTime.MinValue)
   //            {
-  //              TimeSpan tSpan = currentDate.Subtract(user.LastUpdateDate);
+  //              TimeSpan tSpan = currentDate.Subtract(user.LastUpdatedDate);
   //              dayCount = tSpan.Days;
   //              if (systemSettings.IsPasswordChange == 1)
   //              {

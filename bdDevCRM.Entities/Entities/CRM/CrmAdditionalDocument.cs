@@ -1,25 +1,40 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
 public partial class CrmAdditionalDocument
 {
-    public int AdditionalDocumentId { get; set; }
+  [Key]
+  public int AdditionalDocumentId { get; set; }
 
-    public string DocumentTitle { get; set; } = null!;
+  public int? ApplicantId { get; set; }
 
-    public string DocumentPath { get; set; } = null!;
+  [StringLength(350)]
+  [Unicode(false)]
+  public string DocumentTitle { get; set; } = null!;
 
-    public string DocumentName { get; set; } = null!;
+  [StringLength(350)]
+  public string DocumentPath { get; set; } = null!;
 
-    public string RecordType { get; set; } = null!;
+  [StringLength(150)]
+  [Unicode(false)]
+  public string DocumentName { get; set; } = null!;
 
-    public DateTime CreatedDate { get; set; }
+  [StringLength(150)]
+  [Unicode(false)]
+  public string RecordType { get; set; } = null!;
 
-    public int CreatedBy { get; set; }
+  [Column(TypeName = "datetime")]
+  public DateTime CreatedDate { get; set; }
 
-    public DateTime? UpdatedDate { get; set; }
+  public int CreatedBy { get; set; }
 
-    public int? UpdatedBy { get; set; }
+  [Column(TypeName = "datetime")]
+  public DateTime? UpdatedDate { get; set; }
+
+  public int? UpdatedBy { get; set; }
 }

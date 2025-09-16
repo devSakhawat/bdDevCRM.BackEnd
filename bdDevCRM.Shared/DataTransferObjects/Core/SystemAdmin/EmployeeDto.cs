@@ -58,7 +58,7 @@ public class EmployeeDto
   public int StateId { get; set; }
   public string OriginalBirthDay { get; set; }
   public int UserId { get; set; }
-  public DateTime LastUpdateDate { get; set; }
+  public DateTime LastUpdatedDate { get; set; }
   public int ApproverId { get; set; }
   public DateTime ApproveDate { get; set; }
   public bool LogHourEnable { get; set; }

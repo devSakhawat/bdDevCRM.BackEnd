@@ -1,6 +1,7 @@
 using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
+using bdDevCRM.RepositoryDtos.CRM;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
@@ -30,7 +31,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       ca.ApplicationId,
       ca.ApplicationDate,
       ca.StateId,
-
+      doc.FilePath as ApplicantImagePath,
       ai.ApplicantId,
       ac.ApplicantCourseId,
       ac.CountryId,
@@ -107,10 +108,6 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
   --    FROM AdditionalDocument ad 
   --    WHERE ad.ApplicantId = ai.ApplicantId
   --) AS AdditionalDocumentsCount,
-
-
-      -- Photo
-      ai.ApplicantImagePath,
       -- Remarks
       ac.Remarks
 
@@ -136,8 +133,17 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       --LEFT JOIN CrmEducationHistory edu ON ai.ApplicantId = edu.ApplicantId      
       --LEFT JOIN CrmWorkExperience workEx ON ca.ApplicationId = workEx.ApplicantId
       --LEFT JOIN CrmApplicantReference ar  ON ar.ApplicantId = ai.ApplicantId
+
+      OUTER APPLY (
+          SELECT TOP 1 d.FilePath
+          FROM DmsDocument d
+          WHERE d.ReferenceEntityType = 'ApplicantInfo'
+            AND d.ReferenceEntityId = ai.ApplicantId
+          ORDER BY d.UploadDate DESC
+      ) doc
+
   ");
-      string orderBy = " ApplicationDate asc ";
+      string orderBy = " ApplicationId asc ";
       var gridResult = await _repository.CrmApplications.GridData<CrmApplicationGridDto>(sql, options, orderBy, condition);
       return gridResult;
     }
@@ -152,7 +158,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
   public async Task<GetApplicationDto> GetApplication(int applicationId, bool trackChanges)
   {
     var query = string.Format(@" 
-      SELECT
+        SELECT
       -- ================================
       -- CrmApplicationDto (Top-level)
       -- ================================
@@ -168,7 +174,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       -- ApplicantCourseDto
       -- ================================
       ISNULL(ac.ApplicantCourseId, 0) AS ApplicantCourseId,
-      ISNULL(ac.CountryId, 0) AS CountryId,
+      docs.ApplicantImagePath,
       c.CountryName,
       ISNULL(ac.InstituteId, 0) AS InstituteId,
       i.InstituteName,
@@ -197,6 +203,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       ai.ApplicantId,
       ai.GenderId,
       NULL AS GenderName,
+      ISNULL(ac.CountryId, 0) AS CountryId,
       ai.TitleValue,
       ai.TitleText,
       ai.FirstName,
@@ -218,7 +225,6 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       ai.Mobile,
       ai.EmailAddress,
       ai.SkypeId,
-      ai.ApplicantImagePath,
       ai.CreatedDate AS ApplicantCreatedDate,
       ai.CreatedBy AS ApplicantCreatedBy,
       ai.UpdatedDate AS ApplicantUpdatedDate,
@@ -266,7 +272,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       ielts.IELTSSpeaking,
       ielts.IELTSOverallScore,
       ielts.IELTSDate,
-      ielts.IELTSScannedCopyPath,
+      docs.IELTSScannedCopyPath,
+      docs.IELTSScannedCopyFileName,
       ielts.IELTSAdditionalInformation,
       ielts.CreatedDate AS IELTS_CreatedDate,
       ielts.CreatedBy AS IELTS_CreatedBy,
@@ -284,7 +291,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       toefl.TOEFLSpeaking,
       toefl.TOEFLOverallScore,
       toefl.TOEFLDate,
-      toefl.TOEFLScannedCopyPath,
+      docs.TOEFLScannedCopyPath,
+      docs.TOEFLScannedCopyFileName,
       toefl.TOEFLAdditionalInformation,
       toefl.CreatedDate AS TOEFL_CreatedDate,
       toefl.CreatedBy AS TOEFL_CreatedBy,
@@ -302,7 +310,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       pte.PTESpeaking,
       pte.PTEOverallScore,
       pte.PTEDate,
-      pte.PTEScannedCopyPath,
+      docs.PTEScannedCopyPath,
+      docs.PTEScannedCopyFileName,
       pte.PTEAdditionalInformation,
       pte.CreatedDate AS PTE_CreatedDate,
       pte.CreatedBy AS PTE_CreatedBy,
@@ -320,8 +329,9 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       gmat.GMATSpeaking,
       gmat.GMATOverallScore,
       gmat.GMATDate,
-      gmat.GMATScannedCopyPath,
+      docs.GMATScannedCopyPath,
       gmat.GMATAdditionalInformation,
+      docs.GMATScannedCopyFileName,
       gmat.CreatedDate AS GMAT_CreatedDate,
       gmat.CreatedBy AS GMAT_CreatedBy,
       gmat.UpdatedDate AS GMAT_UpdatedDate,
@@ -332,8 +342,9 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       -- ================================
       ISNULL(others.OTHERSInformationId, 0) AS OthersInformationId,
       ISNULL(others.ApplicantId, 0) AS OTHERS_ApplicantId,
-      --others.OTHERSAdditionalInformation,
-      others.OTHERSScannedCopyPath,
+      others.AdditionalInformation as OTHERSAdditionalInformation,
+      docs.OTHERSScannedCopyPath,
+      docs.OTHERSScannedCopyFileName,
       others.CreatedDate AS OTHERS_CreatedDate,
       others.CreatedBy AS OTHERS_CreatedBy,
       others.UpdatedDate AS OTHERS_UpdatedDate,
@@ -345,7 +356,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       ISNULL(sop.StatementOfPurposeId, 0) AS StatementOfPurposeId,
       ISNULL(sop.ApplicantId, 0) AS SOP_ApplicantId,
       sop.StatementOfPurposeRemarks,
-      sop.StatementOfPurposeFilePath,
+      docs.StatementOfPurposeFilePath,
       sop.CreatedDate AS SOP_CreatedDate,
       sop.CreatedBy AS SOP_CreatedBy,
       sop.UpdatedDate AS SOP_UpdatedDate,
@@ -357,25 +368,14 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       ISNULL(addInfo.AdditionalInfoId, 0) AS AdditionalInfoId,
       ISNULL(addInfo.ApplicantId, 0) AS AddInfo_ApplicantId,
       addInfo.RequireAccommodation,
-      addInfo.HealthNmedicalNeeds,
-      addInfo.HealthNmedicalNeedsRemarks,
+      addInfo.HealthNMedicalNeeds,
+      addInfo.HealthNMedicalNeedsRemarks,
       addInfo.AdditionalInformationRemarks,
-
-      -- ================================
-      -- AdditionalDocument/Info (not available in CrmAdditionalInfo)
-      -- returning NULL/defaults to fit DTO
-      -- ================================
-      CAST(0 AS INT) AS AdditionalDocumentId,
-      CAST(addInfo.ApplicantId AS VARCHAR(50)) AS AddDoc_ApplicantId,
-      CAST(NULL AS VARCHAR(500)) AS AddInfoUploadFile,
-      CAST(NULL AS VARCHAR(200)) AS AddInfoDocumentName,
-      CAST(NULL AS VARCHAR(200)) AS AddInfoFileThumbnail,
-      CAST(NULL AS VARCHAR(100)) AS AddInfoRecordType,
-      addInfo.CreateDate AS AddInfoCreatedDate,
-      ISNULL(addInfo.CreateBy, 0) AS AddInfoCreatedBy,
-      addInfo.UpdateDate AS AddInfoUpdatedDate,
-      addInfo.UpdateBy AS AddInfoUpdatedBy,
-      CAST(NULL AS VARCHAR(100)) AS RecordType
+  
+      addInfo.UpdatedDate AS AddInfo_CreatedDate,
+      ISNULL(addInfo.CreatedBy, 0) AS AddInfo_CreatedBy,
+      addInfo.UpdatedDate AS AddInfo_UpdatedDate,
+      addInfo.UpdatedBy AS AddInfo_UpdatedBy
 
     FROM CrmApplication ca
     INNER JOIN CrmApplicantInfo ai ON ca.ApplicationId = ai.ApplicationId
@@ -383,24 +383,48 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     LEFT JOIN CrmCountry c ON ac.CountryId = c.CountryId
     LEFT JOIN CrmInstitute i ON ac.InstituteId = i.InstituteId
     LEFT JOIN CrmCurrencyInfo curInfo ON ac.CurrencyId = curInfo.CurrencyId
-
     LEFT JOIN CrmPermanentAddress pAddr ON ai.ApplicantId = pAddr.ApplicantId
     LEFT JOIN CrmCountry perCountry ON pAddr.CountryId = perCountry.CountryId
-
     LEFT JOIN CrmPresentAddress prAddr ON ai.ApplicantId = prAddr.ApplicantId
     LEFT JOIN CrmCountry preCountry ON prAddr.CountryId = preCountry.CountryId
-
     LEFT JOIN CrmIELTSInformation ielts ON ai.ApplicantId = ielts.ApplicantId
     LEFT JOIN CrmTOEFLInformation toefl ON ai.ApplicantId = toefl.ApplicantId
     LEFT JOIN CrmPTEInformation pte ON ai.ApplicantId = pte.ApplicantId
     LEFT JOIN CrmGMATInformation gmat ON ai.ApplicantId = gmat.ApplicantId
     LEFT JOIN CrmOTHERSInformation others ON ai.ApplicantId = others.ApplicantId
-
     -- Saved using ApplicationId as ApplicantId (per Create flow)
     LEFT JOIN CrmStatementOfPurpose sop ON ca.ApplicationId = sop.ApplicantId
     LEFT JOIN CrmAdditionalInfo addInfo ON ca.ApplicationId = addInfo.ApplicantId
-    -- list of data contain entitites are removed from here.They make the data multiple They will be added manually.
 
+    -- SINGLE OUTER APPLY for all DMS files (including FileName)
+    OUTER APPLY (
+      SELECT
+        MAX(CASE WHEN d.ReferenceEntityType = 'ApplicantInfo'       THEN d.FilePath END) AS ApplicantImagePath,
+        MAX(CASE WHEN d.ReferenceEntityType = 'ApplicantInfo'       THEN d.FileName END) AS ApplicantImageFileName,
+        MAX(CASE WHEN d.ReferenceEntityType = 'IELTSInformation'    THEN d.FilePath END) AS IELTSScannedCopyPath,
+        MAX(CASE WHEN d.ReferenceEntityType = 'IELTSInformation'    THEN d.FileName END) AS IELTSScannedCopyFileName,
+        MAX(CASE WHEN d.ReferenceEntityType = 'TOEFLInformation'    THEN d.FilePath END) AS TOEFLScannedCopyPath,
+        MAX(CASE WHEN d.ReferenceEntityType = 'TOEFLInformation'    THEN d.FileName END) AS TOEFLScannedCopyFileName,
+        MAX(CASE WHEN d.ReferenceEntityType = 'PTEInformation'      THEN d.FilePath END) AS PTEScannedCopyPath,
+        MAX(CASE WHEN d.ReferenceEntityType = 'PTEInformation'      THEN d.FileName END) AS PTEScannedCopyFileName,
+        MAX(CASE WHEN d.ReferenceEntityType = 'GMATInformation'     THEN d.FilePath END) AS GMATScannedCopyPath,
+        MAX(CASE WHEN d.ReferenceEntityType = 'GMATInformation'     THEN d.FileName END) AS GMATScannedCopyFileName,
+        MAX(CASE WHEN d.ReferenceEntityType = 'OTHERSInformation'   THEN d.FilePath END) AS OTHERSScannedCopyPath,
+        MAX(CASE WHEN d.ReferenceEntityType = 'OTHERSInformation'   THEN d.FileName END) AS OTHERSScannedCopyFileName,
+        MAX(CASE WHEN d.ReferenceEntityType = 'StatementOfPurpose'  THEN d.FilePath END) AS StatementOfPurposeFilePath,
+        MAX(CASE WHEN d.ReferenceEntityType = 'StatementOfPurpose'  THEN d.FileName END) AS StatementOfPurposeFileName
+      FROM (
+        SELECT FilePath, FileName, ReferenceEntityType,
+               ROW_NUMBER() OVER (PARTITION BY ReferenceEntityType ORDER BY UploadDate DESC) AS rn
+        FROM DmsDocument
+        WHERE ReferenceEntityId = CONVERT(nvarchar(50), 4)
+          AND ReferenceEntityType IN (
+          'ApplicantInfo', 'IELTSInformation', 'TOEFLInformation' , 'PTEInformation', 'GMATInformation'
+          ,'OTHERSInformation','StatementOfPurpose'
+          )
+      ) d
+      WHERE d.rn = 1
+    ) docs
     WHERE ca.ApplicationId = @ApplicationId
     ", applicationId);
 
@@ -419,50 +443,88 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       return new GetApplicationDto(); // Return empty DTO if no data found
     }
 
-    CrmApplicationDto crmApplicationDto = new CrmApplicationDto();
-    crmApplicationDto = MyMapper.JsonClone<GetApplicationDto, CrmApplicationDto>(result);
+    #region Comment_Code
+    //CrmApplicationDto crmApplicationDto = new CrmApplicationDto();
+    //crmApplicationDto = MyMapper.JsonClone<GetApplicationDto, CrmApplicationDto>(result);
     // Map the result to ApplicationDto, ApplicantCourseDto, and other nested DTOs using MyMapper
     // Note: MyMapper.JsonClone is assumed to be a method that maps one DTO to another using JSON serialization/deserialization
     // Applicant Personal Info with course information
 
-    crmApplicationDto.CourseInformation.PersonalDetails = MyMapper.JsonClone<GetApplicationDto, ApplicantInfoDto>(result);
-    crmApplicationDto.CourseInformation.ApplicantCourse = MyMapper.JsonClone<GetApplicationDto, ApplicantCourseDto>(result);
-    crmApplicationDto.CourseInformation.ApplicantAddress.PresentAddress = MyMapper.JsonClone<GetApplicationDto, PresentAddressDto>(result);
-    crmApplicationDto.CourseInformation.ApplicantAddress.PermanentAddress = MyMapper.JsonClone<GetApplicationDto, PermanentAddressDto>(result);
+    //crmApplicationDto.CourseInformation.PersonalDetails = MyMapper.JsonClone<GetApplicationDto, ApplicantInfoDto>(result);
+    //crmApplicationDto.CourseInformation.ApplicantCourse = MyMapper.JsonClone<GetApplicationDto, ApplicantCourseDto>(result);
+    //crmApplicationDto.CourseInformation.ApplicantAddress.PresentAddress = MyMapper.JsonClone<GetApplicationDto, PresentAddressDto>(result);
+    //crmApplicationDto.CourseInformation.ApplicantAddress.PermanentAddress = MyMapper.JsonClone<GetApplicationDto, PermanentAddressDto>(result);
 
-    // English Language Test Information
-    crmApplicationDto.EducationInformation.IELTSInformation = MyMapper.JsonClone<GetApplicationDto, IELTSInformationDto>(result);
-    crmApplicationDto.EducationInformation.TOEFLInformation = MyMapper.JsonClone<GetApplicationDto, TOEFLInformationDto>(result);
-    crmApplicationDto.EducationInformation.PTEInformation = MyMapper.JsonClone<GetApplicationDto, PTEInformationDto>(result);
-    crmApplicationDto.EducationInformation.GMATInformation = MyMapper.JsonClone<GetApplicationDto, GMATInformationDto>(result);
-    crmApplicationDto.EducationInformation.OTHERSInformation = MyMapper.JsonClone<GetApplicationDto, OTHERSInformationDto>(result);
+    //// English Language Test Information
+    //crmApplicationDto.EducationInformation.IELTSInformation = MyMapper.JsonClone<GetApplicationDto, IELTSInformationDto>(result);
+    //crmApplicationDto.EducationInformation.TOEFLInformation = MyMapper.JsonClone<GetApplicationDto, TOEFLInformationDto>(result);
+    //crmApplicationDto.EducationInformation.PTEInformation = MyMapper.JsonClone<GetApplicationDto, PTEInformationDto>(result);
+    //crmApplicationDto.EducationInformation.GMATInformation = MyMapper.JsonClone<GetApplicationDto, GMATInformationDto>(result);
+    //crmApplicationDto.EducationInformation.OTHERSInformation = MyMapper.JsonClone<GetApplicationDto, OTHERSInformationDto>(result);
 
-    // Education HistoryList and  Work Experience List
-    IEnumerable<CrmEducationHistory> education = await _repository.CrmEducationHistories.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.EducationHistoryId, trackChanges: false);
+    //// Education HistoryList and  Work Experience List
+    //IEnumerable<CrmEducationHistory> education = await _repository.CrmEducationHistories.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.EducationHistoryId, trackChanges: false);
 
-    crmApplicationDto.EducationInformation.EducationDetails.EducationHistory
-      = MyMapper.JsonCloneIEnumerableToList<CrmEducationHistory, EducationHistoryDto>(education);
-    crmApplicationDto.EducationInformation.EducationDetails.TotalEducationRecords = education.Count();
+    //crmApplicationDto.EducationInformation.EducationDetails.EducationHistory
+    //  = MyMapper.JsonCloneIEnumerableToList<CrmEducationHistory, EducationHistoryDto>(education);
+    //crmApplicationDto.EducationInformation.EducationDetails.TotalEducationRecords = education.Count();
 
-    IEnumerable<CrmWorkExperience> workExperiences = await _repository.CrmWorkExperiences.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.WorkExperienceId, trackChanges: false);
-    crmApplicationDto.EducationInformation.WorkExperience.WorkExperienceHistory
-      = MyMapper.JsonCloneIEnumerableToList<CrmWorkExperience, WorkExperienceHistoryDto>(workExperiences);
-    crmApplicationDto.EducationInformation.WorkExperience.TotalWorkExperienceRecords = workExperiences.Count();
+    //IEnumerable<CrmWorkExperience> workExperiences = await _repository.CrmWorkExperiences.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.WorkExperienceId, trackChanges: false);
+    //crmApplicationDto.EducationInformation.WorkExperience.WorkExperienceHistory
+    //  = MyMapper.JsonCloneIEnumerableToList<CrmWorkExperience, WorkExperienceHistoryDto>(workExperiences);
+    //crmApplicationDto.EducationInformation.WorkExperience.TotalWorkExperienceRecords = workExperiences.Count();
 
-    // Additional Information Section DTOs
-    // Applicant Reference List
-    IEnumerable<CrmApplicantReference> applicantReferences = await _repository.CrmApplicantReferences.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.ApplicantReferenceId, trackChanges: false);
-    crmApplicationDto.AdditionalInformation.ReferenceDetails.References
-      = MyMapper.JsonCloneIEnumerableToList<CrmApplicantReference, ApplicantReferenceDto>(applicantReferences);
-    crmApplicationDto.AdditionalInformation.ReferenceDetails.TotalReferenceRecords = applicantReferences.Count();
+    //// Additional Information Section DTOs
+    //// Applicant Reference List
+    //IEnumerable<CrmApplicantReference> applicantReferences = await _repository.CrmApplicantReferences.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.ApplicantReferenceId, trackChanges: false);
+    //crmApplicationDto.AdditionalInformation.ReferenceDetails.References
+    //  = MyMapper.JsonCloneIEnumerableToList<CrmApplicantReference, ApplicantReferenceDto>(applicantReferences);
+    //crmApplicationDto.AdditionalInformation.ReferenceDetails.TotalReferenceRecords = applicantReferences.Count();
 
-    // Additional Information Section DTOs
-    crmApplicationDto.AdditionalInformation.StatementOfPurpose = MyMapper.JsonClone<GetApplicationDto, StatementOfPurposeDto>(result);
-    crmApplicationDto.AdditionalInformation.AdditionalInformation = MyMapper.JsonClone<GetApplicationDto, AdditionalInfoDto>(result);
+    //// Additional Information Section DTOs
+    //crmApplicationDto.AdditionalInformation.StatementOfPurpose = MyMapper.JsonClone<GetApplicationDto, StatementOfPurposeDto>(result);
+    //crmApplicationDto.AdditionalInformation.AdditionalInformation = MyMapper.JsonClone<GetApplicationDto, AdditionalInfoDto>(result);
 
     // If you have AdditionalDocumentDto, you can map it similarly
     // Additional Document List
     //Enumerable<AdditionalDocumentDto> additionalDocumentDto = MyMapper.JsonClone<GetApplicationDto, AdditionalDocumentDto>(result);
+    #endregion Comment_Code
+
+    #region Educational_History_Start
+    var educationHistories = await _repository.CrmEducationHistories.EducationHistoryByApplicantId( result.ApplicantId );
+
+    if (educationHistories != null && educationHistories.Any())
+    {
+      result.EducationHistories = MyMapper.JsonCloneIEnumerableToIEnumerable<EducationHistoryRepositoryDto, EducationHistoryDto>(educationHistories);
+    }
+    #endregion Educational_History_End
+
+    #region Work_Experience_start
+    var workExperiences = await _repository.CrmWorkExperiences.WorkExperiencesByApplicantId(result.ApplicantId);
+
+    if (workExperiences != null && workExperiences.Any())
+    {
+      result.WorkExperienceHistories = MyMapper.JsonCloneIEnumerableToIEnumerable<WorkExperienceHistoryRepositoryDto, WorkExperienceHistoryDto>(workExperiences);
+    }
+    #endregion Work_Experience_End
+
+    #region References_Start
+    var references = await _repository.CrmApplicantReferences.ListByConditionAsync(expression: x=> x.ApplicantId == result.ApplicantId,orderBy: x => x.ApplicantReferenceId, trackChanges: false );
+
+    if (references != null && references.Any())
+    {
+      result.ApplicantReferences = MyMapper.JsonCloneIEnumerableToIEnumerable<CrmApplicantReference, ApplicantReferenceDto>(references);
+    }
+    #endregion References_End
+
+    #region Additional_Document_Start
+    var additionalDocuments = await _repository.CrmAdditionalDocuments.AdditionalDocumentsByApplicantId(result.ApplicantId);
+
+    if (additionalDocuments != null && additionalDocuments.Any())
+    {
+      result.AdditionalDocuments = MyMapper.JsonCloneIEnumerableToIEnumerable<AdditionalDocumentRepositoryDto, AdditionalDocumentDto>(additionalDocuments);
+    }
+    #endregion Additional_Document_End
 
     return result;
   }
@@ -701,7 +763,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
 
     if (key != updateDto.ApplicationId) throw new IdMismatchBadRequestException(key.ToString(), "Application Update");
     bool exists = await _repository.CrmApplications.ExistsAsync(x => x.ApplicationId == key);
-
+    if (!exists) throw new GenericNotFoundException("Application", "ApplicationId", key.ToString());
 
     try
     {
@@ -710,22 +772,22 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       updateDto.UpdatedBy = currentUser.UserId ?? 0;
 
       // 1. Update CrmApplication 
-      var crmApplicationEntity = await _repository.CrmApplications.FirstOrDefaultAsync(expression: x => x.ApplicationId == updateDto.ApplicationId, trackChanges: false);
+      var crmApplicationDB = await _repository.CrmApplications.FirstOrDefaultAsync(expression: x => x.ApplicationId == updateDto.ApplicationId, trackChanges: false);
 
-      crmApplicationEntity.StateId = updateDto.StateId;
-      crmApplicationEntity.ApplicationDate = (crmApplicationEntity.ApplicationDate > DateTime.MinValue)
-                                              ? crmApplicationEntity.ApplicationDate : DateTime.UtcNow;
-      crmApplicationEntity.CreatedDate = (crmApplicationEntity.CreatedDate > DateTime.MinValue)
-                                   ? crmApplicationEntity.CreatedDate
+      crmApplicationDB.StateId = updateDto.StateId;
+      crmApplicationDB.ApplicationDate = (crmApplicationDB.ApplicationDate > DateTime.MinValue)
+                                              ? crmApplicationDB.ApplicationDate : DateTime.UtcNow;
+      crmApplicationDB.CreatedDate = (crmApplicationDB.CreatedDate > DateTime.MinValue)
+                                   ? crmApplicationDB.CreatedDate
                                    : DateTime.UtcNow;
-      crmApplicationEntity.CreatedBy = (crmApplicationEntity.CreatedBy > 0)
-                                ? crmApplicationEntity.CreatedBy
+      crmApplicationDB.CreatedBy = (crmApplicationDB.CreatedBy > 0)
+                                ? crmApplicationDB.CreatedBy
                                 : (currentUser.UserId ?? 0);
-      crmApplicationEntity.UpdatedDate = DateTime.UtcNow;
-      crmApplicationEntity.UpdatedBy = currentUser.UserId ?? 0;
+      crmApplicationDB.UpdatedDate = DateTime.UtcNow;
+      crmApplicationDB.UpdatedBy = currentUser.UserId ?? 0;
 
 
-      _repository.CrmApplications.UpdateByState(crmApplicationEntity);
+      _repository.CrmApplications.UpdateByState(crmApplicationDB);
       await _repository.SaveAsync();
 
       // 2. Save or Update ApplicantInfo
@@ -826,9 +888,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
             permanentAddressDto.ApplicantId = (permanentAddressDto.ApplicantId == 0 || permanentAddressDto.ApplicantId == null) ? permanentAddresseDB.ApplicantId : permanentAddressDto.ApplicantId;
 
             permanentAddressDto.CreatedDate = DateTimeFormatters.IsValidDateTime(permanentAddresseDB.CreatedDate) ? permanentAddresseDB.CreatedDate : DateTime.UtcNow;
-            applicantInfoDto.CreatedBy = (permanentAddresseDB.CreatedBy > 0)
-                                      ? permanentAddresseDB.CreatedBy
-                                      : (currentUser.UserId ?? 0);
+            applicantInfoDto.CreatedBy = (permanentAddresseDB.CreatedBy > 0) ? permanentAddresseDB.CreatedBy : (currentUser.UserId ?? 0);
 
             permanentAddressDto.UpdatedDate = DateTime.UtcNow;
             permanentAddressDto.UpdatedBy = currentUser.UserId ?? 0;
@@ -888,10 +948,15 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
             }
             else
             {
+              var educationHisotryDB = await _repository.CrmEducationHistories.FirstOrDefaultAsync(x => x.ApplicantId == educationDto.ApplicantId && x.EducationHistoryId == educationDto.EducationHistoryId);
+
+              educationDto.CreatedDate = DateTimeFormatters.IsValidDateTime(educationHisotryDB.CreatedDate) ? educationHisotryDB.CreatedDate : DateTime.UtcNow;
+              educationDto.CreatedBy = (educationHisotryDB.CreatedBy > 0) ? educationHisotryDB.CreatedBy : (currentUser.UserId ?? 0);
+
               educationDto.UpdatedDate = DateTime.UtcNow;
               educationDto.UpdatedBy = currentUser.UserId ?? 0;
-              var educationEntity = MyMapper.JsonClone<EducationHistoryDto, CrmEducationHistory>(educationDto);
-              _repository.CrmEducationHistories.UpdateByState(educationEntity);
+              educationHisotryDB = MyMapper.JsonCloneSafe<EducationHistoryDto, CrmEducationHistory>(educationDto);
+              _repository.CrmEducationHistories.UpdateByState(educationHisotryDB);
               await _repository.SaveAsync();
             }
           }
@@ -903,6 +968,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           var ieltsInformationDto = updateDto.EducationInformation?.IELTSInformation;
           bool ieltsInformationExists = await _repository.CrmIELTSInformations.ExistsAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.IELTSInformationId == ieltsInformationDto.IELTSInformationId);
 
+
           if (!ieltsInformationExists)
           {
             ieltsInformationDto.CreatedDate = DateTime.UtcNow;
@@ -913,10 +979,20 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           }
           else
           {
+
+            var ieltsInformationDB = await _repository.CrmIELTSInformations.FirstOrDefaultAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.IELTSInformationId == ieltsInformationDto.IELTSInformationId);
+
+            ieltsInformationDto.CreatedDate = DateTimeFormatters.IsValidDateTime(ieltsInformationDB.CreatedDate)
+                                           ? ieltsInformationDB.CreatedDate
+                                           : DateTime.UtcNow;
+            ieltsInformationDto.CreatedBy = (ieltsInformationDB.CreatedBy > 0)
+                                      ? ieltsInformationDB.CreatedBy
+                                      : (currentUser.UserId ?? 0);
+
             ieltsInformationDto.UpdatedDate = DateTime.UtcNow;
             ieltsInformationDto.UpdatedBy = currentUser.UserId ?? 0;
-            var ieltsInformationEntity = MyMapper.JsonClone<IELTSInformationDto, CrmIELTSInformation>(ieltsInformationDto);
-            _repository.CrmIELTSInformations.UpdateByState(ieltsInformationEntity);
+            ieltsInformationDB = MyMapper.JsonClone<IELTSInformationDto, CrmIELTSInformation>(ieltsInformationDto);
+            _repository.CrmIELTSInformations.UpdateByState(ieltsInformationDB);
             await _repository.SaveAsync();
           }
         }
@@ -937,10 +1013,14 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           }
           else
           {
+            var toeflInformationDB = await _repository.CrmTOEFLInformations.FirstOrDefaultAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.TOEFLInformationId == toeflInformationDto.TOEFLInformationId);
+            toeflInformationDto.CreatedDate = DateTimeFormatters.IsValidDateTime(toeflInformationDB.CreatedDate) ? toeflInformationDB.CreatedDate : DateTime.UtcNow;
+            toeflInformationDto.CreatedBy = (toeflInformationDB.CreatedBy > 0) ? toeflInformationDB.CreatedBy : (currentUser.UserId ?? 0);
+
             toeflInformationDto.UpdatedDate = DateTime.UtcNow;
             toeflInformationDto.UpdatedBy = currentUser.UserId ?? 0;
-            var toeflInformationEntity = MyMapper.JsonClone<TOEFLInformationDto, CrmTOEFLInformation>(toeflInformationDto);
-            _repository.CrmTOEFLInformations.UpdateByState(toeflInformationEntity);
+            toeflInformationDB = MyMapper.JsonClone<TOEFLInformationDto, CrmTOEFLInformation>(toeflInformationDto);
+            _repository.CrmTOEFLInformations.UpdateByState(toeflInformationDB);
             await _repository.SaveAsync();
           }
         }
@@ -953,6 +1033,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
 
           if (!pteInformationExists)
           {
+
             pteInformationDto.CreatedDate = DateTime.UtcNow;
             pteInformationDto.CreatedBy = currentUser.UserId ?? 0;
 
@@ -961,10 +1042,15 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           }
           else
           {
+            var pteInformationDB = await _repository.CrmPTEInformations.FirstOrDefaultAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.PTEInformationId == pteInformationDto.PTEInformationId);
+
+            pteInformationDto.CreatedDate = DateTimeFormatters.IsValidDateTime(pteInformationDB.CreatedDate) ? pteInformationDB.CreatedDate : DateTime.UtcNow;
+            pteInformationDto.CreatedBy = (pteInformationDB.CreatedBy > 0) ? pteInformationDB.CreatedBy : (currentUser.UserId ?? 0);
+
             pteInformationDto.UpdatedDate = DateTime.UtcNow;
             pteInformationDto.UpdatedBy = currentUser.UserId ?? 0;
-            var pteInformationEntity = MyMapper.JsonClone<PTEInformationDto, CrmPTEInformation>(pteInformationDto);
-            _repository.CrmPTEInformations.UpdateByState(pteInformationEntity);
+            pteInformationDB = MyMapper.JsonClone<PTEInformationDto, CrmPTEInformation>(pteInformationDto);
+            _repository.CrmPTEInformations.UpdateByState(pteInformationDB);
             await _repository.SaveAsync();
           }
         }
@@ -985,6 +1071,11 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           }
           else
           {
+            var gmatInformationDB = await _repository.CrmGMATInformations.FirstOrDefaultAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.GMATInformationId == gmatInformationDto.GMATInformationId);
+
+            gmatInformationDto.CreatedDate = DateTimeFormatters.IsValidDateTime(gmatInformationDB.CreatedDate) ? gmatInformationDB.CreatedDate : DateTime.UtcNow;
+            gmatInformationDto.CreatedBy = (gmatInformationDB.CreatedBy > 0) ? gmatInformationDB.CreatedBy : (currentUser.UserId ?? 0);
+
             gmatInformationDto.UpdatedDate = DateTime.UtcNow;
             gmatInformationDto.UpdatedBy = currentUser.UserId ?? 0;
             var gmatInformationEntity = MyMapper.JsonClone<GMATInformationDto, CrmGMATInformation>(gmatInformationDto);
@@ -1009,10 +1100,15 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           }
           else
           {
+            var othersInformationDB = await _repository.CrmOthersInformations.FirstOrDefaultAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.OthersInformationId == othersDto.OthersInformationId);
+
+            othersDto.CreatedDate = DateTimeFormatters.IsValidDateTime(othersInformationDB.CreatedDate) ? othersInformationDB.CreatedDate : DateTime.UtcNow;
+            othersDto.CreatedBy = (othersInformationDB.CreatedBy > 0) ? othersInformationDB.CreatedBy : (currentUser.UserId ?? 0);
+
             othersDto.UpdatedDate = DateTime.UtcNow;
             othersDto.UpdatedBy = currentUser.UserId ?? 0;
-            var othersEntity = MyMapper.JsonClone<OTHERSInformationDto, CrmOthersInformation>(othersDto);
-            _repository.CrmOthersInformations.UpdateByState(othersEntity);
+            othersInformationDB = MyMapper.JsonClone<OTHERSInformationDto, CrmOthersInformation>(othersDto);
+            _repository.CrmOthersInformations.UpdateByState(othersInformationDB);
             await _repository.SaveAsync();
           }
         }
@@ -1034,10 +1130,14 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
             }
             else
             {
+              var workExperienceDB = await _repository.CrmWorkExperiences.FirstOrDefaultAsync(x => x.ApplicantId == workExpDto.ApplicantId && x.WorkExperienceId == workExpDto.WorkExperienceId);
+              workExpDto.CreatedDate = DateTimeFormatters.IsValidDateTime(workExperienceDB.CreatedDate) ? workExperienceDB.CreatedDate : DateTime.UtcNow;
+              workExpDto.CreatedBy = (workExperienceDB.CreatedBy > 0) ? workExperienceDB.CreatedBy : (currentUser.UserId ?? 0);
+
               workExpDto.UpdatedDate = DateTime.UtcNow;
               workExpDto.UpdatedBy = currentUser.UserId ?? 0;
-              var workExpEntity = MyMapper.JsonClone<WorkExperienceHistoryDto, CrmWorkExperience>(workExpDto);
-              _repository.CrmWorkExperiences.UpdateByState(workExpEntity);
+              workExperienceDB = MyMapper.JsonClone<WorkExperienceHistoryDto, CrmWorkExperience>(workExpDto);
+              _repository.CrmWorkExperiences.UpdateByState(workExperienceDB);
               await _repository.SaveAsync();
             }
           }
@@ -1060,10 +1160,14 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
             }
             else
             {
+              var referenceDB = await _repository.CrmApplicantReferences.FirstOrDefaultAsync(x => x.ApplicantId == referenceDto.ApplicantId && x.ApplicantReferenceId == referenceDto.ApplicantReferenceId);
+              referenceDto.CreatedDate = DateTimeFormatters.IsValidDateTime(referenceDB.CreatedDate) ? referenceDB.CreatedDate : DateTime.UtcNow;
+              referenceDto.CreatedBy = (referenceDB.CreatedBy > 0) ? referenceDB.CreatedBy : (currentUser.UserId ?? 0);
+
               referenceDto.UpdatedDate = DateTime.UtcNow;
               referenceDto.UpdatedBy = currentUser.UserId ?? 0;
-              var referenceEntity = MyMapper.JsonClone<ApplicantReferenceDto, CrmApplicantReference>(referenceDto);
-              _repository.CrmApplicantReferences.UpdateByState(referenceEntity);
+              referenceDB = MyMapper.JsonClone<ApplicantReferenceDto, CrmApplicantReference>(referenceDto);
+              _repository.CrmApplicantReferences.UpdateByState(referenceDB);
               await _repository.SaveAsync();
             }
           }
@@ -1086,10 +1190,14 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           }
           else
           {
+            var statementDB = await _repository.CrmStatementOfPurposes.FirstOrDefaultAsync(x => x.ApplicantId == statementDto.ApplicantId && x.StatementOfPurposeId == statementDto.StatementOfPurposeId);
+            statementDto.CreatedDate = DateTimeFormatters.IsValidDateTime(statementDB.CreatedDate) ? statementDB.CreatedDate : DateTime.UtcNow;
+            statementDto.CreatedBy = (statementDB.CreatedBy > 0) ? statementDB.CreatedBy : (currentUser.UserId ?? 0);
+
             statementDto.UpdatedDate = DateTime.UtcNow;
             statementDto.UpdatedBy = currentUser.UserId ?? 0;
-            var statementEntity = MyMapper.JsonClone<StatementOfPurposeDto, CrmStatementOfPurpose>(statementDto);
-            _repository.CrmStatementOfPurposes.UpdateByState(statementEntity);
+            statementDB = MyMapper.JsonClone<StatementOfPurposeDto, CrmStatementOfPurpose>(statementDto);
+            _repository.CrmStatementOfPurposes.UpdateByState(statementDB);
             await _repository.SaveAsync();
           }
         }
@@ -1110,6 +1218,10 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           }
           else
           {
+            var additionalInfoDB = await _repository.CrmAdditionalInfoes.FirstOrDefaultAsync(x => x.ApplicantId == additionalInfoDto.ApplicantId && x.AdditionalInfoId == additionalInfoDto.AdditionalInfoId);
+            additionalInfoDto.CreatedDate = DateTimeFormatters.IsValidDateTime(additionalInfoDB.CreatedDate) ? additionalInfoDB.CreatedDate : DateTime.UtcNow;
+            additionalInfoDto.CreatedBy = (additionalInfoDB.CreatedBy > 0) ? additionalInfoDB.CreatedBy : (currentUser.UserId ?? 0);
+
             additionalInfoDto.UpdatedDate = DateTime.UtcNow;
             additionalInfoDto.UpdatedBy = currentUser.UserId ?? 0;
             var additionalInfoEntity = MyMapper.JsonClone<AdditionalInfoDto, CrmAdditionalInfo>(additionalInfoDto);
@@ -1190,7 +1302,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
         var total = (dto.EducationInformation.IELTSInformation.IELTSListening + dto.EducationInformation.IELTSInformation.IELTSWriting + dto.EducationInformation.IELTSInformation.IELTSReading + dto.EducationInformation.IELTSInformation.IELTSSpeaking);
         if (total != null && total > 0)
           dto.EducationInformation.IELTSInformation.ApplicantId = applicantId;
-        dto.EducationInformation.IELTSInformation = null;
+        else
+          dto.EducationInformation.IELTSInformation = null;
       }
 
       // TOEFL Information
@@ -1199,7 +1312,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
         var total = (dto.EducationInformation.TOEFLInformation.TOEFLListening + dto.EducationInformation.TOEFLInformation.TOEFLWriting + dto.EducationInformation.TOEFLInformation.TOEFLReading + dto.EducationInformation.TOEFLInformation.TOEFLSpeaking);
         if (total != null && total > 0)
           dto.EducationInformation.TOEFLInformation.ApplicantId = applicantId;
-        dto.EducationInformation.TOEFLInformation = null;
+        else
+          dto.EducationInformation.TOEFLInformation = null;
       }
 
       // PTE Information
@@ -1208,7 +1322,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
         var total = (dto.EducationInformation.PTEInformation.PTEListening + dto.EducationInformation.PTEInformation.PTEWriting + dto.EducationInformation.PTEInformation.PTEReading + dto.EducationInformation.PTEInformation.PTESpeaking);
         if (total != null && total > 0)
           dto.EducationInformation.PTEInformation.ApplicantId = applicantId;
-        dto.EducationInformation.PTEInformation = null;
+        else
+          dto.EducationInformation.PTEInformation = null;
       }
 
       // GMAT Information
@@ -1217,7 +1332,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
         var total = (dto.EducationInformation.GMATInformation.GMATListening + dto.EducationInformation.GMATInformation.GMATWriting + dto.EducationInformation.GMATInformation.GMATReading + dto.EducationInformation.GMATInformation.GMATSpeaking);
         if (total != null && total > 0)
           dto.EducationInformation.GMATInformation.ApplicantId = applicantId;
-        dto.EducationInformation.GMATInformation = null;
+        else
+          dto.EducationInformation.GMATInformation = null;
       }
 
       // OTHERS Information
@@ -1225,7 +1341,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       {
         if (dto.EducationInformation.OTHERSInformation.OTHERSScannedCopyFile != null || dto.EducationInformation.OTHERSInformation.OTHERSAdditionalInformation != null)
           dto.EducationInformation.OTHERSInformation.ApplicantId = applicantId;
-        dto.EducationInformation.OTHERSInformation = null;
+        else
+          dto.EducationInformation.OTHERSInformation = null;
       }
 
       // Work Experience
@@ -1243,7 +1360,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     {
       if (dto.AdditionalInformation?.StatementOfPurpose.StatementOfPurposeFile != null)
         dto.AdditionalInformation?.StatementOfPurpose.ApplicantId = applicantId;
-      dto.AdditionalInformation?.StatementOfPurpose = null;
+      else
+        dto.AdditionalInformation?.StatementOfPurpose = null;
     }
 
 
@@ -1252,7 +1370,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     {
       if (!string.IsNullOrEmpty(dto.AdditionalInformation?.AdditionalInformation.HealthNMedicalNeedsRemarks))
         dto.AdditionalInformation?.AdditionalInformation.ApplicantId = applicantId;
-      dto.AdditionalInformation?.AdditionalInformation = null;
+      else
+        dto.AdditionalInformation?.AdditionalInformation = null;
     }
 
 
@@ -1260,7 +1379,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     if (dto.AdditionalInformation != null)
     {
       // Reference Details - These use actual ApplicantId
-      if (dto.AdditionalInformation.ReferenceDetails?.References != null && dto.AdditionalInformation.ReferenceDetails?.References.Count> 0)
+      if (dto.AdditionalInformation.ReferenceDetails?.References != null && dto.AdditionalInformation.ReferenceDetails?.References.Count > 0)
       {
         foreach (var referenceDto in dto.AdditionalInformation.ReferenceDetails.References)
         {

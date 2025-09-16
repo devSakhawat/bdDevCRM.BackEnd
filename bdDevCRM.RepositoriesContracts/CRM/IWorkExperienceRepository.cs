@@ -1,4 +1,5 @@
 using bdDevCRM.Entities.Entities.CRM;
+using bdDevCRM.RepositoryDtos.CRM;
 
 namespace bdDevCRM.RepositoriesContracts.CRM;
 
@@ -8,4 +9,6 @@ public interface ICrmWorkExperienceRepository : IRepositoryBase<CrmWorkExperienc
   Task<IEnumerable<CrmWorkExperience>> GetWorkExperiencesAsync(bool track);
   Task<CrmWorkExperience?> GetWorkExperienceAsync(int id, bool track);
   Task<IEnumerable<CrmWorkExperience>> GetWorkExperiencesByApplicantIdAsync(int applicantId, bool track);
+
+  Task<IEnumerable<WorkExperienceHistoryRepositoryDto>> WorkExperiencesByApplicantId(int applicantId);
 }

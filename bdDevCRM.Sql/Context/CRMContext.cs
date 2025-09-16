@@ -243,9 +243,9 @@ public partial class CRMContext : DbContext
     {
       entity.HasKey(e => e.AssignApproverId);
 
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.DeleteDate).HasColumnType("datetime");
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<ApproverOrder>(entity =>
@@ -350,8 +350,8 @@ public partial class CRMContext : DbContext
       entity.HasIndex(e => new { e.HrRecordId, e.ModuleId, e.SortOrder, e.Type }, "IX_DuplicateApprover").IsUnique();
 
       entity.Property(e => e.AssignApproverId).ValueGeneratedOnAdd();
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<AuditLog>(entity =>
@@ -453,8 +453,8 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.Branchname)
           .HasMaxLength(100)
           .HasColumnName("BRANCHNAME");
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<Company>(entity =>
@@ -467,7 +467,7 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.CompanyRegisterNo).HasMaxLength(250);
       entity.Property(e => e.CompanyTin).HasMaxLength(50);
       entity.Property(e => e.CompanyZone).HasMaxLength(200);
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.Email).HasMaxLength(100);
       entity.Property(e => e.Fax).HasMaxLength(50);
       entity.Property(e => e.FullLogoPath).HasMaxLength(1000);
@@ -477,7 +477,7 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.LetterHeader).HasMaxLength(1000);
       entity.Property(e => e.Phone).HasMaxLength(50);
       entity.Property(e => e.PrimaryContact).HasMaxLength(50);
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<CompanyDepartmentMap>(entity =>
@@ -532,10 +532,10 @@ public partial class CRMContext : DbContext
     {
       entity.HasKey(e => e.AdditionalInfoId).HasName("PK__Addition__2C4B5286CA6080E2");
 
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.HealthNmedicalNeeds).HasColumnName("HealthNMedicalNeeds");
       entity.Property(e => e.HealthNmedicalNeedsRemarks).HasColumnName("HealthNMedicalNeedsRemarks");
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
 
       //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmAdditionalInfo)
       //    .HasForeignKey(d => d.ApplicantId)
@@ -712,9 +712,9 @@ public partial class CRMContext : DbContext
     {
       entity.HasKey(e => e.CurrencyId).HasName("PK_CurrencyInfo");
 
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.CurrencyName).HasMaxLength(50);
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<CrmEducationHistory>(entity =>
@@ -1142,7 +1142,7 @@ public partial class CRMContext : DbContext
 
     modelBuilder.Entity<CurencyRate>(entity =>
     {
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.CurrencyMonth).HasColumnType("datetime");
       entity.Property(e => e.CurrencyRateRation).HasColumnType("decimal(18, 2)");
     });
@@ -1168,10 +1168,10 @@ public partial class CRMContext : DbContext
     modelBuilder.Entity<Department>(entity =>
     {
       entity.Property(e => e.DepartmentId).ValueGeneratedNever();
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.DepartmentCode).HasMaxLength(50);
       entity.Property(e => e.DepartmentName).HasMaxLength(250);
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<DmsDocument>(entity =>
@@ -1507,7 +1507,7 @@ public partial class CRMContext : DbContext
           .HasMaxLength(1000)
           .HasColumnName("IDENTIFICATIONMARK");
       entity.Property(e => e.Investmentamount).HasColumnName("INVESTMENTAMOUNT");
-      entity.Property(e => e.LastUpdateDate).HasColumnType("smalldatetime");
+      entity.Property(e => e.LastUpdatedDate).HasColumnType("smalldatetime");
       entity.Property(e => e.Meritialstatus).HasColumnName("MERITIALSTATUS");
       entity.Property(e => e.MobileNo).HasMaxLength(500);
       entity.Property(e => e.MotherName).HasMaxLength(500);
@@ -1581,7 +1581,7 @@ public partial class CRMContext : DbContext
           .HasColumnName("GPFNO");
       entity.Property(e => e.IsOteligible).HasColumnName("IsOTEligible");
       entity.Property(e => e.Joiningpost).HasColumnName("JOININGPOST");
-      entity.Property(e => e.LastUpdateDate).HasColumnType("smalldatetime");
+      entity.Property(e => e.LastUpdatedDate).HasColumnType("smalldatetime");
       entity.Property(e => e.OfficialEmail).HasMaxLength(250);
       entity.Property(e => e.Reportdepid).HasColumnName("REPORTDEPID");
       entity.Property(e => e.SeparationRemarks).HasMaxLength(250);
@@ -1624,7 +1624,7 @@ public partial class CRMContext : DbContext
           .HasMaxLength(20)
           .IsUnicode(false);
       entity.Property(e => e.Description).HasMaxLength(500);
-      entity.Property(e => e.Lastupdatedate)
+      entity.Property(e => e.LastUpdatedDate)
           .HasColumnType("datetime")
           .HasColumnName("LASTUPDATEDATE");
       entity.Property(e => e.MonthName)
@@ -1637,10 +1637,10 @@ public partial class CRMContext : DbContext
     {
       entity.HasNoKey();
 
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.MaritalStatusId).ValueGeneratedOnAdd();
       entity.Property(e => e.MaritalStatusName).HasMaxLength(250);
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<Menu>(entity =>
@@ -1670,13 +1670,13 @@ public partial class CRMContext : DbContext
     {
       entity.HasKey(e => e.ReportHeaderId);
 
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.OrderByColumn)
           .HasMaxLength(500)
           .IsUnicode(false);
       entity.Property(e => e.ReportHeader).HasMaxLength(250);
       entity.Property(e => e.ReportTitle).HasMaxLength(250);
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<SystemSettings>(entity =>
@@ -1690,7 +1690,7 @@ public partial class CRMContext : DbContext
           .HasDefaultValue(0)
           .HasComment("0=Disable,1=Enable");
       entity.Property(e => e.Language).HasMaxLength(50);
-      entity.Property(e => e.LastUpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
       entity.Property(e => e.OdbcClientList).HasComment("0=Native SQL, 1=ODBC");
       entity.Property(e => e.PassResetBy).HasComment("1=SysAdmin, 2=User");
       entity.Property(e => e.PassType).HasComment("1=Alphanumeric, 2=Alphabetic, 3=Numeric");
@@ -1747,7 +1747,7 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.EmployeeId).HasComment("EmployeeId As HrRecordId");
       entity.Property(e => e.LastLoginDate).HasColumnType("datetime");
-      entity.Property(e => e.LastUpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
       entity.Property(e => e.LoginId).HasMaxLength(50);
       entity.Property(e => e.Password).HasMaxLength(100);
       entity.Property(e => e.Theme)

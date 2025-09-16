@@ -268,6 +268,7 @@ public class CRMApplicationController : BaseApiController
   }
 
   [HttpPut(RouteConstants.CRMApplicationUpdate)]
+  //[DisableRequestSizeLimit]
   public async Task<IActionResult> UpdateApplication([FromRoute] int key, [FromForm] CrmApplicationDto applicationData)
   {
     if (applicationData == null)
@@ -552,7 +553,14 @@ public class CRMApplicationController : BaseApiController
             // Version properties
             VersionNumber = 1,
             UploadedBy = currentUser.UserId.ToString(),
-            UploadedDate = DateTime.UtcNow
+            UploadedDate = DateTime.UtcNow,
+
+
+            FileExtension = Path.GetExtension(educationRecord.AttachedDocumentFile.FileName),
+            FileName = educationRecord.AttachedDocumentFile.FileName,
+            FileSize = educationRecord.AttachedDocumentFile.Length,
+            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+
           };
 
           string educationDocumentDMSJson = JsonConvert.SerializeObject(educationDocumentDMSDto);
@@ -642,6 +650,7 @@ public class CRMApplicationController : BaseApiController
           var workExperienceDMSDto = new DMSDto
           {
             // DocumentType properties
+            ApplicantId = applicantId,
             DocumentTypeName = "Work_Experience_Document",
             DocumentType = "Document",
             IsMandatory = false,
@@ -738,53 +747,6 @@ public class CRMApplicationController : BaseApiController
       }
     }
 
-    ///* ---------- Save Additional Information File (AdditionalInfo Entity) ---------- */
-    //if (dto.AdditionalInformation?.AdditionalInformation?.UploadFileFormFile != null)
-    //{
-    //  var additionalInfoDMSDto = new DMSDto
-    //  {
-    //    // DocumentType properties
-    //    DocumentTypeName = "Additional_Information_Document",
-    //    DocumentType = "Document",
-    //    IsMandatory = false,
-    //    AcceptedExtensions = ".pdf,.doc,.docx,.jpg,.jpeg,.png",
-    //    MaxFileSizeMb = 5,
-
-    //    // Document properties
-    //    Title = $"AdditionalInfo_{dto.AdditionalInformation.AdditionalInformation.DocumentTitle}_{DateTime.Now:yyyyMMdd:FFFFF}",
-    //    Description = $"Additional information document for application {applicantId}",
-    //    ReferenceEntityType = "AdditionalInfo", // Entity name
-    //    ReferenceEntityId = applicantId.ToString(),
-    //    UploadedByUserId = currentUser.UserId.ToString(),
-    //    SystemTags = "UploadFileFormFile", // DTO field name
-
-    //    // Folder properties
-    //    FolderName = $"AdditionalInfo_{applicantId}",
-    //    OwnerId = currentUser.UserId.ToString(),
-
-    //    // Access Log properties
-    //    AccessedByUserId = currentUser.UserId.ToString(),
-    //    AccessDateTime = DateTime.UtcNow,
-    //    Action = "Upload",
-
-    //    // Tag properties
-    //    DocumentTagName = "Document,AdditionalInfo,Miscellaneous",
-
-    //    // Version properties
-    //    VersionNumber = 1,
-    //    UploadedBy = currentUser.UserId.ToString(),
-    //    UploadedDate = DateTime.UtcNow
-    //  };
-
-    //  string additionalInfoDMSJson = JsonConvert.SerializeObject(additionalInfoDMSDto);
-    //  string additionalInfoPath = await _serviceManager.DmsDocuments.SaveFileAndDocumentWithAllDmsAsync(
-    //      dto.AdditionalInformation.AdditionalInformation.UploadFileFormFile, additionalInfoDMSJson);
-
-    //  if (!string.IsNullOrEmpty(additionalInfoPath))
-    //  {
-    //    dto.AdditionalInformation.AdditionalInformation.UploadFile = additionalInfoPath;
-    //  }
-    //}
 
     /* ---------- Save Additional Documents (AdditionalDocument Entity) ---------- */
     if (dto.AdditionalInformation?.AdditionalDocuments?.Documents != null &&
@@ -804,8 +766,8 @@ public class CRMApplicationController : BaseApiController
             MaxFileSizeMb = 5,
 
             // Document properties
-            Title = $"AdditionalDocument_{additionalDoc.Title}_{DateTime.Now:yyyyMMdd:FFFFF}",
-            Description = $"Additional document: {additionalDoc.Title} for application {applicantId}",
+            Title = $"AdditionalDocument_{additionalDoc.DocumentTitle}_{DateTime.Now:yyyyMMdd:FFFFF}",
+            Description = $"Additional document: {additionalDoc.DocumentTitle} for application {applicantId}",
             ReferenceEntityType = "AdditionalDocument", // Entity name - mapped to AdditionalDocument entity
             ReferenceEntityId = applicantId.ToString(),
             UploadedByUserId = currentUser.UserId.ToString(),

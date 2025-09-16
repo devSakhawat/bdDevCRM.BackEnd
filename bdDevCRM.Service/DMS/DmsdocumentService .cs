@@ -434,8 +434,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
       }
 
 
-      var existingMapping = await _repository.DmsDocumentTagMaps
-          .FirstOrDefaultAsync(tm => tm.DocumentId == documentId && tm.TagId == tag.TagId);
+      var existingMapping = await _repository.DmsDocumentTagMaps.FirstOrDefaultAsync(tm => tm.DocumentId == documentId && tm.TagId == tag.TagId);
 
       if (existingMapping == null)
       {

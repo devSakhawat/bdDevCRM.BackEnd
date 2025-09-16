@@ -585,13 +585,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
           // Log unmapped properties for debugging
           var propertyNames = properties.Select(p => p.Name).ToList();
           var unmappedColumns = columnNames.Where(c => !propertyNames.Contains(c, StringComparer.OrdinalIgnoreCase)).ToList();
-          
-          // add log message
-          //if (unmappedColumns.Any())
-          //{
-            
-          //  throw new InvalidOperationException($"WARNING: Some columns were not mapped to properties: {string.Join(", ", unmappedColumns)}");
-          //}
         }
       }
     }

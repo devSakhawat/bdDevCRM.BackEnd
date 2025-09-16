@@ -346,7 +346,7 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
           if (!await _repository.Users.ExistsAsync(x => x.EmployeeId == usersDto.EmployeeId))
           {
             usersDto.CreatedDate = DateTime.Now;
-            usersDto.LastUpdateDate = DateTime.Now;
+            usersDto.LastUpdatedDate = DateTime.Now;
             usersDto.IsExpired = false;
 
             var encytpass = EncryptDecryptHelper.Encrypt(usersDto.Password);
@@ -398,7 +398,7 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
           objUserforDb.UserName = usersDto.UserName;
           objUserforDb.IsActive = usersDto.IsActive;
           objUserforDb.AccessParentCompany = usersDto.AccessParentCompany;
-          objUserforDb.LastUpdateDate = DateTime.Now;
+          objUserforDb.LastUpdatedDate = DateTime.Now;
           objUserforDb.DefaultDashboard = usersDto.DefaultDashboard;
 
           if (objUserforDb.IsActive == true)

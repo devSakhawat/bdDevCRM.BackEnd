@@ -20,9 +20,9 @@ public partial class Users
     /// </summary>
     public int? EmployeeId { get; set; }
 
-    public DateTime? CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; }
 
-    public DateTime? LastUpdateDate { get; set; }
+    public DateTime? LastUpdatedDate { get; set; }
 
     public DateTime? LastLoginDate { get; set; }
 

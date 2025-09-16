@@ -21,11 +21,11 @@ public partial class AssignApprover
 
     public bool? IsActive { get; set; }
 
-    public int? CreateBy { get; set; }
+    public int? CreatedBy { get; set; }
 
-    public DateTime? CreateDate { get; set; }
+    public DateTime? CreatedDate { get; set; }
 
-    public int? UpdateBy { get; set; }
+    public int? UpdatedBy { get; set; }
 
-    public DateTime? UpdateDate { get; set; }
+    public DateTime? UpdatedDate { get; set; }
 }

@@ -30,7 +30,7 @@ public class ApplicantReferenceDto
 
   public string? PostOrZipCode { get; set; }
 
-  public DateTime? CreatedDate { get; set; }
+  public DateTime CreatedDate { get; set; }
 
   public int CreatedBy { get; set; }
 

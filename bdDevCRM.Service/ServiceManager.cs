@@ -74,6 +74,7 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICrmApplicantReferenceService> _applicantReferenceService;
   private readonly Lazy<ICrmStatementOfPurposeService> _statementOfPurposeService;
   private readonly Lazy<ICrmAdditionalInfoService> _additionalInfoService;
+  private readonly Lazy<ICrmAdditionalDocumentService> _additionalDocumentService;
   #endregion CRM
 
   #region DMS Lazy Fields
@@ -139,6 +140,7 @@ public sealed class ServiceManager : IServiceManager
     _applicantReferenceService = new Lazy<ICrmApplicantReferenceService>(() => new CrmApplicantReferenceService(repository, logger, configuration, httpContextAccessor));
     _statementOfPurposeService = new Lazy<ICrmStatementOfPurposeService>(() => new CrmStatementOfPurposeService(repository, logger, configuration, httpContextAccessor));
     _additionalInfoService = new Lazy<ICrmAdditionalInfoService>(() => new CrmAdditionalInfoService(repository, logger, configuration, httpContextAccessor));
+    _additionalDocumentService = new Lazy<ICrmAdditionalDocumentService>(() => new CrmAdditionalDocumentsService(repository, logger, configuration, httpContextAccessor));
     #endregion Crm
 
     #region DMS Lazy Initializations
@@ -202,6 +204,7 @@ public sealed class ServiceManager : IServiceManager
   public ICrmApplicantReferenceService ApplicantReferences => _applicantReferenceService.Value;
   public ICrmStatementOfPurposeService StatementOfPurposes => _statementOfPurposeService.Value;
   public ICrmAdditionalInfoService AdditionalInfos => _additionalInfoService.Value;
+  public ICrmAdditionalDocumentService AdditionalDocuments => _additionalDocumentService.Value;
   #endregion Crm
 
   #region DMS Property Exposures

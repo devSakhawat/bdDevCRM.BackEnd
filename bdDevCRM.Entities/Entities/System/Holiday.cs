@@ -19,7 +19,7 @@ public partial class Holiday
 
     public int? YearName { get; set; }
 
-    public DateTime? Lastupdatedate { get; set; }
+    public DateTime? LastUpdatedDate { get; set; }
 
     public string? DayName { get; set; }
 

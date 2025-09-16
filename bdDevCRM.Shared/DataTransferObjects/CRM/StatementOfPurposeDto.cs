@@ -14,7 +14,7 @@ public class StatementOfPurposeDto
   public IFormFile? StatementOfPurposeFile { get; set; }
 
   // Common fields
-  public DateTime? CreatedDate { get; set; }
+  public DateTime CreatedDate { get; set; }
   public int CreatedBy { get; set; }
   public DateTime? UpdatedDate { get; set; }
   public int? UpdatedBy { get; set; }

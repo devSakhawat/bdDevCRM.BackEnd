@@ -79,7 +79,7 @@ public partial class Employee
 
     public int? UserId { get; set; }
 
-    public DateTime? LastUpdateDate { get; set; }
+    public DateTime? LastUpdatedDate { get; set; }
 
     public int? ApproverId { get; set; }
 

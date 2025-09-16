@@ -131,6 +131,7 @@ wwwroot/Uploads/
 wwwroot/uploads/
 
 # Specific entity upload folders from your DMS system
+wwwroot/*
 wwwroot/Uploads/CRMInstitute/
 wwwroot/Uploads/institutes/
 wwwroot/Uploads/students/

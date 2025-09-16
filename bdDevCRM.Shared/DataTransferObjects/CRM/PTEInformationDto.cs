@@ -20,13 +20,13 @@ public class PTEInformationDto
   public string? PTEAdditionalInformation { get; set; }
 
   // Existing audit (save)
-  public DateTime? CreatedDate { get; set; }
+  public DateTime CreatedDate { get; set; }
   public int CreatedBy { get; set; }
   public DateTime? UpdatedDate { get; set; }
   public int? UpdatedBy { get; set; }
 
   // Added to align with GetApplicationDto aliases
-  public DateTime? PTE_CreatedDate { get; set; }
+  public DateTime PTE_CreatedDate { get; set; }
   public int PTE_CreatedBy { get; set; }
   public DateTime? PTE_UpdatedDate { get; set; }
   public int? PTE_UpdatedBy { get; set; }

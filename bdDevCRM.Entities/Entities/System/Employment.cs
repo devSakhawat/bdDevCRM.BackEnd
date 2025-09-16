@@ -37,7 +37,7 @@ public partial class Employment
 
     public int? UserId { get; set; }
 
-    public DateTime? LastUpdateDate { get; set; }
+    public DateTime? LastUpdatedDate { get; set; }
 
     public int? BankBranchId { get; set; }
 

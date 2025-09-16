@@ -64,12 +64,12 @@ internal sealed class CrmAdditionalInfoService(
       throw new InvalidCreateOperationException("AdditionalInfoId must be 0.");
 
     var entity = MyMapper.JsonClone<AdditionalInfoDto, CrmAdditionalInfo>(dto);
-    entity.CreateDate = DateTime.UtcNow;
-    entity.CreateBy = currentUser.UserId ?? 0;
+    entity.CreatedDate = DateTime.UtcNow;
+    entity.CreatedBy = currentUser.UserId ?? 0;
     
     dto.AdditionalInfoId = await _repository.CrmAdditionalInfoes.CreateAndGetIdAsync(entity);
-    //dto.CreatedDate = entity.CreateDate;
-    //dto.CreatedBy = entity.CreateBy;
+    //dto.CreatedDate = entity.CreatedDate;
+    //dto.CreatedBy = entity.CreatedBy;
 
     return dto;
   }
@@ -82,7 +82,7 @@ internal sealed class CrmAdditionalInfoService(
     if (!exists) throw new GenericNotFoundException("AdditionalInfo", "AdditionalInfoId", key.ToString());
 
     var entity = MyMapper.JsonClone<AdditionalInfoDto, CrmAdditionalInfo>(dto);
-    entity.UpdateDate = DateTime.UtcNow;
+    entity.UpdatedDate = DateTime.UtcNow;
     
     _repository.CrmAdditionalInfoes.Update(entity);
     await _repository.SaveAsync();

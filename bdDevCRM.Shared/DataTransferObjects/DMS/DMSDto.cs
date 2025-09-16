@@ -9,6 +9,7 @@ namespace bdDevCRM.Shared.DataTransferObjects.DMS;
 
 public class DMSDto
 {
+  public int ApplicantId { get; set; }
   // DmsDocumentTypeDto -----------------------
   //public int DocumentTypeId { get; set; }
 

@@ -76,6 +76,7 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<ICrmApplicantReferenceRepository> _applicantReferenceRepository;
   private readonly Lazy<ICrmStatementOfPurposeRepository> _statementOfPurposeRepository;
   private readonly Lazy<ICrmAdditionalInfoRepository> _additionalInfoRepository;
+  private readonly Lazy<ICrmAdditionalDocumentRepository> _additionalDocumentRepository;
   #endregion CRM
 
   #region DMS - Private Lazy Fields
@@ -154,6 +155,7 @@ public class RepositoryManager : IRepositoryManager
     _applicantReferenceRepository = new Lazy<ICrmApplicantReferenceRepository>(() => new CrmApplicantReferenceRepository(_repositoryContext));
     _statementOfPurposeRepository = new Lazy<ICrmStatementOfPurposeRepository>(() => new CrmStatementOfPurposeRepository(_repositoryContext));
     _additionalInfoRepository = new Lazy<ICrmAdditionalInfoRepository>(() => new CrmAdditionalInfoRepository(_repositoryContext));
+    _additionalDocumentRepository = new Lazy<ICrmAdditionalDocumentRepository>(() => new CrmAdditionalDocumentRepository(_repositoryContext));
 
     #endregion CRM
 
@@ -224,6 +226,7 @@ public class RepositoryManager : IRepositoryManager
   public ICrmApplicantReferenceRepository CrmApplicantReferences => _applicantReferenceRepository.Value;
   public ICrmStatementOfPurposeRepository CrmStatementOfPurposes => _statementOfPurposeRepository.Value;
   public ICrmAdditionalInfoRepository CrmAdditionalInfoes => _additionalInfoRepository.Value;
+  public ICrmAdditionalDocumentRepository CrmAdditionalDocuments => _additionalDocumentRepository.Value;
 
   // New repository properties
   public ICrmIntakeMonthRepository CrmIntakeMonths => _crmIntakeMonthRepository.Value;

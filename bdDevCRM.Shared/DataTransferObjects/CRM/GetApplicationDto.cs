@@ -72,6 +72,7 @@ public class GetApplicationDto
   public string? EmailAddress { get; set; }
   public string? SkypeId { get; set; }
   public string? ApplicantImagePath { get; set; }
+  public IFormFile? ApplicantImageFile { get; set; }
 
   public DateTime ApplicantCreatedDate { get; set; }
   public int ApplicantCreatedBy { get; set; }
@@ -114,20 +115,7 @@ public class GetApplicationDto
   // ================================
   // EducationHistoryDto
   // ================================
-  public int EducationHistoryId { get; set; }
-  public int Education_ApplicantId { get; set; }
-  public string? EducationInstitution { get; set; }
-  public string? Qualification { get; set; }
-  public int? PassingYear { get; set; }
-  public string? Grade { get; set; }
-  public string? EducationDocumentName { get; set; }
-  public string? AttachedDocument { get; set; }
-  public string? PdfThumbnail { get; set; }
-
-  public DateTime EducationCreatedDate { get; set; }
-  public int EducationCreatedBy { get; set; }
-  public DateTime? EducationUpdatedDate { get; set; }
-  public int? EducationUpdatedBy { get; set; }
+  public IEnumerable<EducationHistoryDto>? EducationHistories { get; set; }
 
   // ================================
   // IELTSInformationDto
@@ -141,8 +129,8 @@ public class GetApplicationDto
   public string? IELTSOverallScore { get; set; }
   public DateTime? IELTSDate { get; set; }
   public string? IELTSScannedCopyPath { get; set; }
+  public string? IELTSScannedCopyFileName { get; set; }
   public string? IELTSAdditionalInformation { get; set; }
-
   public DateTime IELTS_CreatedDate { get; set; }
   public int IELTS_CreatedBy { get; set; }
   public DateTime? IELTS_UpdatedDate { get; set; }
@@ -160,6 +148,7 @@ public class GetApplicationDto
   public string? TOEFLOverallScore { get; set; }
   public DateTime? TOEFLDate { get; set; }
   public string? TOEFLScannedCopyPath { get; set; }
+  public string? TOEFLScannedCopyFileName { get; set; }
   public string? TOEFLAdditionalInformation { get; set; }
 
   public DateTime TOEFL_CreatedDate { get; set; }
@@ -179,6 +168,7 @@ public class GetApplicationDto
   public string? PTEOverallScore { get; set; }
   public DateTime? PTEDate { get; set; }
   public string? PTEScannedCopyPath { get; set; }
+  public string? PTEScannedCopyFileName { get; set; }
   public string? PTEAdditionalInformation { get; set; }
 
   public DateTime PTE_CreatedDate { get; set; }
@@ -198,6 +188,7 @@ public class GetApplicationDto
   public string? GMATOverallScore { get; set; }
   public DateTime? GMATDate { get; set; }
   public string? GMATScannedCopyPath { get; set; }
+  public string? GMATScannedCopyFileName { get; set; }
   public string? GMATAdditionalInformation { get; set; }
 
   public DateTime GMAT_CreatedDate { get; set; }
@@ -212,6 +203,7 @@ public class GetApplicationDto
   public int OTHERS_ApplicantId { get; set; }
   public string? OTHERSAdditionalInformation { get; set; }
   public string? OTHERSScannedCopyPath { get; set; }
+  public string? OTHERSScannedCopyFileName { get; set; }
 
   public DateTime OTHERS_CreatedDate { get; set; }
   public int OTHERS_CreatedBy { get; set; }
@@ -221,45 +213,12 @@ public class GetApplicationDto
   // ================================
   // WorkExperienceHistoryDto
   // ================================
-  public int WorkExperienceId { get; set; }
-  public int Work_ApplicantId { get; set; }
-  public string? NameOfEmployer { get; set; }
-  public string? Position { get; set; }
-  public DateTime? StartDate { get; set; }
-  public DateTime? EndDate { get; set; }
-  public string? Period { get; set; }
-  public string? MainResponsibility { get; set; }
-  public string? WorkDocumentName { get; set; }
-  public string? FileThumbnail { get; set; }
-  public string? ScannedCopyPath { get; set; }
-  public string? DocumentName { get; set; }
-
-
-  public DateTime WorkCreatedDate { get; set; }
-  public int WorkCreatedBy { get; set; }
-  public DateTime? WorkUpdatedDate { get; set; }
-  public int? WorkUpdatedBy { get; set; }
+  public IEnumerable<WorkExperienceHistoryDto>? WorkExperienceHistories { get; set; }
 
   // ================================
   // ApplicantReferenceDto
   // ================================
-  public int ApplicantReferenceId { get; set; }
-  public int Ref_ApplicantId { get; set; }
-  public string? ReferenceName { get; set; } = null!;
-  public string? Designation { get; set; }
-  public string? Institution { get; set; }
-  public string? EmailID { get; set; }
-  public string? PhoneNo { get; set; }
-  public string? FaxNo { get; set; }
-  public string? RefAddress { get; set; }
-  public string? RefCity { get; set; }
-  public string? RefState { get; set; }
-  public string? RefCountry { get; set; }
-  public string? PostOrZipCode { get; set; }
-  public DateTime RefCreatedDate { get; set; }
-  public int RefCreatedBy { get; set; }
-  public DateTime? RefUpdatedDate { get; set; }
-  public int? RefUpdatedBy { get; set; }
+  public IEnumerable<ApplicantReferenceDto>? ApplicantReferences { get; set; }
 
   // ================================
   // StatementOfPurposeDto
@@ -268,8 +227,8 @@ public class GetApplicationDto
   public int SOP_ApplicantId { get; set; }
   public string? StatementOfPurposeRemarks { get; set; }
   public string? StatementOfPurposeFilePath { get; set; }
-  public DateTime SOP_CreatedDate { get; set; }
-  public int SOP_CreatedBy { get; set; }
+  public DateTime? SOP_CreatedDate { get; set; }
+  public int? SOP_CreatedBy { get; set; }
   public DateTime? SOP_UpdatedDate { get; set; }
   public int? SOP_UpdatedBy { get; set; }
 
@@ -283,21 +242,14 @@ public class GetApplicationDto
   public string? HealthNMedicalNeedsRemarks { get; set; }
   public string? AdditionalInformationRemarks { get; set; }
 
-
+  public DateTime? AddInfo_CreateDate { get; set; }
+  public int? AddInfo_CreatedBy { get; set; }
+  public DateTime? AddInfo_UpdatedDate { get; set; }
+  public int? AddInfo_UpdatedBy { get; set; }
   // ================================
   // AdditionalInfoDto
   // ================================
-  public int AdditionalDocumentId { get; set; }
-  public string? AddDoc_ApplicantId { get; set; }
-  public string? AddInfoUploadFile { get; set; }
-  public string? AddInfoDocumentName { get; set; }
-  public string? AddInfoFileThumbnail { get; set; }
-  public string? AddInfoRecordType { get; set; }
-  public DateTime AddInfoCreatedDate { get; set; }
-  public int AddInfoCreatedBy { get; set; }
-  public DateTime? AddInfoUpdatedDate { get; set; }
-  public int? AddInfoUpdatedBy { get; set; }
-  public string? RecordType { get; set; }
+  public IEnumerable<AdditionalDocumentDto>? AdditionalDocuments { get; set; }
 
 }
 

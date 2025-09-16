@@ -29,7 +29,7 @@ order by FullName";
     string employmentQuery = string.Format(@"SELECT EMPLOYEETYPE.IsContract, EMPLOYEETYPE.IsProbationary, Employment.HRRecordId
 , EmployeeId, EmployeeType, DESIGNATIONID, StartDate, EmploymentDate, CompanyId, DepartmentId, ReportTo, TelephoneExtension
 , OfficialEmail, EmergencyContactName, EmergencyContactNo, PossibleConfirmationDate, Duties, AttendanceCardNo, UserId
-, Employment.LastUpdateDate, BankBranchId, BankAccountNo, BRANCHID, GPFNO, JobEndDate, JOININGPOST, EXPERIENCE, REPORTDEPID
+, Employment.LastUpdatedDate, BankBranchId, BankAccountNo, BRANCHID, GPFNO, JobEndDate, JOININGPOST, EXPERIENCE, REPORTDEPID
 , Func_Id, ContractEndDate, JobEndTypeId, GradeId, TinNumber, PostingType, IsOTEligible, DivisionId,FacilityId, SectionId
 , Approver, ApproverDepartmentId, SalaryLocation 
 FROM Employment 

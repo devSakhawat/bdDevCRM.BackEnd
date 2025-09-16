@@ -55,6 +55,7 @@ public interface IServiceManager
   ICrmApplicantReferenceService ApplicantReferences { get; }
   ICrmStatementOfPurposeService StatementOfPurposes { get; }
   ICrmAdditionalInfoService AdditionalInfos { get; }
+  ICrmAdditionalDocumentService AdditionalDocuments { get; }
   
   // New CRM services
   ICrmIntakeMonthService CrmIntakeMonths { get; }

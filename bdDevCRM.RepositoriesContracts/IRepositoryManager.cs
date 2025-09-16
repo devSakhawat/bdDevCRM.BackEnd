@@ -61,6 +61,7 @@ public interface IRepositoryManager : IDisposable
   ICrmApplicantReferenceRepository CrmApplicantReferences { get; }
   ICrmStatementOfPurposeRepository CrmStatementOfPurposes { get; }
   ICrmAdditionalInfoRepository CrmAdditionalInfoes { get; }
+  ICrmAdditionalDocumentRepository CrmAdditionalDocuments { get; }
   // New CRM repositories
   ICrmIntakeMonthRepository CrmIntakeMonths { get; }
   ICrmIntakeYearRepository CrmIntakeYears { get; }

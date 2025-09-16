@@ -26,7 +26,7 @@ public class EmploymentDto
   public string Duties { get; set; }
   public string AttendanceCardNo { get; set; }
   public int UserId { get; set; }
-  public DateTime LastUpdateDate { get; set; }
+  public DateTime LastUpdatedDate { get; set; }
   public int BankBranchId { get; set; }
   public string BankAccountNo { get; set; }
   public int BranchId { get; set; }
