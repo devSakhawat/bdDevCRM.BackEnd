@@ -123,10 +123,10 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       LEFT JOIN CrmPermanentAddress perAddress ON perAddress.ApplicantId = ai.ApplicantId
       LEFT JOIN CrmCountry perCountry ON perCountry.CountryId = perAddress.CountryId    
 
-      LEFT JOIN CrmIELTSInformation ieltsInfo ON ca.ApplicationId = ieltsInfo.ApplicantId
-      LEFT JOIN CrmTOEFLInformation toeflInfo ON ca.ApplicationId = toeflInfo.ApplicantId
-      LEFT JOIN CrmPTEInformation pteInfo ON ca.ApplicationId = pteInfo.ApplicantId
-      LEFT JOIN CrmOTHERSInformation othersInfo ON ca.ApplicationId = othersInfo.ApplicantId
+      LEFT JOIN CrmIELTSInformation ieltsInfo ON ai.ApplicantId = ieltsInfo.ApplicantId
+      LEFT JOIN CrmTOEFLInformation toeflInfo ON ai.ApplicantId = toeflInfo.ApplicantId
+      LEFT JOIN CrmPTEInformation pteInfo ON ai.ApplicantId = pteInfo.ApplicantId
+      LEFT JOIN CrmOTHERSInformation othersInfo ON ai.ApplicantId = othersInfo.ApplicantId
       LEFT JOIN CrmStatementOfPurpose sp ON sp.ApplicantId = ai.ApplicantId
       LEFT JOIN CrmAdditionalInfo  ON CrmAdditionalInfo.ApplicantId = ai.ApplicantId
     
@@ -1339,7 +1339,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       // OTHERS Information
       if (dto.EducationInformation.OTHERSInformation != null)
       {
-        if (dto.EducationInformation.OTHERSInformation.OTHERSScannedCopyFile != null || dto.EducationInformation.OTHERSInformation.OTHERSAdditionalInformation != null)
+        if (dto.EducationInformation.OTHERSInformation.OTHERSScannedCopyFile != null || dto.EducationInformation.OTHERSInformation.AdditionalInformation != null)
           dto.EducationInformation.OTHERSInformation.ApplicantId = applicantId;
         else
           dto.EducationInformation.OTHERSInformation = null;

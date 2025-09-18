@@ -13,7 +13,7 @@ public class OTHERSInformationDto
 
   public int ApplicantId { get; set; }
 
-  public string? OTHERSAdditionalInformation { get; set; }
+  public string? AdditionalInformation { get; set; }
 
   public IFormFile? OTHERSScannedCopyFile { get; set; }
   public string? OTHERSScannedCopyFileName { get; set; }

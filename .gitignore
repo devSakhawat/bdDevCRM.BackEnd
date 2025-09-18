@@ -9,12 +9,13 @@
 # Universal bin and obj folders for all projects
 **/bin/
 **/obj/
-
+**/wwwroot/
 # Case-insensitive variants
 [Bb]in/
 [Oo]bj/
 [Dd]ebug/
 [Rr]elease/
+bdDevCRM.Api/wwwroot/
 
 # Specific project build outputs
 bdDevCRM.Api/bin/
