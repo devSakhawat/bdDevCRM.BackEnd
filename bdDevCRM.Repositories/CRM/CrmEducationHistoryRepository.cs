@@ -42,11 +42,11 @@ public sealed class CrmEducationHistoryRepository : RepositoryBase<CrmEducationH
       ,[UpdatedBy]
   FROM [dbDevCRM].[dbo].[CrmEducationHistory]
   OUTER APPLY(
-        Select top 1 * 
-        From DmsDocument doc
-        where ReferenceEntityType = 'EducationHistory'
-        and doc.ReferenceEntityId = CrmEducationHistory.ApplicantId
-        Order by doc.UploadDate desc
+      SELECT TOP 1 *
+      FROM DmsDocument d
+      WHERE d.CurrentEntityId = CrmEducationHistory.EducationHistoryId
+        AND d.ReferenceEntityId = CrmEducationHistory.ApplicantId
+      ORDER BY d.UploadDate DESC
     ) doc
 WHERE ApplicantId = @ApplicantId", applicantId);
 

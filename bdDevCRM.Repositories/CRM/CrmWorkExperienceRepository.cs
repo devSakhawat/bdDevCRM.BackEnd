@@ -42,11 +42,11 @@ public sealed class CrmWorkExperienceRepository : RepositoryBase<CrmWorkExperien
       ,[UpdatedBy]
   FROM [dbDevCRM].[dbo].[CrmWorkExperience]
    OUTER APPLY(
-        Select top 1 * 
-        From DmsDocument doc
-        where ReferenceEntityType = 'WorkExperience'
-        and doc.ReferenceEntityId = CrmWorkExperience.ApplicantId
-        Order by doc.UploadDate desc
+        SELECT TOP 1 *
+        FROM DmsDocument d
+        WHERE d.CurrentEntityId = CrmWorkExperience.WorkExperienceId 
+          AND d.ReferenceEntityId = CrmWorkExperience.ApplicantId
+        ORDER BY d.UploadDate DESC
     ) doc
 WHERE ApplicantId = @ApplicantId", applicantId);
 

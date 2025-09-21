@@ -65,6 +65,10 @@ public class CrmApplicationDto
       AdditionalInformation = new AdditionalInfoDto(),
       AdditionalDocuments = new AdditionalDocumentsDto { Documents = new List<AdditionalDocumentDto>() }
     };
+
+    // Pre-initialize list properties to avoid null errors
+    AdditionalInformation.ReferenceDetails.References = new List<ApplicantReferenceDto>();
+    AdditionalInformation.AdditionalDocuments.Documents = new List<AdditionalDocumentDto>();
   }
 
 }
