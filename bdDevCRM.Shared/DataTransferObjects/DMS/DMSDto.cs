@@ -88,6 +88,9 @@ public class DMSDto
   // Version Control Properties
   public int? ExistingDocumentId { get; set; }
   public string UpdateReason { get; set; }
+
+  // every record own Id
+  public int? CurrentEntityId { get; set; }
 }
 
 public class Document_SystemLog

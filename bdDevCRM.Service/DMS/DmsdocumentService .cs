@@ -240,7 +240,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
   // 01. create document version with duplicate check
   private async Task<DmsDocumentType> CreateOrGetDocumentType(DMSDto dmsDto)
   {
-    var documentType = await _repository.DmsDocumentTypes.FirstOrDefaultAsync(dt => dt.Name.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim());
+    var documentType = await _repository.DmsDocumentTypes.FirstOrDefaultAsync(dt => dt.Name.ToLower().Trim() == dmsDto.DocumentTypeName.ToLower().Trim());
 
     if (documentType == null)
     {
@@ -344,11 +344,19 @@ internal sealed class DmsDocumentService : IDmsDocumentService
   // generate document with all information
   private async Task<DmsDocument> CreateDocument(DMSDto dmsDto, DmsDocumentType documentType, DmsDocumentFolder folder, FileInfoDto fileInfo)
   {
+    //var document = await _repository.DmsDocuments.FirstOrDefaultAsync(d =>
+    //    d.ReferenceEntityId == dmsDto.ReferenceEntityId &&
+    //    d.CurrentEntityId = dmsDto.CurrentEntityId &&
+    //    d.FolderId == folder.FolderId &&
+    //    d.FilePath == fileInfo.RelativePath &&
+    //    d.SystemTag.ToLower().Trim() == dmsDto.SystemTags.ToLower().Trim()
+    //    );
     var document = await _repository.DmsDocuments.FirstOrDefaultAsync(d =>
-        d.ReferenceEntityId == dmsDto.ReferenceEntityId &&
-        d.FolderId == folder.FolderId &&
-        d.FilePath == fileInfo.RelativePath &&
-        d.SystemTag.ToLower().Trim() == dmsDto.SystemTags.ToLower().Trim()
+        d.ReferenceEntityId == dmsDto.ReferenceEntityId 
+        && d.CurrentEntityId == dmsDto.CurrentEntityId
+        && d.FolderId == folder.FolderId 
+        && d.FilePath == fileInfo.RelativePath 
+        && d.SystemTag.ToLower().Trim() == dmsDto.SystemTags.ToLower().Trim()
         );
 
     if (document == null)
@@ -366,6 +374,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
         DocumentTypeId = documentType.DocumentTypeId,
         ReferenceEntityType = dmsDto.ReferenceEntityType,
         ReferenceEntityId = dmsDto.ReferenceEntityId,
+        CurrentEntityId = dmsDto.CurrentEntityId,
         FolderId = folder.FolderId,
         SystemTag = dmsDto.SystemTags ?? string.Empty
       };
