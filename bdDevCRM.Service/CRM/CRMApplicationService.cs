@@ -1144,33 +1144,47 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
         }
 
         // Save Applicant Reference
+        // ====================== MODIFIED REFERENCE SECTION (DIFF + DELETE) ======================
         if (updateDto.AdditionalInformation?.ReferenceDetails?.References != null && updateDto.AdditionalInformation.ReferenceDetails.References.Any())
         {
-          foreach (var referenceDto in updateDto.AdditionalInformation.ReferenceDetails.References)
+          var incomingRefs = updateDto.AdditionalInformation.ReferenceDetails.References;
+          var existingRefs = (await _repository.CrmApplicantReferences.GetApplicantReferencesByApplicantIdAsync(applicantInfoDto.ApplicantId, false)).ToList();
+
+          var toDelete = existingRefs.Where(dbRef => !incomingRefs.Any(ir => ir.ApplicantReferenceId == dbRef.ApplicantReferenceId)).ToList();
+
+          foreach (var del in toDelete)
           {
-            bool referenceExists = await _repository.CrmApplicantReferences.ExistsAsync(x => x.ApplicantId == referenceDto.ApplicantId && x.ApplicantReferenceId == referenceDto.ApplicantReferenceId);
+            _repository.CrmApplicantReferences.Delete(del);
+          }
+          if (toDelete.Any()) await _repository.SaveAsync();
+
+          // Create / Update
+          foreach (var referenceDto in incomingRefs)
+          {
+            bool referenceExists = referenceDto.ApplicantReferenceId > 0 && existingRefs.Any(r => r.ApplicantReferenceId == referenceDto.ApplicantReferenceId);
 
             if (!referenceExists)
             {
               referenceDto.CreatedDate = DateTime.UtcNow;
               referenceDto.CreatedBy = currentUser.UserId ?? 0;
-
               var referenceEntity = MyMapper.JsonClone<ApplicantReferenceDto, CrmApplicantReference>(referenceDto);
               referenceDto.ApplicantReferenceId = await _repository.CrmApplicantReferences.CreateAndGetIdAsync(referenceEntity);
             }
             else
             {
-              var referenceDB = await _repository.CrmApplicantReferences.FirstOrDefaultAsync(x => x.ApplicantId == referenceDto.ApplicantId && x.ApplicantReferenceId == referenceDto.ApplicantReferenceId);
+              var referenceDB = existingRefs.First(r => r.ApplicantReferenceId == referenceDto.ApplicantReferenceId);
               referenceDto.CreatedDate = DateTimeFormatters.IsValidDateTime(referenceDB.CreatedDate) ? referenceDB.CreatedDate : DateTime.UtcNow;
               referenceDto.CreatedBy = (referenceDB.CreatedBy > 0) ? referenceDB.CreatedBy : (currentUser.UserId ?? 0);
-
               referenceDto.UpdatedDate = DateTime.UtcNow;
               referenceDto.UpdatedBy = currentUser.UserId ?? 0;
               referenceDB = MyMapper.JsonClone<ApplicantReferenceDto, CrmApplicantReference>(referenceDto);
               _repository.CrmApplicantReferences.UpdateByState(referenceDB);
-              await _repository.SaveAsync();
             }
           }
+
+          await _repository.SaveAsync();
+
+          
         }
 
 

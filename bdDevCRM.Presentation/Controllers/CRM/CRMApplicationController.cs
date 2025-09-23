@@ -477,7 +477,8 @@ public class CRMApplicationController : BaseApiController
         Title = $"{dto.CourseInformation.PersonalDetails.FirstName} {dto.CourseInformation.PersonalDetails.LastName} {DateTime.Now:yyyyMMdd:FFFFF}",
         Description = $"Applicant image for {dto.CourseInformation.PersonalDetails.FirstName} {dto.CourseInformation.PersonalDetails.LastName}",
         ReferenceEntityType = "ApplicantInfo", // Entity name
-        ReferenceEntityId = applicantId.ToString(),
+        ReferenceEntityId = applicantId.ToString(), // applicant id (in crm module it is applicant id, hr module it is hr id)
+        CurrentEntityId = dto.CourseInformation?.PersonalDetails.ApplicantId,
         UploadedByUserId = currentUser.UserId.ToString(),
         SystemTags = "ApplicantImagePath", // DTO field name
 
@@ -534,7 +535,8 @@ public class CRMApplicationController : BaseApiController
             Title = $"EducationDocument_{educationRecord.Institution}_{DateTime.Now:yyyyMMdd:FFFFF}",
             Description = $"Education document for {educationRecord.Institution} - {educationRecord.Qualification} - {educationRecord.PassingYear}",
             ReferenceEntityType = "EducationHistory", // Entity name
-            ReferenceEntityId = applicantId.ToString(),
+            ReferenceEntityId = applicantId.ToString(), // applicant id
+            CurrentEntityId = educationRecord.EducationHistoryId,
             UploadedByUserId = currentUser.UserId.ToString(),
             SystemTags = "AttachedDocument", // File path property name
 
@@ -584,7 +586,8 @@ public class CRMApplicationController : BaseApiController
           "IELTS",
           dto.EducationInformation.IELTSInformation.IELTSScannedCopyFile,
           applicantId,
-          currentUser
+          currentUser,
+          dto.EducationInformation.IELTSInformation.IELTSInformationId
       );
     }
 
@@ -597,7 +600,8 @@ public class CRMApplicationController : BaseApiController
           "TOEFL",
           dto.EducationInformation.TOEFLInformation.TOEFLScannedCopyFile,
           applicantId,
-          currentUser
+          currentUser,
+          dto.EducationInformation.TOEFLInformation.TOEFLInformationId
       );
     }
 
@@ -610,7 +614,8 @@ public class CRMApplicationController : BaseApiController
           "PTE",
           dto.EducationInformation.PTEInformation.PTEScannedCopyFile,
           applicantId,
-          currentUser
+          currentUser,
+          dto.EducationInformation.PTEInformation.PTEInformationId
       );
     }
 
@@ -623,7 +628,8 @@ public class CRMApplicationController : BaseApiController
           "GMAT",
           dto.EducationInformation.GMATInformation.GMATScannedCopyFile,
           applicantId,
-          currentUser
+          currentUser,
+          dto.EducationInformation.GMATInformation.GMATInformationId
       );
     }
 
@@ -636,7 +642,8 @@ public class CRMApplicationController : BaseApiController
           "OTHERS",
           dto.EducationInformation.OTHERSInformation.OTHERSScannedCopyFile,
           applicantId,
-          currentUser
+          currentUser,
+          dto.EducationInformation.OTHERSInformation.OthersInformationId
       );
     }
 
@@ -661,7 +668,8 @@ public class CRMApplicationController : BaseApiController
             Title = $"WorkExperience_{workExpRecord.NameOfEmployer}_{DateTime.Now:yyyyMMdd:FFFFF}",
             Description = $"Work experience document for {workExpRecord.NameOfEmployer} - {workExpRecord.Position}",
             ReferenceEntityType = "WorkExperience", // Entity name
-            ReferenceEntityId = applicantId.ToString(),
+            ReferenceEntityId = applicantId.ToString(), // ApplicationID
+            CurrentEntityId = workExpRecord.WorkExperienceId,
             UploadedByUserId = currentUser.UserId.ToString(),
             SystemTags = "ScannedCopyPath", // DTO field name
 
@@ -715,7 +723,8 @@ public class CRMApplicationController : BaseApiController
         Title = $"StatementOfPurpose_{DateTime.Now:yyyyMMdd:FFFFF}",
         Description = $"Statement of Purpose for application {applicantId}",
         ReferenceEntityType = "StatementOfPurpose", // Entity name
-        ReferenceEntityId = applicantId.ToString(),
+        ReferenceEntityId = applicantId.ToString(), // ApplicationID
+        CurrentEntityId = dto.AdditionalInformation?.StatementOfPurpose?.StatementOfPurposeId,
         UploadedByUserId = currentUser.UserId.ToString(),
         SystemTags = "StatementOfPurposeFile", // DTO field name
 
@@ -768,8 +777,9 @@ public class CRMApplicationController : BaseApiController
             // Document properties
             Title = $"AdditionalDocument_{additionalDoc.DocumentTitle}_{DateTime.Now:yyyyMMdd:FFFFF}",
             Description = $"Additional document: {additionalDoc.DocumentTitle} for application {applicantId}",
-            ReferenceEntityType = "AdditionalDocument", // Entity name - mapped to AdditionalDocument entity
-            ReferenceEntityId = applicantId.ToString(),
+            ReferenceEntityType = "AdditionalDocument", // Entity name - mapped to AdditionalDocument entity 
+            ReferenceEntityId = applicantId.ToString(), // ApplicationID
+            CurrentEntityId = additionalDoc.AdditionalDocumentId,
             UploadedByUserId = currentUser.UserId.ToString(),
             SystemTags = "UploadFileFormFile", // DTO field name
 
@@ -809,7 +819,7 @@ public class CRMApplicationController : BaseApiController
   /* ========================================
      HELPER METHOD FOR LANGUAGE TEST DOCUMENTS
   ======================================== */
-  private async Task<string> SaveLanguageTestDocumentAsync(string entityName, string fieldName, string testType, IFormFile file, int applicationId, UsersDto currentUser)
+  private async Task<string> SaveLanguageTestDocumentAsync(string entityName, string fieldName, string testType, IFormFile file, int applicationId, UsersDto currentUser ,int currentEntityId)
   {
     var languageTestDMSDto = new DMSDto
     {
@@ -824,7 +834,8 @@ public class CRMApplicationController : BaseApiController
       Title = $"{testType}TestResult_{DateTime.Now:yyyyMMdd:FFFFF}",
       Description = $"{testType} test result for application {applicationId}",
       ReferenceEntityType = entityName, // Entity name (e.g., "IELTSInformation")
-      ReferenceEntityId = applicationId.ToString(),
+      ReferenceEntityId = applicationId.ToString(), // ApplicationID
+      CurrentEntityId = currentEntityId, // ownentitiy id
       UploadedByUserId = currentUser.UserId.ToString(),
       SystemTags = fieldName, // DTO field name (e.g., "IELTSScannedCopyFile")
 
