@@ -734,7 +734,20 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           var additionalInfoEntity = MyMapper.JsonClone<AdditionalInfoDto, CrmAdditionalInfo>(additionalInfoDto);
           additionalInfoEntity.AdditionalInfoId = 0;
           var additionalInfoEntityId = await _repository.CrmAdditionalInfoes.CreateAndGetIdAsync(additionalInfoEntity);
-          //await _repository.AdditionalInfo.CreateAsync(additionalInfoEntity);
+        }
+
+        // Save Additional Documents
+        if (dto.EducationInformation?.WorkExperience?.WorkExperienceHistory != null && dto.EducationInformation.WorkExperience.WorkExperienceHistory.Any())
+        {
+          foreach (var workExpDto in dto.EducationInformation.WorkExperience.WorkExperienceHistory)
+          {
+            workExpDto.CreatedDate = DateTime.UtcNow;
+            workExpDto.CreatedBy = currentUser.UserId ?? 0;
+
+            var workExpEntity = MyMapper.JsonClone<WorkExperienceHistoryDto, CrmWorkExperience>(workExpDto);
+            var workExpEntityId = await _repository.CrmWorkExperiences.CreateAndGetIdAsync(workExpEntity);
+            //await _repository.WorkExperience.CreateAsync(workExpEntity);
+          }
         }
       }
 

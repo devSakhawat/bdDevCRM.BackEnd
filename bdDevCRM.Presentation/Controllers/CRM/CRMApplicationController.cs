@@ -807,7 +807,7 @@ public class CRMApplicationController : BaseApiController
 
           if (!string.IsNullOrEmpty(additionalDocPath))
           {
-            additionalDoc.UploadFile = additionalDocPath;
+            additionalDoc.DocumentPath = additionalDocPath;
           }
         }
       }
