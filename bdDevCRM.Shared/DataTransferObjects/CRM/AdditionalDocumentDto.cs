@@ -10,9 +10,11 @@ public class AdditionalDocumentDto
   public string? DocumentTitle { get; set; }
   public string? DocumentName { get; set; }
   public string? RecordType { get; set; } = "Document";
-  public string? AttachedDocument { get; set; }
+  public string DocumentPath { get; set; } = null!;
 
-  public string? UploadFile { get; set; }
+  //public string? AttachedDocument { get; set; }
+  //public string? UploadFile { get; set; }
+
   public IFormFile? UploadFormFile { get; set; }
 
   public string? FileThumbnail { get; set; }
