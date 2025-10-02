@@ -128,11 +128,11 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       LEFT JOIN CrmPTEInformation pteInfo ON ai.ApplicantId = pteInfo.ApplicantId
       LEFT JOIN CrmOTHERSInformation othersInfo ON ai.ApplicantId = othersInfo.ApplicantId
       LEFT JOIN CrmStatementOfPurpose sp ON sp.ApplicantId = ai.ApplicantId
-      LEFT JOIN CrmAdditionalInfo  ON CrmAdditionalInfo.ApplicantId = ai.ApplicantId
     
       --LEFT JOIN CrmEducationHistory edu ON ai.ApplicantId = edu.ApplicantId      
       --LEFT JOIN CrmWorkExperience workEx ON ca.ApplicationId = workEx.ApplicantId
       --LEFT JOIN CrmApplicantReference ar  ON ar.ApplicantId = ai.ApplicantId
+      --LEFT JOIN CrmAdditionalInfo  ON CrmAdditionalInfo.ApplicantId = ai.ApplicantId
 
       OUTER APPLY (
           SELECT TOP 1 d.FilePath
@@ -144,6 +144,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
 
   ");
       string orderBy = " ApplicationId asc ";
+
       var gridResult = await _repository.CrmApplications.GridData<CrmApplicationGridDto>(sql, options, orderBy, condition);
       return gridResult;
     }
@@ -154,7 +155,6 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     }
   }
 
-  //public async Task<CrmApplicationDto> GetApplication(int applicationId, bool trackChanges)
   public async Task<GetApplicationDto> GetApplication(int applicationId, bool trackChanges)
   {
     var query = string.Format(@" 
@@ -357,25 +357,26 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
       ISNULL(sop.ApplicantId, 0) AS SOP_ApplicantId,
       sop.StatementOfPurposeRemarks,
       docs.StatementOfPurposeFilePath,
-      sop.CreatedDate AS SOP_CreatedDate,
-      sop.CreatedBy AS SOP_CreatedBy,
-      sop.UpdatedDate AS SOP_UpdatedDate,
-      sop.UpdatedBy AS SOP_UpdatedBy,
+		  docs.StatementOfPurposeFileName,
+      --sop.CreatedDate AS SOP_CreatedDate,
+      --sop.CreatedBy AS SOP_CreatedBy,
+      --sop.UpdatedDate AS SOP_UpdatedDate,
+      --sop.UpdatedBy AS SOP_UpdatedBy
 
       -- ================================
       -- AdditionalInfoDto
       -- ================================
-      ISNULL(addInfo.AdditionalInfoId, 0) AS AdditionalInfoId,
+      addInfo.AdditionalInfoId,
       ISNULL(addInfo.ApplicantId, 0) AS AddInfo_ApplicantId,
       addInfo.RequireAccommodation,
       addInfo.HealthNMedicalNeeds,
       addInfo.HealthNMedicalNeedsRemarks,
-      addInfo.AdditionalInformationRemarks,
+      addInfo.AdditionalInformationRemarks
   
-      addInfo.UpdatedDate AS AddInfo_CreatedDate,
-      ISNULL(addInfo.CreatedBy, 0) AS AddInfo_CreatedBy,
-      addInfo.UpdatedDate AS AddInfo_UpdatedDate,
-      addInfo.UpdatedBy AS AddInfo_UpdatedBy
+      --,addInfo.UpdatedDate AS AddInfo_CreatedDate,
+      --ISNULL(addInfo.CreatedBy, 0) AS AddInfo_CreatedBy,
+      --addInfo.UpdatedDate AS AddInfo_UpdatedDate,
+      --addInfo.UpdatedBy AS AddInfo_UpdatedBy
 
     FROM CrmApplication ca
     INNER JOIN CrmApplicantInfo ai ON ca.ApplicationId = ai.ApplicationId
@@ -392,9 +393,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     LEFT JOIN CrmPTEInformation pte ON ai.ApplicantId = pte.ApplicantId
     LEFT JOIN CrmGMATInformation gmat ON ai.ApplicantId = gmat.ApplicantId
     LEFT JOIN CrmOTHERSInformation others ON ai.ApplicantId = others.ApplicantId
-    -- Saved using ApplicationId as ApplicantId (per Create flow)
-    LEFT JOIN CrmStatementOfPurpose sop ON ca.ApplicationId = sop.ApplicantId
-    LEFT JOIN CrmAdditionalInfo addInfo ON ca.ApplicationId = addInfo.ApplicantId
+    LEFT JOIN CrmStatementOfPurpose sop ON ai.ApplicantId = sop.ApplicantId
+    LEFT JOIN CrmAdditionalInfo addInfo ON ai.ApplicantId = addInfo.ApplicantId
 
     -- SINGLE OUTER APPLY for all DMS files (including FileName)
     OUTER APPLY (
@@ -491,7 +491,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     #endregion Comment_Code
 
     #region Educational_History_Start
-    var educationHistories = await _repository.CrmEducationHistories.EducationHistoryByApplicantId( result.ApplicantId );
+    var educationHistories = await _repository.CrmEducationHistories.EducationHistoryByApplicantId(result.ApplicantId);
 
     if (educationHistories != null && educationHistories.Any())
     {
@@ -509,7 +509,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     #endregion Work_Experience_End
 
     #region References_Start
-    var references = await _repository.CrmApplicantReferences.ListByConditionAsync(expression: x=> x.ApplicantId == result.ApplicantId,orderBy: x => x.ApplicantReferenceId, trackChanges: false );
+    var references = await _repository.CrmApplicantReferences.ListByConditionAsync(expression: x => x.ApplicantId == result.ApplicantId, orderBy: x => x.ApplicantReferenceId, trackChanges: false);
 
     if (references != null && references.Any())
     {
@@ -1157,7 +1157,6 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
         }
 
         // Save Applicant Reference
-        // ====================== MODIFIED REFERENCE SECTION (DIFF + DELETE) ======================
         if (updateDto.AdditionalInformation?.ReferenceDetails?.References != null && updateDto.AdditionalInformation.ReferenceDetails.References.Any())
         {
           var incomingRefs = updateDto.AdditionalInformation.ReferenceDetails.References;
@@ -1197,9 +1196,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
 
           await _repository.SaveAsync();
 
-          
-        }
 
+        }
 
         // Save Statement of Purpose
         if (updateDto.AdditionalInformation?.StatementOfPurpose != null)
@@ -1235,7 +1233,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           var additionalInfoDto = updateDto.AdditionalInformation.AdditionalInformation;
           bool additionalInfoExists = await _repository.CrmAdditionalInfoes.ExistsAsync(x => x.ApplicantId == additionalInfoDto.ApplicantId && x.AdditionalInfoId == additionalInfoDto.AdditionalInfoId);
 
-          if (!additionalInfoExists)
+          if (additionalInfoExists == false)
           {
             additionalInfoDto.CreatedDate = DateTime.UtcNow;
             additionalInfoDto.CreatedBy = currentUser.UserId ?? 0;
@@ -1245,7 +1243,8 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
           }
           else
           {
-            var additionalInfoDB = await _repository.CrmAdditionalInfoes.FirstOrDefaultAsync(x => x.ApplicantId == additionalInfoDto.ApplicantId && x.AdditionalInfoId == additionalInfoDto.AdditionalInfoId);
+            //var additionalInfoDB = await _repository.CrmAdditionalInfoes.FirstOrDefaultAsync(x => x.ApplicantId == additionalInfoDto.ApplicantId && x.AdditionalInfoId == additionalInfoDto.AdditionalInfoId);
+            var additionalInfoDB = await _repository.CrmAdditionalInfoes.FirstOrDefaultAsync(x => x.ApplicantId == additionalInfoDto.ApplicantId);
             additionalInfoDto.CreatedDate = DateTimeFormatters.IsValidDateTime(additionalInfoDB.CreatedDate) ? additionalInfoDB.CreatedDate : DateTime.UtcNow;
             additionalInfoDto.CreatedBy = (additionalInfoDB.CreatedBy > 0) ? additionalInfoDB.CreatedBy : (currentUser.UserId ?? 0);
 
@@ -1256,8 +1255,60 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
             await _repository.SaveAsync();
           }
         }
-      }
 
+        // Save Additional Documents
+        if (updateDto.AdditionalInformation?.AdditionalDocuments?.Documents != null && updateDto.AdditionalInformation.AdditionalDocuments.Documents.Any())
+        {
+          var incomingDocs = updateDto.AdditionalInformation.AdditionalDocuments.Documents;
+          int docsApplicantId = incomingDocs.FirstOrDefault()?.ApplicantId ?? applicantInfoDto.ApplicantId;
+
+          // Option A: use ListByConditionAsync with a proper expression
+          var existingDocs = (await _repository.CrmAdditionalDocuments.ListByConditionAsync(
+                                  expression: x => x.ApplicantId == docsApplicantId,
+                                  orderBy: x => x.AdditionalDocumentId,
+                                  trackChanges: false)).ToList();
+
+          // Delete missing ones
+          var toDelete = existingDocs
+            .Where(dbDoc => !incomingDocs.Any(inDoc => inDoc.AdditionalDocumentId == dbDoc.AdditionalDocumentId))
+            .ToList();
+
+          foreach (var del in toDelete)
+          {
+            _repository.CrmAdditionalDocuments.Delete(del);
+          }
+          if (toDelete.Any()) await _repository.SaveAsync();
+
+          // Create/Update
+          foreach (var documentDto in incomingDocs)
+          {
+            bool existsDoc = existingDocs.Any(d => d.AdditionalDocumentId == documentDto.AdditionalDocumentId);
+
+            if (!existsDoc)
+            {
+              documentDto.CreatedDate = DateTime.UtcNow;
+              documentDto.CreatedBy = currentUser.UserId ?? 0;
+
+              var entity = MyMapper.JsonClone<AdditionalDocumentDto, CrmAdditionalDocument>(documentDto);
+              documentDto.AdditionalDocumentId = await _repository.CrmAdditionalDocuments.CreateAndGetIdAsync(entity);
+            }
+            else
+            {
+              var dbDoc = existingDocs.First(d => d.AdditionalDocumentId == documentDto.AdditionalDocumentId);
+
+              documentDto.CreatedDate = DateTimeFormatters.IsValidDateTime(dbDoc.CreatedDate) ? dbDoc.CreatedDate : DateTime.UtcNow;
+              documentDto.CreatedBy = (dbDoc.CreatedBy > 0) ? dbDoc.CreatedBy : (currentUser.UserId ?? 0);
+              documentDto.UpdatedDate = DateTime.UtcNow;
+              documentDto.UpdatedBy = currentUser.UserId ?? 0;
+
+              var updateEntity = MyMapper.JsonClone<AdditionalDocumentDto, CrmAdditionalDocument>(documentDto);
+              _repository.CrmAdditionalDocuments.UpdateByState(updateEntity);
+            }
+          }
+
+          await _repository.SaveAsync();
+        }
+      }
       // Commit transaction
       //await _repository.CRMApplication.TransactionCommitAsync();
       return updateDto;

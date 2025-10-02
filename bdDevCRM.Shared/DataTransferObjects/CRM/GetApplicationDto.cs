@@ -227,6 +227,7 @@ public class GetApplicationDto
   public int SOP_ApplicantId { get; set; }
   public string? StatementOfPurposeRemarks { get; set; }
   public string? StatementOfPurposeFilePath { get; set; }
+  public string? StatementOfPurposeFileName { get; set; }
   public DateTime? SOP_CreatedDate { get; set; }
   public int? SOP_CreatedBy { get; set; }
   public DateTime? SOP_UpdatedDate { get; set; }
@@ -247,7 +248,7 @@ public class GetApplicationDto
   public DateTime? AddInfo_UpdatedDate { get; set; }
   public int? AddInfo_UpdatedBy { get; set; }
   // ================================
-  // AdditionalInfoDto
+  // AdditionalDocumentDto
   // ================================
   public IEnumerable<AdditionalDocumentDto>? AdditionalDocuments { get; set; }
 

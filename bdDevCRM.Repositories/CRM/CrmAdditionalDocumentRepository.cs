@@ -10,6 +10,10 @@ public sealed class CrmAdditionalDocumentRepository : RepositoryBase<CrmAddition
 {
   public CrmAdditionalDocumentRepository(CRMContext context) : base(context) { }
 
+
+  //public async Task<IEnumerable<CrmAdditionalDocument>> GetApplicantReferencesByApplicantIdAsync(int applicantId, bool track) =>
+  //    await ListByConditionAsync(x => x.ApplicantId == applicantId, c => c.ApplicantReferenceId, track);
+
   public async Task<IEnumerable<CrmAdditionalDocument>> GetActiveAdditionalDocumentsAsync(bool track) =>
       await ListAsync(c => c.AdditionalDocumentId, track);
 
