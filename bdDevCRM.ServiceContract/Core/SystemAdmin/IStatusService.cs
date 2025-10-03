@@ -21,4 +21,8 @@ public interface IStatusService
   Task<IEnumerable<WfStateDto>> GetNextStatesByMenu(int menuId);
 
   Task<GridEntity<WfActionDto>> GetActionByStatusId(int stateId, CRMGridOptions options);
+
+  Task<IEnumerable<WfStateDto>> GetWFStateByUserPermission(int menuId, int userId);
+
+  Task<IEnumerable<WfStateDto>> GetWFStateByMenuNUserPermission(string menuName, int userId);
 }

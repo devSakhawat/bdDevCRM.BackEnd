@@ -32,7 +32,6 @@ public sealed class CrmAdditionalDocumentRepository : RepositoryBase<CrmAddition
     string sql = string.Format(@"
      SELECT [AdditionalDocumentId]
       ,[DocumentTitle]
-      ,[DocumentPath]
       ,[DocumentName]
       ,[RecordType]
       ,[CreatedDate]
@@ -40,13 +39,14 @@ public sealed class CrmAdditionalDocumentRepository : RepositoryBase<CrmAddition
       ,[UpdatedDate]
       ,[UpdatedBy]
       ,[ApplicantId]
-      ,doc.FilePath as AttachedDocument
+      ,doc.FilePath as DocumentPath
   FROM [dbDevCRM].[dbo].[CrmAdditionalDocument]
   OUTER APPLY(
         Select top 1 * 
         From DmsDocument doc
         where ReferenceEntityType = 'AdditionalDocument'
         and doc.ReferenceEntityId = CrmAdditionalDocument.ApplicantId
+        and doc.CurrentEntityId = CrmAdditionalDocument.AdditionalDocumentId
         Order by doc.UploadDate desc
     ) doc
 WHERE ApplicantId = @ApplicantId", applicantId);

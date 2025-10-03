@@ -12,4 +12,16 @@ public class MenuRepositoryDto
   public int ToDo { get; set; }
   public int SortOrder { get; set; }
   public string ParentMenuName { get; set; }
+
+  public int IsQuickLink { get; set; }
+  public int? MenuType { get; set; }
+  public string? MenuCode { get; set; }
+  public int? IsActive { get; set; }
+
+  public int? CreatedBy { get; set; }
+  public DateTimeOffset? CreatedDate { get; set; } = DateTime.Now;
+  public int? UpdateBy { get; set; }
+  public DateTimeOffset? UpdateDate { get; set; } = DateTime.Now;
+  public int? StatusCode { get; set; }
+  public string? ReponseMessage { get; set; }
 }

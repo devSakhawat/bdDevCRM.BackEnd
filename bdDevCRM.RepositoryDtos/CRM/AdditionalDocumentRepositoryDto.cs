@@ -12,6 +12,7 @@ public class AdditionalDocumentRepositoryDto
   public int ApplicantId { get; set; } // Foreign Key
   public string? DocumentTitle { get; set; }
   public string? DocumentName { get; set; }
+  public string? DocumentPath { get; set; }
   public string? RecordType { get; set; }
 
   public string? AttachedDocument { get; set; }

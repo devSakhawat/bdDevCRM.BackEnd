@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 
 namespace bdDevCRM.ServicesContract.Core.SystemAdmin;
@@ -18,4 +19,7 @@ public interface IGroupService
   // from user settings
   Task<IEnumerable<GroupForUserSettings>> GetGroups(bool trackChanges);
   Task<IEnumerable<GroupMemberDto>> GroupMemberByUserId(int userId, bool trackChanges);
+
+  // get menu permission from controller.
+  Task<MenuDto> CheckMenuPermission(string rawPath, UsersDto objUser);
 }

@@ -256,8 +256,19 @@ internal sealed class StatusService : IStatusService
 
     return gridEntity;
   }
-
   #endregion Workflow end
 
+
+  public async Task<IEnumerable<WfStateDto>> GetWFStateByUserPermission(int menuId, int userId)
+  {
+    IEnumerable<WfStateDto> statusByMenuAndUser = MyMapper.JsonCloneIEnumerableToIEnumerable<WfStateRepositoryDto, WfStateDto>(await _repository.WfStates.GetWFStateByUserPermission(menuId, userId));
+    return statusByMenuAndUser;
+  }
+
+  public async Task<IEnumerable<WfStateDto>> GetWFStateByMenuNUserPermission(string menuName, int userId)
+  {
+    IEnumerable<WfStateDto> statusByMenuAndUser = MyMapper.JsonCloneIEnumerableToIEnumerable<WfStateRepositoryDto, WfStateDto>(await _repository.WfStates.GetWFStateByMenuNUserPermission(menuName, userId));
+    return statusByMenuAndUser;
+  }
 
 }

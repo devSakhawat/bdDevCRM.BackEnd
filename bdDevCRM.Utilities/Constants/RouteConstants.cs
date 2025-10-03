@@ -73,7 +73,9 @@ public static class RouteConstants
 
   #region Status
   public const string StatusByMenuId = "status/key/";
+  public const string StatusByMenuName = "status/menu/{key}";
   public const string ActionsByStatusIdForGroup = "actions-4-group/status/";
+  public const string StatusByMenuNUserId = "Status-MenuId-UserId";
   #endregion Status
 
   #region WorkFlow
@@ -202,6 +204,8 @@ public static class RouteConstants
 
   // CRM Application related routes
   #region CRMApplication
+  public const string CRMApplicationStatus = "crm-application-status";
+
   public const string CRMApplicationSummary = "crm-application-summary";
   public const string CRMApplicationCreate= "crm-application";
   public const string CRMApplicationByKey = "crm-application/key/{key}";

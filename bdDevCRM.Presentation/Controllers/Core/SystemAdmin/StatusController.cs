@@ -1,13 +1,19 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Controllers.BaseController;
+using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Shared.Exceptions.BaseException;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using Microsoft.Extensions.Caching.Memory;
+using System;
 
 public class StatusController : BaseApiController
 {
@@ -333,5 +339,71 @@ public class StatusController : BaseApiController
     }
   }
   #endregion WorkFlow end
+
+
+  [HttpGet(RouteConstants.StatusByMenuNUserId)]
+  public async Task<IActionResult> StatusByMenuNUserId()
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    //var menu = ManageMenu.GetAsync(this, _serviceManager).GetAwaiter().GetResult();
+    // Prefer await over GetAwaiter().GetResult()
+    var menu = await ManageMenu.GetAsync(this, _serviceManager);
+
+    if (!menu.MenuId.HasValue)
+      throw new GenericBadRequestException("Valid MenuId is required.");
+
+    if (!currentUser.UserId.HasValue)
+      throw new GenericBadRequestException("Valid UserId is required.");
+    // menu.MenuId and currentUser.UserId are nullable so we use .Value after checking HasValue
+    var res = await _serviceManager.WfState.GetWFStateByUserPermission(menu.MenuId.Value, currentUser.UserId.Value);
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
+
+    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
+  }
+
+
+  [HttpGet(RouteConstants.StatusByMenuName)]
+  public async Task<IActionResult> StatusByMenuName([FromBody] string menuName)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    //var menu = ManageMenu.GetAsync(this, _serviceManager).GetAwaiter().GetResult();
+    // Prefer await over GetAwaiter().GetResult()
+    var menu = await ManageMenu.CheckByMenuName(this, menuName ,_serviceManager);
+
+    if (!menu.MenuId.HasValue)
+      throw new GenericBadRequestException("Valid MenuId is required.");
+
+    if (!currentUser.UserId.HasValue)
+      throw new GenericBadRequestException("Valid UserId is required.");
+    // menu.MenuId and currentUser.UserId are nullable so we use .Value after checking HasValue
+
+
+    var res = await _serviceManager.WfState.GetWFStateByUserPermission(menu.MenuId.Value, currentUser.UserId.Value);
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
+
+    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
+  }
 
 }

@@ -35,6 +35,78 @@ public class StatusRepository : RepositoryBase<WfState>, IStatusRepository
     return wfActionsByStatus;
   }
 
+  public async Task<IEnumerable<WfStateRepositoryDto>> GetWFStateByUserPermission(int menuId, int userId)
+  {
+    string query = @"
+      SELECT DISTINCT ws.*
+      FROM WFState ws
+      WHERE ws.WFStateId IN
+      (
+        SELECT gp.ReferenceId
+        FROM GroupPermission gp
+        WHERE gp.PermissionTableName = 'Status'
+          AND gp.GroupId IN (SELECT gm.GroupId FROM GroupMember gm WHERE gm.UserId = @UserId)
+      )
+      AND ws.MenuId = @MenuId
+      ORDER BY ws.Sequence";
+
+    var parameters = new SqlParameter[]
+    {
+      new SqlParameter("@MenuId", menuId),
+      new SqlParameter("@UserId", userId),
+    };
+
+    IEnumerable<WfStateRepositoryDto> result = await ExecuteListQuery<WfStateRepositoryDto>(query, parameters);
+    return result;
+  }
+
+  public async Task<IEnumerable<WfStateRepositoryDto>> GetWFStateByMenuNUserPermission(string menuName, int userId)
+  {
+
+    //string query = @"
+    //  SELECT DISTINCT ws.*
+    //  FROM WFState ws
+    //  WHERE ws.WFStateId IN
+    //  (
+    //    SELECT gp.ReferenceId
+    //    FROM GroupPermission gp
+    //    WHERE gp.PermissionTableName = 'Status'
+    //      AND gp.GroupId IN (SELECT gm.GroupId FROM GroupMember gm WHERE gm.UserId = @UserId)
+    //  )
+    //  AND ws.MenuId = @MenuId
+    //  ORDER BY ws.Sequence";
+
+    //var parameters = new SqlParameter[]
+    //{
+    //  new SqlParameter("@MenuId", menuId),
+    //  new SqlParameter("@UserId", userId),
+    //};
+
+    string query = string.Format(@"
+      SELECT DISTINCT ws.*
+      FROM WFState ws
+		  inner join Menu on Menu.MenuID = ws.MenuId
+      WHERE ws.WFStateId IN
+      (
+        SELECT gp.ReferenceId
+        FROM GroupPermission gp
+        WHERE gp.PermissionTableName = 'Status'
+          AND gp.GroupId IN (SELECT gm.GroupId FROM GroupMember gm WHERE gm.UserId = {0})
+      )
+      AND Menu.MenuPath like '%{1}%'
+      ORDER BY ws.Sequence", userId, menuName);
+
+    //var parameters = new SqlParameter[]
+    //{
+    //  new SqlParameter("@MenuId", menuId),
+    //  new SqlParameter("@UserId", userId),
+    //};
+
+    IEnumerable<WfStateRepositoryDto> result = await ExecuteListQuery<WfStateRepositoryDto>(query);
+    return result;
+  }
+
+
 
 
 }

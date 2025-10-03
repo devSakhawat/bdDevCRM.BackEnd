@@ -26,7 +26,7 @@ public interface IMenuService
   Task<(IEnumerable<MenuDto> Menus, string ids)> CreateMenuCollectionAsync(IEnumerable<MenuDto> MenuCollection);
   Task<IEnumerable<MenuDto>> MenusByModuleId(int moduleId, bool trackChanges);
 
-
+  Task<IEnumerable<MenuDto>> GetMenusByMenuName(string menuName, bool trackChanges = false);
   Task<MenuDto> CreateMenuAsync(MenuDto entityForCreate);
   Task<MenuDto> CreateAsync(MenuDto modelDto);
   Task<MenuDto> UpdateAsync(int key, MenuDto modelDto);

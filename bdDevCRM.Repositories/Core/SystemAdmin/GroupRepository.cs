@@ -1,8 +1,13 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
+using bdDevCRM.RepositoryDtos.Core;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Security.AccessControl;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
@@ -35,10 +40,45 @@ public class GroupRepository : RepositoryBase<Groups>, IGroupRepository
     return groupPermissions;
   }
 
+  public async Task<MenuRepositoryDto> CheckMenuPermission(string rawUrl, Users objUser)
+  {
+    rawUrl ??= string.Empty;
 
+    //string query = @"
+    //  SELECT DISTINCT mnu.* ,mdl.ModuleName
+    //  FROM GroupPermission gp
+    //  INNER JOIN Menu   mnu ON mnu.MenuId   = gp.ReferenceId
+    //  INNER JOIN Module mdl ON mdl.ModuleId = mnu.ModuleId
+    //  INNER JOIN GroupMember gm ON gm.GroupId = gp.GroupId
+    //  WHERE gp.PermissionTableName = 'Menu'
+    //    AND gm.UserId = @UserId
+    //    AND mnu.MenuPath LIKE @MenuPath";
 
+    //var parameters = new SqlParameter[]
+    //{
+    //  new SqlParameter("@UserId",   objUser.UserId),
+    //  new SqlParameter("@MenuPath", $"%{rawUrl}%"),
+    //};
 
+    string query = string.Format(@"
+      SELECT DISTINCT mnu.* ,mdl.ModuleName
+      FROM GroupPermission gp
+      INNER JOIN Menu   mnu ON mnu.MenuId   = gp.ReferenceId
+      INNER JOIN Module mdl ON mdl.ModuleId = mnu.ModuleId
+      INNER JOIN GroupMember gm ON gm.GroupId = gp.GroupId
+      WHERE gp.PermissionTableName = 'Menu'
+        AND gm.UserId = {0}
+        AND mnu.MenuPath LIKE '%{1}%'", objUser.UserId, rawUrl);
 
+    var parameters = new SqlParameter[]
+    {
+      //new SqlParameter("@UserId",   objUser.UserId),
+      //new SqlParameter("@MenuPath", $"%{rawUrl}%"),
+    };
+
+    MenuRepositoryDto result = await ExecuteSingleData<MenuRepositoryDto>(query, parameters);
+    return result;
+  }
 
 
 }

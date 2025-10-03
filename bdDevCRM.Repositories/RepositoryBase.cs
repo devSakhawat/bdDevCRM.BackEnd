@@ -720,7 +720,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     };
   }
 
-
   // Helper method to process a property
   private void ProcessProperty<T>(DbDataReader reader, T entity, PropertyInfo property, int columnIndex)
   {
@@ -810,7 +809,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
       using var command = connection.CreateCommand();
       command.CommandText = query;
-      command.CommandTimeout = 3600; // Set timeout to 120 seconds
+      command.CommandTimeout = 3600; // Set timeout to 3600 seconds
 
       if (parameters != null)
       {

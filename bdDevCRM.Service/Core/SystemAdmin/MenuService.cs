@@ -185,6 +185,17 @@ internal sealed class MenuService : IMenuService
     return menusDto;
   }
 
+  public async Task<IEnumerable<MenuDto>> GetMenusByMenuName(string menuName, bool trackChanges = false)
+  {
+    if (string.IsNullOrWhiteSpace(menuName)) throw new GenericBadRequestException(menuName);
+
+    IEnumerable<Menu> menus = await _repository.Menus.ListByConditionAsync(expression: x => x.MenuName.Trim().ToLower() == menuName.Trim().ToLower(), orderBy: x => x.MenuId, trackChanges: false);
+    if (menus.Count() == 0) return new List<MenuDto>();
+
+    List<MenuDto> menusDto = MyMapper.JsonCloneIEnumerableToList<Menu, MenuDto>(menus);
+    return menusDto;
+  }
+
 
 
   public async Task<MenuDto> UpdateAsync(int key, MenuDto modelDto)
@@ -213,9 +224,6 @@ internal sealed class MenuService : IMenuService
     await _repository.Menus.DeleteAsync(x => x.MenuId == modelDto.MenuId, trackChanges: true);
     await _repository.SaveAsync();
   }
-
-
-
 
   public async Task<IEnumerable<MenuForDDLDto>> MenuForDDL()
   {

@@ -11,6 +11,7 @@ using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
@@ -270,6 +271,16 @@ internal sealed class GroupService : IGroupService
   //  IEnumerable<GroupDto> groupsByModule = await _repository.Groups.ListByConditionAsync(x => x.mod, trackChanges:false);
   //}
 
-
+  // (For MenuManagement Only) Check menu permission by path and user
+  public async Task<MenuDto> CheckMenuPermission(string rawPath, UsersDto objUser)
+  {
+    if (string.IsNullOrWhiteSpace(rawPath)) throw new GenericBadRequestException("Invalid URL.");
+    Users userEntity = MyMapper.JsonClone<UsersDto, Users>(objUser);
+    MenuRepositoryDto data = await _repository.Groups.CheckMenuPermission(rawPath, userEntity);
+    if (data == null)
+      return new MenuDto();
+    else
+      return MyMapper.JsonClone<MenuRepositoryDto, MenuDto>(data);
+  }
 
 }

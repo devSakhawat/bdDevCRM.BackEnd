@@ -1,5 +1,6 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Entities.System;
+using bdDevCRM.RepositoryDtos.Core;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
@@ -9,6 +10,8 @@ public interface IGroupRepository : IRepositoryBase<Groups>
   Task<List<GroupsRepositoryDto>> GroupSummary(bool trackChanges);
   Task<IEnumerable<GroupPermissionRepositoryDto>> GroupPermisionsbyGroupId(int groupId);
   Task<IEnumerable<AccessControlRepositoryDto>> GetAccesses();
+
+  Task<MenuRepositoryDto> CheckMenuPermission(string rawUrl, Users objUser);
 
 
   //Task<IEnumerable<Menu>> GetMenus(bool trackChanges);
