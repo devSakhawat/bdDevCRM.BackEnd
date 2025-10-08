@@ -6,6 +6,7 @@ using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.Data.SqlClient;
 using System;
+using System.Data;
 using System.Security.AccessControl;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -15,6 +16,8 @@ public class GroupRepository : RepositoryBase<Groups>, IGroupRepository
 {
   private const string SELECT_GROUPPERMISSION_BY_GROUPID = "Select * from GROUPPERMISSION where GROUPID = {0}";
   private const string SELECT_ALL_ACCESS_CONTROL = "Select * from ACCESSCONTROL";
+
+
 
   public GroupRepository(CRMContext context) : base(context) { }
 
@@ -70,15 +73,51 @@ public class GroupRepository : RepositoryBase<Groups>, IGroupRepository
         AND gm.UserId = {0}
         AND mnu.MenuPath LIKE '%{1}%'", objUser.UserId, rawUrl);
 
-    var parameters = new SqlParameter[]
-    {
-      //new SqlParameter("@UserId",   objUser.UserId),
-      //new SqlParameter("@MenuPath", $"%{rawUrl}%"),
-    };
+    //var parameters = new SqlParameter[]
+    //{
+    //  //new SqlParameter("@UserId",   objUser.UserId),
+    //  //new SqlParameter("@MenuPath", $"%{rawUrl}%"),
+    //};
 
-    MenuRepositoryDto result = await ExecuteSingleData<MenuRepositoryDto>(query, parameters);
+    MenuRepositoryDto result = await ExecuteSingleData<MenuRepositoryDto>(query);
     return result;
   }
 
+  //   // I will update this query Leter for better optimization.
+  public async Task<IEnumerable<GroupPermissionRepositoryDto>> GetAccessPermisionForCurrentUser(int moduleId, int userId)
+  {
+    // Parameterized SQL to avoid injection + consistent with RepositoryBase ExecuteListQuery
+    var sql = @"
+SELECT DISTINCT *
+FROM GroupPermission gp
+WHERE gp.PermissionTableName = 'Access'
+  AND gp.ParentPermission = @ModuleId
+  AND gp.GroupId IN (
+      SELECT gm.GroupId
+      FROM GroupMember gm
+      WHERE gm.UserId = @UserId
+      UNION
+      SELECT gm2.GroupId
+      FROM GroupMember gm2
+      WHERE gm2.UserId IN (
+          SELECT DISTINCT u.UserId
+          FROM DeligationInfo di
+          INNER JOIN Users u  ON u.EmployeeId  = di.HrRecordId
+          INNER JOIN Users dg ON dg.EmployeeId = di.DeligatedHrRecordId
+          WHERE dg.UserId = @UserId
+            AND @Now BETWEEN di.FromDate AND di.ToDate
+            AND di.IsActive = 1
+      )
+  );";
 
+    var parameters = new[]
+    {
+      new SqlParameter("@ModuleId", moduleId),
+      new SqlParameter("@UserId", userId),
+      new SqlParameter("@Now", DateTime.Now.ToString("MM/dd/yyyy"))
+    };
+
+    var result = await ExecuteListQuery<GroupPermissionRepositoryDto>(sql, parameters);
+    return result;
+  }
 }

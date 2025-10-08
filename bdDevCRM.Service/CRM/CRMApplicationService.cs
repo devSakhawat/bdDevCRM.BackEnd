@@ -1,6 +1,8 @@
 using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
+using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
+using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.RepositoryDtos.CRM;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -21,11 +23,35 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
 
-  public async Task<GridEntity<CrmApplicationGridDto>> SummaryGrid(CRMGridOptions options)
+  public async Task<GridEntity<CrmApplicationGridDto>> SummaryGrid(CRMGridOptions options ,int statusId ,UsersDto usersDto ,MenuDto menuDto)
   {
     try
     {
+      //string condition = "";
+      //string condition1 = "";
+      if (menuDto.MenuId != null && menuDto.MenuId != 0)
+      {
+        //IEnumerable<GroupPermissionRepositoryDto> returnResult = await _repository.Groups.GetAccessPermisionForCurrentUser(menuDto.ModuleId.Value, usersDto.UserId.Value);
+        //IEnumerable<GroupPermissionDto> result = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionRepositoryDto, GroupPermissionDto>(returnResult);
+
+        //var isApprover = result.Any(groupPermission => groupPermission.ReferenceID == 4);
+        //var isRecomander = result.Any(groupPermission => groupPermission.ReferenceID == 3);
+        //var isHr = result.Any(groupPermission => groupPermission.ReferenceID == 22);
+        //var onlyApprovalData = result.Any(groupPermission => groupPermission.ReferenceID == 23);
+        //var state = wfstateSvc.GetWfStateById(wfStateId);
+      }
+
+      IEnumerable<GroupPermissionRepositoryDto> returnResult = await _repository.Groups.GetAccessPermisionForCurrentUser(menuDto.ModuleId.Value, usersDto.UserId.Value);
+      IEnumerable<GroupPermissionDto> result = MyMapper.JsonCloneIEnumerableToIEnumerable<GroupPermissionRepositoryDto, GroupPermissionDto>(returnResult);
+
+      var isApprover = result.Any(groupPermission => groupPermission.ReferenceID == 4);
+      var isRecomander = result.Any(groupPermission => groupPermission.ReferenceID == 3);
+      var isHr = result.Any(groupPermission => groupPermission.ReferenceID == 22);
+      var onlyApprovalData = result.Any(groupPermission => groupPermission.ReferenceID == 23);
+
+
       string condition = string.Empty;
+
       string sql = string.Format(
               @"SELECT
       ca.ApplicationId,

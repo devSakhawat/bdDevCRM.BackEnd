@@ -504,7 +504,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   {
     var connection = _context.Database.GetDbConnection();
     var sqlCount = "SELECT COUNT(*) FROM (" + query + " ) As tbl ";
-    query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, "");
+    query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, condition??"");
     var dataList = new List<T>();
     int totalCount = 0;
     try

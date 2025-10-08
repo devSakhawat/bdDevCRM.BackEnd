@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
@@ -35,6 +36,22 @@ public class StatusRepository : RepositoryBase<WfState>, IStatusRepository
     return wfActionsByStatus;
   }
 
+  public async Task<IEnumerable<WfStateRepositoryDto>> GetWfStateByUserPermission(int menuId, int userId)
+  {
+    string query = string.Format(@"Select distinct * 
+      from WFState 
+      where WFStateId in (
+        Select ReferenceId 
+        from GroupPermission 
+        where PermissionTableName = 'Status' 
+          and GroupId in (Select GroupId from GroupMember where UserId ={0})
+      ) and WFState.MenuId={1} order by Sequence", userId, menuId);
+
+    IEnumerable<WfStateRepositoryDto> result = await ExecuteListQuery<WfStateRepositoryDto>(query);
+    return result;
+  }
+
+
   public async Task<IEnumerable<WfStateRepositoryDto>> GetWFStateByUserPermission(int menuId, int userId)
   {
     string query = @"
@@ -46,8 +63,7 @@ public class StatusRepository : RepositoryBase<WfState>, IStatusRepository
         FROM GroupPermission gp
         WHERE gp.PermissionTableName = 'Status'
           AND gp.GroupId IN (SELECT gm.GroupId FROM GroupMember gm WHERE gm.UserId = @UserId)
-      )
-      AND ws.MenuId = @MenuId
+      ) AND ws.MenuId = @MenuId 
       ORDER BY ws.Sequence";
 
     var parameters = new SqlParameter[]
@@ -62,26 +78,6 @@ public class StatusRepository : RepositoryBase<WfState>, IStatusRepository
 
   public async Task<IEnumerable<WfStateRepositoryDto>> GetWFStateByMenuNUserPermission(string menuName, int userId)
   {
-
-    //string query = @"
-    //  SELECT DISTINCT ws.*
-    //  FROM WFState ws
-    //  WHERE ws.WFStateId IN
-    //  (
-    //    SELECT gp.ReferenceId
-    //    FROM GroupPermission gp
-    //    WHERE gp.PermissionTableName = 'Status'
-    //      AND gp.GroupId IN (SELECT gm.GroupId FROM GroupMember gm WHERE gm.UserId = @UserId)
-    //  )
-    //  AND ws.MenuId = @MenuId
-    //  ORDER BY ws.Sequence";
-
-    //var parameters = new SqlParameter[]
-    //{
-    //  new SqlParameter("@MenuId", menuId),
-    //  new SqlParameter("@UserId", userId),
-    //};
-
     string query = string.Format(@"
       SELECT DISTINCT ws.*
       FROM WFState ws
@@ -96,17 +92,9 @@ public class StatusRepository : RepositoryBase<WfState>, IStatusRepository
       AND Menu.MenuPath like '%{1}%'
       ORDER BY ws.Sequence", userId, menuName);
 
-    //var parameters = new SqlParameter[]
-    //{
-    //  new SqlParameter("@MenuId", menuId),
-    //  new SqlParameter("@UserId", userId),
-    //};
-
     IEnumerable<WfStateRepositoryDto> result = await ExecuteListQuery<WfStateRepositoryDto>(query);
     return result;
   }
-
-
 
 
 }

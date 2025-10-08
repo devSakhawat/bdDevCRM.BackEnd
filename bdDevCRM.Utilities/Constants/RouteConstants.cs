@@ -206,7 +206,7 @@ public static class RouteConstants
   #region CRMApplication
   public const string CRMApplicationStatus = "crm-application-status";
 
-  public const string CRMApplicationSummary = "crm-application-summary";
+  public const string CRMApplicationSummary = "crm-application-summary/{statusId:int}";
   public const string CRMApplicationCreate= "crm-application";
   public const string CRMApplicationByKey = "crm-application/key/{key}";
   public const string CRMApplicationUpdate = "crm-Application/{key:int}";

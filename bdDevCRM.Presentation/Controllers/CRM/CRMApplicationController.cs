@@ -48,15 +48,15 @@ public class CRMApplicationController : BaseApiController
 
     if (!MenuConstant.TryGetPath("CRMApplication", out var menuPath))
       throw new GenericBadRequestException("Invalid menu name.");
-    var rawUrl = $"..{menuPath}"; // only if your Menu.MenuPath uses this pattern
+    var rawUrl = $"..{menuPath}";
 
     //if (!menu.MenuId.HasValue)
     //  throw new GenericBadRequestException("Valid MenuId is required.");
 
     if (!currentUser.UserId.HasValue)
       throw new GenericBadRequestException("Valid UserId is required.");
-    // menu.MenuId and currentUser.UserId are nullable so we use .Value after checking HasValue
 
+    // menu.MenuId and currentUser.UserId are nullable so we use .Value after checking HasValue
     var res = await _serviceManager.WfState.GetWFStateByMenuNUserPermission(rawUrl, currentUser.UserId.Value);
     if (res == null)
       return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
@@ -65,9 +65,35 @@ public class CRMApplicationController : BaseApiController
   }
 
 
+  // --------- Application by ApplicationId ----------------------------------------
+  [HttpGet(RouteConstants.CRMApplicationByApplicationId)]
+  //[AllowAnonymous]
+  public async Task<IActionResult> GetApplication([FromRoute] int applicationId)
+  {
+    if (applicationId <= 0)
+      throw new GenericBadRequestException("Invalid application ID. Application ID must be greater than 0.");
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    var res = await _serviceManager.CrmApplications.GetApplication(applicationId, trackChanges: false);
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
+
+    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
+  }
+
   // --------- Summary Grid ----------------------------------------
   [HttpPost(RouteConstants.CRMApplicationSummary)]
-  public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
+  public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options, [FromRoute] int statusId)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
@@ -83,7 +109,18 @@ public class CRMApplicationController : BaseApiController
     if (options == null)
       throw new NullModelBadRequestException(nameof(CRMGridOptions));
 
-    var summaryGrid = await _serviceManager.CrmApplications.SummaryGrid(options);
+    //MenuDto menuDto = await ManageMenu.GetByMenuPathAsync(this, );
+
+    if (!MenuConstant.TryGetPath("CRMApplication", out var menuPath))
+      throw new GenericBadRequestException("Invalid menu name.");
+
+    MenuDto menuDto = await _serviceManager.Groups.CheckMenuPermission($"..{menuPath}", currentUser);
+
+    if (menuDto == null)
+      throw new GenericBadRequestException("Menu not found for the current user.");
+
+
+    var summaryGrid = await _serviceManager.CrmApplications.SummaryGrid(options, statusId, currentUser ,menuDto );
     if (summaryGrid == null || !summaryGrid.Items.Any())
       return Ok(ResponseHelper.NoContent<GridEntity<CrmApplicationGridDto>>("No data found"));
 
@@ -204,31 +241,6 @@ public class CRMApplicationController : BaseApiController
     return Ok(ResponseHelper.Created(savedDto, "Application created successfully."));
   }
 
-
-  [HttpGet(RouteConstants.CRMApplicationByApplicationId)]
-  [AllowAnonymous]
-  public async Task<IActionResult> GetApplication([FromRoute] int applicationId)
-  {
-    if (applicationId <= 0)
-      throw new GenericBadRequestException("Invalid application ID. Application ID must be greater than 0.");
-
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
-
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
-
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
-
-    var res = await _serviceManager.CrmApplications.GetApplication(applicationId, trackChanges: false);
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
-
-    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
-  }
 
 
   /// <summary>

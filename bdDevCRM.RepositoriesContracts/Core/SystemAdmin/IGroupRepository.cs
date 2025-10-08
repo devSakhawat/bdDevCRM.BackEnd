@@ -13,7 +13,7 @@ public interface IGroupRepository : IRepositoryBase<Groups>
 
   Task<MenuRepositoryDto> CheckMenuPermission(string rawUrl, Users objUser);
 
-
+  Task<IEnumerable<GroupPermissionRepositoryDto>> GetAccessPermisionForCurrentUser(int moduleId, int userId);
   //Task<IEnumerable<Menu>> GetMenus(bool trackChanges);
 
   //Menu? GetMenu(int MenuId, bool trackChanges);
