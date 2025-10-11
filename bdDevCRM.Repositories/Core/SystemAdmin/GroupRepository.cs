@@ -1,14 +1,8 @@
-﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Entities.System;
+﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
-using bdDevCRM.RepositoryDtos.Core;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Data;
-using System.Security.AccessControl;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
@@ -71,7 +65,9 @@ public class GroupRepository : RepositoryBase<Groups>, IGroupRepository
       INNER JOIN GroupMember gm ON gm.GroupId = gp.GroupId
       WHERE gp.PermissionTableName = 'Menu'
         AND gm.UserId = {0}
-        AND mnu.MenuPath LIKE '%{1}%'", objUser.UserId, rawUrl);
+        AND mnu.MenuPath LIKE '%{1}%'
+        AND mnu.ParentMenu = 0
+      ", objUser.UserId, rawUrl);
 
     //var parameters = new SqlParameter[]
     //{
@@ -87,15 +83,45 @@ public class GroupRepository : RepositoryBase<Groups>, IGroupRepository
   public async Task<IEnumerable<GroupPermissionRepositoryDto>> GetAccessPermisionForCurrentUser(int moduleId, int userId)
   {
     // Parameterized SQL to avoid injection + consistent with RepositoryBase ExecuteListQuery
-    var sql = @"
+    //    var sql = @"
+    //SELECT DISTINCT *
+    //FROM GroupPermission gp
+    //WHERE gp.PermissionTableName = 'Access'
+    //  AND gp.ParentPermission = @ModuleId
+    //  AND gp.GroupId IN (
+    //      SELECT gm.GroupId
+    //      FROM GroupMember gm
+    //      WHERE gm.UserId = @UserId
+    //      UNION
+    //      SELECT gm2.GroupId
+    //      FROM GroupMember gm2
+    //      WHERE gm2.UserId IN (
+    //          SELECT DISTINCT u.UserId
+    //          FROM DeligationInfo di
+    //          INNER JOIN Users u  ON u.EmployeeId  = di.HrRecordId
+    //          INNER JOIN Users dg ON dg.EmployeeId = di.DeligatedHrRecordId
+    //          WHERE dg.UserId = @UserId
+    //            AND @Now BETWEEN di.FromDate AND di.ToDate
+    //            AND di.IsActive = 1
+    //      )
+    //  );";
+
+    //    var parameters = new[]
+    //    {
+    //      new SqlParameter("@ModuleId", moduleId),
+    //      new SqlParameter("@UserId", userId),
+    //      new SqlParameter("@Now", DateTime.Now.ToString("MM/dd/yyyy"))
+    //    };
+
+    var sql = string.Format(@"
 SELECT DISTINCT *
 FROM GroupPermission gp
 WHERE gp.PermissionTableName = 'Access'
-  AND gp.ParentPermission = @ModuleId
+  AND gp.ParentPermission = {0}
   AND gp.GroupId IN (
       SELECT gm.GroupId
       FROM GroupMember gm
-      WHERE gm.UserId = @UserId
+      WHERE gm.UserId = {1}
       UNION
       SELECT gm2.GroupId
       FROM GroupMember gm2
@@ -104,20 +130,21 @@ WHERE gp.PermissionTableName = 'Access'
           FROM DeligationInfo di
           INNER JOIN Users u  ON u.EmployeeId  = di.HrRecordId
           INNER JOIN Users dg ON dg.EmployeeId = di.DeligatedHrRecordId
-          WHERE dg.UserId = @UserId
-            AND @Now BETWEEN di.FromDate AND di.ToDate
+          WHERE dg.UserId = {1}
+            AND '{2}' BETWEEN di.FromDate AND di.ToDate
             AND di.IsActive = 1
       )
-  );";
+  )", moduleId, userId, DateTime.Now.ToString("MM/dd/yyyy"));
 
-    var parameters = new[]
-    {
-      new SqlParameter("@ModuleId", moduleId),
-      new SqlParameter("@UserId", userId),
-      new SqlParameter("@Now", DateTime.Now.ToString("MM/dd/yyyy"))
-    };
+    //var parameters = new[]
+    //{
+    //  new SqlParameter("@ModuleId", moduleId),
+    //  new SqlParameter("@UserId", userId),
+    //  new SqlParameter("@Now", DateTime.Now.ToString("MM/dd/yyyy"))
+    //};
 
-    var result = await ExecuteListQuery<GroupPermissionRepositoryDto>(sql, parameters);
+
+    var result = await ExecuteListQuery<GroupPermissionRepositoryDto>(sql);
     return result;
   }
 }

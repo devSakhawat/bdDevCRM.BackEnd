@@ -47,8 +47,8 @@ internal sealed class StatusService : IStatusService
   #region Workflow start
   public async Task<GridEntity<WfStateDto>> WorkflowSummary(bool trackChanges, CRMGridOptions options)
   {
-    string query = "Select WFSTATE.WfStateId,WFSTATE.STATENAME,WFSTATE.MENUID,WFSTATE.ISDEFAULTSTART,WFSTATE.ISCLOSED,MENU.MODULEID,MENU.MENUNAME,MODULE.MODULENAME \r\nfrom WFSTATE ,MENU ,MODULE  \r\nwhere WFSTATE.MENUID = MENU.MENUID and MENU.MODULEID = MODULE.MODULEID";
-    string orderBy = " MENUNAME,ISDEFAULTSTART,STATENAME asc ";
+    string query = "Select WFSTATE.WfStateId,WFSTATE.STATENAME,WFSTATE.MENUID,WFSTATE.ISDEFAULTSTART,WFSTATE.ISCLOSED,MENU.MODULEID,MENU.MENUNAME,MODULE.MODULENAME,[sequence] Sequence \r\nfrom WFSTATE ,MENU ,MODULE  \r\nwhere WFSTATE.MENUID = MENU.MENUID and MENU.MODULEID = MODULE.MODULEID";
+    string orderBy = " MenuId, ModuleID, Sequence asc ";
     var gridEntity = await _repository.Workflowes.GridData<WfStateDto>(query, options, orderBy, "");
 
     return gridEntity;
@@ -59,7 +59,7 @@ internal sealed class StatusService : IStatusService
     if (modelDto.WfStateId != 0)
       throw new InvalidCreateOperationException("CourseId must be 0.");
 
-    bool dup = await _repository.WfStates.ExistsAsync(x => x.StateName != null && x.StateName.Trim().ToLower().Equals(modelDto.StateName!.Trim().ToLower()));
+    bool dup = await _repository.WfStates.ExistsAsync(x => x.StateName != null && x.StateName.Trim().ToLower().Equals(modelDto.StateName!.Trim().ToLower()) && x.MenuId == modelDto.MenuId);
     if (dup) throw new DuplicateRecordException("Workflow", "StateName");
 
     var entity = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);

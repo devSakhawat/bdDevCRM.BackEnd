@@ -82,7 +82,7 @@ public static class RouteConstants
   public const string WorkFlowSummary = "workflow-summary";
   public const string CreateWorkFlow = "workflow";
   public const string CreateAction = "wf-action";
-  public const string UpdateWorkFlow = "workflow/{key}";
+  public const string UpdateWorkFlow = "workflow/{key:int}";
   public const string UpdateAction = "wf-action/{key}";
   public const string DeleteAction = "wf-action/{key}";
   public const string GetNextStatesByMenu = "next-states-by-menu/";

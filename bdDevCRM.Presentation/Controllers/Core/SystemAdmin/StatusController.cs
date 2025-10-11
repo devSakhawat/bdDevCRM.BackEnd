@@ -170,7 +170,7 @@ public class StatusController : BaseApiController
 
 
   // --------- Update ----------------------------------------------
-  [HttpPost(RouteConstants.UpdateWorkFlow)]
+  [HttpPut(RouteConstants.UpdateWorkFlow)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateWorkFlow([FromRoute] int key, [FromBody] WfStateDto modelDto)
   {
