@@ -67,7 +67,7 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<ICrmEducationHistoryService> _educationHistoryService;
   private readonly Lazy<ICrmIELTSInformationService> _ieltsinformationService;
   private readonly Lazy<ICrmTOEFLInformationService> _toeflinformationService;
-  private readonly Lazy<ICrmPTEInformationService> _pteinformationService;
+  private readonly Lazy<ICrmPTEInformationService> _PTEInformationService;
   private readonly Lazy<ICrmGmatinformationService> _gmatinformationService;
   private readonly Lazy<ICrmOthersInformationService> _othersinformationService;
   private readonly Lazy<ICrmWorkExperienceService> _workExperienceService;
@@ -133,7 +133,7 @@ public sealed class ServiceManager : IServiceManager
     _educationHistoryService = new Lazy<ICrmEducationHistoryService>(() => new CrmEducationHistoryService(repository, logger, configuration, httpContextAccessor));
     _ieltsinformationService = new Lazy<ICrmIELTSInformationService>(() => new CrmIELTSInformationService(repository, logger, configuration, httpContextAccessor));
     _toeflinformationService = new Lazy<ICrmTOEFLInformationService>(() => new CrmTOEFLInformationService(repository, logger, configuration, httpContextAccessor));
-    _pteinformationService = new Lazy<ICrmPTEInformationService>(() => new CrmPTEInformationService(repository, logger, configuration, httpContextAccessor));
+    _PTEInformationService = new Lazy<ICrmPTEInformationService>(() => new CrmPTEInformationService(repository, logger, configuration, httpContextAccessor));
     _gmatinformationService = new Lazy<ICrmGmatinformationService>(() => new CrmGMATInformationService(repository, logger, configuration, httpContextAccessor));
     _othersinformationService = new Lazy<ICrmOthersInformationService>(() => new CrmOthersInformationService(repository, logger, configuration, httpContextAccessor));
     _workExperienceService = new Lazy<ICrmWorkExperienceService>(() => new CrmWorkExperienceService(repository, logger, configuration, httpContextAccessor));
@@ -197,7 +197,7 @@ public sealed class ServiceManager : IServiceManager
   public ICrmEducationHistoryService EducationHistories => _educationHistoryService.Value;
   public ICrmIELTSInformationService IELTSInformations => _ieltsinformationService.Value;
   public ICrmTOEFLInformationService TOEFLInformations => _toeflinformationService.Value;
-  public ICrmPTEInformationService PTEInformations => _pteinformationService.Value;
+  public ICrmPTEInformationService PTEInformations => _PTEInformationService.Value;
   public ICrmGmatinformationService GMATInformations => _gmatinformationService.Value;
   public ICrmOthersInformationService OTHERSInformations => _othersinformationService.Value;
   public ICrmWorkExperienceService WorkExperiences => _workExperienceService.Value;

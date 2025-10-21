@@ -23,37 +23,37 @@ internal sealed class CrmPTEInformationService(
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-  public async Task<IEnumerable<PTEInformationDto>> GetPteinformationsDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<PTEInformationDto>> GetPTEInformationsDDLAsync(bool trackChanges = false)
   {
-    var list = await _repository.CrmPTEInformations.GetActivePteinformationsAsync(trackChanges);
+    var list = await _repository.CrmPTEInformations.GetActivePTEInformationsAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("CrmPTEInformation");
     return MyMapper.JsonCloneIEnumerableToList<CrmPTEInformation, PTEInformationDto>(list);
   }
 
-  public async Task<IEnumerable<PTEInformationDto>> GetActivePteinformationsAsync(bool trackChanges = false)
+  public async Task<IEnumerable<PTEInformationDto>> GetActivePTEInformationsAsync(bool trackChanges = false)
   {
-    var list = await _repository.CrmPTEInformations.GetActivePteinformationsAsync(trackChanges);
+    var list = await _repository.CrmPTEInformations.GetActivePTEInformationsAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("CrmPTEInformation");
     return MyMapper.JsonCloneIEnumerableToList<CrmPTEInformation, PTEInformationDto>(list);
   }
 
-  public async Task<IEnumerable<PTEInformationDto>> GetPteinformationsAsync(bool trackChanges = false)
+  public async Task<IEnumerable<PTEInformationDto>> GetPTEInformationsAsync(bool trackChanges = false)
   {
-    var list = await _repository.CrmPTEInformations.GetPteinformationsAsync(trackChanges);
+    var list = await _repository.CrmPTEInformations.GetPTEInformationsAsync(trackChanges);
     if (!list.Any()) throw new GenericListNotFoundException("CrmPTEInformation");
     return MyMapper.JsonCloneIEnumerableToList<CrmPTEInformation, PTEInformationDto>(list);
   }
 
-  public async Task<PTEInformationDto> GetPteinformationAsync(int id, bool trackChanges = false)
+  public async Task<PTEInformationDto> GetPTEInformationAsync(int id, bool trackChanges = false)
   {
-    var entity = await _repository.CrmPTEInformations.GetPteinformationAsync(id, trackChanges);
+    var entity = await _repository.CrmPTEInformations.GetPTEInformationAsync(id, trackChanges);
     if (entity == null) throw new GenericNotFoundException("CrmPTEInformation", "PTEInformationId", id.ToString());
     return MyMapper.JsonClone<CrmPTEInformation, PTEInformationDto>(entity);
   }
 
-  public async Task<PTEInformationDto> GetPteinformationByApplicantIdAsync(int applicantId, bool trackChanges = false)
+  public async Task<PTEInformationDto> GetPTEInformationByApplicantIdAsync(int applicantId, bool trackChanges = false)
   {
-    var entity = await _repository.CrmPTEInformations.GetPteinformationByApplicantIdAsync(applicantId, trackChanges);
+    var entity = await _repository.CrmPTEInformations.GetPTEInformationByApplicantIdAsync(applicantId, trackChanges);
     if (entity == null) throw new GenericNotFoundException("CrmPTEInformation", "ApplicantId", applicantId.ToString());
     return MyMapper.JsonClone<CrmPTEInformation, PTEInformationDto>(entity);
   }

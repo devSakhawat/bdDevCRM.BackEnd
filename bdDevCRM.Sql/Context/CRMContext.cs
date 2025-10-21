@@ -1053,7 +1053,7 @@ public partial class CRMContext : DbContext
           .HasColumnName("PTEWriting");
       entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
 
-      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmPteinformation)
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmPTEInformation)
       //    .HasForeignKey(d => d.ApplicantId)
       //    .OnDelete(DeleteBehavior.ClientSetNull)
       //    .HasConstraintName("FK__PTEInform__Appli__0E391C95");

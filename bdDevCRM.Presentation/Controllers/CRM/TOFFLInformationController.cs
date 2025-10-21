@@ -16,12 +16,12 @@ using Microsoft.Extensions.Caching.Memory;
 namespace bdDevCRM.Presentation.Controllers.CRM;
 
 [ApiController]
-public class ToeflInformationController : BaseApiController
+public class TOFFLInformationController : BaseApiController
 {
   private readonly IMemoryCache _cache;
   private readonly IWebHostEnvironment _env;
 
-  public ToeflInformationController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
+  public TOFFLInformationController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
   {
     _cache = cache;
     _env = env;

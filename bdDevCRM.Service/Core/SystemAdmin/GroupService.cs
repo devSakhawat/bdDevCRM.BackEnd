@@ -244,6 +244,9 @@ internal sealed class GroupService : IGroupService
   public async Task<IEnumerable<GroupPermissionDto>> GetAccessPermisionForCurrentUser(int moduleId, int userId)
   {
     IEnumerable<GroupPermissionRepositoryDto> groupMemeberRepositoriesDto = await _repository.GroupPermissiones.GetAccessPermisionForCurrentUser(moduleId, userId);
+    if (!groupMemeberRepositoriesDto.Any())
+      groupMemeberRepositoriesDto = new List<GroupPermissionRepositoryDto> { new GroupPermissionRepositoryDto() };
+
     IEnumerable<GroupPermissionDto> groupMemeberDtos = MyMapper.JsonCloneIEnumerableToList<GroupPermissionRepositoryDto, GroupPermissionDto>(groupMemeberRepositoriesDto);
     return groupMemeberDtos;
   }

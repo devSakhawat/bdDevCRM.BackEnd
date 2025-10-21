@@ -6,11 +6,11 @@ namespace bdDevCRM.ServiceContract.CRM;
 
 public interface ICrmPTEInformationService
 {
-  Task<IEnumerable<PTEInformationDto>> GetPteinformationsDDLAsync(bool trackChanges = false);
-  Task<IEnumerable<PTEInformationDto>> GetActivePteinformationsAsync(bool trackChanges = false);
-  Task<IEnumerable<PTEInformationDto>> GetPteinformationsAsync(bool trackChanges = false);
-  Task<PTEInformationDto> GetPteinformationAsync(int id, bool trackChanges = false);
-  Task<PTEInformationDto> GetPteinformationByApplicantIdAsync(int applicantId, bool trackChanges = false);
+  Task<IEnumerable<PTEInformationDto>> GetPTEInformationsDDLAsync(bool trackChanges = false);
+  Task<IEnumerable<PTEInformationDto>> GetActivePTEInformationsAsync(bool trackChanges = false);
+  Task<IEnumerable<PTEInformationDto>> GetPTEInformationsAsync(bool trackChanges = false);
+  Task<PTEInformationDto> GetPTEInformationAsync(int id, bool trackChanges = false);
+  Task<PTEInformationDto> GetPTEInformationByApplicantIdAsync(int applicantId, bool trackChanges = false);
   Task<PTEInformationDto> CreateNewRecordAsync(PTEInformationDto dto, UsersDto currentUser);
   Task<string> UpdateRecordAsync(int key, PTEInformationDto dto, bool trackChanges);
   Task<string> DeleteRecordAsync(int key, PTEInformationDto dto);

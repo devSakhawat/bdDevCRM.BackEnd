@@ -2,17 +2,17 @@
 using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.Entities.Entities.System;
-
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using System.Reflection;
 
 namespace bdDevCRM.Service.Core.SystemAdmin;
 
@@ -47,7 +47,34 @@ internal sealed class StatusService : IStatusService
   #region Workflow start
   public async Task<GridEntity<WfStateDto>> WorkflowSummary(bool trackChanges, CRMGridOptions options)
   {
-    string query = "Select WFSTATE.WfStateId,WFSTATE.STATENAME,WFSTATE.MENUID,WFSTATE.ISDEFAULTSTART,WFSTATE.ISCLOSED,MENU.MODULEID,MENU.MENUNAME,MODULE.MODULENAME,[sequence] Sequence \r\nfrom WFSTATE ,MENU ,MODULE  \r\nwhere WFSTATE.MENUID = MENU.MENUID and MENU.MODULEID = MODULE.MODULEID";
+    //string query = "Select WFSTATE.WfStateId,WFSTATE.STATENAME,WFSTATE.MENUID,WFSTATE.ISDEFAULTSTART,WFSTATE.ISCLOSED,MENU.MODULEID,MENU.MENUNAME,MODULE.MODULENAME,[sequence] Sequence \r\nfrom WFSTATE ,MENU ,MODULE  \r\nwhere WFSTATE.MENUID = MENU.MENUID and MENU.MODULEID = MODULE.MODULEID";
+    string query = @"SELECT 
+    WFSTATE.WfStateId,
+    WFSTATE.StateName,
+    WFSTATE.MenuId,
+    WFSTATE.IsDefaultStart,
+    WFSTATE.IsClosed,
+    MENU.ModuleId,
+    MENU.MenuName,
+    MODULE.ModuleName,
+    [Sequence] AS Sequence,
+    WFSTATE.IsClosed AS ClosingStateId,
+    CASE WFSTATE.IsClosed
+        WHEN 0 THEN 'Select Closing Status'
+        WHEN 1 THEN 'Open'
+        WHEN 2 THEN 'Possible Close'
+        WHEN 3 THEN 'Close'
+        WHEN 4 THEN 'Destroyed'
+        WHEN 5 THEN 'Draft'
+        WHEN 6 THEN 'Deligated'
+        WHEN 7 THEN 'Published'
+        WHEN 8 THEN 'Extended'
+        ELSE 'Unknown'
+    END AS ClosingStateName
+FROM WFSTATE
+INNER JOIN MENU ON WFSTATE.MenuId = MENU.MenuId
+INNER JOIN MODULE ON MENU.ModuleId = MODULE.ModuleId
+    ";
     string orderBy = " MenuId, ModuleID, Sequence asc ";
     var gridEntity = await _repository.Workflowes.GridData<WfStateDto>(query, options, orderBy, "");
 
@@ -88,7 +115,9 @@ internal sealed class StatusService : IStatusService
     if (modelDto.WfActionId != 0)
       throw new InvalidCreateOperationException("CourseId must be 0.");
 
-    bool dup = await _repository.WfActions.ExistsAsync(x => x.ActionName != null && x.ActionName.Trim().ToLower().Equals(modelDto.ActionName!.Trim().ToLower()));
+    bool dup = await _repository.WfActions.ExistsAsync(
+      x => x.ActionName != null && x.ActionName.Trim().ToLower().Equals(modelDto.ActionName!.Trim().ToLower()) && x.WfStateId == modelDto.WfStateId
+    );
     if (dup) throw new DuplicateRecordException("Workflow", "ActionName");
 
     var entity = MyMapper.JsonClone<WfActionDto, WfAction>(modelDto);
@@ -229,6 +258,32 @@ internal sealed class StatusService : IStatusService
     return OperationMessage.Success;
   }
 
+  public async Task<string> DeleteWorkflow(int key)
+  {
+    if (key == null) 
+      throw new NullModelBadRequestException(nameof(WfStateDto));
+    
+    if (key != key) 
+      throw new IdMismatchBadRequestException(key.ToString(), nameof(WfStateDto));
+
+    // Check if WfState exists
+    WfState wfStateData = await _repository.WfStates.FirstOrDefaultAsync(m => m.WfStateId == key, trackChanges: false);
+    if (wfStateData == null) 
+      throw new GenericNotFoundException("WfState", "WfStateId", key.ToString());
+
+    // Check if there are any actions associated with this status
+    bool hasActions = await _repository.WfActions.ExistsAsync(x => x.WfStateId == key);
+    if (hasActions)
+      throw new GenericConflictException("Cannot delete workflow status. Action data exists for this statusId. Please delete action data first.");
+
+
+    // If no actions exist, proceed with deletion
+    await _repository.WfStates.DeleteAsync(x => x.WfStateId == key, trackChanges: true);
+    await _repository.SaveAsync();
+    _logger.LogWarn($"Workflow status deleted, id={key}");
+    return OperationMessage.Success;
+  }
+
   public async Task<IEnumerable<WfStateDto>> GetNextStatesByMenu(int menuId)
   {
     IEnumerable<WfState> wfstates = await _repository.WfStates.ListByWhereWithSelectAsync(
@@ -248,7 +303,13 @@ internal sealed class StatusService : IStatusService
   public async Task<GridEntity<WfActionDto>> GetActionByStatusId(int stateId, CRMGridOptions options)
   {
     const string SELECT_ACTION_BY_STATUSID =
-        "Select *, (Select StateName from WFState where WfStateId = NextStateId) as NextStateName from WFAction where WfStateId = {0} ";
+        @"
+Select WFActionId, WFAction.WFStateId, WfState.StateName, ActionName, NextStateId
+,(Select StateName from WFState where WfStateId = NextStateId) as NextStateName 
+,EMAIL_ALERT, SMS_ALERT, AcSortOrder, MenuId, IsDefaultStart, IsClosed, sequence as Sequence
+from WFAction 
+inner join WfState on WfState.WFStateId = WfAction.WFStateId
+where WFAction.WfStateId = {0} ";
     string orderBy = " AcSortOrder asc ";
 
     string formattedQuery = string.Format(SELECT_ACTION_BY_STATUSID, stateId);

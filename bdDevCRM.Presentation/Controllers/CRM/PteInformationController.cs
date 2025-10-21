@@ -16,19 +16,19 @@ using Microsoft.Extensions.Caching.Memory;
 namespace bdDevCRM.Presentation.Controllers.CRM;
 
 [ApiController]
-public class PteInformationController : BaseApiController
+public class PTEInformationController : BaseApiController
 {
   private readonly IMemoryCache _cache;
   private readonly IWebHostEnvironment _env;
 
-  public PteInformationController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
+  public PTEInformationController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
   {
     _cache = cache;
     _env = env;
   }
 
-  [HttpGet(RouteConstants.PteInformationDDL)]
-  public async Task<IActionResult> PteInformationDDL()
+  [HttpGet(RouteConstants.PTEInformationDDL)]
+  public async Task<IActionResult> PTEInformationDDL()
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
@@ -38,15 +38,15 @@ public class PteInformationController : BaseApiController
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null) return Unauthorized("User not found in cache.");
 
-    var res = await _serviceManager.PTEInformations.GetPteinformationsDDLAsync(trackChanges: false);
+    var res = await _serviceManager.PTEInformations.GetPTEInformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<PTEInformationDto>>("No PTE information found"));
 
     return Ok(ResponseHelper.Success(res, "PTE information retrieved successfully"));
   }
 
-  [HttpGet(RouteConstants.PteInformationByApplicantId)]
-  public async Task<IActionResult> PteInformationByApplicantId([FromRoute] int applicantId)
+  [HttpGet(RouteConstants.PTEInformationByApplicantId)]
+  public async Task<IActionResult> PTEInformationByApplicantId([FromRoute] int applicantId)
   {
     if (applicantId <= 0)
       throw new GenericBadRequestException("Invalid applicant ID.");
@@ -59,11 +59,11 @@ public class PteInformationController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.PTEInformations.GetPteinformationByApplicantIdAsync(applicantId, trackChanges: false);
+    var res = await _serviceManager.PTEInformations.GetPTEInformationByApplicantIdAsync(applicantId, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "PTE information retrieved successfully"));
   }
 
-  [HttpPost(RouteConstants.PteInformationSummary)]
+  [HttpPost(RouteConstants.PTEInformationSummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
@@ -79,7 +79,7 @@ public class PteInformationController : BaseApiController
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
-  [HttpPost(RouteConstants.CreatePteInformation)]
+  [HttpPost(RouteConstants.CreatePTEInformation)]
   public async Task<IActionResult> CreateNewRecord([FromBody] PTEInformationDto modelDto)
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
@@ -94,9 +94,9 @@ public class PteInformationController : BaseApiController
     return Ok(ResponseHelper.Created(res, "PTE information created successfully"));
   }
 
-  [HttpPut(RouteConstants.UpdatePteInformation)]
+  [HttpPut(RouteConstants.UpdatePTEInformation)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> UpdatePteInformation([FromRoute] int key, [FromBody] PTEInformationDto modelDto)
+  public async Task<IActionResult> UpdatePTEInformation([FromRoute] int key, [FromBody] PTEInformationDto modelDto)
   {
     var res = await _serviceManager.PTEInformations.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
@@ -105,9 +105,9 @@ public class PteInformationController : BaseApiController
       return Conflict(ResponseHelper.Conflict(res));
   }
 
-  [HttpDelete(RouteConstants.DeletePteInformation)]
+  [HttpDelete(RouteConstants.DeletePTEInformation)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> DeletePteInformation([FromRoute] int key, [FromBody] PTEInformationDto modelDto)
+  public async Task<IActionResult> DeletePTEInformation([FromRoute] int key, [FromBody] PTEInformationDto modelDto)
   {
     var res = await _serviceManager.PTEInformations.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
@@ -116,10 +116,10 @@ public class PteInformationController : BaseApiController
       return Conflict(ResponseHelper.Conflict(res));
   }
 
-  [HttpGet(RouteConstants.UpdatePteInformation)]
-  public async Task<IActionResult> GetPteInformation([FromRoute] int key)
+  [HttpGet(RouteConstants.UpdatePTEInformation)]
+  public async Task<IActionResult> GetPTEInformation([FromRoute] int key)
   {
-    var res = await _serviceManager.PTEInformations.GetPteinformationAsync(key, trackChanges: false);
+    var res = await _serviceManager.PTEInformations.GetPTEInformationAsync(key, trackChanges: false);
     return Ok(ResponseHelper.Success(res, "PTE information retrieved successfully"));
   }
 }

@@ -54,7 +54,7 @@ public static class RouteConstants
   #region Group
   public const string Groups = "groups";
   public const string GroupById = "group/key/{key}";
-  public const string GroupPermisionsbyGroupId = "grouppermission/key/";
+  public const string GroupPermisionsbyGroupId = "grouppermission/{groupId:int}";
   public const string GetAccesses = "getaccess";
   public const string GroupSummary = "group-summary";
   public const string CreateGroup = "group";
@@ -64,6 +64,7 @@ public static class RouteConstants
   public const string GroupsByCompany = "groups/companyId";
 
   public const string GroupMemberByUserId = "groups/group-members-by-userId/";
+  public const string GetAccessPermisionForCurrentUser = "groups/accesspermisionforcurrentuser";
   #endregion Group
 
   #region QueryAnalyzer
@@ -81,8 +82,9 @@ public static class RouteConstants
   #region WorkFlow
   public const string WorkFlowSummary = "workflow-summary";
   public const string CreateWorkFlow = "workflow";
-  public const string CreateAction = "wf-action";
   public const string UpdateWorkFlow = "workflow/{key:int}";
+  public const string DeleteWorkFlow = "workflow/{key:int}";
+  public const string CreateAction = "wf-action";
   public const string UpdateAction = "wf-action/{key}";
   public const string DeleteAction = "wf-action/{key}";
   public const string GetNextStatesByMenu = "next-states-by-menu/";
@@ -284,12 +286,12 @@ public static class RouteConstants
   #endregion TOEFLInformation
 
   #region PTEInformation
-  public const string PteInformationDDL = "pte-information-ddl";
-  public const string PteInformationSummary = "pte-information-summary";
-  public const string CreatePteInformation = "pte-information";
-  public const string UpdatePteInformation = "pte-information/{key:int}";
-  public const string DeletePteInformation = "pte-information/{key:int}";
-  public const string PteInformationByApplicantId = "pte-information-by-applicantid/{applicantId:int}";
+  public const string PTEInformationDDL = "pte-information-ddl";
+  public const string PTEInformationSummary = "pte-information-summary";
+  public const string CreatePTEInformation = "pte-information";
+  public const string UpdatePTEInformation = "pte-information/{key:int}";
+  public const string DeletePTEInformation = "pte-information/{key:int}";
+  public const string PTEInformationByApplicantId = "pte-information-by-applicantid/{applicantId:int}";
   #endregion PTEInformation
 
   #region GMATInformation

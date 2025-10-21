@@ -21,4 +21,7 @@ public class WfStateDto
 
   public int? ModuleId { get; set; }
   public string? ModuleName{ get; set; }
+
+  public int? ClosingStateId { get; set; }
+  public string? ClosingStateName { get; set; }
 }

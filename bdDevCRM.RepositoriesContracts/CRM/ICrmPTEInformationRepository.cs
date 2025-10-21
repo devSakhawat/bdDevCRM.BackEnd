@@ -4,9 +4,9 @@ namespace bdDevCRM.RepositoriesContracts.CRM;
 
 public interface ICrmPTEInformationRepository : IRepositoryBase<CrmPTEInformation>
 {
-  Task<IEnumerable<CrmPTEInformation>> GetActivePteinformationsAsync(bool track);
-  Task<IEnumerable<CrmPTEInformation>> GetPteinformationsAsync(bool track);
-  Task<CrmPTEInformation?> GetPteinformationAsync(int id, bool track);
-  Task<IEnumerable<CrmPTEInformation>> GetPteinformationsByApplicantIdAsync(int applicantId, bool track);
-  Task<CrmPTEInformation?> GetPteinformationByApplicantIdAsync(int applicantId, bool track);
+  Task<IEnumerable<CrmPTEInformation>> GetActivePTEInformationsAsync(bool track);
+  Task<IEnumerable<CrmPTEInformation>> GetPTEInformationsAsync(bool track);
+  Task<CrmPTEInformation?> GetPTEInformationAsync(int id, bool track);
+  Task<IEnumerable<CrmPTEInformation>> GetPTEInformationsByApplicantIdAsync(int applicantId, bool track);
+  Task<CrmPTEInformation?> GetPTEInformationByApplicantIdAsync(int applicantId, bool track);
 }

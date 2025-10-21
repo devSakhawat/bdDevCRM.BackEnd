@@ -3,6 +3,7 @@ using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.Controllers.BaseController;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
+using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -47,7 +48,6 @@ public class StatusController : BaseApiController
     IEnumerable<WfActionDto> groupPermissions = await _serviceManager.WfState.ActionsByStatusIdForGroup(statusId, trackChanges: false);
     return Ok(groupPermissions);
   }
-
 
   #region WorkFlow start
   [HttpPost(RouteConstants.WorkFlowSummary)]
@@ -143,6 +143,9 @@ public class StatusController : BaseApiController
   {
     try
     {
+      if (modelDto == null)
+        return BadRequest(ResponseHelper.BadRequest("Status data is required"));
+
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
         return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
@@ -406,4 +409,27 @@ public class StatusController : BaseApiController
     return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
   }
 
+  [HttpDelete(RouteConstants.DeleteWorkFlow)]
+  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  public async Task<IActionResult> DeleteWorkFlow([FromRoute] int key, [FromBody] WfStateDto modelDto)
+  {
+    // Authentication check
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new UnauthorizedException("User authentication required");
+
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new UnauthorizedException("User session expired");
+
+    // Key validation
+    if (key <= 0 && key != modelDto.WfStateId)
+      throw new BadRequestException("Valid workflow status ID is required");
+
+    string result = await _serviceManager.WfState.DeleteWorkflow(key);
+
+    // If we reach here, deletion was successful
+    return Ok(ResponseHelper.Success(result, "Workflow status deleted successfully"));
+  }
 }

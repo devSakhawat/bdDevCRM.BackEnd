@@ -17,6 +17,7 @@ public interface IStatusService
   Task<string> SaveWorkflow(WfStateDto modelDto);
   Task<string> CreateActionAsync(WfActionDto modelDto);
   Task<string> DeleteAction(int key, WfActionDto modelDto);
+  Task<string> DeleteWorkflow(int key);
 
   Task<IEnumerable<WfStateDto>> GetNextStatesByMenu(int menuId);
 

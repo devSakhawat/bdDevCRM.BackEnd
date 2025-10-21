@@ -1067,29 +1067,29 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
         // Save or Update PTE Information
         if (updateDto.EducationInformation?.PTEInformation != null)
         {
-          var pteInformationDto = updateDto.EducationInformation?.PTEInformation;
-          bool pteInformationExists = await _repository.CrmPTEInformations.ExistsAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.PTEInformationId == pteInformationDto.PTEInformationId);
+          var PTEInformationDto = updateDto.EducationInformation?.PTEInformation;
+          bool PTEInformationExists = await _repository.CrmPTEInformations.ExistsAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.PTEInformationId == PTEInformationDto.PTEInformationId);
 
-          if (!pteInformationExists)
+          if (!PTEInformationExists)
           {
 
-            pteInformationDto.CreatedDate = DateTime.UtcNow;
-            pteInformationDto.CreatedBy = currentUser.UserId ?? 0;
+            PTEInformationDto.CreatedDate = DateTime.UtcNow;
+            PTEInformationDto.CreatedBy = currentUser.UserId ?? 0;
 
-            var pteInformationEntity = MyMapper.JsonClone<PTEInformationDto, CrmPTEInformation>(pteInformationDto);
-            updateDto.EducationInformation?.PTEInformation.PTEInformationId = await _repository.CrmPTEInformations.CreateAndGetIdAsync(pteInformationEntity);
+            var PTEInformationEntity = MyMapper.JsonClone<PTEInformationDto, CrmPTEInformation>(PTEInformationDto);
+            updateDto.EducationInformation?.PTEInformation.PTEInformationId = await _repository.CrmPTEInformations.CreateAndGetIdAsync(PTEInformationEntity);
           }
           else
           {
-            var pteInformationDB = await _repository.CrmPTEInformations.FirstOrDefaultAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.PTEInformationId == pteInformationDto.PTEInformationId);
+            var PTEInformationDB = await _repository.CrmPTEInformations.FirstOrDefaultAsync(x => x.ApplicantId == applicantInfoDto.ApplicantId && x.PTEInformationId == PTEInformationDto.PTEInformationId);
 
-            pteInformationDto.CreatedDate = DateTimeFormatters.IsValidDateTime(pteInformationDB.CreatedDate) ? pteInformationDB.CreatedDate : DateTime.UtcNow;
-            pteInformationDto.CreatedBy = (pteInformationDB.CreatedBy > 0) ? pteInformationDB.CreatedBy : (currentUser.UserId ?? 0);
+            PTEInformationDto.CreatedDate = DateTimeFormatters.IsValidDateTime(PTEInformationDB.CreatedDate) ? PTEInformationDB.CreatedDate : DateTime.UtcNow;
+            PTEInformationDto.CreatedBy = (PTEInformationDB.CreatedBy > 0) ? PTEInformationDB.CreatedBy : (currentUser.UserId ?? 0);
 
-            pteInformationDto.UpdatedDate = DateTime.UtcNow;
-            pteInformationDto.UpdatedBy = currentUser.UserId ?? 0;
-            pteInformationDB = MyMapper.JsonClone<PTEInformationDto, CrmPTEInformation>(pteInformationDto);
-            _repository.CrmPTEInformations.UpdateByState(pteInformationDB);
+            PTEInformationDto.UpdatedDate = DateTime.UtcNow;
+            PTEInformationDto.UpdatedBy = currentUser.UserId ?? 0;
+            PTEInformationDB = MyMapper.JsonClone<PTEInformationDto, CrmPTEInformation>(PTEInformationDto);
+            _repository.CrmPTEInformations.UpdateByState(PTEInformationDB);
             await _repository.SaveAsync();
           }
         }

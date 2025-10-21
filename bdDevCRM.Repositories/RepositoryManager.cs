@@ -69,7 +69,7 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<ICrmEducationHistoryRepository> _educationHistoryRepository;
   private readonly Lazy<ICrmIELTSInformationRepository> _ieltsinformationRepository;
   private readonly Lazy<ICrmTOEFLInformationRepository> _toeflinformationRepository;
-  private readonly Lazy<ICrmPTEInformationRepository> _pteinformationRepository;
+  private readonly Lazy<ICrmPTEInformationRepository> _PTEInformationRepository;
   private readonly Lazy<ICrmGMATInformationRepository> _gmatinformationRepository;
   private readonly Lazy<ICrmOthersInformationRepository> _othersinformationRepository;
   private readonly Lazy<ICrmWorkExperienceRepository> _workExperienceRepository;
@@ -148,7 +148,7 @@ public class RepositoryManager : IRepositoryManager
     _educationHistoryRepository = new Lazy<ICrmEducationHistoryRepository>(() => new CrmEducationHistoryRepository(_repositoryContext));
     _ieltsinformationRepository = new Lazy<ICrmIELTSInformationRepository>(() => new CrmIELTSInformationRepository(_repositoryContext));
     _toeflinformationRepository = new Lazy<ICrmTOEFLInformationRepository>(() => new CrmTOEFLInformationRepository(_repositoryContext));
-    _pteinformationRepository = new Lazy<ICrmPTEInformationRepository>(() => new CrmPTEInformationRepository(_repositoryContext));
+    _PTEInformationRepository = new Lazy<ICrmPTEInformationRepository>(() => new CrmPTEInformationRepository(_repositoryContext));
     _gmatinformationRepository = new Lazy<ICrmGMATInformationRepository>(() => new CrmGMATInformationRepository(_repositoryContext));
     _othersinformationRepository = new Lazy<ICrmOthersInformationRepository>(() => new CrmOthersInformationRepository(_repositoryContext));
     _workExperienceRepository = new Lazy<ICrmWorkExperienceRepository>(() => new CrmWorkExperienceRepository(_repositoryContext));
@@ -219,7 +219,7 @@ public class RepositoryManager : IRepositoryManager
   public ICrmEducationHistoryRepository CrmEducationHistories => _educationHistoryRepository.Value;
   public ICrmIELTSInformationRepository CrmIELTSInformations => _ieltsinformationRepository.Value;
   public ICrmTOEFLInformationRepository CrmTOEFLInformations => _toeflinformationRepository.Value;
-  public ICrmPTEInformationRepository CrmPTEInformations => _pteinformationRepository.Value;
+  public ICrmPTEInformationRepository CrmPTEInformations => _PTEInformationRepository.Value;
   public ICrmGMATInformationRepository CrmGMATInformations => _gmatinformationRepository.Value;
   public ICrmOthersInformationRepository CrmOthersInformations => _othersinformationRepository.Value;
   public ICrmWorkExperienceRepository CrmWorkExperiences => _workExperienceRepository.Value;
