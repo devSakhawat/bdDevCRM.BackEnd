@@ -261,6 +261,38 @@ internal sealed class GroupService : IGroupService
     return groupForUserSettings;
   }
 
+  public async Task<IEnumerable<GroupForUserSettings>> GetGroupsByUserId(int userId, bool trackChanges)
+  {
+    // get user to check IsSystemUser flag
+    Users? objUser = await _repository.Users.GetUserAsync(userId, trackChanges: false);
+
+    IEnumerable<Groups> groups;
+
+    // If system user -> return all groups (no joins)
+    if (objUser != null && objUser.IsSystemUser == true)
+    {
+      groups = await _repository.Groups.ListWithSelectAsync(
+        selector: g => new Groups { GroupId = g.GroupId, GroupName = g.GroupName },
+        trackChanges: false);
+    }
+    else
+    {
+      // normal user -> get groups by GroupMember relation
+      IEnumerable<GroupMember> groupMembers =
+        await _repository.GroupMembers.ListByConditionAsync(x => x.UserId == userId, trackChanges: false);
+
+      var groupIds = groupMembers?.Select(gm => gm.GroupId).Distinct().ToList();
+
+      if (groupIds == null || !groupIds.Any())
+        return Enumerable.Empty<GroupForUserSettings>();
+
+      groups = await _repository.Groups.ListByConditionAsync(g => groupIds.Contains(g.GroupId), trackChanges: false);
+    }
+
+    IEnumerable<GroupForUserSettings> groupForUserSettings = MyMapper.JsonCloneIEnumerableToList<Groups, GroupForUserSettings>(groups);
+    return groupForUserSettings;
+  }
+
   public async Task<IEnumerable<GroupMemberDto>> GroupMemberByUserId(int userId, bool trackChanges)
   {
     // ListByConditionAsync must be call by only enitiy name not dto. 

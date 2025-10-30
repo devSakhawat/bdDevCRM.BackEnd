@@ -37,7 +37,7 @@ public static class RouteConstants
   public const string CreateMenu = "menu";
   public const string MenuSummary = "menu-summary";
   public const string GetMenus = "menus";
-  public const string MenusByModuleId = "menus-by-moduleId";
+  public const string MenusByModuleId = "menus-by-moduleId/{moduleId:int}";
   public const string ReadMenu = "menu/key/{key}";
   public const string UpdateMenu = "menu/{key}";
   public const string DeleteMenu = "menu/{key}";
@@ -62,6 +62,8 @@ public static class RouteConstants
   public const string UpdateGroup = "group/{key}";
   public const string DeleteGroup = "group/{key}";
   public const string GroupsByCompany = "groups/companyId";
+
+  public const string GetGroupsByUserId = "groups/{usersUserId:int}";
 
   public const string GroupMemberByUserId = "groups/group-members-by-userId/";
   public const string GetAccessPermisionForCurrentUser = "groups/accesspermisionforcurrentuser";

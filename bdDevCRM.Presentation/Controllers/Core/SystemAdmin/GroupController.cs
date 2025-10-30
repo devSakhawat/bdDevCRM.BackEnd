@@ -38,7 +38,16 @@ public class GroupController : BaseApiController
   [HttpGet(RouteConstants.GroupPermisionsbyGroupId)]
   public async Task<IActionResult> GroupPermisionsbyGroupId([FromRoute] int groupId)
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
     if (groupId == 0 || groupId == null) throw new IdParametersBadRequestException();
 
     //IEnumerable<GroupPermissionDto> groupPermissions = await _serviceManager.Groups.GroupPermisionsbyGroupId(groupId);
@@ -95,6 +104,34 @@ public class GroupController : BaseApiController
 
     IEnumerable<GroupForUserSettings> groupForUserSettings = await _serviceManager.Groups.GetGroups(trackChanges: false);
     return Ok(groupForUserSettings.ToList());
+  }
+
+
+  [HttpGet(RouteConstants.GetGroupsByUserId)]
+  //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
+  public async Task<IActionResult> GetGroupsByUserId(int usersUserId)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
+
+    //IEnumerable<GroupForUserSettings> groupForUserSettings = await _serviceManager.Groups.GetGroups(trackChanges: false);
+    //return Ok(groupForUserSettings.ToList());
+
+    var res = await _serviceManager.Groups.GetGroupsByUserId(usersUserId, trackChanges: false);
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<GroupForUserSettings>>("No data found!"));
+
+    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
   }
 
 

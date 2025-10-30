@@ -4,6 +4,7 @@ using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -31,8 +32,18 @@ public class QueryAnalyzerController : BaseApiController
   [HttpGet(RouteConstants.GetCustomizedReportInfo)]
   public async Task<IActionResult> GetCustomizedReportInfo()
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    IEnumerable<QueryAnalyzerDto> queryAnalyzers = await _serviceManager.QueryAnalyzer.CustomizedReportInfo(trackChanges: false);
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    IEnumerable<QueryAnalyzerDto> queryAnalyzers = await _serviceManager.QueryAnalyzer.CustomizedReportByPermission(currentUser, trackChanges: false);
     return Ok(queryAnalyzers);
   }
 

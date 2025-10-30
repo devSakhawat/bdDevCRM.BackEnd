@@ -18,6 +18,7 @@ public interface IGroupService
 
   // from user settings
   Task<IEnumerable<GroupForUserSettings>> GetGroups(bool trackChanges);
+  Task<IEnumerable<GroupForUserSettings>> GetGroupsByUserId(int userId, bool trackChanges);
   Task<IEnumerable<GroupMemberDto>> GroupMemberByUserId(int userId, bool trackChanges);
 
   // get menu permission from controller.

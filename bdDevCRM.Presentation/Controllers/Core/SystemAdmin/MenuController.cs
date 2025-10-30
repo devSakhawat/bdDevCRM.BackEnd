@@ -12,12 +12,13 @@ using Microsoft.Extensions.Caching.Memory;
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 
-public class EmployeeController : BaseApiController
+//public class EmployeeController : BaseApiController
+public class MenuController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
 
-  public EmployeeController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
+  public MenuController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
   {
     //_serviceManager = serviceManager;
     _cache = cache;
@@ -82,15 +83,27 @@ public class EmployeeController : BaseApiController
   }
 
   [HttpGet(RouteConstants.MenusByModuleId)]
-  [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
+  [ResponseCache(Duration = 60)]
   //[IgnoreMediaTypeValidation]
   [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  public async Task<IActionResult> MenusByModuleId(int moduleId)
+  public async Task<IActionResult> MenusByModuleId([FromRoute] int moduleId)
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    IEnumerable<MenuDto> menusDto = await _serviceManager.Menus.MenusByModuleId(moduleId, trackChanges: false);
-    //return (menuSummary != null ) ? Ok(menuSummary) : NoContent();
-    return Ok(menusDto.ToList());
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    var res = await _serviceManager.Menus.MenusByModuleId(moduleId, trackChanges: false);
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<ModuleDto>>("No data found!"));
+
+    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
   }
 
 

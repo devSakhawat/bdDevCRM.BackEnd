@@ -1754,6 +1754,11 @@ public partial class CRMContext : DbContext
           .HasMaxLength(100)
           .HasColumnName("THEME");
       entity.Property(e => e.UserName).HasMaxLength(500);
+      entity.Property(e => e.IsSystemUser)
+      .HasColumnName("IsSystemUser")
+      .HasColumnType("bit")
+      .HasDefaultValue(false)
+      .IsRequired();
     });
 
     modelBuilder.Entity<WfAction>(entity =>
