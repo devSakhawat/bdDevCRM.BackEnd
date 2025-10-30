@@ -1,7 +1,10 @@
 ﻿//using bdDevCRM.Entities.CRMGrid;
 using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 //using bdDevCRM.Utilities.KendoGrid;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,62 +16,78 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 public class ModuleController : BaseApiController
 {
-  //private readonly IServiceManager _serviceManager;
-  private readonly IMemoryCache _cache;
-  public ModuleController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
-  {
-    //_serviceManager = serviceManager;
-    _cache = cache;
-  }
+    //private readonly IServiceManager _serviceManager;
+    private readonly IMemoryCache _cache;
+    public ModuleController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
+    {
+        //_serviceManager = serviceManager;
+        _cache = cache;
+    }
 
 
-  [HttpPost(RouteConstants.ModuleSummary)]
-  public async Task<IActionResult> ModuleSummary([FromBody] CRMGridOptions options)
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    var moduleSummary = await _serviceManager.Modules.ModuleSummary(false, options);
-    return (moduleSummary != null) ? Ok(moduleSummary) : NoContent();
-  }
+    [HttpPost(RouteConstants.ModuleSummary)]
+    public async Task<IActionResult> ModuleSummary([FromBody] CRMGridOptions options)
+    {
+        var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+        var moduleSummary = await _serviceManager.Modules.ModuleSummary(false, options);
+        return (moduleSummary != null) ? Ok(moduleSummary) : NoContent();
+    }
 
 
-  //[HttpGet("SelectMenuByUserPermission")]
-  [HttpGet(RouteConstants.Modules)]
-  //[Produces("application/json")]
-  [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  public async Task<IActionResult> GetModulesAsync()
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    var modulesDto = await _serviceManager.Modules.GetModulesAsync(false);
-    return Ok(modulesDto.ToList());
-  }
+    //[HttpGet("SelectMenuByUserPermission")]
+    [HttpGet(RouteConstants.Modules)]
+    //[Produces("application/json")]
+    [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> GetModulesAsync()
+    {
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            throw new GenericUnauthorizedException("User authentication required.");
 
-  [HttpPost(RouteConstants.CreateModule)]
-  public async Task<IActionResult> SaveModule([FromBody] ModuleDto moduleDto)
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+        if (!int.TryParse(userIdClaim, out int userId))
+            throw new GenericBadRequestException("Invalid user ID format.");
 
-    var module = await _serviceManager.Modules.CreateModuleAsync(moduleDto);
-    return (module != null) ? Ok(module) : NoContent();
-  }
+        UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+        if (currentUser == null)
+            throw new GenericUnauthorizedException("User session expired.");
 
-  [HttpPut(RouteConstants.UpdateModule)]
-  public async Task<IActionResult> UpdateModule([FromRoute] int key, [FromBody] ModuleDto moduleDto)
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+        if (!MenuConstant.TryGetPath("CRMApplication", out var menuPath))
+            throw new GenericBadRequestException("Invalid menu name.");
 
-    ModuleDto returnData = await _serviceManager.Modules.UpdateModuleAsync(key, moduleDto);
-    return (returnData != null) ? Ok(returnData) : NoContent();
-  }
+        var res = await _serviceManager.Modules.GetModulesAsync(currentUser ,false);
+        if (res == null || !res.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<ModuleDto>>("No data found"));
 
-  [HttpDelete(RouteConstants.DeleteModule)]
-  public async Task<IActionResult> DeleteModule([FromRoute] int key, [FromBody] ModuleDto moduleDto)
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+        return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
+    }
 
-    await _serviceManager.Modules.DeleteModuleAsync(key, moduleDto);
-    return Ok("Success");
-  }
+    [HttpPost(RouteConstants.CreateModule)]
+    public async Task<IActionResult> SaveModule([FromBody] ModuleDto moduleDto)
+    {
+        var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+        var module = await _serviceManager.Modules.CreateModuleAsync(moduleDto);
+        return (module != null) ? Ok(module) : NoContent();
+    }
+
+    [HttpPut(RouteConstants.UpdateModule)]
+    public async Task<IActionResult> UpdateModule([FromRoute] int key, [FromBody] ModuleDto moduleDto)
+    {
+        var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+        ModuleDto returnData = await _serviceManager.Modules.UpdateModuleAsync(key, moduleDto);
+        return (returnData != null) ? Ok(returnData) : NoContent();
+    }
+
+    [HttpDelete(RouteConstants.DeleteModule)]
+    public async Task<IActionResult> DeleteModule([FromRoute] int key, [FromBody] ModuleDto moduleDto)
+    {
+        var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+        await _serviceManager.Modules.DeleteModuleAsync(key, moduleDto);
+        return Ok("Success");
+    }
 
 
 

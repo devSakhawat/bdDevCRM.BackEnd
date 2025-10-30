@@ -37,4 +37,5 @@ public partial class Users
     public int? AccessParentCompany { get; set; }
 
     public int? DefaultDashboard { get; set; }
+    public bool? IsSystemUser { get; set; }
 }

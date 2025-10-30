@@ -50,7 +50,7 @@ internal sealed class ModuleService : IModuleService
     return gridentity;
   }
 
-  public async Task<List<ModuleDto>> GetModulesAsync(bool trackChanges)
+  public async Task<List<ModuleDto>> GetModulesAsync(UsersDto currentUser ,bool trackChanges)
   {
     var module = await _repository.Modules.GetModulesAsync(trackChanges);
     List<ModuleDto> modulesDto = MyMapper.JsonCloneIEnumerableToList<Module, ModuleDto>(module);

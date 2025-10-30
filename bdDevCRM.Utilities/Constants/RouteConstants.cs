@@ -37,7 +37,7 @@ public static class RouteConstants
   public const string CreateMenu = "menu";
   public const string MenuSummary = "menu-summary";
   public const string GetMenus = "menus";
-  public const string MenusByModuleId = "menus-by-moduleId";
+  public const string MenusByModuleId = "menus-by-moduleId/{moduleId:int}";
   public const string ReadMenu = "menu/key/{key}";
   public const string UpdateMenu = "menu/{key}";
   public const string DeleteMenu = "menu/{key}";
