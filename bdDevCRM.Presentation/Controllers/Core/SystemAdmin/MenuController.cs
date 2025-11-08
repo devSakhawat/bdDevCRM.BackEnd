@@ -18,11 +18,11 @@ public class MenuController : BaseApiController
     //private readonly IServiceManager _serviceManager;
     private readonly IMemoryCache _cache;
 
-  public MenuController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
-  {
-    //_serviceManager = serviceManager;
-    _cache = cache;
-  }
+    public MenuController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
+    {
+        //_serviceManager = serviceManager;
+        _cache = cache;
+    }
 
 
     [HttpGet(RouteConstants.SelectMenuByUserPermission)]
@@ -82,29 +82,29 @@ public class MenuController : BaseApiController
         return Ok(menusDto.ToList());
     }
 
-  [HttpGet(RouteConstants.MenusByModuleId)]
-  [ResponseCache(Duration = 60)]
-  //[IgnoreMediaTypeValidation]
-  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-  public async Task<IActionResult> MenusByModuleId([FromRoute] int moduleId)
-  {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
+    [HttpGet(RouteConstants.MenusByModuleId)]
+    [ResponseCache(Duration = 60)]
+    //[IgnoreMediaTypeValidation]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> MenusByModuleId([FromRoute] int moduleId)
+    {
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            throw new GenericUnauthorizedException("User authentication required.");
 
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
+        if (!int.TryParse(userIdClaim, out int userId))
+            throw new GenericBadRequestException("Invalid user ID format.");
 
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
+        UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+        if (currentUser == null)
+            throw new GenericUnauthorizedException("User session expired.");
 
-    var res = await _serviceManager.Menus.MenusByModuleId(moduleId, trackChanges: false);
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<ModuleDto>>("No data found!"));
+        var res = await _serviceManager.Menus.MenusByModuleId(moduleId, trackChanges: false);
+        if (res == null)
+            return Ok(ResponseHelper.NoContent<IEnumerable<ModuleDto>>("No data found!"));
 
-    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
-  }
+        return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
+    }
 
 
     /// <summary>

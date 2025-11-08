@@ -55,7 +55,7 @@ public class AccessControlController : BaseApiController
     if (modelDto.AccessId <= 0)
       throw new InvalidCreateOperationException("Failed to create new record.");
 
-    return Ok(ResponseHelper.Created(modelDto, "Record updated successfully."));
+    return Ok(ResponseHelper.Updated(modelDto, "Record updated successfully."));
   }
 
 

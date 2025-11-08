@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System.Security.AccessControl;
+using System.Text.RegularExpressions;
 
 public class GroupController : BaseApiController
 {
@@ -50,9 +51,6 @@ public class GroupController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
     if (groupId == 0 || groupId == null) throw new IdParametersBadRequestException();
 
-    //IEnumerable<GroupPermissionDto> groupPermissions = await _serviceManager.Groups.GroupPermisionsbyGroupId(groupId);
-    //return Ok(groupPermissions);
-
     var res = await _serviceManager.Groups.GroupPermisionsbyGroupId(groupId);
     if (res == null)
       return Ok(ResponseHelper.NoContent<IEnumerable<GroupPermissionDto>>("No data found for the specified group"));
@@ -63,10 +61,27 @@ public class GroupController : BaseApiController
   [HttpGet(RouteConstants.GetAccesses)]
   public async Task<IActionResult> GetAccesses()
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    //var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
 
-    IEnumerable<AccessControlDto> accessControlls = await _serviceManager.Groups.GetAccesses();
-    return Ok(accessControlls);
+    //IEnumerable<AccessControlDto> accessControlls = await _serviceManager.Groups.GetAccesses();
+    //return Ok(accessControlls);
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    var res = await _serviceManager.Groups.GetAccesses();
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<AccessControlDto>>("No data found!"));
+
+    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
   }
 
 
@@ -82,13 +97,32 @@ public class GroupController : BaseApiController
     return (model != null) ? Ok(model) : NoContent();
   }
 
-  [HttpPut(RouteConstants.UpdateGroup)]
-  public async Task<IActionResult> UpdateGroup([FromRoute] int key, [FromBody] GroupDto modelDto)
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
 
-    GroupDto returnData = await _serviceManager.Groups.UpdateAsync(key, modelDto);
-    return (returnData != null) ? Ok(returnData) : NoContent();
+  [HttpPut(RouteConstants.UpdateGroup)]
+  public async Task<IActionResult> UpdateGroup([FromRoute] int groupId, [FromBody] GroupDto modelDto)
+  {
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+    if (groupId == 0 || groupId == null) throw new IdParametersBadRequestException();
+
+    var res = await _serviceManager.Groups.UpdateAsync(groupId, modelDto);
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<GroupPermissionDto>>("No data found for the specified group"));
+
+    return Ok(ResponseHelper.Updated(res, "Data Updated successfully"));
+
+    //var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    //GroupDto returnData = await _serviceManager.Groups.UpdateAsync(groupId, modelDto);
+    //return (returnData != null) ? Ok(returnData) : NoContent();
   }
 
 

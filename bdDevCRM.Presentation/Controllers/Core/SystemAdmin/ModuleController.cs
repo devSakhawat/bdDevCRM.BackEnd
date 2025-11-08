@@ -56,7 +56,7 @@ public class ModuleController : BaseApiController
       throw new GenericBadRequestException("Invalid menu name.");
     var rawUrl = $"..{menuPath}";
 
-    var res = await _serviceManager.Modules.GetModulesAsync(false);
+    var res = await _serviceManager.Modules.GetModulesAsync(currentUser,false);
     if (res == null)
       return Ok(ResponseHelper.NoContent<IEnumerable<ModuleDto>>("No data found!"));
 

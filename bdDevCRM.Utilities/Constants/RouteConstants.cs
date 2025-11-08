@@ -59,7 +59,7 @@ public static class RouteConstants
   public const string GroupSummary = "group-summary";
   public const string CreateGroup = "group";
   public const string ReadGroup = "group/key/{key}";
-  public const string UpdateGroup = "group/{key}";
+  public const string UpdateGroup = "group/{groupId:int}";
   public const string DeleteGroup = "group/{key}";
   public const string GroupsByCompany = "groups/companyId";
 
@@ -75,7 +75,8 @@ public static class RouteConstants
   #endregion QueryAnalyzer
 
   #region Status
-  public const string StatusByMenuId = "status/key/";
+  //public const string StatusByMenuId = "status/key/";
+  public const string StatusByMenuId = "status/key/{menuId:int}";
   public const string StatusByMenuName = "status/menu/{key}";
   public const string ActionsByStatusIdForGroup = "actions-4-group/status/";
   public const string StatusByMenuNUserId = "Status-MenuId-UserId";

@@ -27,16 +27,45 @@ public class StatusController : BaseApiController
     _cache = cache;
   }
 
+  /// <summary>
+  /// 
+  /// </summary>
+  /// <param name="menuId"></param>
+  /// <returns></returns>
+  /// <exception cref="GenericUnauthorizedException"></exception>
+  /// <exception cref="GenericBadRequestException"></exception>
   [HttpGet(RouteConstants.StatusByMenuId)]
   //[AllowAnonymous]
-  public async Task<IActionResult> StatusByMenuId([FromQuery] int menuId)
+  public async Task<IActionResult> StatusByMenuId([FromRoute] int menuId)
   {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    if (menuId == 0 || menuId == null) throw new IdParametersBadRequestException();
+    //var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    //if (menuId == 0 || menuId == null) throw new IdParametersBadRequestException();
 
-    IEnumerable<WfStateDto> groupPermissions = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
-    return Ok(groupPermissions);
+    //IEnumerable<WfStateDto> groupPermissions = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
+    //return Ok(groupPermissions);
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      throw new GenericUnauthorizedException("User authentication required.");
+
+    if (!int.TryParse(userIdClaim, out int userId))
+      throw new GenericBadRequestException("Invalid user ID format.");
+
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null)
+      throw new GenericUnauthorizedException("User session expired.");
+
+    if (!currentUser.UserId.HasValue)
+      throw new GenericBadRequestException("Valid UserId is required.");
+
+    var res = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
+    if (res == null)
+      return Ok(ResponseHelper.NoContent<IEnumerable<WfStateDto>>("No data found!"));
+
+    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
+
   }
+
 
   [HttpGet(RouteConstants.ActionsByStatusIdForGroup)]
   //[AllowAnonymous]
