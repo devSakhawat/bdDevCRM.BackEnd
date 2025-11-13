@@ -118,11 +118,6 @@ public class GroupController : BaseApiController
       return Ok(ResponseHelper.NoContent<IEnumerable<GroupPermissionDto>>("No data found for the specified group"));
 
     return Ok(ResponseHelper.Updated(res, "Data Updated successfully"));
-
-    //var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-
-    //GroupDto returnData = await _serviceManager.Groups.UpdateAsync(groupId, modelDto);
-    //return (returnData != null) ? Ok(returnData) : NoContent();
   }
 
 
