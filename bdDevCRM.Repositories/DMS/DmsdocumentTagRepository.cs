@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Repositories.DMS;
 
-// DmsdocumentTag Repository Implementation
-public class DmsdocumentTagRepository : RepositoryBase<DmsdocumentTag>, IDmsdocumentTagRepository
+// DmsDocumentTag Repository Implementation
+public class DmsDocumentTagRepository : RepositoryBase<DmsDocumentTag>, IDmsDocumentTagRepository
 {
-  public DmsdocumentTagRepository(CRMContext context) : base(context) { }
+  public DmsDocumentTagRepository(CRMContext context) : base(context) { }
 
   // Get all tags
-  public async Task<IEnumerable<DmsdocumentTag>> GetAllTagsAsync(bool trackChanges) =>
+  public async Task<IEnumerable<DmsDocumentTag>> GetAllTagsAsync(bool trackChanges) =>
       await ListAsync(x => x.TagId, trackChanges);
 
   // Create new tag
-  public void CreateTag(DmsdocumentTag tag) => Create(tag);
+  public void CreateTag(DmsDocumentTag tag) => Create(tag);
 
   // Delete tag
-  public void DeleteTag(DmsdocumentTag tag) => Delete(tag);
+  public void DeleteTag(DmsDocumentTag tag) => Delete(tag);
 }

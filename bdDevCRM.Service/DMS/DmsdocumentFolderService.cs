@@ -1,10 +1,11 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.DMS;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -16,52 +17,52 @@ using System.Threading.Tasks;
 namespace bdDevCRM.Service.DMS;
 
 
-internal sealed class DmsdocumentFolderService : IDmsdocumentFolderService
+internal sealed class DmsDocumentFolderService : IDmsDocumentFolderService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
 
-  public DmsdocumentFolderService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DmsDocumentFolderService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<DmsdocumentFolderDDL>> GetFoldersDDLAsync(bool trackChanges = false)
+  public async Task<IEnumerable<DmsDocumentFolderDDL>> GetFoldersDDLAsync(bool trackChanges = false)
   {
-    var folders = await _repository.DmsdocumentFolders.ListAsync(trackChanges:trackChanges);
+    var folders = await _repository.DmsDocumentFolders.ListAsync(trackChanges:trackChanges);
 
     if (!folders.Any())
-      throw new GenericListNotFoundException("DmsdocumentFolder");
+      throw new GenericListNotFoundException("DmsDocumentFolder");
 
-    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<DmsdocumentFolder, DmsdocumentFolderDDL>(folders);
+    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<DmsDocumentFolder, DmsDocumentFolderDDL>(folders);
 
     return ddlDtos;
   }
 
-  public async Task<GridEntity<DmsdocumentFolderDto>> SummaryGrid(CRMGridOptions options)
+  public async Task<GridEntity<DmsDocumentFolderDto>> SummaryGrid(CRMGridOptions options)
   {
-    string query = "SELECT * FROM DmsdocumentFolder";
+    string query = "SELECT * FROM DmsDocumentFolder";
     string orderBy = "FolderName asc";
 
-    var gridEntity = await _repository.DmsdocumentFolders.GridData<DmsdocumentFolderDto>(query, options, orderBy, "");
+    var gridEntity = await _repository.DmsDocumentFolders.GridData<DmsDocumentFolderDto>(query, options, orderBy, "");
 
     return gridEntity;
   }
 
-  public async Task<string> CreateNewRecordAsync(DmsdocumentFolderDto modelDto)
+  public async Task<string> CreateNewRecordAsync(DmsDocumentFolderDto modelDto)
   {
     if (modelDto.FolderId != 0)
       throw new InvalidCreateOperationException("FolderId must be 0 when creating a new folder.");
 
-    bool isExist = await _repository.DmsdocumentFolders.ExistsAsync(x => x.FolderName.Trim().ToLower() == modelDto.FolderName.Trim().ToLower());
-    if (isExist) throw new DuplicateRecordException("DmsdocumentFolder", "FolderName");
+    bool isExist = await _repository.DmsDocumentFolders.ExistsAsync(x => x.FolderName.Trim().ToLower() == modelDto.FolderName.Trim().ToLower());
+    if (isExist) throw new DuplicateRecordException("DmsDocumentFolder", "FolderName");
 
-    var folder = MyMapper.JsonClone<DmsdocumentFolderDto, DmsdocumentFolder>(modelDto);
+    var folder = MyMapper.JsonClone<DmsDocumentFolderDto, DmsDocumentFolder>(modelDto);
 
-    var createdId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(folder);
+    var createdId = await _repository.DmsDocumentFolders.CreateAndGetIdAsync(folder);
     if (createdId == 0)
       throw new InvalidCreateOperationException();
 
@@ -71,38 +72,38 @@ internal sealed class DmsdocumentFolderService : IDmsdocumentFolderService
     return OperationMessage.Success;
   }
 
-  public async Task<string> UpdateNewRecordAsync(int key, DmsdocumentFolderDto modelDto, bool trackChanges)
+  public async Task<string> UpdateNewRecordAsync(int key, DmsDocumentFolderDto modelDto, bool trackChanges)
   {
     if (key <= 0 || key != modelDto.FolderId)
       return "Invalid update attempt: key does not match the FolderId.";
 
-    bool exists = await _repository.DmsdocumentFolders.ExistsAsync(x => x.FolderId == key);
+    bool exists = await _repository.DmsDocumentFolders.ExistsAsync(x => x.FolderId == key);
     if (!exists)
       return "Update failed: folder not found.";
 
-    var folder = MyMapper.JsonClone<DmsdocumentFolderDto, DmsdocumentFolder>(modelDto);
+    var folder = MyMapper.JsonClone<DmsDocumentFolderDto, DmsDocumentFolder>(modelDto);
 
-    _repository.DmsdocumentFolders.Update(folder);
+    _repository.DmsDocumentFolders.Update(folder);
     await _repository.SaveAsync();
     _logger.LogWarn($"Folder with Id: {key} updated.");
 
     return OperationMessage.Success;
   }
 
-  public async Task<string> DeleteRecordAsync(int key, DmsdocumentFolderDto modelDto)
+  public async Task<string> DeleteRecordAsync(int key, DmsDocumentFolderDto modelDto)
   {
     if (modelDto == null)
-      throw new NullModelBadRequestException(nameof(DmsdocumentFolderDto));
+      throw new NullModelBadRequestException(nameof(DmsDocumentFolderDto));
 
     if (key != modelDto.FolderId)
-      throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsdocumentFolderDto));
+      throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsDocumentFolderDto));
 
-    var folder = await _repository.DmsdocumentFolders.FirstOrDefaultAsync(x => x.FolderId == key, false);
+    var folder = await _repository.DmsDocumentFolders.FirstOrDefaultAsync(x => x.FolderId == key, false);
 
     if (folder == null)
-      throw new GenericNotFoundException("DmsdocumentFolder", "FolderId", key.ToString());
+      throw new GenericNotFoundException("DmsDocumentFolder", "FolderId", key.ToString());
 
-    await _repository.DmsdocumentFolders.DeleteAsync(x => x.FolderId == key, true);
+    await _repository.DmsDocumentFolders.DeleteAsync(x => x.FolderId == key, true);
     await _repository.SaveAsync();
 
     _logger.LogWarn($"Folder with Id: {key} deleted.");
@@ -110,16 +111,16 @@ internal sealed class DmsdocumentFolderService : IDmsdocumentFolderService
     return OperationMessage.Success;
   }
 
-  public async Task<string> SaveOrUpdate(int key, DmsdocumentFolderDto modelDto)
+  public async Task<string> SaveOrUpdate(int key, DmsDocumentFolderDto modelDto)
   {
     if (modelDto.FolderId == 0 && key == 0)
     {
-      bool isExist = await _repository.DmsdocumentFolders.ExistsAsync(x => x.FolderName.Trim().ToLower() == modelDto.FolderName.Trim().ToLower());
-      if (isExist) throw new DuplicateRecordException("DmsdocumentFolder", "FolderName");
+      bool isExist = await _repository.DmsDocumentFolders.ExistsAsync(x => x.FolderName.Trim().ToLower() == modelDto.FolderName.Trim().ToLower());
+      if (isExist) throw new DuplicateRecordException("DmsDocumentFolder", "FolderName");
 
-      var newFolder = MyMapper.JsonClone<DmsdocumentFolderDto, DmsdocumentFolder>(modelDto);
+      var newFolder = MyMapper.JsonClone<DmsDocumentFolderDto, DmsDocumentFolder>(modelDto);
 
-      var createdId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(newFolder);
+      var createdId = await _repository.DmsDocumentFolders.CreateAndGetIdAsync(newFolder);
       if (createdId == 0)
         throw new InvalidCreateOperationException();
 
@@ -129,11 +130,11 @@ internal sealed class DmsdocumentFolderService : IDmsdocumentFolderService
     }
     else if (key > 0 && key == modelDto.FolderId)
     {
-      var exists = await _repository.DmsdocumentFolders.ExistsAsync(x => x.FolderId == key);
+      var exists = await _repository.DmsDocumentFolders.ExistsAsync(x => x.FolderId == key);
       if (!exists)
       {
-        var updateFolder = MyMapper.JsonClone<DmsdocumentFolderDto, DmsdocumentFolder>(modelDto);
-        _repository.DmsdocumentFolders.Update(updateFolder);
+        var updateFolder = MyMapper.JsonClone<DmsDocumentFolderDto, DmsDocumentFolder>(modelDto);
+        _repository.DmsDocumentFolders.Update(updateFolder);
         await _repository.SaveAsync();
 
         _logger.LogWarn($"Folder with Id: {key} updated.");

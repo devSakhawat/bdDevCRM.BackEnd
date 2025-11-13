@@ -1,6 +1,6 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
@@ -8,6 +8,7 @@ using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Common;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Data;
@@ -164,7 +165,7 @@ left join Employment on Employment.HRRecordId=Users.EmployeeId where Users.Emplo
   // from users settings page
   public async Task<GridEntity<UsersDto>> UsersSummary(int companyId, bool trackChanges, CRMGridOptions options, UsersDto user)
   {
-    IEnumerable<GroupsRepositoryDto> objGroups = await _repository.AccessRestriction.AccessRestrictionGroupsByHrrecordId((int)user.HrRecordId);
+    IEnumerable<GroupsRepositoryDto> objGroups = await _repository.AccessRestrictions.AccessRestrictionGroupsByHrrecordId((int)user.HrRecordId);
     string condition = "";
     var newCondition = "";
     string groupCondition = string.Empty;
@@ -174,120 +175,124 @@ left join Employment on Employment.HRRecordId=Users.EmployeeId where Users.Emplo
       if (!string.IsNullOrEmpty(groupIds)) groupCondition = $" or GroupId in ({groupIds})";
     }
 
-    var accessRestrictionRepositoryDto = await _repository.AccessRestriction.AccessRestrictionByHrRecordId((int)user.HrRecordId, groupCondition);
+    #region access restriction : no need now.
+    //var accessRestrictionRepositoryDto = await _repository.AccessRestrictions.AccessRestrictionByHrRecordId((int)user.HrRecordId, groupCondition);
 
-    if (accessRestrictionRepositoryDto.Count() > 0)
-    {
-      IEnumerable<AccessRestrictionRepositoryDto> objAccessRestructionCompany = accessRestrictionRepositoryDto.Where(a => a.ParentReference == 0 && a.ReferenceType == 1).ToList();
+    //if (accessRestrictionRepositoryDto.Count() > 0)
+    //{
+    //  IEnumerable<AccessRestrictionRepositoryDto> objAccessRestructionCompany = accessRestrictionRepositoryDto.Where(a => a.ParentReference == 0 && a.ReferenceType == 1).ToList();
 
-      if (objAccessRestructionCompany.Count() > 0)
-      {
-        foreach (var accessRestrictionEntity in objAccessRestructionCompany)
-        {
-          if (newCondition == "")
-          {
-            newCondition += string.Format(" (Employment.CompanyId= {0} ", accessRestrictionEntity.ReferenceId);
-          }
-          else
-          {
-            newCondition += string.Format(" or (Employment.CompanyId={0}", accessRestrictionEntity.ReferenceId);
-          }
+    //  if (objAccessRestructionCompany.Count() > 0)
+    //  {
+    //    foreach (var accessRestrictionEntity in objAccessRestructionCompany)
+    //    {
+    //      if (newCondition == "")
+    //      {
+    //        newCondition += string.Format(" (Employment.CompanyId= {0} ", accessRestrictionEntity.ReferenceId);
+    //      }
+    //      else
+    //      {
+    //        newCondition += string.Format(" or (Employment.CompanyId={0}", accessRestrictionEntity.ReferenceId);
+    //      }
 
-          var objAccessRestructionBranch = accessRestrictionRepositoryDto.Where(b => b.ReferenceType == 2 && b.ParentReference == accessRestrictionEntity.ReferenceId).ToList();
+    //      var objAccessRestructionBranch = accessRestrictionRepositoryDto.Where(b => b.ReferenceType == 2 && b.ParentReference == accessRestrictionEntity.ReferenceId).ToList();
 
-          #region Branch Count
+    //      #region Branch Count
 
-          if (objAccessRestructionBranch.Count > 0)
-          {
-            var isFirstConditionForBranch = true;
-            newCondition += " and (";
+    //      if (objAccessRestructionBranch.Count > 0)
+    //      {
+    //        var isFirstConditionForBranch = true;
+    //        newCondition += " and (";
 
-            foreach (var restrictionEntity in objAccessRestructionBranch)
-            {
-              if (isFirstConditionForBranch)
-              {
-                newCondition += string.Format(" (Employment.BranchId={0}",
-                    restrictionEntity.ReferenceId);
-              }
-              else
-              {
-                newCondition += string.Format(" or (Employment.BranchId={0}",
-                    restrictionEntity.ReferenceId);
-              }
-              isFirstConditionForBranch = false;
+    //        foreach (var restrictionEntity in objAccessRestructionBranch)
+    //        {
+    //          if (isFirstConditionForBranch)
+    //          {
+    //            newCondition += string.Format(" (Employment.BranchId={0}",
+    //                restrictionEntity.ReferenceId);
+    //          }
+    //          else
+    //          {
+    //            newCondition += string.Format(" or (Employment.BranchId={0}",
+    //                restrictionEntity.ReferenceId);
+    //          }
+    //          isFirstConditionForBranch = false;
 
-              #region Department Count
+    //          #region Department Count
 
-              var objAccessRestructionDep = accessRestrictionRepositoryDto.Where(b =>
-                          b.ReferenceType == 3 &&
-                          b.ParentReference == accessRestrictionEntity.ReferenceId &&
-                          b.ChiledParentReference == restrictionEntity.ReferenceId).ToList();
-              if (objAccessRestructionDep.Count > 0)
-              {
-                newCondition += " and (";
-                var ids = objAccessRestructionDep.Aggregate("",
-                    (current, entity) =>
-                        current +
-                        (current == ""
-                            ? entity.ReferenceId.ToString()
-                            : "," + entity.ReferenceId.ToString()));
-                if (ids != "")
-                {
-                  newCondition += " Employment.DepartmentId in (" + ids + ")";
-                }
-                newCondition += ")";
-              }
+    //          var objAccessRestructionDep = accessRestrictionRepositoryDto.Where(b =>
+    //                      b.ReferenceType == 3 &&
+    //                      b.ParentReference == accessRestrictionEntity.ReferenceId &&
+    //                      b.ChiledParentReference == restrictionEntity.ReferenceId).ToList();
+    //          if (objAccessRestructionDep.Count > 0)
+    //          {
+    //            newCondition += " and (";
+    //            var ids = objAccessRestructionDep.Aggregate("",
+    //                (current, entity) =>
+    //                    current +
+    //                    (current == ""
+    //                        ? entity.ReferenceId.ToString()
+    //                        : "," + entity.ReferenceId.ToString()));
+    //            if (ids != "")
+    //            {
+    //              newCondition += " Employment.DepartmentId in (" + ids + ")";
+    //            }
+    //            newCondition += ")";
+    //          }
 
-              #endregion
+    //          #endregion
 
-              newCondition += ")";
-            }
-            newCondition += ")";
-          }
+    //          newCondition += ")";
+    //        }
+    //        newCondition += ")";
+    //      }
 
-          #endregion
+    //      #endregion
 
-          newCondition += " )";
-        }
-      }
+    //      newCondition += " )";
+    //    }
+    //  }
 
-      if (user.AccessParentCompany == 1)
-      {
-        if (companyId > 0)
-        {
-          condition = string.Format(" where Users.CompanyId={0}", companyId);
-          if (newCondition != "")
-          {
-            condition += " and (" + newCondition + ")";
-          }
-        }
-        else
-        {
-          if (newCondition != "")
-          {
-            condition = " where " + newCondition;
-          }
-        }
-      }
-      else
-      {
-        condition = string.Format(" where Users.CompanyId={0}", companyId == 0 ? companyId : companyId);
-        if (newCondition != "")
-        {
-          condition += " and (" + newCondition + " )";
-        }
-      }
-    }
+    //  if (user.AccessParentCompany == 1)
+    //  {
+    //    if (companyId > 0)
+    //    {
+    //      condition = string.Format(" where Users.CompanyId={0}", companyId);
+    //      if (newCondition != "")
+    //      {
+    //        condition += " and (" + newCondition + ")";
+    //      }
+    //    }
+    //    else
+    //    {
+    //      if (newCondition != "")
+    //      {
+    //        condition = " where " + newCondition;
+    //      }
+    //    }
+    //  }
+    //  else
+    //  {
+    //    condition = string.Format(" where Users.CompanyId={0}", companyId == 0 ? companyId : companyId);
+    //    if (newCondition != "")
+    //    {
+    //      condition += " and (" + newCondition + " )";
+    //    }
+    //  }
+    //}
+
+    #endregion access restriction : no need now.
 
 
     string query =
       string.Format(@"Select Users.*,Employment.DepartmentId ,BranchId ,Employment.EmployeeId as Employee_Id ,Employee.ShortName ,Department.DepartmentName
-,DESIGNATION.DESIGNATIONNAME ,Users.EmployeeId as HrRecordId
+--,DESIGNATION.DESIGNATIONNAME 
+,Users.EmployeeId as HrRecordId
 from Users
 inner join Employment on Employment.HrREcordId = Users.EmployeeID 
 inner join Employee on Employee.HrRecordId = Employment.HrREcordId
 left join Department on Employment.DepartmentId = Department.DepartmentId
-left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
+--left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
 {0}", condition);
     string orderBy = "UserName asc";
     var gridEntity = await _repository.Users.GridData<UsersDto>(query, options, orderBy, "");
@@ -295,9 +300,9 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
     return gridEntity;
   }
 
-  public async Task<string> SaveUser(UsersDto usersDto)
+  public async Task<UsersDto> SaveUser(UsersDto usersDto)
   {
-    string res = string.Empty;
+    var res = new UsersDto();
     //// Not now. We will work this function letter.
     //UpdateAppUser(usersDto);
 
@@ -322,16 +327,15 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
 
     if (validate != "Valid")
     {
-      res = validate;
-      return res;
+      return new UsersDto();
     }
 
     using var transaction = _repository.Users.TransactionBeginAsync();
     try
     {
       List<GroupMember> groupMembers = new List<GroupMember>();
-      #region New User
 
+      #region New User
       if (usersDto.UserId == 0)
       {
         //var objUserNewByLogInId = GetUserByLoginId(usersDto.LoginId);
@@ -342,17 +346,14 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
           if (!await _repository.Users.ExistsAsync(x => x.EmployeeId == usersDto.EmployeeId))
           {
             usersDto.CreatedDate = DateTime.Now;
-            usersDto.LastUpdateDate = DateTime.Now;
+            usersDto.LastUpdatedDate = DateTime.Now;
             usersDto.IsExpired = false;
 
             var encytpass = EncryptDecryptHelper.Encrypt(usersDto.Password);
             usersDto.Password = encytpass;
 
-            //GetDbHelper();
-            //SqlDbHelper.BeginTransaction();
-
             Users objUsers = MyMapper.JsonClone<UsersDto, Users>(usersDto);
-            int lastCreatedUserId = await _repository.Users.CreateAndGetIdAsync(objUsers);
+            usersDto.UserId = await _repository.Users.CreateAndGetIdAsync(objUsers);
 
             foreach (var groupMember in usersDto.GroupMembers)
             {
@@ -364,20 +365,18 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
               await _repository.GroupMembers.BulkInsertAsync(groupMembers);
             }
 
-            // commit transaction with save changes.
             await _repository.GroupMembers.TransactionCommitAsync();
 
-            return OperationMessage.Success;
+            return usersDto;
           }
           else
           {
-            res = "This Employee already exist";
+            return res;
           }
         }
         else
         {
-          res = "This Login ID already exist";
-          return res;
+          return new UsersDto();
         }
       }
       #endregion New User
@@ -399,7 +398,7 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
           objUserforDb.UserName = usersDto.UserName;
           objUserforDb.IsActive = usersDto.IsActive;
           objUserforDb.AccessParentCompany = usersDto.AccessParentCompany;
-          objUserforDb.LastUpdateDate = DateTime.Now;
+          objUserforDb.LastUpdatedDate = DateTime.Now;
           objUserforDb.DefaultDashboard = usersDto.DefaultDashboard;
 
           if (objUserforDb.IsActive == true)
@@ -432,12 +431,11 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
           }
           await _repository.Users.TransactionCommitAsync();
 
-          return OperationMessage.Success;
+          return usersDto;
         }
         else
         {
-          res = "This login ID already exist on another user";
-          return res;
+          return new UsersDto();
         }
       }
       #endregion Update User
@@ -451,26 +449,6 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
     {
       await _repository.Users.TransactionDisposeAsync();
     }
-
-    return res;
-  }
-
-  // not now when need. Letter we will work this this 
-  private void UpdateAppUser(UsersDto usersDto)
-  {
-    try
-    {
-      if (usersDto.EmployeeId > 0)
-      {
-        string sql = string.Format("Update AppUsers set IMEI='{0}' where HrRecordId={1}", usersDto.IMEI, usersDto.EmployeeId);
-        _repository.Users.ExecuteNonQuery(sql);
-      }
-    }
-    catch (Exception)
-    {
-
-
-    }
   }
 
   private string ValidateUser(UsersDto users, SystemSettings objsystem)
@@ -483,20 +461,21 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
       if (objsystem.MinLoginLength > users.LoginId.Trim().Length)
       {
         message = "Login ID must have to be minimum " + objsystem.MinLoginLength + " character length!";
-        return message;
+        throw new InvalidUpdateOperationException(message);
       }
     }
 
     if (objsystem.MinPassLength > users.Password.Trim().Length)
     {
       message = "Password must have to be minimum " + objsystem.MinPassLength + " character length!";
-      return message;
+      throw new InvalidUpdateOperationException(message);
     }
-    if (objsystem.MinLoginLength == 0 && objsystem.MinPassLength == 0 && objsystem.SpecialCharAllowed == false)
-      return message;
 
-    int numCount = 0; //Numaric Charcter in password text
-    int charCount = 0; //Charecter count
+    if (objsystem.MinLoginLength == 0 && objsystem.MinPassLength == 0 && objsystem.SpecialCharAllowed == false)
+      throw new InvalidUpdateOperationException(message);
+
+    int numCount = 0;
+    int charCount = 0;
     int specialcharCount = 0;
     char[] pasChars = users.Password.ToCharArray();
     for (int i = 0; i < pasChars.Length; i++)
@@ -522,13 +501,13 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
       if (numCount > 0)
       {
         message = "Password must not have any number!";
-        return message;
+        throw new InvalidUpdateOperationException(message);
       }
 
       if (charCount == 0)
       {
         message = "Password must have to be alphabetic characters!";
-        return message;
+        throw new InvalidUpdateOperationException(message);
       }
     }
     else if (objsystem.PassType == 1)
@@ -537,13 +516,13 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
       if (numCount == 0)
       {
         message = "Password must have atleast one numeric character!";
-        return message;
+        throw new InvalidUpdateOperationException(message);
       }
 
       if (charCount > 0)
       {
         message = "Password must not have any alphabetic character!";
-        return message;
+        throw new InvalidUpdateOperationException(message);
       }
     }
     else
@@ -552,13 +531,13 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
       if (numCount == 0)
       {
         message = "Password must have atleast one numeric character!";
-        return message;
+        throw new InvalidUpdateOperationException(message);
       }
 
       if (charCount == 0)
       {
         message = "Password must have atleast one alphabetic character!";
-        return message;
+        throw new InvalidUpdateOperationException(message);
       }
     }
     if (objsystem.SpecialCharAllowed == true)
@@ -566,7 +545,7 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
       if (specialcharCount == 0)
       {
         message = "Password must have atleast one special character!";
-        return message;
+        throw new InvalidUpdateOperationException(message);
       }
     }
 
@@ -574,6 +553,23 @@ left join DESIGNATION on  Employment.DESIGNATIONID = DESIGNATION.DESIGNATIONID
   }
 
 
+  // not now when need. Letter we will work this this 
+  private void UpdateAppUser(UsersDto usersDto)
+  {
+    try
+    {
+      if (usersDto.EmployeeId > 0)
+      {
+        string sql = string.Format("Update AppUsers set IMEI='{0}' where HrRecordId={1}", usersDto.IMEI, usersDto.EmployeeId);
+        _repository.Users.ExecuteNonQuery(sql);
+      }
+    }
+    catch (Exception)
+    {
+      _logger.LogError(string.Format(@"Error while updating AppUser for IMEI: {0} and HrRecordId: {1}", usersDto.IMEI, usersDto.EmployeeId));
+      throw new InvalidUpdateOperationException("Error while updating AppUser");
+    }
+  }
 
 
 }

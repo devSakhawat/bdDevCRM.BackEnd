@@ -1,70 +1,71 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 namespace bdDevCRM.Service.CRM;
 
-internal sealed class CRMYearService : ICRMYearService
+internal sealed class CrmYearService : ICrmYearService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
   private readonly IConfiguration _configuration;
 
 
-  public CRMYearService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public CrmYearService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
     _configuration = configuration;
   }
 
-  public async Task<IEnumerable<WfstateDto>> StatusByMenuId(int menuId, bool trackChanges)
+  public async Task<IEnumerable<WfStateDto>> StatusByMenuId(int menuId, bool trackChanges)
   {
-    IEnumerable<WfStateRepositoryDto> wfstates = await _repository.WfState.StatusByMenuId(menuId, trackChanges);
-    IEnumerable<WfstateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToList<WfStateRepositoryDto, WfstateDto>(wfstates);
+    IEnumerable<WfStateRepositoryDto> wfstates = await _repository.WfStates.StatusByMenuId(menuId, trackChanges);
+    IEnumerable<WfStateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToList<WfStateRepositoryDto, WfStateDto>(wfstates);
     return wfstatesDto;
   }
 
   public async Task<IEnumerable<WfActionDto>> ActionsByStatusIdForGroup(int statusId, bool trackChanges)
   {
-    IEnumerable<WfActionRepositoryDto> wfActions = await _repository.WfState.ActionsByStatusIdForGroup(statusId, trackChanges);
+    IEnumerable<WfActionRepositoryDto> wfActions = await _repository.WfStates.ActionsByStatusIdForGroup(statusId, trackChanges);
     IEnumerable<WfActionDto> wfActionsDto = MyMapper.JsonCloneIEnumerableToList<WfActionRepositoryDto, WfActionDto>(wfActions);
     return wfActionsDto;
   }
 
   #region Workflow start
-  public async Task<GridEntity<WfstateDto>> WorkflowSummary(bool trackChanges, CRMGridOptions options)
+  public async Task<GridEntity<WfStateDto>> WorkflowSummary(bool trackChanges, CRMGridOptions options)
   {
-    string query = "Select WFSTATE.WFSTATEID,WFSTATE.STATENAME,WFSTATE.MENUID,WFSTATE.ISDEFAULTSTART,WFSTATE.ISCLOSED,MENU.MODULEID,MENU.MENUNAME,MODULE.MODULENAME \r\nfrom WFSTATE ,MENU ,MODULE  \r\nwhere WFSTATE.MENUID = MENU.MENUID and MENU.MODULEID = MODULE.MODULEID";
+    string query = "Select WfStates.WfStateId,WfStates.STATENAME,WfStates.MENUID,WfStates.ISDEFAULTSTART,WfStates.ISCLOSED,MENU.MODULEID,MENU.MENUNAME,MODULE.MODULENAME \r\nfrom WFSTATE ,MENU ,MODULE  \r\nwhere WfStates.MENUID = MENU.MENUID and MENU.MODULEID = MODULE.MODULEID";
     string orderBy = " MENUNAME,ISDEFAULTSTART,STATENAME asc ";
-    var gridEntity = await _repository.Workflow.GridData<WfstateDto>(query, options, orderBy, "");
+    var gridEntity = await _repository.Workflowes.GridData<WfStateDto>(query, options, orderBy, "");
 
     return gridEntity;
   }
 
-  public async Task<string> SaveWorkflow(WfstateDto modelDto)
+  public async Task<string> SaveWorkflow(WfStateDto modelDto)
   {
     string res = string.Empty;
 
     #region New WfState
     var isDefaultStart = (bool)modelDto.IsDefaultStart ? 1 : 0;
-    if (modelDto.WfstateId == 0)
+    if (modelDto.WfStateId == 0)
     {
-      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == false && x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim());
+      bool isDefaultExist = await _repository.WfStates.ExistsAsync(x => x.IsDefaultStart == false && x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim());
 
       if (!isDefaultExist)
       {
         //if (!IsExistsUserByEmployee(usersDto.EmployeeId))
-        if (!await _repository.WfState.ExistsAsync(x => x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim()))
+        if (!await _repository.WfStates.ExistsAsync(x => x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim()))
         {
-          Wfstate wfstate = MyMapper.JsonClone<WfstateDto, Wfstate>(modelDto);
-          int lastCreatedWfStateId = await _repository.WfState.CreateAndGetIdAsync(wfstate);
+          WfState wfstate = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);
+          int lastCreatedWfStateId = await _repository.WfStates.CreateAndGetIdAsync(wfstate);
           await _repository.SaveAsync();
           return OperationMessage.Success;
         }
@@ -84,14 +85,14 @@ internal sealed class CRMYearService : ICRMYearService
     #region Update WfState
     else
     {
-      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == modelDto.IsDefaultStart && x.WfstateId == modelDto.WfstateId);
+      bool isDefaultExist = await _repository.WfStates.ExistsAsync(x => x.IsDefaultStart == modelDto.IsDefaultStart && x.WfStateId == modelDto.WfStateId);
 
       if (!isDefaultExist)
       {
 
 
-        Wfstate wfstate = MyMapper.JsonClone<WfstateDto, Wfstate>(modelDto);
-        _repository.WfState.Update(wfstate);
+        WfState wfstate = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);
+        _repository.WfStates.Update(wfstate);
         await _repository.SaveAsync();
 
         return OperationMessage.Success;
@@ -111,15 +112,15 @@ internal sealed class CRMYearService : ICRMYearService
     string res = string.Empty;
 
     #region New WfState
-    if (modelDto.WfactionId == 0)
+    if (modelDto.WfActionId == 0)
     {
-      bool isActionExistByStateId = await _repository.WfAction.ExistsAsync(x => x.WfstateId == modelDto.WfstateId && x.ActionName.ToLower().Trim() == modelDto.ActionName.ToLower().Trim());
+      bool isActionExistByStateId = await _repository.WfActions.ExistsAsync(x => x.WfStateId == modelDto.WfStateId && x.ActionName.ToLower().Trim() == modelDto.ActionName.ToLower().Trim());
 
       if (!isActionExistByStateId)
       {
 
-        Wfaction wfAcation = MyMapper.JsonClone<WfActionDto, Wfaction>(modelDto);
-        int lastCreatedWfActionId = await _repository.WfAction.CreateAndGetIdAsync(wfAcation);
+        WfAction wfAcation = MyMapper.JsonClone<WfActionDto, WfAction>(modelDto);
+        int lastCreatedWfActionId = await _repository.WfActions.CreateAndGetIdAsync(wfAcation);
         await _repository.SaveAsync();
         return OperationMessage.Success;
       }
@@ -134,12 +135,12 @@ internal sealed class CRMYearService : ICRMYearService
     #region Update WfState
     else
     {
-      bool isActionExistByStateId = await _repository.WfAction.ExistsAsync(x => x.WfstateId == modelDto.WfstateId && x.ActionName == modelDto.ActionName);
+      bool isActionExistByStateId = await _repository.WfActions.ExistsAsync(x => x.WfStateId == modelDto.WfStateId && x.ActionName == modelDto.ActionName);
 
       if (!isActionExistByStateId)
       {
-        Wfaction wfAction = MyMapper.JsonClone<WfActionDto, Wfaction>(modelDto);
-        _repository.WfAction.Update(wfAction);
+        WfAction wfAction = MyMapper.JsonClone<WfActionDto, WfAction>(modelDto);
+        _repository.WfActions.Update(wfAction);
         await _repository.SaveAsync();
 
         return OperationMessage.Success;
@@ -156,22 +157,22 @@ internal sealed class CRMYearService : ICRMYearService
   public async Task<string> DeleteAction(int key, WfActionDto modelDto)
   {
     if (modelDto == null) throw new NullModelBadRequestException(new WfActionDto().GetType().Name.ToString());
-    if (key != modelDto.WfactionId) throw new IdMismatchBadRequestException(key.ToString(), new ModuleDto().GetType().Name.ToString());
+    if (key != modelDto.WfActionId) throw new IdMismatchBadRequestException(key.ToString(), new ModuleDto().GetType().Name.ToString());
 
-    Wfaction wfactionData = await _repository.WfAction.FirstOrDefaultAsync(m => m.WfactionId == key, trackChanges: false);
-    if (wfactionData == null) throw new GenericNotFoundException("Wfaction", "ActionId", key.ToString());
+    WfAction wfactionData = await _repository.WfActions.FirstOrDefaultAsync(m => m.WfActionId == key, trackChanges: false);
+    if (wfactionData == null) throw new GenericNotFoundException("WfAction", "ActionId", key.ToString());
 
-    await _repository.WfAction.DeleteAsync(x => x.WfactionId == modelDto.WfactionId, trackChanges: true);
+    await _repository.WfActions.DeleteAsync(x => x.WfActionId == modelDto.WfActionId, trackChanges: true);
     await _repository.SaveAsync();
     return OperationMessage.Success;
   }
 
-  public async Task<IEnumerable<WfstateDto>> GetNextStatesByMenu(int menuId)
+  public async Task<IEnumerable<WfStateDto>> GetNextStatesByMenu(int menuId)
   {
-    IEnumerable<Wfstate> wfstates = await _repository.WfState.ListByWhereWithSelectAsync(
-      selector: x => new Wfstate
+    IEnumerable<WfState> wfstates = await _repository.WfStates.ListByWhereWithSelectAsync(
+      selector: x => new WfState
       {
-        WfstateId = x.WfstateId,
+        WfStateId = x.WfStateId,
         StateName = x.StateName
       },
       expression: x => x.MenuId == menuId,
@@ -179,18 +180,18 @@ internal sealed class CRMYearService : ICRMYearService
       trackChanges: false
       );
 
-    IEnumerable<WfstateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToIEnumerable<Wfstate, WfstateDto>(wfstates);
+    IEnumerable<WfStateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToIEnumerable<WfState, WfStateDto>(wfstates);
     return wfstatesDto;
   }
 
   public async Task<GridEntity<WfActionDto>> GetActionByStatusId(int stateId, CRMGridOptions options)
   {
     const string SELECT_ACTION_BY_STATUSID =
-        "Select *, (Select StateName from WFState where WFStateId = NextStateId) as NextStateName from WFAction where WFStateId = {0} ";
+        "Select *, (Select StateName from WFState where WfStateId = NextStateId) as NextStateName from WFAction where WfStateId = {0} ";
     string orderBy = " AcSortOrder asc ";
 
     string formattedQuery = string.Format(SELECT_ACTION_BY_STATUSID, stateId);
-    var gridEntity = await _repository.WfAction.GridData<WfActionDto>(formattedQuery, options, orderBy, "");
+    var gridEntity = await _repository.WfActions.GridData<WfActionDto>(formattedQuery, options, orderBy, "");
 
     return gridEntity;
   }

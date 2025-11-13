@@ -1,11 +1,12 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Entities.Exceptions;
+
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -49,7 +50,7 @@ internal sealed class ModuleService : IModuleService
     return gridentity;
   }
 
-  public async Task<List<ModuleDto>> GetModulesAsync(bool trackChanges)
+  public async Task<List<ModuleDto>> GetModulesAsync(UsersDto currentUser ,bool trackChanges)
   {
     var module = await _repository.Modules.GetModulesAsync(trackChanges);
     List<ModuleDto> modulesDto = MyMapper.JsonCloneIEnumerableToList<Module, ModuleDto>(module);

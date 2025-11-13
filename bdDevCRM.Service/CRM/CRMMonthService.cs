@@ -1,201 +1,178 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
-using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
-using bdDevCRM.ServicesContract.CRM;
+using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+
 namespace bdDevCRM.Service.CRM;
 
-internal sealed class CRMMonthService : ICRMMonthService
+internal sealed class CrmMonthService : ICrmMonthService
 {
   private readonly IRepositoryManager _repository;
   private readonly ILoggerManager _logger;
-  private readonly IConfiguration _configuration;
+  private readonly IConfiguration _config;
 
-
-  public CRMMonthService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public CrmMonthService(IRepositoryManager repository, ILoggerManager logger, IConfiguration config)
   {
     _repository = repository;
     _logger = logger;
-    _configuration = configuration;
+    _config = config;
   }
 
-  public async Task<IEnumerable<WfstateDto>> StatusByMenuId(int menuId, bool trackChanges)
+  public async Task<IEnumerable<CrmMonthDto>> GetMonthsDDLAsync(bool trackChanges = false)
   {
-    IEnumerable<WfStateRepositoryDto> wfstates = await _repository.WfState.StatusByMenuId(menuId, trackChanges);
-    IEnumerable<WfstateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToList<WfStateRepositoryDto, WfstateDto>(wfstates);
-    return wfstatesDto;
+    var months = await _repository.CrmMonths.GetActiveMonthAsync(trackChanges);
+    return MyMapper.JsonCloneIEnumerableToList<CrmMonth, CrmMonthDto>(months);
   }
 
-  public async Task<IEnumerable<WfActionDto>> ActionsByStatusIdForGroup(int statusId, bool trackChanges)
+  public async Task<IEnumerable<CrmMonthDto>> GetActiveMonthsAsync(bool trackChanges = false)
   {
-    IEnumerable<WfActionRepositoryDto> wfActions = await _repository.WfState.ActionsByStatusIdForGroup(statusId, trackChanges);
-    IEnumerable<WfActionDto> wfActionsDto = MyMapper.JsonCloneIEnumerableToList<WfActionRepositoryDto, WfActionDto>(wfActions);
-    return wfActionsDto;
+    var months = await _repository.CrmMonths.GetActiveMonthAsync(trackChanges);
+    return MyMapper.JsonCloneIEnumerableToList<CrmMonth, CrmMonthDto>(months);
   }
 
-  #region Workflow start
-  public async Task<GridEntity<WfstateDto>> WorkflowSummary(bool trackChanges, CRMGridOptions options)
+  public async Task<IEnumerable<CrmMonthDto>> GetMonthsAsync(bool trackChanges = false)
   {
-    string query = "Select WFSTATE.WFSTATEID,WFSTATE.STATENAME,WFSTATE.MENUID,WFSTATE.ISDEFAULTSTART,WFSTATE.ISCLOSED,MENU.MODULEID,MENU.MENUNAME,MODULE.MODULENAME \r\nfrom WFSTATE ,MENU ,MODULE  \r\nwhere WFSTATE.MENUID = MENU.MENUID and MENU.MODULEID = MODULE.MODULEID";
-    string orderBy = " MENUNAME,ISDEFAULTSTART,STATENAME asc ";
-    var gridEntity = await _repository.Workflow.GridData<WfstateDto>(query, options, orderBy, "");
-
-    return gridEntity;
+    var months = await _repository.CrmMonths.ListAsync(x => x.MonthId, trackChanges);
+    return MyMapper.JsonCloneIEnumerableToList<CrmMonth, CrmMonthDto>(months);
   }
 
-  public async Task<string> SaveWorkflow(WfstateDto modelDto)
+  public async Task<CrmMonthDto> GetMonthAsync(int id, bool trackChanges = false)
   {
-    string res = string.Empty;
-
-    #region New WfState
-    var isDefaultStart = (bool)modelDto.IsDefaultStart ? 1 : 0;
-    if (modelDto.WfstateId == 0)
-    {
-      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == false && x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim());
-
-      if (!isDefaultExist)
-      {
-        //if (!IsExistsUserByEmployee(usersDto.EmployeeId))
-        if (!await _repository.WfState.ExistsAsync(x => x.MenuId == modelDto.MenuId && x.StateName.ToString().Trim() == modelDto.StateName.ToString().Trim()))
-        {
-          Wfstate wfstate = MyMapper.JsonClone<WfstateDto, Wfstate>(modelDto);
-          int lastCreatedWfStateId = await _repository.WfState.CreateAndGetIdAsync(wfstate);
-          await _repository.SaveAsync();
-          return OperationMessage.Success;
-        }
-        else
-        {
-          res = "The state name already exist!";
-        }
-      }
-      else
-      {
-        res = "The state name already exist or Only one StatusId can be IsDefault!";
-        return res;
-      }
-    }
-    #endregion New WfState
-
-    #region Update WfState
-    else
-    {
-      bool isDefaultExist = await _repository.WfState.ExistsAsync(x => x.IsDefaultStart == modelDto.IsDefaultStart && x.WfstateId == modelDto.WfstateId);
-
-      if (!isDefaultExist)
-      {
-
-
-        Wfstate wfstate = MyMapper.JsonClone<WfstateDto, Wfstate>(modelDto);
-        _repository.WfState.Update(wfstate);
-        await _repository.SaveAsync();
-
-        return OperationMessage.Success;
-      }
-      else
-      {
-        res = "Only one StatusId can be IsDefault!";
-        return res;
-      }
-    }
-    #endregion Update WfState
-    return res;
-  }
-
-  public async Task<string> CreateActionAsync(WfActionDto modelDto)
-  {
-    string res = string.Empty;
-
-    #region New WfState
-    if (modelDto.WfactionId == 0)
-    {
-      bool isActionExistByStateId = await _repository.WfAction.ExistsAsync(x => x.WfstateId == modelDto.WfstateId && x.ActionName.ToLower().Trim() == modelDto.ActionName.ToLower().Trim());
-
-      if (!isActionExistByStateId)
-      {
-
-        Wfaction wfAcation = MyMapper.JsonClone<WfActionDto, Wfaction>(modelDto);
-        int lastCreatedWfActionId = await _repository.WfAction.CreateAndGetIdAsync(wfAcation);
-        await _repository.SaveAsync();
-        return OperationMessage.Success;
-      }
-      else
-      {
-        res = "The action name already exist for the state!";
-        return res;
-      }
-    }
-    #endregion New WfState
-
-    #region Update WfState
-    else
-    {
-      bool isActionExistByStateId = await _repository.WfAction.ExistsAsync(x => x.WfstateId == modelDto.WfstateId && x.ActionName == modelDto.ActionName);
-
-      if (!isActionExistByStateId)
-      {
-        Wfaction wfAction = MyMapper.JsonClone<WfActionDto, Wfaction>(modelDto);
-        _repository.WfAction.Update(wfAction);
-        await _repository.SaveAsync();
-
-        return OperationMessage.Success;
-      }
-      else
-      {
-        res = "The action name already exist for the state!";
-        return res;
-      }
-    }
-    #endregion Update WfState
-  }
-
-  public async Task<string> DeleteAction(int key, WfActionDto modelDto)
-  {
-    if (modelDto == null) throw new NullModelBadRequestException(new WfActionDto().GetType().Name.ToString());
-    if (key != modelDto.WfactionId) throw new IdMismatchBadRequestException(key.ToString(), new ModuleDto().GetType().Name.ToString());
-
-    Wfaction wfactionData = await _repository.WfAction.FirstOrDefaultAsync(m => m.WfactionId == key, trackChanges: false);
-    if (wfactionData == null) throw new GenericNotFoundException("Wfaction", "ActionId", key.ToString());
-
-    await _repository.WfAction.DeleteAsync(x => x.WfactionId == modelDto.WfactionId, trackChanges: true);
-    await _repository.SaveAsync();
-    return OperationMessage.Success;
-  }
-
-  public async Task<IEnumerable<WfstateDto>> GetNextStatesByMenu(int menuId)
-  {
-    IEnumerable<Wfstate> wfstates = await _repository.WfState.ListByWhereWithSelectAsync(
-      selector: x => new Wfstate
-      {
-        WfstateId = x.WfstateId,
-        StateName = x.StateName
-      },
-      expression: x => x.MenuId == menuId,
-      orderBy: x => x.Sequence,
-      trackChanges: false
+    var month = await _repository.CrmMonths.GetByIdAsync(x => x.MonthId == id, trackChanges);
+    if (month == null)
+      throw new GenericNotFoundException(
+        $"Month with id: {id} doesn't exist in the database.",
+        nameof(CrmMonthDto),
+        id.ToString()
       );
 
-    IEnumerable<WfstateDto> wfstatesDto = MyMapper.JsonCloneIEnumerableToIEnumerable<Wfstate, WfstateDto>(wfstates);
-    return wfstatesDto;
+    return MyMapper.JsonClone<CrmMonth, CrmMonthDto>(month);
   }
 
-  public async Task<GridEntity<WfActionDto>> GetActionByStatusId(int stateId, CRMGridOptions options)
+  public async Task<CrmMonthDto> CreateNewRecordAsync(CrmMonthDto dto, UsersDto currentUser)
   {
-    const string SELECT_ACTION_BY_STATUSID =
-        "Select *, (Select StateName from WFState where WFStateId = NextStateId) as NextStateName from WFAction where WFStateId = {0} ";
-    string orderBy = " AcSortOrder asc ";
+    var monthEntity = MyMapper.JsonClone<CrmMonthDto, CrmMonth>(dto);
+    //monthEntity.CreatedDate = DateTime.UtcNow;
+    //monthEntity.CreatedBy = currentUser.UserId ?? 0;
+    //monthEntity.IsActive = true;
 
-    string formattedQuery = string.Format(SELECT_ACTION_BY_STATUSID, stateId);
-    var gridEntity = await _repository.WfAction.GridData<WfActionDto>(formattedQuery, options, orderBy, "");
+    await _repository.CrmMonths.CreateAsync(monthEntity);
+    await _repository.SaveAsync();
 
-    return gridEntity;
+    return MyMapper.JsonClone<CrmMonth, CrmMonthDto>(monthEntity);
   }
 
-  #endregion Workflow end
+  public async Task<string> UpdateRecordAsync(int key, CrmMonthDto dto, bool trackChanges)
+  {
+    var monthEntity = await _repository.CrmMonths.GetByIdAsync(x => x.MonthId == key, trackChanges);
 
+    if (monthEntity == null)
+      throw new GenericNotFoundException(
+        $"Month with id: {key} doesn't exist in the database.",
+        nameof(key),
+        key.ToString()
+      );
 
+    monthEntity.MonthName = dto.MonthName;
+    monthEntity.MonthCode = dto.MonthCode;
+    //monthEntity.MonthNumber = dto.MonthNumber;
+    //monthEntity.Description = dto.Description;
+    //monthEntity.IsActive = dto.IsActive;
+    //monthEntity.UpdatedDate = DateTime.UtcNow;
+    //monthEntity.UpdatedBy = dto.UpdatedBy;
+
+    await _repository.SaveAsync();
+    return "Month updated successfully.";
+  }
+
+  public async Task<string> DeleteRecordAsync(int key, CrmMonthDto dto)
+  {
+    var monthEntity = await _repository.CrmMonths.GetByIdAsync(x => x.MonthId == key, false);
+
+    if (monthEntity == null)
+      throw new GenericNotFoundException(
+        $"Month with id: {key} doesn't exist in the database.",
+        nameof(key),
+        key.ToString()
+      );
+
+    _repository.CrmMonths.Delete(monthEntity);
+    await _repository.SaveAsync();
+
+    return "Month deleted successfully.";
+  }
+
+  public async Task<string> SaveOrUpdate(int key, CrmMonthDto modelDto, UsersDto currentUser)
+  {
+    return key == 0 
+      ? (await CreateNewRecordAsync(modelDto, currentUser)).MonthId > 0 ? "Month created successfully." : "Failed to create month."
+      : await UpdateRecordAsync(key, modelDto, trackChanges: false);
+  }
+
+  public async Task<GridEntity<CrmMonthDto>> SummaryGrid(CRMGridOptions options)
+  {
+    string condition = string.Empty;
+    string sql = @"
+      SELECT 
+        MonthId,
+        MonthName,
+        MonthCode,
+        MonthNumber,
+        Description,
+        IsActive,
+        CreatedDate,
+        CreatedBy,
+        UpdatedDate,
+        UpdatedBy
+      FROM CrmMonth";
+
+    string orderBy = " MonthNumber asc ";
+    return await _repository.CrmMonths.GridData<CrmMonthDto>(sql, options, orderBy, condition);
+  }
+
+  public async Task<CrmMonthDto> CreateMonthAsync(CrmMonthDto entityForCreate)
+  {
+    var monthEntity = MyMapper.JsonClone<CrmMonthDto, CrmMonth>(entityForCreate);
+    //monthEntity.CreatedDate = DateTime.UtcNow;
+    //monthEntity.IsActive = true;
+
+    await _repository.CrmMonths.CreateAsync(monthEntity);
+    await _repository.SaveAsync();
+
+    return MyMapper.JsonClone<CrmMonth, CrmMonthDto>(monthEntity);
+  }
+
+  public async Task<IEnumerable<CrmMonthDto>> GetMonthsByApplicantIdAsync(int applicantId, bool trackChanges = false)
+  {
+    var applicantCourses = await _repository.CrmApplicantCourses.GetApplicantCoursesByApplicantIdAsync(applicantId, trackChanges);
+    
+    if (!applicantCourses.Any())
+    {
+      return new List<CrmMonthDto>(); 
+    }
+
+    var intakeMonthIds = applicantCourses
+      .Where(ac => ac.IntakeMonthId > 0) 
+      .Select(ac => ac.IntakeMonthId)
+      .Distinct()
+      .ToList();
+
+    if (!intakeMonthIds.Any())
+    {
+      return new List<CrmMonthDto>();
+    }
+
+    var months = await _repository.CrmMonths.ListByConditionAsync(
+      x => intakeMonthIds.Contains(x.MonthId),
+      x => x.MonthName,
+      trackChanges
+    );
+
+    return MyMapper.JsonCloneIEnumerableToList<CrmMonth, CrmMonthDto>(months);
+  }
 }

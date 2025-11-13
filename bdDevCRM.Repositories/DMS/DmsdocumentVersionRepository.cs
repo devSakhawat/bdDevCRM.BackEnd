@@ -5,14 +5,14 @@ using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.DMS;
 
-public class DmsdocumentVersionRepository : RepositoryBase<DmsdocumentVersion>, IDmsdocumentVersionRepository
+public class DmsDocumentVersionRepository : RepositoryBase<DmsDocumentVersion>, IDmsDocumentVersionRepository
 {
-  public DmsdocumentVersionRepository(CRMContext context) : base(context) { }
+  public DmsDocumentVersionRepository(CRMContext context) : base(context) { }
 
   // Get versions by DocumentId
-  public async Task<IEnumerable<DmsdocumentVersion>> GetVersionsByDocumentIdAsync(int documentId, bool trackChanges) =>
+  public async Task<IEnumerable<DmsDocumentVersion>> GetVersionsByDocumentIdAsync(int documentId, bool trackChanges) =>
       await ListByConditionAsync(x => x.DocumentId == documentId, x => x.VersionNumber, trackChanges);
 
   // Create new version
-  public void CreateVersion(DmsdocumentVersion version) => Create(version);
+  public void CreateVersion(DmsDocumentVersion version) => Create(version);
 }

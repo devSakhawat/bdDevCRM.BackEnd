@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
@@ -31,17 +32,25 @@ public class EmployeeController : BaseApiController
   }
 
   [HttpGet(RouteConstants.EmployeesByCompanyIdAndBranchIdAndDepartmentId)]
-  public async Task<IActionResult> GetEmployeeByCompanyIdAndBranchIdAndDepartmentId([FromBody] int companyid, int branchId, int departmentId)
+  public async Task<IActionResult> GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(int companyid, int branchId, int departmentId)
   {
-    // from claim.
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    // userId : which key is reponsible to when cache was created .
-    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
-    UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
+    //int userId = HttpContext.GetUserId();
+    //var currentUser = HttpContext.GetCurrentUser();
 
-    IEnumerable<EmployeesByCompanyBranchDepartmentDto> result = await _serviceManager.Employees.GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(companyid, branchId, departmentId);
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      return Unauthorized("Unauthorized attempt to get data!");
 
-    return Ok(result);
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null) return Unauthorized("User not found in cache.");
+
+    IEnumerable<EmployeesByCompanyBranchDepartmentDto> res = await _serviceManager.Employees.GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(companyid, branchId, departmentId);
+
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<EmployeesByCompanyBranchDepartmentDto>>("No Data found"));
+
+    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
   }
 
 

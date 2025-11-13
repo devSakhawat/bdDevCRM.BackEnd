@@ -3,14 +3,15 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
 
-public partial class DmsdocumentTagMap
+public partial class DmsDocumentTagMap
 {
-  public int TagMapId { get; set; }
-  public int DocumentId { get; set; }
+    public int DocumentId { get; set; }
 
     public int TagId { get; set; }
 
-    public virtual Dmsdocument Document { get; set; } = null!;
+    public int TagMapId { get; set; }
 
-    public virtual DmsdocumentTag Tag { get; set; } = null!;
+    public virtual DmsDocument Document { get; set; } = null!;
+
+    public virtual DmsDocumentTag Tag { get; set; } = null!;
 }

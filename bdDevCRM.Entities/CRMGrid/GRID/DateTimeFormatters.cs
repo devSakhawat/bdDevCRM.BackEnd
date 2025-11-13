@@ -91,6 +91,26 @@ public static class DateTimeFormatters
     }
 
   }
+
+
+  //applicantInfosDB.CreatedDate = DateTimeFormatters.IsValidDateTime(applicantInfosDB.CreatedDate)
+  //                               ? applicantInfosDB.CreatedDate
+  //                                       : DateTime.UtcNow;
+  public static bool IsValidDateTime(DateTime? dateTime)
+  {
+    if (dateTime == null) return false;
+    return dateTime > DateTime.MinValue &&
+           dateTime < DateTime.MaxValue &&
+           dateTime > new DateTime(1900, 1, 1);
+  }
+  //applicantInfosDB.CreatedDate = applicantInfosDB.CreatedDate.IsValidDate()
+  //                             ? applicantInfosDB.CreatedDate
+  //                                       : DateTime.UtcNow;
+  public static bool IsValidDate(this DateTime? dateTime)
+  {
+    if (dateTime == null) return false;
+    return dateTime > DateTime.MinValue && dateTime != default(DateTime);
+  }
 }
 
 public struct OracleDateTime

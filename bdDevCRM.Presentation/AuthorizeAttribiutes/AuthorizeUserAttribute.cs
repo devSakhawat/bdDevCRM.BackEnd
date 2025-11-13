@@ -1,8 +1,6 @@
-﻿using bdDevCRM.Entities.Exceptions;
-using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+﻿using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace bdDevCRM.Presentation.AuthorizeAttribiutes;

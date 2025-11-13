@@ -73,7 +73,7 @@ public class CRMGridDataBuilder<T>
     }
     var sql =
         string.Format(
-            @"SELECT * FROM (SELECT ROW_NUMBER() OVER({4}) AS ROWINDEX, T.* FROM ({0}) T {2}) tbl WHERE ROWINDEX >{1} AND ROWINDEX <={3}",
+            @"SELECT * FROM (SELECT ROW_NUMBER() OVER({4}) AS RowIndex, T.* FROM ({0}) T {2}) tbl WHERE RowIndex >{1} AND RowIndex <={3}",
             query, skip, condition, pageupperBound, orderby);
 
     return sql;

@@ -15,18 +15,25 @@ public class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
       "Select * from Employee where HRRecordId = {0} order by FullName";
 
   private const string SELECT_EMPLOYEE_BY_CompanyBranchDepartment_SQL =
-           "Select * from (Select Employee.HRRecordId,EmployeeId,FullName,CompanyId,ReportTo,DepartmentId,BranchId  from Employee inner join Employment ON Employment.HRRecordId = Employee.HRRecordId) as tbl {0} order by FullName";
+           @"
+Select * from (
+	Select Employee.HRRecordId,EmployeeId,FullName,CompanyId,ReportTo,DepartmentId,BranchId  
+	from Employee 
+	inner join Employment ON Employment.HRRecordId = Employee.HRRecordId
+) as tbl 
+{0} 
+order by FullName";
 
   public async Task<EmploymentRepositoryDto> GetEmploymentByHrRecordId(int hrRecordId)
   {
-    string employmentQuery = string.Format(@"SELECT EMPLOYEETYPE.IsContract, EMPLOYEETYPE.IsProbationary, Employment.HRRecordId, EmployeeId, EmployeeType, 
-             DESIGNATIONID, StartDate, EmploymentDate, CompanyId, DepartmentId, ReportTo, TelephoneExtension, OfficialEmail, 
-             EmergencyContactName, EmergencyContactNo, PossibleConfirmationDate, Duties, AttendanceCardNo, UserId, 
-             Employment.LastUpdateDate, BankBranchId, BankAccountNo, BRANCHID, GPFNO, JobEndDate, JOININGPOST, EXPERIENCE, 
-             REPORTDEPID, Func_Id, ContractEndDate, JobEndTypeId, GradeId, TinNumber, PostingType, IsOTEligible, DivisionId, 
-             FacilityId, SectionId, Approver, ApproverDepartmentId, SalaryLocation 
-      FROM Employment 
-      INNER JOIN EMPLOYEETYPE ON EMPLOYEETYPE.EMPLOYEETYPEID = Employment.EmployeeType 
+    string employmentQuery = string.Format(@"SELECT EMPLOYEETYPE.IsContract, EMPLOYEETYPE.IsProbationary, Employment.HRRecordId
+, EmployeeId, EmployeeType, DESIGNATIONID, StartDate, EmploymentDate, CompanyId, DepartmentId, ReportTo, TelephoneExtension
+, OfficialEmail, EmergencyContactName, EmergencyContactNo, PossibleConfirmationDate, Duties, AttendanceCardNo, UserId
+, Employment.LastUpdatedDate, BankBranchId, BankAccountNo, BRANCHID, GPFNO, JobEndDate, JOININGPOST, EXPERIENCE, REPORTDEPID
+, Func_Id, ContractEndDate, JobEndTypeId, GradeId, TinNumber, PostingType, IsOTEligible, DivisionId,FacilityId, SectionId
+, Approver, ApproverDepartmentId, SalaryLocation 
+FROM Employment 
+INNER JOIN EMPLOYEETYPE ON EMPLOYEETYPE.EMPLOYEETYPEID = Employment.EmployeeType 
       WHERE Employment.HRRecordId = {0}", hrRecordId);
     ;
 
@@ -35,14 +42,14 @@ public class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
     return result;
   }
 
-  public async Task<Wfstate> GetEmployeeCurrentStatusByHrRecordId(int hrRecordId)
+  public async Task<WfState> GetEmployeeCurrentStatusByHrRecordId(int hrRecordId)
   {
     string sql = string.Format(@"Select case when (WFState.IsClosed =3 and Employment.JobEndDate<'{1}') then WFState.StateName else '' end as StateName ,Employment.JobEndDate,GetDate() as CurrentDate  
 from Employee 
 inner join Employment on Employment.HRRecordId=Employee.HRRecordId 
-left outer join WFState on WFState.WFStateId=Employee.StateId where Employment.HRRecordId={0} ", hrRecordId, DateTime.Today.ToString("MM-dd-yyyy"));
+left outer join WFState on WFState.WfStateId=Employee.StateId where Employment.HRRecordId={0} ", hrRecordId, DateTime.Today.ToString("MM-dd-yyyy"));
 
-    var data = await ExecuteSingleData<Wfstate>(sql);
+    var data = await ExecuteSingleData<WfState>(sql);
     return data;
   }
 

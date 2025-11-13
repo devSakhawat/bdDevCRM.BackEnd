@@ -1,9 +1,10 @@
 ﻿namespace bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 
 
-public class WfstateDto
+public class WfStateDto
 {
-  public int WfstateId { get; set; }
+  public int RowIndex { get; set; }
+  public int WfStateId { get; set; }
 
   public string? StateName { get; set; } = null!;
 
@@ -20,4 +21,7 @@ public class WfstateDto
 
   public int? ModuleId { get; set; }
   public string? ModuleName{ get; set; }
+
+  public int? ClosingStateId { get; set; }
+  public string? ClosingStateName { get; set; }
 }

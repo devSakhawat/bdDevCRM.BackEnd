@@ -1,9 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Utilities.OthersLibrary;
 
@@ -47,6 +42,72 @@ public class MyMapper
     return target;
   }
 
+  public static TTarget JsonCloneSafe<TSource, TTarget>(TSource source) where TTarget : new()
+  {
+    if (source == null) throw new ArgumentNullException(nameof(source));
+
+    var settings = new JsonSerializerSettings
+    {
+      NullValueHandling = NullValueHandling.Ignore,
+      MissingMemberHandling = MissingMemberHandling.Ignore,
+      DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+      Error = (sender, args) =>
+      {
+        // Handle DateTime conversion errors
+        if (args.ErrorContext.Error is InvalidCastException &&
+            args.ErrorContext.Path.Contains("Date"))
+        {
+          // Set default DateTime for null values
+          args.ErrorContext.Handled = true;
+        }
+      }
+    };
+
+    var serialized = JsonConvert.SerializeObject(source, settings);
+    var target = JsonConvert.DeserializeObject<TTarget>(serialized, settings) ?? new TTarget();
+
+    ProcessDateTimeFields(target);
+
+    return target;
+  }
+
+  /// <summary>
+  /// Checke DateTime properties. If there are  DateTime.MinValue then set null.
+  /// </summary>
+  /// <typeparam name="T">Target object type</typeparam>
+  /// <param name="obj">check Object DateTime properties</param>
+  private static void ProcessDateTimeFields<T>(T obj)
+  {
+    if (obj == null) return;
+
+    var type = typeof(T);
+    var properties = type.GetProperties();
+
+    foreach (var property in properties)
+    {
+      if (property.PropertyType == typeof(DateTime) ||
+          property.PropertyType == typeof(DateTime?))
+      {
+        try
+        {
+          var value = property.GetValue(obj);
+
+          if (value is DateTime dateTimeValue && dateTimeValue == DateTime.MinValue)
+          {
+            if (property.PropertyType == typeof(DateTime?))
+            {
+              property.SetValue(obj, null);
+            }
+          }
+        }
+        catch (Exception)
+        {
+          continue;
+        }
+      }
+    }
+  }
+
 
   // IEnumerable<Country> countries = await _repository.Countries.GetCountriesAsync(trackChanges);
   //List<CountryDto> countryDtos = MyMapper.JsonCloneIEnumerableToList<Country, CountryDto>(countries);
@@ -60,7 +121,7 @@ public class MyMapper
     return targetList;
   }
 
-  public static IEnumerable<TTarget> JsonCloneListToIEnumerable<TSource, TTarget>(List<TSource> sourceList)
+  public static IEnumerable<TTarget> JsonCloneIEnumerableToIEnumerable<TSource, TTarget>(List<TSource> sourceList)
   {
     if (sourceList == null) throw new ArgumentNullException(nameof(sourceList));
 
@@ -90,4 +151,27 @@ public class MyMapper
     return targetList;
   }
 }
+
+
+public static class JsonSafeDeserializer
+{
+  public static T SafeDeserialize<T>(string json) where T : new()
+  {
+    var settings = new JsonSerializerSettings
+    {
+      NullValueHandling = NullValueHandling.Ignore,
+      MissingMemberHandling = MissingMemberHandling.Ignore,
+      Error = (sender, args) =>
+      {
+        Console.WriteLine("JSON Error at: " + args.ErrorContext.Path);
+        args.ErrorContext.Handled = true;
+      }
+    };
+
+    return JsonConvert.DeserializeObject<T>(json, settings) ?? new T();
+  }
+}
+
+
+
 

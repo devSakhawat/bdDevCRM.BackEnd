@@ -13,7 +13,7 @@ public partial class CurencyRate
 
     public DateTime? CurrencyMonth { get; set; }
 
-    public int? CreateBy { get; set; }
+    public int? CreatedBy { get; set; }
 
-    public DateTime? CreateDate { get; set; }
+    public DateTime? CreatedDate { get; set; }
 }

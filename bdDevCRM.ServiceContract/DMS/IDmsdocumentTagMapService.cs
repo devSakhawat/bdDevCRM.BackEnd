@@ -2,14 +2,14 @@
 
 namespace bdDevCRM.ServiceContract.DMS;
 
-public interface IDmsdocumentTagMapService
+public interface IDmsDocumentTagMapService
 {
-  //Task<IEnumerable<DmsdocumentTagMapDDL>> GetTagMapsDDLAsync(bool trackChanges);
-  //Task<GridEntity<DmsdocumentTagMapDto>> SummaryGrid(CRMGridOptions options);
-  //Task<string> CreateNewRecordAsync(DmsdocumentTagMapDto modelDto);
-  //Task<string> UpdateNewRecordAsync(int key, DmsdocumentTagMapDto modelDto, bool trackChanges);
-  //Task<string> DeleteRecordAsync(int key, DmsdocumentTagMapDto modelDto);
-  //Task<string> SaveOrUpdate(int key, DmsdocumentTagMapDto modelDto);
+  //Task<IEnumerable<DmsDocumentTagMapDDL>> GetTagMapsDDLAsync(bool trackChanges);
+  //Task<GridEntity<DmsDocumentTagMapDto>> SummaryGrid(CRMGridOptions options);
+  //Task<string> CreateNewRecordAsync(DmsDocumentTagMapDto modelDto);
+  //Task<string> UpdateNewRecordAsync(int key, DmsDocumentTagMapDto modelDto, bool trackChanges);
+  //Task<string> DeleteRecordAsync(int key, DmsDocumentTagMapDto modelDto);
+  //Task<string> SaveOrUpdate(int key, DmsDocumentTagMapDto modelDto);
 }
 
 

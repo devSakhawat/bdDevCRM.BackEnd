@@ -2,7 +2,7 @@
 
 namespace bdDevCRM.RepositoriesContracts.CRM;
 
-public interface ICRMYearRepository : IRepositoryBase<Crmyear>
+public interface ICrmYearRepository : IRepositoryBase<CrmYear>
 {
-  Task<IEnumerable<Crmyear>> GetActiveYearAsync(bool trackChanges);
+  Task<IEnumerable<CrmYear>> GetActiveYearAsync(bool trackChanges);
 }

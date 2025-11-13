@@ -6,13 +6,18 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Shared.DataTransferObjects.CRM;
 
-public class CRMMonthDto
+public class CrmMonthDto
 {
   public int MonthId { get; set; }
 
-  public string CrmmonthName { get; set; } = null!;
+  public string MonthName { get; set; } = null!;
 
   public string? MonthCode { get; set; }
 
   public bool? Status { get; set; }
+
+  public DateTime CreatedDate { get; init; }
+  public int CreatedBy { get; init; }
+  public DateTime? UpdatedDate { get; init; }
+  public int? UpdatedBy { get; init; }
 }

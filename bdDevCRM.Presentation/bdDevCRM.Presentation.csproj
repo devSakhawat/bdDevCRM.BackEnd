@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ActionFIlters\ApiResponse\**" />
+    <EmbeddedResource Remove="ActionFIlters\ApiResponse\**" />
+    <None Remove="ActionFIlters\ApiResponse\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
   </ItemGroup>
@@ -14,11 +20,8 @@
   <ItemGroup>
     <ProjectReference Include="..\bdDevCRM.LoggerSevice\bdDevCRM.LoggerSevice.csproj" />
     <ProjectReference Include="..\bdDevCRM.ServiceContract\bdDevCRM.ServiceContract.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Shared\bdDevCRM.Shared.csproj" />
     <ProjectReference Include="..\bdDevCRM.Utilities\bdDevCRM.Utilities.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ApiResponse\" />
   </ItemGroup>
 
 </Project>

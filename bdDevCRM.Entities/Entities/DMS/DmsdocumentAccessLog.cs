@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
 
-public partial class DmsdocumentAccessLog
+public partial class DmsDocumentAccessLog
 {
     public long LogId { get; set; }
 
@@ -23,5 +23,5 @@ public partial class DmsdocumentAccessLog
 
     public string? Notes { get; set; }
 
-    public virtual Dmsdocument Document { get; set; } = null!;
+    public virtual DmsDocument Document { get; set; } = null!;
 }

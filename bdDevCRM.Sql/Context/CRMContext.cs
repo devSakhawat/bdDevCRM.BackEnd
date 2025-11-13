@@ -1,5 +1,4 @@
-﻿using bdDevCRM.Entities.Entities.Core;
-using bdDevCRM.Entities.Entities.CRM;
+﻿using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.Entities.Entities.System;
 using Microsoft.EntityFrameworkCore;
@@ -12,16 +11,16 @@ public partial class CRMContext : DbContext
   {
   }
 
-  public CRMContext(DbContextOptions<CRMContext> options) : base(options)
+  public CRMContext(DbContextOptions<CRMContext> options)
+      : base(options)
   {
   }
 
-
   public virtual DbSet<AboutUsLicense> AboutUsLicense { get; set; }
 
-  public virtual DbSet<AccessRestriction> AccessRestriction { get; set; }
+  public virtual DbSet<AccessControl> AccessControl { get; set; }
 
-  public virtual DbSet<Accesscontrol> Accesscontrol { get; set; }
+  public virtual DbSet<AccessRestriction> AccessRestriction { get; set; }
 
   public virtual DbSet<ApproverDetails> ApproverDetails { get; set; }
 
@@ -49,51 +48,95 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<BoardInstitute> BoardInstitute { get; set; }
 
+  public virtual DbSet<Branch> Branch { get; set; }
+
   public virtual DbSet<Company> Company { get; set; }
+
+  public virtual DbSet<CompanyDepartmentMap> CompanyDepartmentMap { get; set; }
+
+  public virtual DbSet<CompanyLocationMap> CompanyLocationMap { get; set; }
 
   public virtual DbSet<Competencies> Competencies { get; set; }
 
   public virtual DbSet<CompetencyLevel> CompetencyLevel { get; set; }
 
-  public virtual DbSet<Country> Country { get; set; }
+  public virtual DbSet<CrmAdditionalDocument> CrmAdditionalDocument { get; set; }
 
-  public virtual DbSet<Course> Course { get; set; }
+  public virtual DbSet<CrmAdditionalInfo> CrmAdditionalInfo { get; set; }
 
-  public virtual DbSet<CrmapplicantCourseDetials> CrmapplicantCourseDetials { get; set; }
+  public virtual DbSet<CrmApplicantCourse> CrmApplicantCourse { get; set; }
 
-  public virtual DbSet<Crmcourse> Crmcourse { get; set; }
+  public virtual DbSet<CrmApplicantInfo> CrmApplicantInfo { get; set; }
 
-  public virtual DbSet<CrmcourseIntake> CrmcourseIntake { get; set; }
+  public virtual DbSet<CrmApplicantReference> CrmApplicantReference { get; set; }
 
-  public virtual DbSet<Crminstitute> Crminstitute { get; set; }
+  public virtual DbSet<CrmApplication> CrmApplication { get; set; }
 
-  public virtual DbSet<CrminstituteType> CrminstituteType { get; set; }
+  public virtual DbSet<CrmCountry> CrmCountry { get; set; }
 
-  public virtual DbSet<Crmmonth> Crmmonth { get; set; }
+  public virtual DbSet<CrmCourse> CrmCourse { get; set; }
 
-  public virtual DbSet<Crmyear> Crmyear { get; set; }
+  public virtual DbSet<CrmCourseIntake> CrmCourseIntake { get; set; }
+
+  public virtual DbSet<CrmCurrencyInfo> CrmCurrencyInfo { get; set; }
+
+  public virtual DbSet<CrmEducationHistory> CrmEducationHistory { get; set; }
+
+  public virtual DbSet<CrmGMATInformation> CrmGmatinformation { get; set; }
+
+  public virtual DbSet<CrmIELTSInformation> CrmIELTSInformation { get; set; }
+
+  public virtual DbSet<CrmInstitute> CrmInstitute { get; set; }
+
+  public virtual DbSet<CrmInstituteType> CrmInstituteType { get; set; }
+
+  public virtual DbSet<CrmIntakeMonth> CrmIntakeMonth { get; set; }
+
+  public virtual DbSet<CrmIntakeYear> CrmIntakeYear { get; set; }
+
+  public virtual DbSet<CrmMonth> CrmMonth { get; set; }
+
+  public virtual DbSet<CrmOthersInformation> CrmOthersInformation { get; set; }
+
+  public virtual DbSet<CrmPaymentMethod> CrmPaymentMethod { get; set; }
+
+  public virtual DbSet<CrmPermanentAddress> CrmPermanentAddress { get; set; }
+
+  public virtual DbSet<CrmPresentAddress> CrmPresentAddress { get; set; }
+
+  public virtual DbSet<CrmPTEInformation> CrmPTEInformation { get; set; }
+
+  public virtual DbSet<CrmStatementOfPurpose> CrmStatementOfPurpose { get; set; }
+
+  public virtual DbSet<CrmTOEFLInformation> CrmTOEFLInformation { get; set; }
+
+  public virtual DbSet<CrmWorkExperience> CrmWorkExperience { get; set; }
+
+  public virtual DbSet<CrmYear> CrmYear { get; set; }
 
   public virtual DbSet<CurencyRate> CurencyRate { get; set; }
 
   public virtual DbSet<Currency> Currency { get; set; }
 
-  public virtual DbSet<CurrencyInfo> CurrencyInfo { get; set; }
-
   public virtual DbSet<DeligationInfo> DeligationInfo { get; set; }
 
-  public virtual DbSet<Dmsdocument> Dmsdocument { get; set; }
+  public virtual DbSet<Department> Department { get; set; }
 
-  public virtual DbSet<DmsdocumentAccessLog> DmsdocumentAccessLog { get; set; }
+  public virtual DbSet<DmsDocument> DmsDocument { get; set; }
 
-  public virtual DbSet<DmsdocumentFolder> DmsdocumentFolder { get; set; }
+  public virtual DbSet<DmsDocumentAccessLog> DmsDocumentAccessLog { get; set; }
 
-  public virtual DbSet<DmsdocumentTag> DmsdocumentTag { get; set; }
+  public virtual DbSet<DmsDocumentFolder> DmsDocumentFolder { get; set; }
 
-  public virtual DbSet<DmsdocumentTagMap> DmsdocumentTagMap { get; set; }
+  public virtual DbSet<DmsDocumentTag> DmsDocumentTag { get; set; }
 
-  public virtual DbSet<DmsdocumentType> DmsdocumentType { get; set; }
+  public virtual DbSet<DmsDocumentTagMap> DmsDocumentTagMap { get; set; }
 
-  public virtual DbSet<DmsdocumentVersion> DmsdocumentVersion { get; set; }
+  public virtual DbSet<DmsDocumentType> DmsDocumentType { get; set; }
+
+  public virtual DbSet<DmsDocumentVersion> DmsDocumentVersion { get; set; }
+
+  public virtual DbSet<DmsFileUpdateHistory> DmsFileUpdateHistory { get; set; }
 
   public virtual DbSet<Docmdetails> Docmdetails { get; set; }
 
@@ -125,6 +168,8 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<Holiday> Holiday { get; set; }
 
+  public virtual DbSet<MaritalStatus> MaritalStatus { get; set; }
+
   public virtual DbSet<Menu> Menu { get; set; }
 
   public virtual DbSet<Module> Module { get; set; }
@@ -139,13 +184,16 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<Timesheet> Timesheet { get; set; }
 
+  public virtual DbSet<TokenBlacklist> TokenBlacklist { get; set; }
+
   public virtual DbSet<Users> Users { get; set; }
 
-  public virtual DbSet<Wfaction> Wfaction { get; set; }
+  public virtual DbSet<WfAction> Wfaction { get; set; }
 
-  public virtual DbSet<Wfstate> Wfstate { get; set; }
-  public virtual DbSet<TokenBlacklist> TokenBlacklist { get; set; }
-  public virtual DbSet<Branch> Branch { get; set; }
+  public virtual DbSet<WfState> Wfstate { get; set; }
+
+  //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -171,18 +219,16 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.UserLicense).HasMaxLength(50);
     });
 
+    modelBuilder.Entity<AccessControl>(entity =>
+    {
+      entity.HasKey(e => e.AccessId).HasName("PK_ACCESSCONTROL");
+
+      entity.Property(e => e.AccessName).HasMaxLength(50);
+    });
+
     modelBuilder.Entity<AccessRestriction>(entity =>
     {
       entity.Property(e => e.AccessDate).HasColumnType("datetime");
-    });
-
-    modelBuilder.Entity<Accesscontrol>(entity =>
-    {
-      entity.HasKey(e => e.AccessId);
-
-      entity.ToTable("ACCESSCONTROL");
-
-      entity.Property(e => e.AccessName).HasMaxLength(50);
     });
 
     modelBuilder.Entity<ApproverDetails>(entity =>
@@ -197,9 +243,9 @@ public partial class CRMContext : DbContext
     {
       entity.HasKey(e => e.AssignApproverId);
 
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.DeleteDate).HasColumnType("datetime");
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<ApproverOrder>(entity =>
@@ -304,8 +350,8 @@ public partial class CRMContext : DbContext
       entity.HasIndex(e => new { e.HrRecordId, e.ModuleId, e.SortOrder, e.Type }, "IX_DuplicateApprover").IsUnique();
 
       entity.Property(e => e.AssignApproverId).ValueGeneratedOnAdd();
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<AuditLog>(entity =>
@@ -392,6 +438,25 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
     });
 
+    modelBuilder.Entity<Branch>(entity =>
+    {
+      entity.Property(e => e.Branchid).HasColumnName("BRANCHID");
+      entity.Property(e => e.BranchAddress)
+          .HasMaxLength(250)
+          .IsUnicode(false);
+      entity.Property(e => e.Branchcode)
+          .HasMaxLength(50)
+          .HasColumnName("BRANCHCODE");
+      entity.Property(e => e.Branchdescription)
+          .HasMaxLength(2000)
+          .HasColumnName("BRANCHDESCRIPTION");
+      entity.Property(e => e.Branchname)
+          .HasMaxLength(100)
+          .HasColumnName("BRANCHNAME");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+    });
+
     modelBuilder.Entity<Company>(entity =>
     {
       entity.Property(e => e.Address).HasMaxLength(1000);
@@ -402,7 +467,7 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.CompanyRegisterNo).HasMaxLength(250);
       entity.Property(e => e.CompanyTin).HasMaxLength(50);
       entity.Property(e => e.CompanyZone).HasMaxLength(200);
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.Email).HasMaxLength(100);
       entity.Property(e => e.Fax).HasMaxLength(50);
       entity.Property(e => e.FullLogoPath).HasMaxLength(1000);
@@ -412,7 +477,21 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.LetterHeader).HasMaxLength(1000);
       entity.Property(e => e.Phone).HasMaxLength(50);
       entity.Property(e => e.PrimaryContact).HasMaxLength(50);
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+    });
+
+    modelBuilder.Entity<CompanyDepartmentMap>(entity =>
+    {
+      entity.HasNoKey();
+
+      entity.Property(e => e.SbuDepartmentMapId).ValueGeneratedOnAdd();
+    });
+
+    modelBuilder.Entity<CompanyLocationMap>(entity =>
+    {
+      entity.HasNoKey();
+
+      entity.Property(e => e.SbuLocationMapId).ValueGeneratedOnAdd();
     });
 
     modelBuilder.Entity<Competencies>(entity =>
@@ -430,13 +509,132 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
     });
 
-    modelBuilder.Entity<Country>(entity =>
+    modelBuilder.Entity<CrmAdditionalDocument>(entity =>
     {
+      entity.HasKey(e => e.AdditionalDocumentId);
+
+      entity.Property(e => e.AdditionalDocumentId).ValueGeneratedNever();
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.DocumentName)
+          .HasMaxLength(150)
+          .IsUnicode(false);
+      entity.Property(e => e.DocumentPath).HasMaxLength(350);
+      entity.Property(e => e.DocumentTitle)
+          .HasMaxLength(350)
+          .IsUnicode(false);
+      entity.Property(e => e.RecordType)
+          .HasMaxLength(150)
+          .IsUnicode(false);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+    });
+
+    modelBuilder.Entity<CrmAdditionalInfo>(entity =>
+    {
+      entity.HasKey(e => e.AdditionalInfoId).HasName("PK__Addition__2C4B5286CA6080E2");
+
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.HealthNmedicalNeeds).HasColumnName("HealthNMedicalNeeds");
+      entity.Property(e => e.HealthNmedicalNeedsRemarks).HasColumnName("HealthNMedicalNeedsRemarks");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmAdditionalInfo)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__Additiona__Appli__7A3223E8");
+    });
+
+    modelBuilder.Entity<CrmApplicantCourse>(entity =>
+    {
+      entity.HasKey(e => e.ApplicantCourseId).HasName("PK__Applican__32CD933295321BBB");
+
+      entity.Property(e => e.ApplicationFee).HasMaxLength(50);
+      entity.Property(e => e.CountryName).HasMaxLength(100);
+      entity.Property(e => e.CourseTitle).HasMaxLength(255);
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.IntakeMonth).HasMaxLength(50);
+      entity.Property(e => e.IntakeYear).HasMaxLength(50);
+      entity.Property(e => e.PaymentDate).HasColumnType("datetime");
+      entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+      entity.Property(e => e.PaymentReferenceNumber).HasMaxLength(100);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmApplicantCourse)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__Applicant__Appli__7D0E9093");
+    });
+
+    modelBuilder.Entity<CrmApplicantInfo>(entity =>
+    {
+      entity.HasKey(e => e.ApplicantId).HasName("PK__Applican__39AE91A8F9CF4ED3");
+
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.DateOfBirth).HasColumnType("datetime");
+      entity.Property(e => e.EmailAddress).HasMaxLength(150);
+      entity.Property(e => e.FirstName).HasMaxLength(100);
+      entity.Property(e => e.LastName).HasMaxLength(100);
+      entity.Property(e => e.Mobile).HasMaxLength(20);
+      entity.Property(e => e.Nationality).HasMaxLength(100);
+      entity.Property(e => e.PassportExpiryDate).HasColumnType("datetime");
+      entity.Property(e => e.PassportIssueDate).HasColumnType("datetime");
+      entity.Property(e => e.PassportNumber).HasMaxLength(50);
+      entity.Property(e => e.PhoneAreaCode).HasMaxLength(10);
+      entity.Property(e => e.PhoneCountryCode).HasMaxLength(10);
+      entity.Property(e => e.PhoneNumber).HasMaxLength(25);
+      entity.Property(e => e.SkypeId).HasMaxLength(100);
+      entity.Property(e => e.TitleText).HasMaxLength(50);
+      entity.Property(e => e.TitleValue).HasMaxLength(50);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Application).WithMany(p => p.CrmApplicantInfo)
+      //    .HasForeignKey(d => d.ApplicationId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__Applicant__Appli__7755B73D");
+    });
+
+    modelBuilder.Entity<CrmApplicantReference>(entity =>
+    {
+      entity.HasKey(e => e.ApplicantReferenceId).HasName("PK__Applican__8C380D2828FDEB18");
+
+      entity.Property(e => e.Address).HasMaxLength(255);
+      entity.Property(e => e.City).HasMaxLength(100);
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.Designation).HasMaxLength(255);
+      entity.Property(e => e.EmailId)
+          .HasMaxLength(150)
+          .HasColumnName("EmailID");
+      entity.Property(e => e.FaxNo).HasMaxLength(50);
+      entity.Property(e => e.Institution).HasMaxLength(255);
+      entity.Property(e => e.Name).HasMaxLength(255);
+      entity.Property(e => e.PhoneNo).HasMaxLength(50);
+      entity.Property(e => e.PostOrZipCode).HasMaxLength(20);
+      entity.Property(e => e.State).HasMaxLength(100);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmApplicantReference)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__Applicant__Appli__7FEAFD3E");
+    });
+
+    modelBuilder.Entity<CrmApplication>(entity =>
+    {
+      entity.HasKey(e => e.ApplicationId).HasName("PK__CrmAppli__C93A4C99E0194183");
+
+      entity.Property(e => e.ApplicationDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+    });
+
+    modelBuilder.Entity<CrmCountry>(entity =>
+    {
+      entity.HasKey(e => e.CountryId).HasName("PK_Country");
+
       entity.Property(e => e.CountryCode).HasMaxLength(50);
       entity.Property(e => e.CountryName).HasMaxLength(100);
     });
 
-    modelBuilder.Entity<Course>(entity =>
+    modelBuilder.Entity<CrmCourse>(entity =>
     {
       entity.HasNoKey();
 
@@ -451,9 +649,6 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.AwardingBody)
           .HasMaxLength(100)
           .IsUnicode(false);
-      entity.Property(e => e.CampusLocation)
-          .HasMaxLength(100)
-          .IsUnicode(false);
       entity.Property(e => e.CountryBenefits)
           .HasMaxLength(500)
           .IsUnicode(false);
@@ -503,94 +698,9 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
     });
 
-    modelBuilder.Entity<CrmapplicantCourseDetials>(entity =>
+    modelBuilder.Entity<CrmCourseIntake>(entity =>
     {
-      entity
-          .HasNoKey()
-          .ToTable("CRMApplicantCourseDetials");
-
-      entity.Property(e => e.ApplicantCourseDetailsId).ValueGeneratedOnAdd();
-      entity.Property(e => e.ApplicationFee).HasColumnType("decimal(18, 2)");
-      entity.Property(e => e.CourseRemarks)
-          .HasMaxLength(500)
-          .IsUnicode(false);
-      entity.Property(e => e.PaymentDate).HasColumnType("datetime");
-      entity.Property(e => e.PaymentReferenceNumber)
-          .HasMaxLength(50)
-          .IsUnicode(false);
-    });
-
-    modelBuilder.Entity<Crmcourse>(entity =>
-    {
-      entity
-          .HasNoKey()
-          .ToTable("CRMCourse");
-
-      entity.Property(e => e.AdditionalInformationOfCourse)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.After2YearsPswcompletingCourse)
-          .HasMaxLength(300)
-          .IsUnicode(false)
-          .HasColumnName("After2YearsPSWCompletingCourse");
-      entity.Property(e => e.ApplicationFee).HasColumnType("decimal(18, 2)");
-      entity.Property(e => e.AwardingBody)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.CountryBenefits)
-          .HasMaxLength(500)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseBenefits)
-          .HasMaxLength(200)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseCategory)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseDuration)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseFee).HasColumnType("decimal(18, 2)");
-      entity.Property(e => e.CourseId).ValueGeneratedOnAdd();
-      entity.Property(e => e.CourseLevel)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseTitle)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.DocumentId)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.EndDate).HasColumnType("datetime");
-      entity.Property(e => e.FundsRequirementforVisa)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.GeneralEligibility)
-          .HasMaxLength(200)
-          .IsUnicode(false);
-      entity.Property(e => e.InstitutionalBenefits)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.KeyModules)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.LanguagesRequirement)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.MonthlyLivingCost).HasColumnType("decimal(18, 2)");
-      entity.Property(e => e.PartTimeWorkDetails)
-          .HasMaxLength(500)
-          .IsUnicode(false);
-      entity.Property(e => e.StartDate).HasColumnType("datetime");
-      entity.Property(e => e.VisaRequirement)
-          .HasMaxLength(500)
-          .IsUnicode(false);
-    });
-
-    modelBuilder.Entity<CrmcourseIntake>(entity =>
-    {
-      entity
-          .HasNoKey()
-          .ToTable("CRMCourseIntake");
+      entity.HasNoKey();
 
       entity.Property(e => e.CourseIntakeId).ValueGeneratedOnAdd();
       entity.Property(e => e.IntakeTitile)
@@ -598,10 +708,114 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
     });
 
-    modelBuilder.Entity<Crminstitute>(entity =>
+    modelBuilder.Entity<CrmCurrencyInfo>(entity =>
     {
-      entity.HasKey(e => e.InstituteId);
-      entity.ToTable("CRMInstitute");
+      entity.HasKey(e => e.CurrencyId).HasName("PK_CurrencyInfo");
+
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.CurrencyName).HasMaxLength(50);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+    });
+
+    modelBuilder.Entity<CrmEducationHistory>(entity =>
+    {
+      entity.HasKey(e => e.EducationHistoryId).HasName("PK__Educatio__576CCA0DF8920341");
+
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.DocumentName).HasMaxLength(255);
+      entity.Property(e => e.DocumentPath).HasMaxLength(255);
+      entity.Property(e => e.Grade).HasMaxLength(50);
+      entity.Property(e => e.Institution).HasMaxLength(255);
+      entity.Property(e => e.Qualification).HasMaxLength(100);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmEducationHistory)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__Education__Appli__02C769E9");
+    });
+
+    modelBuilder.Entity<CrmGMATInformation>(entity =>
+    {
+      entity.HasKey(e => e.GMATInformationId).HasName("PK__GMATInfo__511C53ECA7E93B59");
+
+      entity.ToTable("CrmGMATInformation");
+
+      entity.Property(e => e.GMATInformationId).HasColumnName("GMATInformationId");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.GmatadditionalInformation).HasColumnName("GMATAdditionalInformation");
+      entity.Property(e => e.Gmatdate)
+          .HasColumnType("datetime")
+          .HasColumnName("GMATDate");
+      entity.Property(e => e.Gmatlistening)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("GMATListening");
+      entity.Property(e => e.GmatoverallScore)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("GMATOverallScore");
+      entity.Property(e => e.Gmatreading)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("GMATReading");
+      entity.Property(e => e.GmatscannedCopyPath)
+          .HasMaxLength(350)
+          .HasColumnName("GMATScannedCopyPath");
+      entity.Property(e => e.Gmatspeaking)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("GMATSpeaking");
+      entity.Property(e => e.Gmatwriting)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("GMATWriting");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmGmatinformation)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__GMATInfor__Appli__05A3D694");
+    });
+
+    modelBuilder.Entity<CrmIELTSInformation>(entity =>
+    {
+      entity.HasKey(e => e.IELTSInformationId).HasName("PK__IELTSInf__F3D98972BEA5442E");
+
+      entity.ToTable("CrmIELTSInformation");
+
+      entity.Property(e => e.IELTSInformationId).HasColumnName("IELTSInformationId");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.IeltsadditionalInformation)
+          .IsUnicode(false)
+          .HasColumnName("IELTSAdditionalInformation");
+      entity.Property(e => e.Ieltsdate)
+          .HasColumnType("datetime")
+          .HasColumnName("IELTSDate");
+      entity.Property(e => e.Ieltslistening)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("IELTSListening");
+      entity.Property(e => e.IeltsoverallScore)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("IELTSOverallScore");
+      entity.Property(e => e.Ieltsreading)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("IELTSReading");
+      entity.Property(e => e.IeltsscannedCopyPath)
+          .HasMaxLength(350)
+          .HasColumnName("IELTSScannedCopyPath");
+      entity.Property(e => e.Ieltsspeaking)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("IELTSSpeaking");
+      entity.Property(e => e.Ieltswriting)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("IELTSWriting");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmIeltsinformation)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__IELTSInfo__Appli__0880433F");
+    });
+
+    modelBuilder.Entity<CrmInstitute>(entity =>
+    {
+      entity.HasKey(e => e.InstituteId).HasName("PK_CRMInstitute");
 
       entity.Property(e => e.ApplicationFee).HasColumnType("decimal(18, 2)");
       entity.Property(e => e.Campus)
@@ -619,7 +833,6 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.InstituteEmail)
           .HasMaxLength(100)
           .IsUnicode(false);
-      entity.Property(e => e.InstituteId).ValueGeneratedOnAdd();
       entity.Property(e => e.InstituteMobileNo)
           .HasMaxLength(20)
           .IsUnicode(false);
@@ -657,43 +870,271 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
     });
 
-    modelBuilder.Entity<CrminstituteType>(entity =>
+    modelBuilder.Entity<CrmInstituteType>(entity =>
     {
-      entity.HasKey(e => e.InstituteTypeId);
-
-      entity.ToTable("CRMInstituteType");
+      entity.HasKey(e => e.InstituteTypeId).HasName("PK_CRMInstituteType");
 
       entity.Property(e => e.InstituteTypeName)
           .HasMaxLength(150)
           .IsUnicode(false);
     });
 
-    modelBuilder.Entity<Crmmonth>(entity =>
+    modelBuilder.Entity<CrmIntakeMonth>(entity =>
     {
-      entity
-          .HasNoKey()
-          .ToTable("CRMMonth");
+      entity.HasKey(e => e.IntakeMonthId);
 
-      entity.Property(e => e.CrmmonthName)
-          .HasMaxLength(10)
-          .IsUnicode(false)
-          .HasColumnName("CRMMonthName");
+      entity.ToTable(tb => tb.HasComment("Stores intake months for CRM applications"));
+
+      entity.HasIndex(e => e.MonthNumber, "IX_CrmIntakeMonth_MonthNumber");
+
+      entity.HasIndex(e => e.IsActive, "IX_CrmIntakeMonth_Status");
+
+      entity.Property(e => e.CreatedDate)
+          .HasDefaultValueSql("(getdate())")
+          .HasColumnType("datetime");
+      entity.Property(e => e.Description)
+          .HasMaxLength(500)
+          .IsUnicode(false);
+      entity.Property(e => e.IsActive).HasDefaultValue(true);
       entity.Property(e => e.MonthCode)
           .HasMaxLength(10)
           .IsUnicode(false);
-      entity.Property(e => e.MonthId).ValueGeneratedOnAdd();
+      entity.Property(e => e.MonthName)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
-    modelBuilder.Entity<Crmyear>(entity =>
+    modelBuilder.Entity<CrmIntakeYear>(entity =>
     {
-      entity
-          .HasNoKey()
-          .ToTable("CRMYear");
+      entity.HasKey(e => e.IntakeYearId);
+
+      entity.ToTable(tb => tb.HasComment("Stores intake years for CRM applications"));
+
+      entity.HasIndex(e => e.IsActive, "IX_CrmIntakeYear_Status");
+
+      entity.HasIndex(e => e.YearValue, "IX_CrmIntakeYear_YearValue");
+
+      entity.Property(e => e.CreatedDate)
+          .HasDefaultValueSql("(getdate())")
+          .HasColumnType("datetime");
+      entity.Property(e => e.Description)
+          .HasMaxLength(500)
+          .IsUnicode(false);
+      entity.Property(e => e.IsActive).HasDefaultValue(true);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+      entity.Property(e => e.YearCode)
+          .HasMaxLength(10)
+          .IsUnicode(false);
+      entity.Property(e => e.YearName)
+          .HasMaxLength(10)
+          .IsUnicode(false);
+    });
+
+    modelBuilder.Entity<CrmMonth>(entity =>
+    {
+      entity.HasKey(e => e.MonthId);
+
+      entity.Property(e => e.MonthCode)
+          .HasMaxLength(10)
+          .IsUnicode(false);
+      entity.Property(e => e.MonthName)
+          .HasMaxLength(10)
+          .IsUnicode(false);
+    });
+
+    modelBuilder.Entity<CrmOthersInformation>(entity =>
+    {
+      entity.HasKey(e => e.OthersInformationId).HasName("PK__OTHERSIn__213F3EE456434251");
+
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.OthersScannedCopyPath).HasMaxLength(255);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmOthersInformation)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__OTHERSInf__Appli__0B5CAFEA");
+    });
+
+    modelBuilder.Entity<CrmPaymentMethod>(entity =>
+    {
+      entity.HasKey(e => e.PaymentMethodId);
+
+      entity.ToTable(tb => tb.HasComment("Stores payment methods available in CRM system"));
+
+      entity.HasIndex(e => e.IsOnlinePayment, "IX_CrmPaymentMethod_IsOnlinePayment");
+
+      entity.HasIndex(e => e.IsActive, "IX_CrmPaymentMethod_Status");
+
+      entity.Property(e => e.CreatedDate)
+          .HasDefaultValueSql("(getdate())")
+          .HasColumnType("datetime");
+      entity.Property(e => e.Description)
+          .HasMaxLength(500)
+          .IsUnicode(false);
+      entity.Property(e => e.IsActive).HasDefaultValue(true);
+      entity.Property(e => e.PaymentMethodCode)
+          .HasMaxLength(20)
+          .IsUnicode(false);
+      entity.Property(e => e.PaymentMethodName)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+      entity.Property(e => e.ProcessingFee).HasColumnType("decimal(18, 2)");
+      entity.Property(e => e.ProcessingFeeType)
+          .HasMaxLength(20)
+          .IsUnicode(false);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+    });
+
+    modelBuilder.Entity<CrmPermanentAddress>(entity =>
+    {
+      entity.HasKey(e => e.PermanentAddressId).HasName("PK__Permanen__3288F26856B2B9D9");
+
+      entity.Property(e => e.Address).HasMaxLength(255);
+      entity.Property(e => e.City).HasMaxLength(100);
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.PostalCode).HasMaxLength(20);
+      entity.Property(e => e.State).HasMaxLength(100);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmPermanentAddress)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__Permanent__Appli__11158940");
+    });
+
+    modelBuilder.Entity<CrmPresentAddress>(entity =>
+    {
+      entity.HasKey(e => e.PresentAddressId).HasName("PK__PresentA__C0BAC2A24C5CA74C");
+
+      entity.Property(e => e.Address).HasMaxLength(255);
+      entity.Property(e => e.City).HasMaxLength(100);
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.PostalCode).HasMaxLength(20);
+      entity.Property(e => e.State).HasMaxLength(100);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmPresentAddress)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__PresentAd__Appli__13F1F5EB");
+    });
+
+    modelBuilder.Entity<CrmPTEInformation>(entity =>
+    {
+      entity.HasKey(e => e.PTEInformationId).HasName("PK__PTEInfor__1D54A2410A53FFCD");
+
+      entity.ToTable("CrmPTEInformation");
+
+      entity.Property(e => e.PTEInformationId).HasColumnName("PTEInformationId");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.PteadditionalInformation).HasColumnName("PTEAdditionalInformation");
+      entity.Property(e => e.Ptedate)
+          .HasColumnType("datetime")
+          .HasColumnName("PTEDate");
+      entity.Property(e => e.Ptelistening)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("PTEListening");
+      entity.Property(e => e.PteoverallScore)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("PTEOverallScore");
+      entity.Property(e => e.Ptereading)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("PTEReading");
+      entity.Property(e => e.PtescannedCopyPath)
+          .HasMaxLength(350)
+          .HasColumnName("PTEScannedCopyPath");
+      entity.Property(e => e.Ptespeaking)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("PTESpeaking");
+      entity.Property(e => e.Ptewriting)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("PTEWriting");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmPTEInformation)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__PTEInform__Appli__0E391C95");
+    });
+
+    modelBuilder.Entity<CrmStatementOfPurpose>(entity =>
+    {
+      entity.HasKey(e => e.StatementOfPurposeId).HasName("PK__Statemen__88D17C3D66DAD506");
+
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.StatementOfPurposeFilePath).HasMaxLength(255);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+    });
+
+    modelBuilder.Entity<CrmTOEFLInformation>(entity =>
+    {
+      entity.HasKey(e => e.TOEFLInformationId).HasName("PK__TOEFLInf__BD367513B8466628");
+
+      entity.ToTable("CrmTOEFLInformation");
+
+      entity.Property(e => e.TOEFLInformationId).HasColumnName("TOEFLInformationId");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.ToefladditionalInformation)
+          .IsUnicode(false)
+          .HasColumnName("TOEFLAdditionalInformation");
+      entity.Property(e => e.Toefldate)
+          .HasColumnType("datetime")
+          .HasColumnName("TOEFLDate");
+      entity.Property(e => e.Toefllistening)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("TOEFLListening");
+      entity.Property(e => e.ToefloverallScore)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("TOEFLOverallScore");
+      entity.Property(e => e.Toeflreading)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("TOEFLReading");
+      entity.Property(e => e.ToeflscannedCopyPath)
+          .HasMaxLength(350)
+          .HasColumnName("TOEFLScannedCopyPath");
+      entity.Property(e => e.Toeflspeaking)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("TOEFLSpeaking");
+      entity.Property(e => e.Toeflwriting)
+          .HasColumnType("decimal(18, 2)")
+          .HasColumnName("TOEFLWriting");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmToeflinformation)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__TOEFLInfo__Appli__19AACF41");
+    });
+
+    modelBuilder.Entity<CrmWorkExperience>(entity =>
+    {
+      entity.HasKey(e => e.WorkExperienceId).HasName("PK__WorkExpe__55A2B889125C12F5");
+
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.DocumentName).HasMaxLength(255);
+      entity.Property(e => e.EndDate).HasColumnType("datetime");
+      entity.Property(e => e.NameOfEmployer).HasMaxLength(255);
+      entity.Property(e => e.Period).HasColumnType("decimal(18, 2)");
+      entity.Property(e => e.Position).HasMaxLength(100);
+      entity.Property(e => e.ScannedCopyPath).HasMaxLength(350);
+      entity.Property(e => e.StartDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+      //entity.HasOne(d => d.Applicant).WithMany(p => p.CrmWorkExperience)
+      //    .HasForeignKey(d => d.ApplicantId)
+      //    .OnDelete(DeleteBehavior.ClientSetNull)
+      //    .HasConstraintName("FK__WorkExper__Appli__1C873BEC");
+    });
+
+    modelBuilder.Entity<CrmYear>(entity =>
+    {
+      entity.HasKey(e => e.YearId);
 
       entity.Property(e => e.YearCode)
           .HasMaxLength(10)
           .IsUnicode(false);
-      entity.Property(e => e.YearId).ValueGeneratedOnAdd();
       entity.Property(e => e.YearName)
           .HasMaxLength(10)
           .IsUnicode(false);
@@ -701,7 +1142,7 @@ public partial class CRMContext : DbContext
 
     modelBuilder.Entity<CurencyRate>(entity =>
     {
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.CurrencyMonth).HasColumnType("datetime");
       entity.Property(e => e.CurrencyRateRation).HasColumnType("decimal(18, 2)");
     });
@@ -719,48 +1160,46 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
     });
 
-    modelBuilder.Entity<CurrencyInfo>(entity =>
-    {
-      entity.HasKey(e => e.CurrencyId);
-
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
-      entity.Property(e => e.CurrencyName).HasMaxLength(50);
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
-    });
-
     modelBuilder.Entity<DeligationInfo>(entity =>
     {
       entity.HasKey(e => e.DeligationId).HasName("PK_Deligation");
     });
 
-    modelBuilder.Entity<Dmsdocument>(entity =>
+    modelBuilder.Entity<Department>(entity =>
+    {
+      entity.Property(e => e.DepartmentId).ValueGeneratedNever();
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.DepartmentCode).HasMaxLength(50);
+      entity.Property(e => e.DepartmentName).HasMaxLength(250);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+    });
+
+    modelBuilder.Entity<DmsDocument>(entity =>
     {
       entity.HasKey(e => e.DocumentId).HasName("PK__DMSDocum__1ABEEF0FA80AC05E");
-
-      entity.ToTable("DMSDocument");
 
       entity.Property(e => e.FileExtension).HasMaxLength(10);
       entity.Property(e => e.FileName).HasMaxLength(255);
       entity.Property(e => e.ReferenceEntityId).HasMaxLength(50);
       entity.Property(e => e.ReferenceEntityType).HasMaxLength(50);
-      entity.Property(e => e.Title).HasMaxLength(255);
-      entity.Property(e => e.UploadDate).HasDefaultValueSql("(getdate())");
-      entity.Property(e => e.UploadedByUserId).HasMaxLength(50).IsUnicode(false);
-
-      entity.HasOne(d => d.DocumentType).WithMany(p => p.Dmsdocument)
-          .HasForeignKey(d => d.DocumentTypeId)
-          .OnDelete(DeleteBehavior.ClientSetNull)
-          .HasConstraintName("FK_Document_DocumentType");
       entity.Property(e => e.SystemTag)
           .HasMaxLength(200)
-          .HasColumnName("SystemTag");
+          .IsUnicode(false);
+      entity.Property(e => e.Title).HasMaxLength(255);
+      entity.Property(e => e.UploadDate).HasDefaultValueSql("(getdate())");
+      entity.Property(e => e.UploadedByUserId)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+
+      entity.HasOne(d => d.DocumentType).WithMany(p => p.DmsDocument)
+          .HasForeignKey(d => d.DocumentTypeId)
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .HasConstraintName("FK_Dmsdocument_DmsdocumentType");
     });
 
-    modelBuilder.Entity<DmsdocumentAccessLog>(entity =>
+    modelBuilder.Entity<DmsDocumentAccessLog>(entity =>
     {
       entity.HasKey(e => e.LogId).HasName("PK__DMSDocum__5E548648EC7B75AF");
-
-      entity.ToTable("DMSDocumentAccessLog");
 
       entity.Property(e => e.AccessDateTime).HasDefaultValueSql("(getdate())");
       entity.Property(e => e.AccessedByUserId)
@@ -780,58 +1219,55 @@ public partial class CRMContext : DbContext
           .HasMaxLength(150)
           .IsUnicode(false);
 
-      entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentAccessLog)
+      entity.HasOne(d => d.Document).WithMany(p => p.DmsDocumentAccessLog)
           .HasForeignKey(d => d.DocumentId)
-          .HasConstraintName("FK_DocumentAccessLog_Document");
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .HasConstraintName("FK_DmsdocumentAccessLog_Dmsdocument");
     });
 
-    modelBuilder.Entity<DmsdocumentFolder>(entity =>
+    modelBuilder.Entity<DmsDocumentFolder>(entity =>
     {
       entity.HasKey(e => e.FolderId).HasName("PK__DMSDocum__ACD7107FD7A53641");
-      entity.ToTable("DMSDocumentFolder");
 
       entity.Property(e => e.FolderName).HasMaxLength(255);
-      entity.Property(e => e.OwnerId).HasMaxLength(50).IsUnicode(false).IsRequired(false);
-      entity.Property(e => e.ReferenceEntityId).HasMaxLength(50).IsRequired(false); ;
-      entity.Property(e => e.ReferenceEntityType).HasMaxLength(150).IsRequired(false); ;
+      entity.Property(e => e.OwnerId)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+      entity.Property(e => e.ReferenceEntityId).HasMaxLength(50);
+      entity.Property(e => e.ReferenceEntityType).HasMaxLength(150);
 
       entity.HasOne(d => d.ParentFolder).WithMany(p => p.InverseParentFolder)
           .HasForeignKey(d => d.ParentFolderId)
           .HasConstraintName("FK_DocumentFolder_ParentFolder");
     });
 
-    modelBuilder.Entity<DmsdocumentTag>(entity =>
+    modelBuilder.Entity<DmsDocumentTag>(entity =>
     {
       entity.HasKey(e => e.TagId).HasName("PK__DMSDocum__657CF9AC43C5B9E0");
-
-      entity.ToTable("DMSDocumentTag");
 
       entity.HasIndex(e => e.DocumentTagName, "UQ__DMSDocum__737584F60E3D41BA").IsUnique();
 
       entity.Property(e => e.DocumentTagName).HasMaxLength(200);
     });
 
-    modelBuilder.Entity<DmsdocumentTagMap>(entity =>
+    modelBuilder.Entity<DmsDocumentTagMap>(entity =>
     {
-      entity.HasKey(e => e.TagMapId);
-      entity.ToTable("DMSDocumentTagMap");
+      entity.HasKey(e => e.TagMapId).HasName("PK_DMSDocumentTagMap");
 
-      entity.Property(e => e.TagMapId).ValueGeneratedOnAdd();
-
-      entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentTagMap)
+      entity.HasOne(d => d.Document).WithMany(p => p.DmsDocumentTagMap)
           .HasForeignKey(d => d.DocumentId)
-          .HasConstraintName("FK_DocumentTagMap_Document");
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .HasConstraintName("FK_DmsdocumentTagMap_Dmsdocument");
 
-      entity.HasOne(d => d.Tag).WithMany(p => p.DmsdocumentTagMap)
+      entity.HasOne(d => d.Tag).WithMany(p => p.DmsDocumentTagMap)
           .HasForeignKey(d => d.TagId)
-          .HasConstraintName("FK_DocumentTagMap_DocumentTag");
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .HasConstraintName("FK_DmsdocumentTagMap_DmsdocumentTag");
     });
 
-    modelBuilder.Entity<DmsdocumentType>(entity =>
+    modelBuilder.Entity<DmsDocumentType>(entity =>
     {
       entity.HasKey(e => e.DocumentTypeId).HasName("PK__DMSDocum__DBA390E192D25821");
-
-      entity.ToTable("DMSDocumentType");
 
       entity.Property(e => e.AcceptedExtensions).HasMaxLength(255);
       entity.Property(e => e.DocumentType).HasMaxLength(100);
@@ -839,11 +1275,9 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.Name).HasMaxLength(100);
     });
 
-    modelBuilder.Entity<DmsdocumentVersion>(entity =>
+    modelBuilder.Entity<DmsDocumentVersion>(entity =>
     {
       entity.HasKey(e => e.VersionId).HasName("PK__DMSDocum__16C6400F35C8BCE0");
-
-      entity.ToTable("DMSDocumentVersion");
 
       entity.HasIndex(e => new { e.DocumentId, e.VersionNumber }, "UQ_DocumentVersion_DocumentId_VersionNumber").IsUnique();
 
@@ -853,9 +1287,21 @@ public partial class CRMContext : DbContext
           .IsUnicode(false);
       entity.Property(e => e.UploadedDate).HasDefaultValueSql("(getdate())");
 
-      entity.HasOne(d => d.Document).WithMany(p => p.DmsdocumentVersion)
+      entity.HasOne(d => d.Document).WithMany(p => p.DmsDocumentVersion)
           .HasForeignKey(d => d.DocumentId)
-          .HasConstraintName("FK_DocumentVersion_Document");
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .HasConstraintName("FK_DmsdocumentVersion_Dmsdocument");
+    });
+
+    modelBuilder.Entity<DmsFileUpdateHistory>(entity =>
+    {
+      entity.HasKey(e => e.Id).HasName("PK__DmsFileU__3214EC070B58ED2A");
+
+      entity.Property(e => e.DocumentType).HasMaxLength(255);
+      entity.Property(e => e.EntityId).HasMaxLength(255);
+      entity.Property(e => e.EntityType).HasMaxLength(255);
+      entity.Property(e => e.UpdateReason).HasMaxLength(500);
+      entity.Property(e => e.UpdatedBy).HasMaxLength(255);
     });
 
     modelBuilder.Entity<Docmdetails>(entity =>
@@ -1061,7 +1507,7 @@ public partial class CRMContext : DbContext
           .HasMaxLength(1000)
           .HasColumnName("IDENTIFICATIONMARK");
       entity.Property(e => e.Investmentamount).HasColumnName("INVESTMENTAMOUNT");
-      entity.Property(e => e.LastUpdateDate).HasColumnType("smalldatetime");
+      entity.Property(e => e.LastUpdatedDate).HasColumnType("smalldatetime");
       entity.Property(e => e.Meritialstatus).HasColumnName("MERITIALSTATUS");
       entity.Property(e => e.MobileNo).HasMaxLength(500);
       entity.Property(e => e.MotherName).HasMaxLength(500);
@@ -1135,7 +1581,7 @@ public partial class CRMContext : DbContext
           .HasColumnName("GPFNO");
       entity.Property(e => e.IsOteligible).HasColumnName("IsOTEligible");
       entity.Property(e => e.Joiningpost).HasColumnName("JOININGPOST");
-      entity.Property(e => e.LastUpdateDate).HasColumnType("smalldatetime");
+      entity.Property(e => e.LastUpdatedDate).HasColumnType("smalldatetime");
       entity.Property(e => e.OfficialEmail).HasMaxLength(250);
       entity.Property(e => e.Reportdepid).HasColumnName("REPORTDEPID");
       entity.Property(e => e.SeparationRemarks).HasMaxLength(250);
@@ -1178,13 +1624,23 @@ public partial class CRMContext : DbContext
           .HasMaxLength(20)
           .IsUnicode(false);
       entity.Property(e => e.Description).HasMaxLength(500);
-      entity.Property(e => e.Lastupdatedate)
+      entity.Property(e => e.LastUpdatedDate)
           .HasColumnType("datetime")
           .HasColumnName("LASTUPDATEDATE");
       entity.Property(e => e.MonthName)
           .HasMaxLength(50)
           .IsUnicode(false);
       entity.Property(e => e.Shiftid).HasColumnName("SHIFTID");
+    });
+
+    modelBuilder.Entity<MaritalStatus>(entity =>
+    {
+      entity.HasNoKey();
+
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+      entity.Property(e => e.MaritalStatusId).ValueGeneratedOnAdd();
+      entity.Property(e => e.MaritalStatusName).HasMaxLength(250);
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<Menu>(entity =>
@@ -1214,13 +1670,13 @@ public partial class CRMContext : DbContext
     {
       entity.HasKey(e => e.ReportHeaderId);
 
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
+      entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.OrderByColumn)
           .HasMaxLength(500)
           .IsUnicode(false);
       entity.Property(e => e.ReportHeader).HasMaxLength(250);
       entity.Property(e => e.ReportTitle).HasMaxLength(250);
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
     });
 
     modelBuilder.Entity<SystemSettings>(entity =>
@@ -1234,7 +1690,7 @@ public partial class CRMContext : DbContext
           .HasDefaultValue(0)
           .HasComment("0=Disable,1=Enable");
       entity.Property(e => e.Language).HasMaxLength(50);
-      entity.Property(e => e.LastUpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
       entity.Property(e => e.OdbcClientList).HasComment("0=Native SQL, 1=ODBC");
       entity.Property(e => e.PassResetBy).HasComment("1=SysAdmin, 2=User");
       entity.Property(e => e.PassType).HasComment("1=Alphanumeric, 2=Alphabetic, 3=Numeric");
@@ -1276,6 +1732,13 @@ public partial class CRMContext : DbContext
           .HasColumnName("WORKING_LOG_DATE");
     });
 
+    modelBuilder.Entity<TokenBlacklist>(entity =>
+    {
+      entity.HasNoKey();
+
+      entity.Property(e => e.ExpiryDate).HasColumnType("datetime");
+    });
+
     modelBuilder.Entity<Users>(entity =>
     {
       entity.HasKey(e => e.UserId).HasName("PK_User");
@@ -1284,65 +1747,42 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.CreatedDate).HasColumnType("datetime");
       entity.Property(e => e.EmployeeId).HasComment("EmployeeId As HrRecordId");
       entity.Property(e => e.LastLoginDate).HasColumnType("datetime");
-      entity.Property(e => e.LastUpdateDate).HasColumnType("datetime");
+      entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
       entity.Property(e => e.LoginId).HasMaxLength(50);
       entity.Property(e => e.Password).HasMaxLength(100);
       entity.Property(e => e.Theme)
           .HasMaxLength(100)
           .HasColumnName("THEME");
       entity.Property(e => e.UserName).HasMaxLength(500);
+      entity.Property(e => e.IsSystemUser)
+      .HasColumnName("IsSystemUser")
+      .HasColumnType("bit")
+      .HasDefaultValue(false)
+      .IsRequired();
     });
 
-    modelBuilder.Entity<Wfaction>(entity =>
+    modelBuilder.Entity<WfAction>(entity =>
     {
       entity.ToTable("WFAction");
 
-      entity.Property(e => e.WfactionId).HasColumnName("WFActionId");
+      entity.Property(e => e.WfActionId).HasColumnName("WfActionId");
       entity.Property(e => e.ActionName).HasMaxLength(50);
       entity.Property(e => e.EmailAlert).HasColumnName("EMAIL_ALERT");
       entity.Property(e => e.SmsAlert).HasColumnName("SMS_ALERT");
-      entity.Property(e => e.WfstateId).HasColumnName("WFStateId");
+      entity.Property(e => e.WfStateId).HasColumnName("WfStateId");
     });
 
-    modelBuilder.Entity<Wfstate>(entity =>
+    modelBuilder.Entity<WfState>(entity =>
     {
       entity.ToTable("WFState");
 
-      entity.Property(e => e.WfstateId).HasColumnName("WFStateId");
+      entity.Property(e => e.WfStateId).HasColumnName("WfStateId");
       entity.Property(e => e.Sequence).HasColumnName("sequence");
       entity.Property(e => e.StateName).HasMaxLength(50);
     });
 
-    modelBuilder.Entity<TokenBlacklist>(entity =>
-    {
-      entity.HasNoKey();
-
-      entity.Property(e => e.ExpiryDate).HasColumnType("datetime");
-    });
-
-    modelBuilder.Entity<Branch>(entity =>
-    {
-      entity.Property(e => e.Branchid).HasColumnName("BRANCHID");
-      entity.Property(e => e.BranchAddress)
-          .HasMaxLength(250)
-          .IsUnicode(false);
-      entity.Property(e => e.Branchcode)
-          .HasMaxLength(50)
-          .HasColumnName("BRANCHCODE");
-      entity.Property(e => e.Branchdescription)
-          .HasMaxLength(2000)
-          .HasColumnName("BRANCHDESCRIPTION");
-      entity.Property(e => e.Branchname)
-          .HasMaxLength(100)
-          .HasColumnName("BRANCHNAME");
-      entity.Property(e => e.CreateDate).HasColumnType("datetime");
-      entity.Property(e => e.UpdateDate).HasColumnType("datetime");
-    });
-
-
+    OnModelCreatingPartial(modelBuilder);
   }
 
-
   partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
 }

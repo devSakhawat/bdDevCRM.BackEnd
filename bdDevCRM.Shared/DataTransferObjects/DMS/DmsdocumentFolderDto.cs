@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Shared.DataTransferObjects.DMS;
 
-public class DmsdocumentFolderDto
+public class DmsDocumentFolderDto
 {
   public int FolderId { get; set; }
 
@@ -20,7 +20,7 @@ public class DmsdocumentFolderDto
 
   public string ReferenceEntityId { get; set; } = null!;
 
-  //public virtual ICollection<DmsdocumentFolder> InverseParentFolder { get; set; } = new List<DmsdocumentFolder>();
+  //public virtual ICollection<DmsDocumentFolder> InverseParentFolder { get; set; } = new List<DmsDocumentFolder>();
 
-  //public virtual DmsdocumentFolder? ParentFolder { get; set; }
+  //public virtual DmsDocumentFolder? ParentFolder { get; set; }
 }

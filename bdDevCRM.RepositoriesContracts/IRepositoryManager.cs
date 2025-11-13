@@ -9,8 +9,8 @@ namespace bdDevCRM.RepositoriesContracts;
 public interface IRepositoryManager : IDisposable
 {
   // SystemAdmin Part
-  ITokenBlacklistRepository TokenBlacklist { get; }
-  ICountryRepository Countries { get; }
+  ITokenBlacklistRepository TokenBlacklists { get; }
+  ICrmCountryRepository Countries { get; }
   ICompanyRepository Companies { get; }
   ISystemSettingsRepository SystemSettings { get; }
   IUsersRepository Users { get; }
@@ -19,43 +19,65 @@ public interface IRepositoryManager : IDisposable
   IModuleRepository Modules { get; }
   IGroupRepository Groups { get; }
   IGroupMemberRepository GroupMembers { get; }
-  IQueryAnalyzerRepository QueryAnalyzer { get; }
-  IStatusRepository WfState { get; }
-  IWFActionRepository WfAction { get; }
-  IWorkFlowSettingsRepository Workflow { get; }
-  IGroupPermissionRepository GroupPermission { get; }
-  IAccessControlRepository AccessControl { get; }
-  IAccessRestrictionRepository AccessRestriction { get; }
-  ICurrencyRepository Currency { get; }
+  IQueryAnalyzerRepository QueryAnalyzers { get; }
+  IStatusRepository WfStates { get; }
+  IWFActionRepository WfActions { get; }
+  IWorkFlowSettingsRepository Workflowes { get; }
+  IGroupPermissionRepository GroupPermissiones { get; }
+  IAccessControlRepository AccessControls { get; }
+  IAccessRestrictionRepository AccessRestrictions { get; }
+  ICurrencyRepository Currencies { get; }
 
   // HR Part
   IEmployeeRepository Employees { get; }
   IEmployeeTypeRepository EmployeeTypes { get; }
   IBranchRepository Branches { get; }
-  //IDepartmentRepository departments { get; }
+  IDepartmentRepository departments { get; }
   // instance should be small letter.
 
   #region CRM
-  ICRMInstituteRepository CRMInstitutes { get; }
-  ICRMInstituteTypeRepository CRMInstituteTypes { get; }
-  ICRMCourseRepository CRMCourse { get; }
-  ICRMMonthRepository CRMMonth{ get; }
-  ICRMYearRepository CRMYear { get; }
+  ICrmCourseRepository CrmCourses { get; }
+  ICrmMonthRepository CrmMonths { get; }
+  ICrmYearRepository CrmYears { get; }
+  ICrmInstituteRepository CrmInstitutes { get; }
+  ICrmInstituteTypeRepository CrmInstituteTypes { get; }
 
+
+  // Existing CRM repositories
+  ICrmApplicationRepository CrmApplications { get; }
+  ICrmApplicantCourseRepository CrmApplicantCourses { get; }
+  ICrmApplicantInfoRepository CrmApplicantInfoes { get; }
+  ICrmPermanentAddressRepository CrmPermanentAddresses { get; }
+  ICrmPresentAddressRepository CrmPresentAddresses { get; }
+  
+  // New CRM repositories for 10 entities
+  ICrmEducationHistoryRepository CrmEducationHistories { get; }
+  ICrmIELTSInformationRepository CrmIELTSInformations { get; }
+  ICrmTOEFLInformationRepository CrmTOEFLInformations { get; }
+  ICrmPTEInformationRepository CrmPTEInformations { get; }
+  ICrmGMATInformationRepository CrmGMATInformations { get; }
+  ICrmOthersInformationRepository CrmOthersInformations { get; }
+  ICrmWorkExperienceRepository CrmWorkExperiences { get; }
+  ICrmApplicantReferenceRepository CrmApplicantReferences { get; }
+  ICrmStatementOfPurposeRepository CrmStatementOfPurposes { get; }
+  ICrmAdditionalInfoRepository CrmAdditionalInfoes { get; }
+  ICrmAdditionalDocumentRepository CrmAdditionalDocuments { get; }
+  // New CRM repositories
+  ICrmIntakeMonthRepository CrmIntakeMonths { get; }
+  ICrmIntakeYearRepository CrmIntakeYears { get; }
+  ICrmPaymentMethodRepository CrmPaymentMethods { get; }
   #endregion CRM
 
   #region DMS
-  IDmsdocumentRepository Dmsdocuments { get; }
-  IDmsdocumentTypeRepository DmsdocumentTypes { get; }
-  IDmsdocumentTagRepository DmsdocumentTags { get; }
-  IDmsdocumentTagMapRepository DmsdocumentTagMaps { get; }
-  IDmsdocumentFolderRepository DmsdocumentFolders { get; }
-  IDmsdocumentVersionRepository DmsdocumentVersions { get; }
-  IDmsdocumentAccessLogRepository DmsdocumentAccessLogs { get; }
+  IDmsDocumentRepository DmsDocuments { get; }
+  IDmsDocumentTypeRepository DmsDocumentTypes { get; }
+  IDmsDocumentTagRepository DmsDocumentTags { get; }
+  IDmsDocumentTagMapRepository DmsDocumentTagMaps { get; }
+  IDmsDocumentFolderRepository DmsDocumentFolders { get; }
+  IDmsDocumentVersionRepository DmsDocumentVersions { get; }
+  IDmsDocumentAccessLogRepository DmsDocumentAccessLogs { get; }
+  IDmsFileUpdateHistoryRepository DmsFileUpdateHistories { get; }
   #endregion
-
-
-
 
   // Save changes to the database
   Task SaveAsync();

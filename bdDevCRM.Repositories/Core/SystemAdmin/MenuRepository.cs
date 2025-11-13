@@ -1,6 +1,7 @@
 ﻿using bdDevCRM.Entities.Entities;
 using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
+using bdDevCRM.RepositoryDtos.Core;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 using Microsoft.EntityFrameworkCore;

@@ -5,7 +5,7 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 
 namespace bdDevCRM.ServicesContract.CRM;
 
-public interface ICRMYearService
+public interface ICrmYearService
 {
 
   //Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges);

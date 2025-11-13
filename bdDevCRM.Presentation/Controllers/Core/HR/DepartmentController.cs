@@ -1,5 +1,5 @@
-﻿using bdDevCRM.Entities.Exceptions;
-using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.HR;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
@@ -23,14 +23,24 @@ public class DepartmentController : BaseApiController
   [AllowAnonymous]
   public async Task<IActionResult> DepartmentByCompanyIdForCombo([FromQuery] int companyId)
   {
-    // from claim.
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    // userId : which key is reponsible to when cache was created .
-    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
-    UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
+    //int userId = HttpContext.GetUserId();
+    //var currentUser = HttpContext.GetCurrentUser();
 
-    IEnumerable<DepartmentDto> result = await _serviceManager.departments.DepartmentesByCompanyIdForCombo(companyId, user);
-    return Ok(result);
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+      return Unauthorized("Unauthorized attempt to get data!");
+
+    int userId = Convert.ToInt32(userIdClaim);
+    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    if (currentUser == null) return Unauthorized("User not found in cache.");
+
+    IEnumerable<DepartmentDto> res = await _serviceManager.departments.DepartmentesByCompanyIdForCombo(companyId, currentUser);
+    //return Ok(branchList);
+
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<DepartmentDto>>("No Data found"));
+
+    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
   }
 
 

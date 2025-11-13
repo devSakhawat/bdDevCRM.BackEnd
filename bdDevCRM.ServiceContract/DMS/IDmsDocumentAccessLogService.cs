@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.ServiceContract.DMS;
 
-public interface IDmsdocumentAccessLogService
+public interface IDmsDocumentAccessLogService
 {
-  Task<IEnumerable<DmsdocumentAccessLogDDL>> GetAccessLogsDDLAsync(bool trackChanges);
-  Task<GridEntity<DmsdocumentAccessLogDto>> SummaryGrid(CRMGridOptions options);
-  Task<string> CreateNewRecordAsync(DmsdocumentAccessLogDto modelDto);
-  Task<string> UpdateNewRecordAsync(int key, DmsdocumentAccessLogDto modelDto, bool trackChanges);
-  Task<string> DeleteRecordAsync(int key, DmsdocumentAccessLogDto modelDto);
-  Task<string> SaveOrUpdate(int key, DmsdocumentAccessLogDto modelDto);
+  Task<IEnumerable<DmsDocumentAccessLogDDL>> GetAccessLogsDDLAsync(bool trackChanges);
+  Task<GridEntity<DmsDocumentAccessLogDto>> SummaryGrid(CRMGridOptions options);
+  Task<string> CreateNewRecordAsync(DmsDocumentAccessLogDto modelDto);
+  Task<string> UpdateNewRecordAsync(int key, DmsDocumentAccessLogDto modelDto, bool trackChanges);
+  Task<string> DeleteRecordAsync(int key, DmsDocumentAccessLogDto modelDto);
+  Task<string> SaveOrUpdate(int key, DmsDocumentAccessLogDto modelDto);
 }

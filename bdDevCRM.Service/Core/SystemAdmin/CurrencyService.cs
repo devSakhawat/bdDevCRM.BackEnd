@@ -1,10 +1,10 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.Core;
-using bdDevCRM.Entities.Exceptions;
+using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 
@@ -26,24 +26,24 @@ internal sealed class CurrencyService : ICurrencyService
 
   public async Task<IEnumerable<CurrencyDDL>> GetCurrenciesDDLAsync()
   {
-    IEnumerable<CurrencyDDL> currenciesDDL = await _repository.Currency.ListByWhereWithSelectAsync(selector: x => new CurrencyDDL { CurrencyId = x.CurrencyId, CurrencyName = x.CurrencyName }, orderBy: x => x.CurrencyName, trackChanges: false);
+    IEnumerable<CurrencyDDL> currenciesDDL = await _repository.Currencies.ListByWhereWithSelectAsync(selector: x => new CurrencyDDL { CurrencyId = x.CurrencyId, CurrencyName = x.CurrencyName }, orderBy: x => x.CurrencyName, trackChanges: false);
     //if (currenciesDDL.Count() == 0) throw new GenericListNotFoundException("Currency");
     return currenciesDDL;
   }
 
   public async Task<GridEntity<CurrencyDto>> CurrecySummary(CRMGridOptions options)
   {
-    string query = "Select * from CurrencyInfo";
+    string query = "Select * from CrmCurrencyInfo";
     string orderBy = " CurrencyName asc ";
-    var gridEntity = await _repository.Currency.GridData<CurrencyDto>(query, options, orderBy, "");
+    var gridEntity = await _repository.Currencies.GridData<CurrencyDto>(query, options, orderBy, "");
 
     return gridEntity;
   }
 
-  public async Task<string> SaveOrUpdate(int key ,CurrencyDto modelDto)
+  public async Task<string> SaveOrUpdate(int key, CurrencyDto modelDto)
   {
     string res = string.Empty;
-    bool isDefaultExist = await _repository.Currency.ExistsAsync(x => x.IsDefault == modelDto.IsDefault && modelDto.IsDefault == 1);
+    bool isDefaultExist = await _repository.Currencies.ExistsAsync(x => x.IsDefault == modelDto.IsDefault && modelDto.IsDefault == 1);
 
     if (isDefaultExist)
     {
@@ -53,7 +53,7 @@ internal sealed class CurrencyService : ICurrencyService
     else
     {
 
-      bool isCurrencyExist = await _repository.Currency.ExistsAsync(x => x.CurrencyName.Trim().ToLower() == modelDto.CurrencyName.Trim().ToLower() && x.CurrencyName.Trim().ToLower() == modelDto.CurrencyName.Trim().ToLower());
+      bool isCurrencyExist = await _repository.Currencies.ExistsAsync(x => x.CurrencyName.Trim().ToLower() == modelDto.CurrencyName.Trim().ToLower() && x.CurrencyName.Trim().ToLower() == modelDto.CurrencyName.Trim().ToLower());
 
       #region New Currency
       if (modelDto.CurrencyId == 0 && key == modelDto.CurrencyId)
@@ -61,8 +61,8 @@ internal sealed class CurrencyService : ICurrencyService
 
         if (!isCurrencyExist)
         {
-          CurrencyInfo currency = MyMapper.JsonClone<CurrencyDto, CurrencyInfo>(modelDto);
-          int lastCreatedWfStateId = await _repository.Currency.CreateAndGetIdAsync(currency);
+          CrmCurrencyInfo currency = MyMapper.JsonClone<CurrencyDto, CrmCurrencyInfo>(modelDto);
+          int lastCreatedWfStateId = await _repository.Currencies.CreateAndGetIdAsync(currency);
           await _repository.SaveAsync();
           return OperationMessage.Success;
         }
@@ -81,8 +81,8 @@ internal sealed class CurrencyService : ICurrencyService
         {
           if (!isCurrencyExist)
           {
-            CurrencyInfo currency = MyMapper.JsonClone<CurrencyDto, CurrencyInfo>(modelDto);
-            _repository.Currency.Update(currency);
+            CrmCurrencyInfo currency = MyMapper.JsonClone<CurrencyDto, CrmCurrencyInfo>(modelDto);
+            _repository.Currencies.Update(currency);
             await _repository.SaveAsync();
 
             return OperationMessage.Success;
@@ -108,10 +108,10 @@ internal sealed class CurrencyService : ICurrencyService
     if (modelDto == null) throw new NullModelBadRequestException(new CurrencyDto().GetType().Name.ToString());
     if (key != modelDto.CurrencyId) throw new IdMismatchBadRequestException(key.ToString(), new CurrencyDto().GetType().Name.ToString());
 
-    CurrencyInfo currencyData = await _repository.Currency.FirstOrDefaultAsync(m => m.CurrencyId == key, trackChanges: false);
-    if (currencyData == null) throw new GenericNotFoundException("CurrencyInfo", "CurrencyId", key.ToString());
+    CrmCurrencyInfo currencyData = await _repository.Currencies.FirstOrDefaultAsync(m => m.CurrencyId == key, trackChanges: false);
+    if (currencyData == null) throw new GenericNotFoundException("CrmCurrencyInfo", "CurrencyId", key.ToString());
 
-    await _repository.Currency.DeleteAsync(x => x.CurrencyId == modelDto.CurrencyId, trackChanges: true);
+    await _repository.Currencies.DeleteAsync(x => x.CurrencyId == modelDto.CurrencyId, trackChanges: true);
     await _repository.SaveAsync();
     return OperationMessage.Success;
   }

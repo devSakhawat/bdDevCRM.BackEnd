@@ -1,10 +1,11 @@
-﻿using bdDevCRM.Entities.Exceptions;
+﻿
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client.Region;
-using System.Threading.Tasks;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
@@ -64,10 +65,12 @@ public class CompaniesController : BaseApiController
     if (user.HrRecordId == 0 || user.HrRecordId == null) throw new IdParametersBadRequestException();
     companyId = (int)user.CompanyId;
 
-    IEnumerable<CompanyDto> companyList = await _serviceManager.Companies.GetMotherCompany(companyId, user);
+    IEnumerable<CompanyDto> res = await _serviceManager.Companies.GetMotherCompany(companyId, user);
 
+    if(res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<CompanyDto>>("No Company found"));
 
-    return Ok(companyList);
+    return Ok(ResponseHelper.Success(res, "Companies retrieved successfully"));
   }
 
 }

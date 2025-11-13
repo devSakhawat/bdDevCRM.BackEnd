@@ -3,12 +3,12 @@ using bdDevCRM.RepositoriesContracts.CRM;
 using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.CRM;
-public class CRMYearRepository : RepositoryBase<Crmyear>, ICRMYearRepository
+public class CrmYearRepository : RepositoryBase<CrmYear>, ICrmYearRepository
 {
-  public CRMYearRepository(CRMContext context) : base(context) { }
+  public CrmYearRepository(CRMContext context) : base(context) { }
 
   // Get all Active Year
-  public async Task<IEnumerable<Crmyear>> GetActiveYearAsync(bool trackChanges) =>
+  public async Task<IEnumerable<CrmYear>> GetActiveYearAsync(bool trackChanges) =>
       await ListByConditionAsync(x => x.Status == true, c => c.YearId, trackChanges, descending: false);
 
   ////// Get a single country by ID

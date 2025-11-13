@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.DMS;
 
-public partial class DmsdocumentVersion
+public partial class DmsDocumentVersion
 {
     public int VersionId { get; set; }
 
@@ -19,5 +19,13 @@ public partial class DmsdocumentVersion
 
     public string? UploadedBy { get; set; }
 
-    public virtual Dmsdocument Document { get; set; } = null!;
+    public bool? IsCurrentVersion { get; set; }
+
+    public string? VersionNotes { get; set; }
+
+    public int? PreviousVersionId { get; set; }
+
+    public long? FileSize { get; set; }
+
+    public virtual DmsDocument Document { get; set; } = null!;
 }

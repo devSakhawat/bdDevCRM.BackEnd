@@ -2,9 +2,9 @@
 
 public class WfActionRepositoryDto
 {
-  public int WfactionId { get; set; }
+  public int WfActionId { get; set; }
 
-  public int WfstateId { get; set; }
+  public int WfStateId { get; set; }
 
   public string ActionName { get; set; } = null!;
 

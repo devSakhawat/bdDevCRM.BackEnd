@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Repositories.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Sql.Context;
 using Microsoft.Data.SqlClient;
@@ -38,7 +39,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     var keyProperty = _context.Model.FindEntityType(typeof(T)).FindPrimaryKey().Properties[0];
 
     // Return the primary key value
-    return (int)keyProperty.GetGetter().GetClrValue(entity);
+    return (Int32)keyProperty.GetGetter().GetClrValue(entity);
   }
 
 
@@ -503,7 +504,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   {
     var connection = _context.Database.GetDbConnection();
     var sqlCount = "SELECT COUNT(*) FROM (" + query + " ) As tbl ";
-    query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, "");
+    query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, condition??"");
     var dataList = new List<T>();
     int totalCount = 0;
     try
@@ -555,6 +556,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
             var entity = Activator.CreateInstance<T>();
             foreach (var property in properties)
             {
+              if (!property.CanWrite) continue;
               // Case-insensitive property matching
               if (!columnMap.ContainsKey(property.Name))
               {
@@ -583,19 +585,13 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
           // Log unmapped properties for debugging
           var propertyNames = properties.Select(p => p.Name).ToList();
           var unmappedColumns = columnNames.Where(c => !propertyNames.Contains(c, StringComparer.OrdinalIgnoreCase)).ToList();
-          
-          // add log message
-          //if (unmappedColumns.Any())
-          //{
-            
-          //  throw new InvalidOperationException($"WARNING: Some columns were not mapped to properties: {string.Join(", ", unmappedColumns)}");
-          //}
         }
       }
     }
     catch (Exception ex)
     {
-      throw new InvalidOperationException($"Error in ExecuteQueryAsync: {ex.Message}");
+      if (ex is DataMappingException) throw;
+      throw new InvalidOperationException($"Error in ExecuteQueryAsync: {ex.Message}", ex);
     }
     finally
     {
@@ -724,7 +720,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     };
   }
 
-
   // Helper method to process a property
   private void ProcessProperty<T>(DbDataReader reader, T entity, PropertyInfo property, int columnIndex)
   {
@@ -734,13 +729,19 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     try
     {
       Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-      if (propertyType == typeof(Guid) && value is string)
+     
+
+      if (propertyType == typeof(Guid) && value is string sGuid)
       {
-        property.SetValue(entity, Guid.Parse((string)value));
+        property.SetValue(entity, Guid.Parse(sGuid));
       }
-      else if (propertyType.IsEnum && value is string)
+      else if (propertyType.IsEnum && value is string sEnum)
       {
-        property.SetValue(entity, Enum.Parse(propertyType, (string)value));
+        property.SetValue(entity, Enum.Parse(propertyType, sEnum));
+      }
+      else if (propertyType == typeof(string))
+      {
+        property.SetValue(entity, Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture));
       }
       else
       {
@@ -749,7 +750,19 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     }
     catch (Exception ex)
     {
-      Console.Error.WriteLine($"Error converting value '{value}' to type {property.PropertyType.Name} for property {property.Name}: {ex.Message}");
+      var columnName = reader.GetName(columnIndex);
+      var message =
+        $"Failed to map column '{columnName}' value '{value}' to property '{property.Name}' of type '{property.PropertyType.Name}' " +
+        $"on entity '{typeof(T).Name}'. {ex.Message}";
+
+      throw new DataMappingException(
+        message,
+        columnName: columnName,
+        propertyName: property.Name,
+        propertyType: property.PropertyType.Name,
+        entityType: typeof(T).Name,
+        rawValue: value,
+        inner: ex);
     }
   }
 
@@ -796,7 +809,7 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
 
       using var command = connection.CreateCommand();
       command.CommandText = query;
-      command.CommandTimeout = 120; // Set timeout to 120 seconds
+      command.CommandTimeout = 3600; // Set timeout to 3600 seconds
 
       if (parameters != null)
       {

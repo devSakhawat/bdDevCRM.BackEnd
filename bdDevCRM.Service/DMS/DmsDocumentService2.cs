@@ -4,7 +4,7 @@
 //using bdDevCRM.Entities.CRMGrid.GRID;
 //using bdDevCRM.Entities.Entities.System;
 //using bdDevCRM.Entities.Entities.DMS;
-//using bdDevCRM.Entities.Exceptions;
+//
 //using bdDevCRM.RepositoriesContracts;
 //using bdDevCRM.ServiceContract.DMS;
 //using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -22,14 +22,14 @@
 
 //namespace bdDevCRM.Service.DMS;
 
-//internal sealed class DmsdocumentService2 : IDmsdocumentService2
+//internal sealed class DmsDocumentService2 : IDmsDocumentService2
 //{
 //  private readonly IRepositoryManager _repository;
 //  private readonly ILoggerManager _logger;
 //  private readonly IConfiguration _configuration;
 //  private readonly IHttpContextAccessor _httpContextAccessor;
 
-//  public DmsdocumentService2(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+//  public DmsDocumentService2(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
 //  {
 //    _repository = repository;
 //    _logger = logger;
@@ -37,24 +37,24 @@
 //    _httpContextAccessor = httpContextAccessor;
 //  }
 
-//  public async Task<IEnumerable<DmsdocumentDDL>> GetDocumentsDDLAsync(bool trackChanges = false)
+//  public async Task<IEnumerable<DmsDocumentDDL>> GetDocumentsDDLAsync(bool trackChanges = false)
 //  {
-//    var documents = await _repository.Dmsdocuments.ListAsync(trackChanges: trackChanges);
+//    var documents = await _repository.DmsDocuments.ListAsync(trackChanges: trackChanges);
 
 //    if (!documents.Any())
 //      throw new GenericListNotFoundException("DmsDocument");
 
-//    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<Dmsdocument, DmsdocumentDDL>(documents);
+//    var ddlDtos = MyMapper.JsonCloneIEnumerableToList<DmsDocument, DmsDocumentDDL>(documents);
 
 //    return ddlDtos;
 //  }
 
 //  public async Task<GridEntity<DmsDocumentDto>> SummaryGrid(CRMGridOptions options)
 //  {
-//    string query = "SELECT * FROM Dmsdocument";  // Adjust if needed
+//    string query = "SELECT * FROM DmsDocument";  // Adjust if needed
 //    string orderBy = "Title asc";
 
-//    var gridEntity = await _repository.Dmsdocuments.GridData<DmsDocumentDto>(query, options, orderBy, "");
+//    var gridEntity = await _repository.DmsDocuments.GridData<DmsDocumentDto>(query, options, orderBy, "");
 
 //    return gridEntity;
 //  }
@@ -64,12 +64,12 @@
 //    if (modelDto.DocumentId != 0)
 //      throw new InvalidCreateOperationException("DocumentId must be 0 when creating a new document.");
 
-//    bool isExist = await _repository.Dmsdocuments.ExistsAsync(x => x.Title.Trim().ToLower() == modelDto.Title.Trim().ToLower());
+//    bool isExist = await _repository.DmsDocuments.ExistsAsync(x => x.Title.Trim().ToLower() == modelDto.Title.Trim().ToLower());
 //    if (isExist) throw new DuplicateRecordException("DmsDocument", "Title");
 
-//    var document = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(modelDto);
+//    var document = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(modelDto);
 
-//    var createdId = await _repository.Dmsdocuments.CreateAndGetIdAsync(document);
+//    var createdId = await _repository.DmsDocuments.CreateAndGetIdAsync(document);
 //    if (createdId == 0)
 //      throw new InvalidCreateOperationException();
 
@@ -84,13 +84,13 @@
 //    if (key <= 0 || key != modelDto.DocumentId)
 //      return "Invalid update attempt: key does not match the DocumentId.";
 
-//    bool exists = await _repository.Dmsdocuments.ExistsAsync(x => x.DocumentId == key);
+//    bool exists = await _repository.DmsDocuments.ExistsAsync(x => x.DocumentId == key);
 //    if (!exists)
 //      return "Update failed: document not found.";
 
-//    var document = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(modelDto);
+//    var document = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(modelDto);
 
-//    _repository.Dmsdocuments.Update(document);
+//    _repository.DmsDocuments.Update(document);
 //    await _repository.SaveAsync();
 
 //    _logger.LogWarn($"Document with Id: {key} updated.");
@@ -106,12 +106,12 @@
 //    if (key != modelDto.DocumentId)
 //      throw new IdMismatchBadRequestException(key.ToString(), nameof(DmsDocumentDto));
 
-//    var document = await _repository.Dmsdocuments.FirstOrDefaultAsync(x => x.DocumentId == key, false);
+//    var document = await _repository.DmsDocuments.FirstOrDefaultAsync(x => x.DocumentId == key, false);
 
 //    if (document == null)
 //      throw new GenericNotFoundException("DmsDocument", "DocumentId", key.ToString());
 
-//    await _repository.Dmsdocuments.DeleteAsync(x => x.DocumentId == key, true);
+//    await _repository.DmsDocuments.DeleteAsync(x => x.DocumentId == key, true);
 //    await _repository.SaveAsync();
 
 //    _logger.LogWarn($"Document with Id: {key} deleted.");
@@ -123,12 +123,12 @@
 //  {
 //    if (modelDto.DocumentId == 0 && key == 0)
 //    {
-//      bool isExist = await _repository.Dmsdocuments.ExistsAsync(x => x.Title.Trim().ToLower() == modelDto.Title.Trim().ToLower());
+//      bool isExist = await _repository.DmsDocuments.ExistsAsync(x => x.Title.Trim().ToLower() == modelDto.Title.Trim().ToLower());
 //      if (isExist) throw new DuplicateRecordException("DmsDocument", "Title");
 
-//      var newDoc = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(modelDto);
+//      var newDoc = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(modelDto);
 
-//      var createdId = await _repository.Dmsdocuments.CreateAndGetIdAsync(newDoc);
+//      var createdId = await _repository.DmsDocuments.CreateAndGetIdAsync(newDoc);
 //      if (createdId == 0)
 //        throw new InvalidCreateOperationException();
 
@@ -138,11 +138,11 @@
 //    }
 //    else if (key > 0 && key == modelDto.DocumentId)
 //    {
-//      var exists = await _repository.Dmsdocuments.ExistsAsync(x => x.DocumentId == key);
+//      var exists = await _repository.DmsDocuments.ExistsAsync(x => x.DocumentId == key);
 //      if (!exists)
 //      {
-//        var updateDoc = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(modelDto);
-//        _repository.Dmsdocuments.Update(updateDoc);
+//        var updateDoc = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(modelDto);
+//        _repository.DmsDocuments.Update(updateDoc);
 //        await _repository.SaveAsync();
 
 //        _logger.LogWarn($"Document with Id: {key} updated.");
@@ -170,10 +170,10 @@
 //    if (dmsDto == null || crmInstituteDto == null || usersDto == null) throw new NullModelBadRequestException(nameof(DMSDto));
 
 //    01.Check DMSDocumentType by dmsDto.EntityType
-//   var dmsDocumentType = await _repository.DmsdocumentTypes.FirstOrDefaultAsync(f => f.DocumentType.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim());
+//   var dmsDocumentType = await _repository.DmsDocumentTypes.FirstOrDefaultAsync(f => f.DocumentType.ToLower().Trim() == dmsDto.DocumentType.ToLower().Trim());
 //    if (dmsDocumentType == null)
 //    {
-//      dmsDocumentType = new DmsdocumentType
+//      dmsDocumentType = new DmsDocumentType
 //      {
 //        Name = dmsDto.DocumentTypeName ?? "Default Document Type",
 //        DocumentType = dmsDto.DocumentType,
@@ -185,14 +185,14 @@
 //        || dmsDto.AcceptedExtensions.Contains(".jpeg"))) ? 1 : 5)
 //        MaxFileSizeMb = (!dmsDto.AcceptedExtensions.Contains(".pdf")) ? 1 : dmsDto.MaxFileSizeMb ?? 10
 //      };
-//      dmsDocumentType.DocumentTypeId = await _repository.DmsdocumentTypes.CreateAndGetIdAsync(dmsDocumentType);
+//      dmsDocumentType.DocumentTypeId = await _repository.DmsDocumentTypes.CreateAndGetIdAsync(dmsDocumentType);
 //    }
 
-//    02.Check parent forlder and child folder DmsdocumentFolders by dmsDto.FolderName and ParentFolderId
-//   var parentFolder = await _repository.DmsdocumentFolders.FirstOrDefaultAsync(f => f.FolderName.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim());
+//    02.Check parent forlder and child folder DmsDocumentFolders by dmsDto.FolderName and ParentFolderId
+//   var parentFolder = await _repository.DmsDocumentFolders.FirstOrDefaultAsync(f => f.FolderName.ToLower().Trim() == dmsDto.ReferenceEntityType.ToLower().Trim());
 //    if (parentFolder == null)
 //    {
-//      parentFolder = new DmsdocumentFolder
+//      parentFolder = new DmsDocumentFolder
 //      {
 //        FolderName = dmsDto.ReferenceEntityType,
 //        OwnerId = null, // OwnerId: Folder Owner.
@@ -202,14 +202,14 @@
 //      Parent folder has no ReferenceEntityId ,OwnerId, and ParentFolderId
 //       because it is the top - level folder.
 //       OwnerId,ReferenceEntityId,ParentFolderId is not set here, it will be set later when creating child folders.
-//      parentFolder.ParentFolderId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(parentFolder);
+//      parentFolder.ParentFolderId = await _repository.DmsDocumentFolders.CreateAndGetIdAsync(parentFolder);
 //    }
 
-//    var dmsDocumentFolder = await _repository.DmsdocumentFolders.FirstOrDefaultAsync(f => f.FolderName.ToLower().Trim() == dmsDto.FolderName.ToLower().Trim()
+//    var dmsDocumentFolder = await _repository.DmsDocumentFolders.FirstOrDefaultAsync(f => f.FolderName.ToLower().Trim() == dmsDto.FolderName.ToLower().Trim()
 //    && f.ParentFolderId == dmsDto.ParentFolderId);
 //    if (dmsDocumentFolder == null)
 //    {
-//      dmsDocumentFolder = new DmsdocumentFolder
+//      dmsDocumentFolder = new DmsDocumentFolder
 //      {
 //        ParentFolderId = parentFolder.ParentFolderId,
 //        FolderName = dmsDto.ReferenceEntityType,
@@ -217,7 +217,7 @@
 //        ReferenceEntityType = dmsDto.ReferenceEntityType, // e.g., "Crminstitute"
 //        ReferenceEntityId = dmsDto.ReferenceEntityId // e.g., "1" (for Crminstitute)
 //      };
-//      dmsDocumentFolder.FolderId = await _repository.DmsdocumentFolders.CreateAndGetIdAsync(dmsDocumentFolder);
+//      dmsDocumentFolder.FolderId = await _repository.DmsDocumentFolders.CreateAndGetIdAsync(dmsDocumentFolder);
 //    }
 
 //    2.1.Find or create parent folder(e.g., "Institute")
@@ -235,7 +235,7 @@
 //    string relativeFilePath = $"/Uploads/{dmsDto.ReferenceEntityType}/{dmsDto.ReferenceEntityId}/{dmsDto.DocumentType}/{fileName}";
 
 //    3.Create DmsDocument
-//   var document = new Dmsdocument
+//   var document = new DmsDocument
 //   {
 //     Title = dmsDto.Title ?? fileName,
 //     Description = dmsDto.Description,
@@ -250,11 +250,11 @@
 //     UploadDate = DateTime.UtcNow,
 //     UploadedByUserId = usersDto.UserId.ToString(),
 //   };
-//    document.DocumentId = await _repository.Dmsdocuments.CreateAndGetIdAsync(document);
+//    document.DocumentId = await _repository.DmsDocuments.CreateAndGetIdAsync(document);
 //    _logger.LogInfo($"DMS Document created with Id: {document.DocumentId}, Title: {document.Title}, FilePath: {relativeFilePath}");
 
 //    4.Create DmsDocumentVersion
-//   var version = new DmsdocumentVersion();
+//   var version = new DmsDocumentVersion();
 //    if (dmsDto.VersionNumber > 0)
 //    {
 //      version.DocumentId = document.DocumentId;
@@ -263,10 +263,10 @@
 //      version.FilePath = relativeFilePath;
 //      version.UploadedBy = usersDto.UserId.ToString();
 //      version.UploadedDate = DateTime.UtcNow;
-//      version.VersionId = await _repository.DmsdocumentVersions.CreateAndGetIdAsync(version);
+//      version.VersionId = await _repository.DmsDocumentVersions.CreateAndGetIdAsync(version);
 //    }
 //    ;
-//    var documentVersionId = await _repository.DmsdocumentVersions.CreateAndGetIdAsync(version);
+//    var documentVersionId = await _repository.DmsDocumentVersions.CreateAndGetIdAsync(version);
 //    _logger.LogInfo($"DMS Document created with Id: {document.DocumentId}, VersionId: {version.VersionId}");
 
 
@@ -278,7 +278,7 @@
 //        .Where(n => n.OperationalStatus == OperationalStatus.Up && n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
 //        .Select(n => n.GetPhysicalAddress().ToString())
 //        .FirstOrDefault() ?? "Unavailable";
-//    var accessLog = new DmsdocumentAccessLog
+//    var accessLog = new DmsDocumentAccessLog
 //    {
 //      DocumentId = document.DocumentId,
 //      AccessedByUserId = usersDto.UserId.ToString(),
@@ -289,7 +289,7 @@
 //      MacAddress = macAddress,
 //      Notes = $"File uploaded by UserId: {usersDto.UserId}, IP: {ipAddress}, User-Agent: {userAgent}"
 //    };
-//    await _repository.DmsdocumentAccessLogs.CreateAsync(accessLog);
+//    await _repository.DmsDocumentAccessLogs.CreateAsync(accessLog);
 //    await _repository.SaveAsync();
 //    _logger.LogInfo($"DMS Document access log created for DocumentId: {document.DocumentId}, Action: {accessLog.Action}, AccessedByUserId: {accessLog.AccessedByUserId}");
 //    _configuration["DMS:FileUploadPath"] = relativeFilePath; // Save the file path to configuration if needed
@@ -305,22 +305,22 @@
 //      foreach (var tagName in tags)
 //      {
 //        Check if the tag already exists
-//       var tag = await _repository.DmsdocumentTags.FirstOrDefaultAsync(t => t.DocumentTagName == tagName);
+//       var tag = await _repository.DmsDocumentTags.FirstOrDefaultAsync(t => t.DocumentTagName == tagName);
 //        if (tag == null)
 //        {
-//          tag = new DmsdocumentTag { DocumentTagName = tagName };
-//          tag.TagId = await _repository.DmsdocumentTags.CreateAndGetIdAsync(tag);
+//          tag = new DmsDocumentTag { DocumentTagName = tagName };
+//          tag.TagId = await _repository.DmsDocumentTags.CreateAndGetIdAsync(tag);
 //          await _repository.SaveAsync();
 //        }
 
 //        // Map the tag to the document
-//        var tagMap = new DmsdocumentTagMap
+//        var tagMap = new DmsDocumentTagMap
 //        {
 //          DocumentId = document.DocumentId,
 //          TagId = tag.TagId
 //        };
 
-//        await _repository.DmsdocumentTagMaps.CreateAsync(tagMap);
+//        await _repository.DmsDocumentTagMaps.CreateAsync(tagMap);
 //      }
 //    }
 
@@ -359,7 +359,7 @@
 
 //using bdDevCRM.Entities.CRMGrid.GRID;
 //using bdDevCRM.Entities.Entities.DMS;
-//using bdDevCRM.Entities.Exceptions;
+//
 //using bdDevCRM.RepositoriesContracts;
 //using bdDevCRM.ServiceContract.DMS;
 //using bdDevCRM.Shared.DataTransferObjects.DMS;
@@ -416,7 +416,7 @@
 //        d.Title == dto.Title && d.ReferenceEntityId == dto.ReferenceEntityId);
 //    if (dup) throw new DuplicateRecordException("DmsDocument", "Title");
 
-//    var entity = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(dto);
+//    var entity = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(dto);
 
 //    // 👉 ফাইল সেভ করলে path সেট করুন (StorageService ইত্যাদি)
 //    // entity.FilePath = _fileStore.Save(fileStream, dto.FileName);
@@ -438,7 +438,7 @@
 //    bool exists = await _repo.DmsDocuments.ExistsAsync(x => x.DocumentId == key);
 //    if (!exists) throw new GenericNotFoundException("DmsDocument", "DocumentId", key.ToString());
 
-//    var entity = MyMapper.JsonClone<DmsDocumentDto, Dmsdocument>(dto);
+//    var entity = MyMapper.JsonClone<DmsDocumentDto, DmsDocument>(dto);
 //    _repo.DmsDocuments.Update(entity);
 //    await _repo.SaveAsync();
 

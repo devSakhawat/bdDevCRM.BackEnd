@@ -1,10 +1,10 @@
-﻿using bdDevCRM.Entities.Entities.Core;
+﻿using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.Core.SystemAdmin;
 
-public class CurrencyRepository : RepositoryBase<CurrencyInfo>, ICurrencyRepository
+public class CurrencyRepository : RepositoryBase<CrmCurrencyInfo>, ICurrencyRepository
 {
   public CurrencyRepository(CRMContext context) : base(context) { }
 

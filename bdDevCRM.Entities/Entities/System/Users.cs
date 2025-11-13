@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace bdDevCRM.Entities.Entities.System;
+﻿namespace bdDevCRM.Entities.Entities.System;
 
 public partial class Users
 {
@@ -20,9 +17,9 @@ public partial class Users
     /// </summary>
     public int? EmployeeId { get; set; }
 
-    public DateTime? CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; }
 
-    public DateTime? LastUpdateDate { get; set; }
+    public DateTime? LastUpdatedDate { get; set; }
 
     public DateTime? LastLoginDate { get; set; }
 
@@ -37,4 +34,5 @@ public partial class Users
     public int? AccessParentCompany { get; set; }
 
     public int? DefaultDashboard { get; set; }
+    public bool? IsSystemUser { get; set; }
 }

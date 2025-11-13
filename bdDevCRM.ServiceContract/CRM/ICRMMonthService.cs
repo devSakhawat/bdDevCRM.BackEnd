@@ -1,20 +1,20 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 
-namespace bdDevCRM.ServicesContract.CRM;
+namespace bdDevCRM.ServiceContract.CRM;
 
-public interface ICRMMonthService
+public interface ICrmMonthService
 {
-
-  //Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges);
-  //Task<CountryDto> GetCountryAsync(int countryId, bool trackChanges);
-  //Task<IEnumerable<CountryDDL>> GetCountriesDDLAsync(bool trackChanges);
-  //Task<CountryDto> CreateCountryAsync(CountryDto entityForCreate);
-  //Task<IEnumerable<CountryDto>> GetByIdsAsync(IEnumerable<int> ids, bool trackChanges);
-  //Task<(IEnumerable<CountryDto> countries, string ids)> CreateCountryCollectionAsync
-  //  (IEnumerable<CountryDto> countryCollection);
-  //Task DeleteCountryAsync(int countryId, bool trackChanges);
-  //Task UpdateCountryAsync(int countryId, CountryDto countryForUpdate, bool trackChanges);
+  Task<IEnumerable<CrmMonthDto>> GetMonthsDDLAsync(bool trackChanges = false);
+  Task<IEnumerable<CrmMonthDto>> GetActiveMonthsAsync(bool trackChanges = false);
+  Task<IEnumerable<CrmMonthDto>> GetMonthsAsync(bool trackChanges = false);
+  Task<CrmMonthDto> GetMonthAsync(int id, bool trackChanges = false);
+  Task<IEnumerable<CrmMonthDto>> GetMonthsByApplicantIdAsync(int applicantId, bool trackChanges = false);
+  Task<CrmMonthDto> CreateNewRecordAsync(CrmMonthDto dto, UsersDto currentUser);
+  Task<string> UpdateRecordAsync(int key, CrmMonthDto dto, bool trackChanges);
+  Task<string> DeleteRecordAsync(int key, CrmMonthDto dto);
+  Task<string> SaveOrUpdate(int key, CrmMonthDto modelDto, UsersDto currentUser);
+  Task<CrmMonthDto> CreateMonthAsync(CrmMonthDto entityForCreate);
+  Task<GridEntity<CrmMonthDto>> SummaryGrid(CRMGridOptions options);
 }

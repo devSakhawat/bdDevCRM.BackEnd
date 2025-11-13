@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Shared.DataTransferObjects.DMS;
 
-public class DmsdocumentTagDDL
+public class DmsDocumentTagDDL
 {
   public int TagId { get; set; }
   public string Name { get; set; } = null!;

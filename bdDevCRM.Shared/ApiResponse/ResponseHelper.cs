@@ -14,6 +14,12 @@ public static class ResponseHelper
     return new ApiResponse<T>(data, 201, message ?? "Resource created successfully");
   }
 
+  public static ApiResponse<T> Updated<T>(T data, string message = null)
+  {
+    return new ApiResponse<T>(data, 200, message ?? "Resource updated successfully");
+  }
+
+
   public static ApiResponse Success(string message = null)
   {
     return new ApiResponse(200, message ?? "Operation completed successfully");

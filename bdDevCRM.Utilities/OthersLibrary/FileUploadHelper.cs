@@ -55,7 +55,7 @@
 
 //    var dms = new DMSDto
 //    {
-//      // DmsdocumentTypeDto -----------------------
+//      // DmsDocumentTypeDto -----------------------
 //      DocumentTypeName = string.Empty,
 //      EntityType = string.Empty,
 //      IsMandatory = false,

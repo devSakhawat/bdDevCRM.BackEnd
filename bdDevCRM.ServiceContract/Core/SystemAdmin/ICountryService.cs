@@ -5,18 +5,17 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 
 namespace bdDevCRM.ServicesContract.Core.SystemAdmin;
 
-public interface ICountryService
+public interface ICrmCountryService
 {
+  Task<IEnumerable<CrmCountryDDL>> GetCountriesDDLAsync(bool trackChanges);
+  Task<GridEntity<CrmCountryDto>> SummaryGrid(CRMGridOptions options);
+  Task<string> CreateNewRecordAsync(CrmCountryDto modelDto);
+  Task<string> UpdateNewRecordAsync(int key, CrmCountryDto modelDto, bool trackChanges);
+  Task<string> DeleteRecordAsync(int key, CrmCountryDto modelDto);
+  Task<string> SaveOrUpdate(int key, CrmCountryDto modelDto);
 
-  Task<IEnumerable<CountryDDL>> GetCountriesDDLAsync(bool trackChanges);
-  Task<GridEntity<CountryDto>> SummaryGrid(CRMGridOptions options);
-  Task<string> CreateNewRecordAsync(CountryDto modelDto);
-  Task<string> UpdateNewRecordAsync(int key, CountryDto modelDto, bool trackChanges);
-  Task<string> DeleteRecordAsync(int key, CountryDto modelDto);
-  Task<string> SaveOrUpdate(int key, CountryDto modelDto);
 
-
-  Task<IEnumerable<CountryDto>> GetCountriesAsync(bool trackChanges);
-  Task<CountryDto> GetCountryAsync(int countryId, bool trackChanges);
-  Task<CountryDto> CreateCountryAsync(CountryDto entityForCreate);
+  Task<IEnumerable<CrmCountryDto>> GetCountriesAsync(bool trackChanges);
+  Task<CrmCountryDto> GetCountryAsync(int countryId, bool trackChanges);
+  Task<CrmCountryDto> CreateCountryAsync(CrmCountryDto entityForCreate);
 }

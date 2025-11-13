@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Api.ApiResponseError;
+﻿//using bdDevCRM.Api.ApiResponseError;
 using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.LoggerSevice;
 using bdDevCRM.Repositories;

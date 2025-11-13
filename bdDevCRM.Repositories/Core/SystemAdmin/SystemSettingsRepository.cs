@@ -38,7 +38,7 @@ public class SystemSettingsRepository : RepositoryBase<SystemSettings>, ISystemS
 
   private const string InsertSystemSettingsData =
       "INSERT INTO SystemSettings(CompanyId,Theme,Language,MinLoginLength,MinPassLength,PassType,SpecialCharAllowed,WrongAttemptNo,ChangePassDays," +
-      "ChangePassFirstLogin,PassExpiryDays,ResetPass,PassResetBy,OldPassUseRestriction,LastUpdateDate,OdbcClientList,UserId,IsPasswordChange," +
+      "ChangePassFirstLogin,PassExpiryDays,ResetPass,PassResetBy,OldPassUseRestriction,LastUpdatedDate,OdbcClientList,UserId,IsPasswordChange," +
       "IsPasswordExpire,IsWebLoginEnable,DeleteApproveLeaveUponPunch,DeleteLateUponAttendanceApproval,IsOtLimitApplicable,IsSingleBranchApplicable,CheckPreviousAbsenteeism,BypassDefaultStateForSameBoss,DefaultLateDeductionDays,CheckingApproverSettings,IsOtCalculateForSalary," +
       "DefaultEarlyExitDeductionDays,IsEmployeeIdAutoGenereted,IsGradeWiseLeave,EnableMultiplePolicyForSameLeaveType,IsAbsenteeismMarge,IsTotalBillingApplicable,EnableApproverCheckingWhileApplication,EnableDelayOnShiftInGraceTime,EnableLateAfterShiftInGraceTime," +
       "EnableEarlyExitBeforeShiftOutGraceTime,EnableAbsentAfterLateTime,EnableAbsentBeforeEarlyExitTime,EnableAbsentForNoOutPunch,LateTime,EarlyExitTime,EnableCustomStatusOutPunch,CustomStatusForNoOutPunch,EnableCustomStatusAfterShiftInGraceTime,CustomStatusForAfterShiftinGraceTime,DefaultLateDeductionDaysNext,RegulariseAttendaceDaysLimit, DefaultLateDeductionDaysFirstTime,ShortLeaveSlot,CasualWorkerAmount) VALUES ({0}, '{1}', '{2}', '{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}','{13}',{14},'{15}','{16}',{17},{18},{19},{20},{21},{22},{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},'{45}',{46},'{47}','{48}','{49}','{50}','{51}','{52}')";
@@ -46,7 +46,7 @@ public class SystemSettingsRepository : RepositoryBase<SystemSettings>, ISystemS
   private const string UpdateSystemSettingsData =
       "Update SystemSettings set CompanyId = {0}, Theme='{1}', Language = '{2}', MinLoginLength = '{3}', MinPassLength='{4}',PassType='{5}'," +
       "SpecialCharAllowed = '{6}',WrongAttemptNo='{7}',ChangePassDays='{8}',ChangePassFirstLogin='{9}',PassExpiryDays='{10}',ResetPass='{11}'," +
-      "PassResetBy='{12}',OldPassUseRestriction='{13}',LastUpdateDate={14},OdbcClientList='{15}',UserId='{16}',IsPasswordChange={17}," +
+      "PassResetBy='{12}',OldPassUseRestriction='{13}',LastUpdatedDate={14},OdbcClientList='{15}',UserId='{16}',IsPasswordChange={17}," +
       "IsPasswordExpire={18}, IsWebLoginEnable={19}, DeleteApproveLeaveUponPunch={20},DeleteLateUponAttendanceApproval={21},IsOtLimitApplicable={22}," +
       "IsSingleBranchApplicable={23},CheckPreviousAbsenteeism={24},BypassDefaultStateForSameBoss={25},DefaultLateDeductionDays={26},CheckingApproverSettings={27},IsOtCalculateForSalary = {28},DefaultEarlyExitDeductionDays={29},IsEmployeeIdAutoGenereted={30},IsGradeWiseLeave={31},EnableMultiplePolicyForSameLeaveType={32},IsAbsenteeismMarge={33},IsTotalBillingApplicable={34}," +
       "EnableApproverCheckingWhileApplication={36},EnableDelayOnShiftInGraceTime={37},EnableLateAfterShiftInGraceTime={38}," +
@@ -197,8 +197,8 @@ public class SystemSettingsRepository : RepositoryBase<SystemSettings>, ISystemS
   //          var specialCharAllowed = objSystemSettings.SpecialCharAllowed == false ? 0 : 1;
   //          var changePassAfterFirstLogin = objSystemSettings.ChangePassFirstLogin == false ? 0 : 1;
   //          var odbcClientList = objSystemSettings.OdbcClientList == false ? 0 : 1;
-  //          string lastUpdateDate = DateTime.Today.ToString("dd/MMM/yyyy");
-  //          lastUpdateDate = lastUpdateDate.Replace('/', '-');
+  //          string LastUpdatedDate = DateTime.Today.ToString("dd/MMM/yyyy");
+  //          LastUpdatedDate = LastUpdatedDate.Replace('/', '-');
   //          if (objSystemSettings.SettingsId == 0)
   //          {
   //            quary = string.Format(InsertSystemSettingsData, objSystemSettings.CompanyId,
@@ -209,7 +209,7 @@ public class SystemSettingsRepository : RepositoryBase<SystemSettings>, ISystemS
   //                                  changePassAfterFirstLogin,
   //                                  objSystemSettings.PassExpiryDays, objSystemSettings.ResetPass,
   //                                  objSystemSettings.PassResetBy, objSystemSettings.OldPassUseRestriction,
-  //                                  "to_date('" + lastUpdateDate + "')", odbcClientList,
+  //                                  "to_date('" + LastUpdatedDate + "')", odbcClientList,
   //                                  objSystemSettings.UserId, objSystemSettings.IsPasswordChange, objSystemSettings.IsPasswordExpire,
   //                                  objSystemSettings.IsWebLoginEnable,
   //                                  objSystemSettings.DeleteApproveLeaveUponPunch,
@@ -227,7 +227,7 @@ public class SystemSettingsRepository : RepositoryBase<SystemSettings>, ISystemS
   //                                  changePassAfterFirstLogin,
   //                                  objSystemSettings.PassExpiryDays, objSystemSettings.ResetPass,
   //                                  objSystemSettings.PassResetBy, objSystemSettings.OldPassUseRestriction,
-  //                                  "to_date('" + lastUpdateDate + "')", odbcClientList,
+  //                                  "to_date('" + LastUpdatedDate + "')", odbcClientList,
   //                                  objSystemSettings.UserId, objSystemSettings.IsPasswordChange, objSystemSettings.IsPasswordExpire,
   //                                  objSystemSettings.IsWebLoginEnable,
   //                                  objSystemSettings.DeleteApproveLeaveUponPunch,

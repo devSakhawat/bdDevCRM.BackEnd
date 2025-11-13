@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
-public partial class CrminstituteType
+public partial class CrmInstituteType
 {
     public int InstituteTypeId { get; set; }
 

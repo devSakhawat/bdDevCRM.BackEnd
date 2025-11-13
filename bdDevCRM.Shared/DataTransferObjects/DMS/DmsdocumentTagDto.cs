@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Shared.DataTransferObjects.DMS;
 
-public class DmsdocumentTagDto
+public class DmsDocumentTagDto
 {
   public int TagId { get; set; }
 
   public string Name { get; set; } = null!;
 
-  //public virtual ICollection<Dmsdocument> Document { get; set; } = new List<Dmsdocument>();
+  //public virtual ICollection<DmsDocument> Document { get; set; } = new List<DmsDocument>();
 }

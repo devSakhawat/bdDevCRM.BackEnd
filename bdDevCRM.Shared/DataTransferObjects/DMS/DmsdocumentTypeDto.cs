@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.Shared.DataTransferObjects.DMS;
 
-public class DmsdocumentTypeDto
+public class DmsDocumentTypeDto
 {
   public int DocumentTypeId { get; set; }
   public string Name { get; set; } = null!;
@@ -14,5 +14,5 @@ public class DmsdocumentTypeDto
   public bool IsMandatory { get; set; }
   public string? AcceptedExtensions { get; set; }
   public int? MaxFileSizeMb { get; set; }
-  //public virtual ICollection<Dmsdocument> Dmsdocument { get; set; } = new List<Dmsdocument>();
+  //public virtual ICollection<DmsDocument> DmsDocument { get; set; } = new List<DmsDocument>();
 }

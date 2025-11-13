@@ -2,7 +2,8 @@
 
 public class EmployeesByCompanyBranchDepartmentRepositoroyDto
 {
-  public int HRRecordId { get; set; }
+  public int HrRecordId { get; set; }
+  public string FullName { get; set; }
   public string EmployeeId { get; set; }
   public int CompanyId { get; set; }
   // Report to EmployeeId

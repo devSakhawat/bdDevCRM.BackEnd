@@ -22,7 +22,7 @@ public class DmsDocumentDto
   public string ReferenceEntityType { get; set; } = null!;
   public string ReferenceEntityId { get; set; } = null!;
 
-  // DmsdocumentAccessLogDto -----------------------
+  // DmsDocumentAccessLogDto -----------------------
   //public long LogId { get; set; }
 
   //public int DocumentId { get; set; }
@@ -33,7 +33,7 @@ public class DmsDocumentDto
 
   public string Action { get; set; } = null!;
 
-  // DmsdocumentFolderDto -----------------------
+  // DmsDocumentFolderDto -----------------------
   //public int FolderId { get; set; }
 
   public int? ParentFolderId { get; set; }
@@ -47,14 +47,14 @@ public class DmsDocumentDto
   //public string ReferenceEntityId { get; set; } = null!;
 
 
-  // DmsdocumentTagDto-----------------------
+  // DmsDocumentTagDto-----------------------
   
   public int TagId { get; set; }
 
   public string DocumentTagName { get; set; } = null!;
 
 
-  // DmsdocumentTypeDto -----------------------
+  // DmsDocumentTypeDto -----------------------
   //public int DocumentTypeId { get; set; }
   
   public string DocumentTypeName { get; set; } = null!;
@@ -63,7 +63,7 @@ public class DmsDocumentDto
   public string? AcceptedExtensions { get; set; }
   public int? MaxFileSizeMb { get; set; }
 
-  // DmsdocumentVersionDto -----------------------
+  // DmsDocumentVersionDto -----------------------
   public int VersionId { get; set; }
   //public int DocumentId { get; set; }
   public int VersionNumber { get; set; }

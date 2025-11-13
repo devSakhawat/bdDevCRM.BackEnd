@@ -61,3 +61,37 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# Ignore published/static web assets
+/wwwroot/**
+!/wwwroot/.gitkeep
+
+
+Common .NET build outputs
+bin/
+obj/
+[Tt]emp/
+*.user
+*.rsuser
+*.suo
+*.userprefs
+*.vcxproj.user
+*.pubxml
+*.publish.xml
+
+# Logs
+*.log
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# OS
+[Dd]esktop.ini
+[Tt]humbs.db
+.DS_Store

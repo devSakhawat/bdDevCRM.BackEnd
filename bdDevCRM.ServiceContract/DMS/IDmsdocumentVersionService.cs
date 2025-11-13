@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.ServiceContract.DMS;
 
-public interface IDmsdocumentVersionService
+public interface IDmsDocumentVersionService
 {
-  Task<IEnumerable<DmsdocumentVersionDDL>> GetVersionsDDLAsync(bool trackChanges);
-  Task<GridEntity<DmsdocumentVersionDto>> SummaryGrid(CRMGridOptions options);
-  Task<string> CreateNewRecordAsync(DmsdocumentVersionDto modelDto);
-  Task<string> UpdateNewRecordAsync(int key, DmsdocumentVersionDto modelDto, bool trackChanges);
-  Task<string> DeleteRecordAsync(int key, DmsdocumentVersionDto modelDto);
-  Task<string> SaveOrUpdate(int key, DmsdocumentVersionDto modelDto);
+  Task<IEnumerable<DmsDocumentVersionDDL>> GetVersionsDDLAsync(bool trackChanges);
+  Task<GridEntity<DmsDocumentVersionDto>> SummaryGrid(CRMGridOptions options);
+  Task<string> CreateNewRecordAsync(DmsDocumentVersionDto modelDto);
+  Task<string> UpdateNewRecordAsync(int key, DmsDocumentVersionDto modelDto, bool trackChanges);
+  Task<string> DeleteRecordAsync(int key, DmsDocumentVersionDto modelDto);
+  Task<string> SaveOrUpdate(int key, DmsDocumentVersionDto modelDto);
 }

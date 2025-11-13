@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.RepositoriesContracts.DMS;
 
-public interface IDmsdocumentVersionRepository : IRepositoryBase<DmsdocumentVersion>
+public interface IDmsDocumentVersionRepository : IRepositoryBase<DmsDocumentVersion>
 {
-  Task<IEnumerable<DmsdocumentVersion>> GetVersionsByDocumentIdAsync(int documentId, bool trackChanges);
-  void CreateVersion(DmsdocumentVersion version);
+  Task<IEnumerable<DmsDocumentVersion>> GetVersionsByDocumentIdAsync(int documentId, bool trackChanges);
+  void CreateVersion(DmsDocumentVersion version);
 }

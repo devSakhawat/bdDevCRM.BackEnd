@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace bdDevCRM.RepositoriesContracts.DMS;
 
-public interface IDmsdocumentTagMapRepository : IRepositoryBase<DmsdocumentTagMap>
+public interface IDmsDocumentTagMapRepository : IRepositoryBase<DmsDocumentTagMap>
 {
-  //Task<IEnumerable<DmsdocumentTagMap>> GetDocumentTagsByDocumentIdAsync(int documentId, bool trackChanges = false);
-  //Task<IEnumerable<DmsdocumentTagMap>> GetTagsByDocumentIdsAsync(IEnumerable<int> documentIds, bool trackChanges = false);
+  //Task<IEnumerable<DmsDocumentTagMap>> GetDocumentTagsByDocumentIdAsync(int documentId, bool trackChanges = false);
+  //Task<IEnumerable<DmsDocumentTagMap>> GetTagsByDocumentIdsAsync(IEnumerable<int> documentIds, bool trackChanges = false);
   //Task<bool> AddTagToDocumentAsync(int documentId, int tagId);
   //Task<bool> RemoveTagFromDocumentAsync(int documentId, int tagId);
 }

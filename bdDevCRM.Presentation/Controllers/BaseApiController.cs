@@ -1,34 +1,19 @@
 ﻿
 // CRM.Solution.Presentation/Controllers/BaseApiController.cs (or wherever your BaseApiController is located)
 
-using bdDevCRM.Entities.Exceptions;
-using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants; // Add this using directive if IServiceManager depends on IMemoryCache directly
+using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #region Old_Code
 
 
-[Route(RouteConstants.BaseRoute)] // Assuming RouteConstants.BaseRoute is defined elsewhere, e.g., "api/[controller]"
+[Route(RouteConstants.BaseRoute)]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 //[AuthorizeUser]

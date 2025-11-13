@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace bdDevCRM.Entities.Entities.System;
 
-namespace bdDevCRM.Entities.Entities.System;
-
-public partial class Wfstate
+public partial class WfState
 {
-    public int WfstateId { get; set; }
+  public int WfStateId { get; set; }
 
-    public string StateName { get; set; } = null!;
+  public string StateName { get; set; } = null!;
 
-    public int MenuId { get; set; }
+  public int MenuId { get; set; }
 
-    public bool? IsDefaultStart { get; set; }
+  public bool? IsDefaultStart { get; set; }
 
-    public int? IsClosed { get; set; }
+  public int? IsClosed { get; set; }
 
-    public int? Sequence { get; set; }
+  public int? Sequence { get; set; }
 }

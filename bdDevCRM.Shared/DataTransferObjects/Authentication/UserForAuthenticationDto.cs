@@ -13,3 +13,10 @@ public class UserForAuthenticationDto
 
   public bool? IsRememberMe { get; set; }
 }
+
+public class TokenVerificationRequest
+{
+  [Required(ErrorMessage = "Token is required")]
+  public string Token { get; set; }
+}
+

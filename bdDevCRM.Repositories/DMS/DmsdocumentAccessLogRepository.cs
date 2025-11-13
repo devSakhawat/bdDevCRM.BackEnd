@@ -4,14 +4,14 @@ using bdDevCRM.Sql.Context;
 
 namespace bdDevCRM.Repositories.DMS;
 
-public class DmsdocumentAccessLogRepository : RepositoryBase<DmsdocumentAccessLog>, IDmsdocumentAccessLogRepository
+public class DmsDocumentAccessLogRepository : RepositoryBase<DmsDocumentAccessLog>, IDmsDocumentAccessLogRepository
 {
-  public DmsdocumentAccessLogRepository(CRMContext context) : base(context) { }
+  public DmsDocumentAccessLogRepository(CRMContext context) : base(context) { }
 
   // Get access logs by DocumentId
-  public async Task<IEnumerable<DmsdocumentAccessLog>> GetLogsByDocumentIdAsync(int documentId, bool trackChanges) =>
+  public async Task<IEnumerable<DmsDocumentAccessLog>> GetLogsByDocumentIdAsync(int documentId, bool trackChanges) =>
       await ListByConditionAsync(x => x.DocumentId == documentId, x => x.AccessDateTime, trackChanges);
 
   // Create new log
-  public void CreateLog(DmsdocumentAccessLog log) => Create(log);
+  public void CreateLog(DmsDocumentAccessLog log) => Create(log);
 }

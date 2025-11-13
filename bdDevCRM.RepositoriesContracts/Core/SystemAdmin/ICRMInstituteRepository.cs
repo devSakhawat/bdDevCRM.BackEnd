@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 
 
-public interface ICRMInstituteRepository : IRepositoryBase<Crminstitute>
+public interface ICrmInstituteRepository : IRepositoryBase<CrmInstitute>
 {
-  Task<IEnumerable<Crminstitute>> GetActiveInstitutesAsync(bool trackChanges);
-  Task<IEnumerable<Crminstitute>> GetInstitutesAsync(bool trackChanges);
-  Task<Crminstitute?> GetInstituteAsync(int id, bool trackChanges);
+  Task<IEnumerable<CrmInstitute>> GetActiveInstitutesAsync(bool trackChanges);
+  Task<IEnumerable<CrmInstitute>> GetInstitutesAsync(bool trackChanges);
+  Task<CrmInstitute?> GetInstituteAsync(int id, bool trackChanges);
 }
 
