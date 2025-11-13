@@ -1,5 +1,5 @@
 ﻿using Azure;
-using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts;

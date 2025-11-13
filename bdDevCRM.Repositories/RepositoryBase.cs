@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Repositories.Exceptions;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Sql.Context;
@@ -134,6 +134,33 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
       _dbSet.Remove(enitytData);
     }
   }
+
+  /// <summary>
+  /// Executes a DELETE statement directly against the database without loading entities into memory.
+  /// This bypasses the change tracker and is more efficient for bulk deletes.
+  /// </summary>
+  public async Task<int> ExecuteDeleteAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+  {
+    return await _dbSet.Where(predicate).ExecuteDeleteAsync(cancellationToken);
+  }
+
+  /// <summary>
+  /// Clears all tracked entities from the ChangeTracker
+  /// </summary>
+  public void ClearChangeTracker()
+  {
+    _context.ChangeTracker.Clear();
+  }
+
+  /// <summary>
+  /// Clears all tracked entities from the ChangeTracker asynchronously
+  /// </summary>
+  public Task ClearChangeTrackerAsync()
+  {
+    _context.ChangeTracker.Clear();
+    return Task.CompletedTask;
+  }
+
 
   public T GetById(Expression<Func<T, bool>> predicate, bool trackChanges = false)
     => !trackChanges ? _dbSet.Where(predicate).AsNoTracking().FirstOrDefault() : _dbSet.Where(predicate).FirstOrDefault();
@@ -1093,6 +1120,9 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   #region DMS Module
 
   #endregion DMS Module
+
+
+
 }
 
 

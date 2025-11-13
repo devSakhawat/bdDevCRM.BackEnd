@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace bdDevCRM.Entities.Entities.CRM;
 
 public partial class CrmCourse
 {
+  [Key]
     public int CourseId { get; set; }
 
     public int InstituteId { get; set; }

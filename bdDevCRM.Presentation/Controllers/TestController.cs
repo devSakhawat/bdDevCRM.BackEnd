@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
@@ -35,6 +35,7 @@ namespace bdDevCRM.Presentation.Controllers;
 
 //  // GitHub Copilot: generate the code by using ResponseHelper for this method InstituteDDL.
 //  [HttpGet(RouteConstants.TestDDL)]
+// [Produces("text/csv")] // CSV format
 //  public async Task<IActionResult> TestDDL()
 //  {
 //    int userId = HttpContext.GetUserId();

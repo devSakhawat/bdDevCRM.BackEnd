@@ -629,59 +629,30 @@ public partial class CRMContext : DbContext
     modelBuilder.Entity<CrmCountry>(entity =>
     {
       entity.HasKey(e => e.CountryId).HasName("PK_Country");
-
       entity.Property(e => e.CountryCode).HasMaxLength(50);
       entity.Property(e => e.CountryName).HasMaxLength(100);
     });
 
     modelBuilder.Entity<CrmCourse>(entity =>
     {
-      entity.HasNoKey();
-
-      entity.Property(e => e.AdditionalInformationOfCourse)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.After2YearsPswcompletingCourse)
-          .HasMaxLength(300)
-          .IsUnicode(false)
-          .HasColumnName("After2YearsPSWCompletingCourse");
+      entity.HasKey(e => e.CourseId).HasName("PK_CRMCourse");
+      entity.Property(e => e.AdditionalInformationOfCourse).HasMaxLength(300).IsUnicode(false);
+      entity.Property(e => e.After2YearsPswcompletingCourse).HasMaxLength(300).IsUnicode(false).HasColumnName("After2YearsPSWCompletingCourse");
       entity.Property(e => e.ApplicationFee).HasColumnType("decimal(18, 2)");
-      entity.Property(e => e.AwardingBody)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.CountryBenefits)
-          .HasMaxLength(500)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseBenefits)
-          .HasMaxLength(200)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseCategory)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseDuration)
-          .HasMaxLength(100)
-          .IsUnicode(false);
+      entity.Property(e => e.AwardingBody).HasMaxLength(100).IsUnicode(false);
+      entity.Property(e => e.CountryBenefits).HasMaxLength(500).IsUnicode(false);
+      entity.Property(e => e.CourseBenefits).HasMaxLength(200).IsUnicode(false);
+      entity.Property(e => e.CourseCategory).HasMaxLength(100).IsUnicode(false);
+      entity.Property(e => e.CourseDuration).HasMaxLength(100).IsUnicode(false);
       entity.Property(e => e.CourseFee).HasColumnType("decimal(18, 2)");
       entity.Property(e => e.CourseId).ValueGeneratedOnAdd();
-      entity.Property(e => e.CourseLevel)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.CourseTitle)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.DocumentId)
-          .HasMaxLength(100)
-          .IsUnicode(false);
+      entity.Property(e => e.CourseLevel).HasMaxLength(100).IsUnicode(false);
+      entity.Property(e => e.CourseTitle).HasMaxLength(300).IsUnicode(false);
+      entity.Property(e => e.DocumentId).HasMaxLength(100).IsUnicode(false);
       entity.Property(e => e.EndDate).HasColumnType("datetime");
-      entity.Property(e => e.FundsRequirementforVisa)
-          .HasMaxLength(300)
-          .IsUnicode(false);
-      entity.Property(e => e.GeneralEligibility)
-          .HasMaxLength(200)
-          .IsUnicode(false);
-      entity.Property(e => e.InstitutionalBenefits)
-          .HasMaxLength(300)
-          .IsUnicode(false);
+      entity.Property(e => e.FundsRequirementforVisa).HasMaxLength(300).IsUnicode(false);
+      entity.Property(e => e.GeneralEligibility).HasMaxLength(200).IsUnicode(false);
+      entity.Property(e => e.InstitutionalBenefits).HasMaxLength(300).IsUnicode(false);
       entity.Property(e => e.KeyModules)
           .HasMaxLength(300)
           .IsUnicode(false);
@@ -700,12 +671,9 @@ public partial class CRMContext : DbContext
 
     modelBuilder.Entity<CrmCourseIntake>(entity =>
     {
-      entity.HasNoKey();
-
-      entity.Property(e => e.CourseIntakeId).ValueGeneratedOnAdd();
-      entity.Property(e => e.IntakeTitile)
-          .HasMaxLength(100)
-          .IsUnicode(false);
+      entity.HasKey(e => e.CourseIntakeId).HasName("PK_CrmCourseIntake");
+      //entity.Property(e => e.CourseIntakeId).ValueGeneratedOnAdd();
+      entity.Property(e => e.IntakeTitile).HasMaxLength(100).IsUnicode(false);
     });
 
     modelBuilder.Entity<CrmCurrencyInfo>(entity =>

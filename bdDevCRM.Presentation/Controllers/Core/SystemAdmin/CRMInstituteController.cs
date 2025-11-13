@@ -1,13 +1,14 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Presentation.ActionFIlters;
+﻿using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,20 +33,20 @@ public class CRMInstituteController : BaseApiController
 
   // --------- 1. DDL --------------------------------------------------
 
-  // GitHub Copilot: generate the code by using ResponseHelper for this method InstituteDDL.
+  [AllowAnonymous]
   [HttpGet(RouteConstants.InstituteDDL)]
   public async Task<IActionResult> InstituteDDL()
   {
     //int userId = HttpContext.GetUserId();
     //var currentUser = HttpContext.GetCurrentUser();
 
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+    //var userIdClaim = User.FindFirst("UserId")?.Value;
+    //if (string.IsNullOrEmpty(userIdClaim))
+    //  return Unauthorized("Unauthorized attempt to get data!");
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    //int userId = Convert.ToInt32(userIdClaim);
+    //UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    //if (currentUser == null) return Unauthorized("User not found in cache.");
 
     var res = await _serviceManager.CrmInstitutes.GetInstitutesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())

@@ -11,6 +11,7 @@ using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoriesContracts.CRM;
 using bdDevCRM.RepositoriesContracts.DMS;
 using bdDevCRM.Sql.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace bdDevCRM.Repositories;
 

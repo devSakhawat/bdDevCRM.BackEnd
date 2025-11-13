@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Data.Common;
@@ -28,9 +28,27 @@ public interface IRepositoryBase<T>
 
   void Delete(T entity);
   Task DeleteAsync(Expression<Func<T, bool>> predicate, bool trackChanges);
+  /// <summary>
+  /// Executes a DELETE statement directly against the database without loading entities into memory.
+  /// This bypasses the change tracker and is more efficient for bulk deletes.
+  /// Available in EF Core 7.0+
+  /// </summary>
+  /// <param name="predicate">Filter expression to determine which entities to delete</param>
+  /// <param name="cancellationToken">Cancellation token</param>
+  /// <returns>Number of rows deleted</returns>
+  Task<int> ExecuteDeleteAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
 
   void BulkDelete(IEnumerable<T> entities);
 
+  /// <summary>
+  /// Clears all tracked entities from the ChangeTracker
+  /// </summary>
+  void ClearChangeTracker();
+
+  /// <summary>
+  /// Clears all tracked entities from the ChangeTracker asynchronously
+  /// </summary>
+  Task ClearChangeTrackerAsync();
 
   T GetById(Expression<Func<T, bool>> predicate, bool trackChanges = false);
   Task<T> GetByIdAsync(Expression<Func<T, bool>> predicate, bool trackChanges = false);

@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [Route(RouteConstants.BaseRoute)]
 [ApiController]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 //[AuthorizeUser]
 // [ServiceFilter(typeof(LogActionAttribute))]
 // [ServiceFilter(typeof(ValidateMediaTypeAttribute))]

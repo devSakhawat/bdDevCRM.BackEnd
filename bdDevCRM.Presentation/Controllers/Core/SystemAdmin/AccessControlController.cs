@@ -1,5 +1,5 @@
 ﻿
-using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;

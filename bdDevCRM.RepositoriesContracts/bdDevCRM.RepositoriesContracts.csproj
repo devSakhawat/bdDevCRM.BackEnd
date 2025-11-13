@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\bdDevCRM.Entities\bdDevCRM.Entities.csproj" />
     <ProjectReference Include="..\bdDevCRM.RepositoryDtos\bdDevCRM.RepositoryDtos.csproj" />
+    <ProjectReference Include="..\bdDevCRM.Utilities\bdDevCRM.Utilities.csproj" />
   </ItemGroup>
 
 </Project>
