@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;

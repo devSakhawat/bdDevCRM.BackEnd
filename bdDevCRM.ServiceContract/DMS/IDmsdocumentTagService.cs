@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
 
 namespace bdDevCRM.ServiceContract.DMS;

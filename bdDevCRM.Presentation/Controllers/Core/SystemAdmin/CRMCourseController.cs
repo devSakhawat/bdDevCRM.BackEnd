@@ -1,11 +1,12 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Presentation.ActionFIlters;
-using bdDevCRM.Presentation.Extensions;
+﻿using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
+using Microsoft.AspNetCore.Authorization;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +22,14 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 [ApiController]
 public class CRMCourseController : BaseApiController
 {
-  private readonly IMemoryCache _cache;
-  private readonly IWebHostEnvironment _env;
+    private readonly IMemoryCache _cache;
+    private readonly IWebHostEnvironment _env;
 
-  public CRMCourseController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
-  {
-    _cache = cache;
-    _env = env;
-  }
+    public CRMCourseController(IServiceManager serviceManager, IMemoryCache cache, IWebHostEnvironment env) : base(serviceManager)
+    {
+        _cache = cache;
+        _env = env;
+    }
 
   // --------- 1. DDL --------------------------------------------------
   /// <summary>
@@ -49,8 +50,8 @@ public class CRMCourseController : BaseApiController
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
 
-    return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
-  }
+        return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
+    }
 
   /// <summary>
   /// Retrieves courses by institute ID for dropdown list
@@ -75,8 +76,8 @@ public class CRMCourseController : BaseApiController
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CRMCourseDDLDto>>("No course found"));
 
-    return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
-  }
+        return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
+    }
 
   // --------- 2. Summary Grid ----------------------------------------
   /// <summary>
@@ -200,8 +201,8 @@ public class CRMCourseController : BaseApiController
       if (key <= 0)
         return BadRequest(ResponseHelper.BadRequest("Invalid course ID. Course ID must be greater than 0."));
 
-      if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Course data is required"));
+            if (modelDto == null)
+                return BadRequest(ResponseHelper.BadRequest("Course data is required"));
 
       // Execute business logic
       var res = await _serviceManager.CrmCourses.DeleteRecordAsync(key, modelDto);

@@ -3,6 +3,7 @@ using bdDevCRM.RepositoriesContracts.Core.HR;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoriesContracts.CRM;
 using bdDevCRM.RepositoriesContracts.DMS;
+using System.Linq.Expressions;
 
 namespace bdDevCRM.RepositoriesContracts;
 
@@ -81,6 +82,7 @@ public interface IRepositoryManager : IDisposable
 
   // Save changes to the database
   Task SaveAsync();
+
   void Save();
 }
 

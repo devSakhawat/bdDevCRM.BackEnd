@@ -7,9 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="bdDevCRM.Sql\**" />
     <Compile Remove="CRMGrid\StaticData\**" />
+    <Compile Remove="Repository\**" />
+    <EmbeddedResource Remove="bdDevCRM.Sql\**" />
     <EmbeddedResource Remove="CRMGrid\StaticData\**" />
+    <EmbeddedResource Remove="Repository\**" />
+    <None Remove="bdDevCRM.Sql\**" />
     <None Remove="CRMGrid\StaticData\**" />
+    <None Remove="Repository\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,10 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="bdDevCRM.Sql\" />
     <Folder Include="Entities\Core\" />
     <Folder Include="Entities\Entities\" />
-    <Folder Include="Repository\Context\" />
   </ItemGroup>
 
 </Project>

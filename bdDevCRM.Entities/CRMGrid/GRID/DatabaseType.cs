@@ -1,15 +1,15 @@
-﻿namespace bdDevCRM.Entities.CRMGrid.GRID;
+﻿//namespace bdDevCRM.Entities.CRMGrid.GRID;
 
-public enum DatabaseType
-{
-  SQL,
-  Oracle,
-  MySql,
-  Odbc,
-  OleDb
-}
+//public enum DatabaseType
+//{
+//  SQL,
+//  Oracle,
+//  MySql,
+//  Odbc,
+//  OleDb
+//}
 
-public enum DatabaseProvider
-{
-  ODT
-}
+//public enum DatabaseProvider
+//{
+//  ODT
+//}

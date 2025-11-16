@@ -1,4 +1,4 @@
-using bdDevCRM.Api.ContentFormatter;
+﻿using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Api.Extensions;
 using bdDevCRM.Api.Middleware;
 using bdDevCRM.Presentation;
@@ -42,15 +42,28 @@ builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
 
 // Configure controllers with Newtonsoft.Json support
+//builder.Services.AddControllers(config =>
+//{
+//  config.RespectBrowserAcceptHeader = true;
+//  config.ReturnHttpNotAcceptable = true;
+//  config.OutputFormatters.Add(new CsvOutputFormatter());
+//})
+//.AddXmlDataContractSerializerFormatters()
+//.AddApplicationPart(typeof(PresentationReference).Assembly)
+//.AddNewtonsoftJson(options =>
+//{
+//  options.SerializerSettings.ContractResolver = new DefaultContractResolver
+//  {
+//    NamingStrategy = new DefaultNamingStrategy() // Use PascalCase
+//  };
+//});
+
+
 builder.Services.AddControllers(config =>
 {
   config.RespectBrowserAcceptHeader = true;
   config.ReturnHttpNotAcceptable = true;
-  config.OutputFormatters.Add(new CsvOutputFormatter());
-
-  // Add global validation filter for all controllers
-  // to check if the Accept header is present with the required media type like "application/json" or "application/xml" or "text/csv" or "text/plain"
-  //config.Filters.Add<ValidationFilterAttribute>();
+  // CSV formatter remove করুন
 })
 .AddXmlDataContractSerializerFormatters()
 .AddApplicationPart(typeof(PresentationReference).Assembly)
@@ -58,9 +71,10 @@ builder.Services.AddControllers(config =>
 {
   options.SerializerSettings.ContractResolver = new DefaultContractResolver
   {
-    NamingStrategy = new DefaultNamingStrategy() // Use PascalCase
+    NamingStrategy = new DefaultNamingStrategy()
   };
 });
+// .AddCustomCSVFormatter();
 
 // Register MemoryCache
 builder.Services.AddMemoryCache();

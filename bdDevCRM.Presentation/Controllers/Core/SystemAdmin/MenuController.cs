@@ -1,9 +1,9 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +12,13 @@ using Microsoft.Extensions.Caching.Memory;
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 
-public class EmployeeController : BaseApiController
+//public class EmployeeController : BaseApiController
+public class MenuController : BaseApiController
 {
     //private readonly IServiceManager _serviceManager;
     private readonly IMemoryCache _cache;
 
-    public EmployeeController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
+    public MenuController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
     {
         //_serviceManager = serviceManager;
         _cache = cache;
@@ -27,7 +28,7 @@ public class EmployeeController : BaseApiController
     [HttpGet(RouteConstants.SelectMenuByUserPermission)]
     //[Produces("application/json")]
     [ResponseCache(Duration = 300)] // Browser caching for 5 minutes
-                                    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> SelectMenuByUserPermission()
     {
         var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -82,16 +83,11 @@ public class EmployeeController : BaseApiController
     }
 
     [HttpGet(RouteConstants.MenusByModuleId)]
-    [ResponseCache(Duration = 60)] // Browser caching for 5 minutes
-                                   //[IgnoreMediaTypeValidation]
+    [ResponseCache(Duration = 60)]
+    //[IgnoreMediaTypeValidation]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> MenusByModuleId([FromRoute] int moduleId)
     {
-        //var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-        //IEnumerable<MenuDto> menusDto = await _serviceManager.Menus.MenusByModuleId(moduleId, trackChanges: false);
-        ////return (menuSummary != null ) ? Ok(menuSummary) : NoContent();
-        //return Ok(menusDto.ToList());
-
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (string.IsNullOrEmpty(userIdClaim))
             throw new GenericUnauthorizedException("User authentication required.");
@@ -103,12 +99,9 @@ public class EmployeeController : BaseApiController
         if (currentUser == null)
             throw new GenericUnauthorizedException("User session expired.");
 
-        if (!MenuConstant.TryGetPath("CRMApplication", out var menuPath))
-            throw new GenericBadRequestException("Invalid menu name.");
-
         var res = await _serviceManager.Menus.MenusByModuleId(moduleId, trackChanges: false);
-        if (res == null || !res.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<MenuDto>>("No data found"));
+        if (res == null)
+            return Ok(ResponseHelper.NoContent<IEnumerable<ModuleDto>>("No data found!"));
 
         return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
     }
@@ -125,7 +118,11 @@ public class EmployeeController : BaseApiController
     public async Task<IActionResult> GetMenuSummary([FromBody] CRMGridOptions options)
     {
         var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
-        return (menuSummary != null) ? Ok(menuSummary) : NoContent();
+
+        if (menuSummary == null)
+            return Ok(ResponseHelper.NoContent<GridEntity<MenuDto>>("No data found!"));
+
+        return Ok(ResponseHelper.Success(menuSummary, "Menu summary retrieved successfully"));
     }
 
 

@@ -19,9 +19,35 @@ public class QueryAnalyzerRepository : RepositoryBase<ReportBuilder>, IQueryAnal
     IEnumerable<QueryAnalyzerRepositoryDto> queryAnalyzers = await ExecuteListQuery<QueryAnalyzerRepositoryDto>(queryAnalyzerQuery);
     return queryAnalyzers;
   }
+  
+  public async Task<IEnumerable<QueryAnalyzerRepositoryDto>> CustomizedReportByPermission(Users currentUser ,string condition ,bool trackChanges)
+  {
+    string queryAnalyzerQuery = string.Format(@"SELECT t.ReportHeader ,t.ReportTitle ,t.ReportHeaderId
+FROM (
+	SELECT ReportHeader + ' (Report)' AS ReportHeader ,ReportTitle ,ReportHeaderId ,1 AS SortOrder
+	FROM ReportBuilder
+	WHERE IsActive = 1 AND QueryType = 1
+	
+	UNION ALL
+	
+	SELECT ReportHeader + ' (Document)' AS ReportHeader ,ReportTitle ,ReportHeaderId ,2 AS SortOrder
+	FROM ReportBuilder
+	WHERE IsActive = 1 AND QueryType = 4
+	) T
+{0}
+ORDER BY t.SortOrder ,ReportHeader", condition);
+   
+    IEnumerable<QueryAnalyzerRepositoryDto> queryAnalyzers = await ExecuteListQuery<QueryAnalyzerRepositoryDto>(queryAnalyzerQuery);
+    return queryAnalyzers;
+  }
 
-
-
-
-
+  public async Task<IEnumerable<QueryAnalyzerRepositoryDto>> GroupPermissionForQueryAnalyzerReport(Users currentUser)
+  {
+    string queryAnalyzerQuery = string.Format(@"SELECT DISTINCT REFERENCEID AS ReportHeaderId
+FROM GroupPermission
+INNER JOIN GroupMember ON GroupMember.GroupId = GroupPermission.GROUPID
+WHERE UserId = {0} AND PERMISSIONTABLENAME = 'Customized Report'", currentUser.UserId);
+    var groupPermissionList = await ExecuteListQuery<QueryAnalyzerRepositoryDto>(queryAnalyzerQuery);
+    return groupPermissionList;
+  }
 }

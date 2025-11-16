@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.System;
 
 using bdDevCRM.RepositoriesContracts;
@@ -300,6 +300,157 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
     return gridEntity;
   }
 
+  //public async Task<UsersDto> SaveUser(UsersDto usersDto)
+  //{
+  //  var res = new UsersDto();
+  //  //// Not now. We will work this function letter.
+  //  //UpdateAppUser(usersDto);
+
+  //  SystemSettings objsystem = await _repository.SystemSettings.GetSystemSettingsDataByCompanyId((int)usersDto.CompanyId);
+
+  //  if (objsystem == null)
+  //  {
+  //    throw new CommonBadReuqestException("Please First Save System Settings Data");
+  //  }
+
+  //  var validate = "";
+  //  if (usersDto.UserId == 0)
+  //  {
+  //    validate = ValidateUser(usersDto, objsystem);
+  //  }
+  //  else
+  //  {
+  //    Users userByUserId = await _repository.Users.GetByIdAsync(x => x.UserId == usersDto.UserId, trackChanges: false);
+  //    usersDto.Password = usersDto.Password == "" ? EncryptDecryptHelper.Decrypt(userByUserId.Password) : usersDto.Password;
+  //    validate = ValidateUser(usersDto, objsystem);
+  //  }
+
+  //  if (validate != "Valid")
+  //  {
+  //    return new UsersDto();
+  //  }
+
+  //  using var transaction = _repository.Users.TransactionBeginAsync();
+  //  try
+  //  {
+  //    List<GroupMember> groupMembers = new List<GroupMember>();
+
+  //    #region New User
+  //    if (usersDto.UserId == 0)
+  //    {
+  //      //var objUserNewByLogInId = GetUserByLoginId(usersDto.LoginId);
+  //      Users userByLoginid = await _repository.Users.GetByIdAsync(x => x.LoginId.ToLower().Trim() == usersDto.LoginId.ToLower().Trim(), trackChanges: false);
+  //      if (userByLoginid == null)
+  //      {
+  //        //if (!IsExistsUserByEmployee(usersDto.EmployeeId))
+  //        if (!await _repository.Users.ExistsAsync(x => x.EmployeeId == usersDto.EmployeeId))
+  //        {
+  //          usersDto.CreatedDate = DateTime.Now;
+  //          usersDto.LastUpdatedDate = DateTime.Now;
+  //          usersDto.IsExpired = false;
+
+  //          var encytpass = EncryptDecryptHelper.Encrypt(usersDto.Password);
+  //          usersDto.Password = encytpass;
+
+  //          Users objUsers = MyMapper.JsonClone<UsersDto, Users>(usersDto);
+  //          usersDto.UserId = await _repository.Users.CreateAndGetIdAsync(objUsers);
+
+  //          foreach (var groupMember in usersDto.GroupMembers)
+  //          {
+  //            groupMembers.Add(new GroupMember { GroupId = groupMember.GroupId, UserId = objUsers.UserId });
+  //          }
+
+  //          if (groupMembers.Count > 0)
+  //          {
+  //            await _repository.GroupMembers.BulkInsertAsync(groupMembers);
+  //          }
+
+  //          await _repository.GroupMembers.TransactionCommitAsync();
+
+  //          return usersDto;
+  //        }
+  //        else
+  //        {
+  //          return res;
+  //        }
+  //      }
+  //      else
+  //      {
+  //        return new UsersDto();
+  //      }
+  //    }
+  //    #endregion New User
+
+  //    #region Update User
+  //    else
+  //    {
+  //      //var objUserNewByLogInId = GetUserByLoginIdAndNotUserId(users.LoginId, users.UserId);
+  //      var objUserNewByLogInId = await _repository.Users.FirstOrDefaultAsync( x=> x.LoginId == usersDto.LoginId && x.UserId != usersDto.UserId);
+
+  //      if (objUserNewByLogInId == null)
+  //      {
+  //        //var objUserforDb = GetUserById(usersDto.UserId);
+  //        var objUserforDb = await _repository.Users.FirstOrDefaultAsync(x => x.UserId == usersDto.UserId);
+  //        objUserforDb.CompanyId = usersDto.CompanyId;
+  //        objUserforDb.LoginId = usersDto.LoginId;
+  //        var encytpass = EncryptDecryptHelper.Encrypt(usersDto.Password);
+  //        objUserforDb.Password = encytpass;
+  //        objUserforDb.UserName = usersDto.UserName;
+  //        objUserforDb.IsActive = usersDto.IsActive;
+  //        objUserforDb.AccessParentCompany = usersDto.AccessParentCompany;
+  //        objUserforDb.LastUpdatedDate = DateTime.Now;
+  //        objUserforDb.DefaultDashboard = usersDto.DefaultDashboard;
+
+  //        if (objUserforDb.IsActive == true)
+  //        {
+  //          objUserforDb.FailedLoginNo = 0;
+  //        }
+
+  //        var lastLoginDate = objUserforDb.LastLoginDate.HasValue && objUserforDb.LastLoginDate.Value != DateTime.MinValue
+  //            ? objUserforDb.LastLoginDate
+  //            : null;
+
+  //        objUserforDb.LastLoginDate = lastLoginDate;
+  //        _repository.Users.Update(objUserforDb);
+
+  //        IEnumerable<GroupMember> groupMembersByUserId = await _repository.GroupMembers.GetListByIdsAsync(x => x.UserId == usersDto.UserId);
+
+  //        if (groupMembersByUserId.Count() > 0)
+  //        {
+  //          _repository.GroupMembers.BulkDelete(groupMembersByUserId);
+  //        }
+
+  //        foreach (var groupMember in usersDto.GroupMembers)
+  //        {
+  //          groupMembers.Add(new GroupMember { GroupId = groupMember.GroupId, UserId = (int)usersDto.UserId });
+  //        }
+
+  //        if (groupMembers.Count > 0)
+  //        {
+  //          await _repository.GroupMembers.BulkInsertAsync(groupMembers);
+  //        }
+  //        await _repository.Users.TransactionCommitAsync();
+
+  //        return usersDto;
+  //      }
+  //      else
+  //      {
+  //        return new UsersDto();
+  //      }
+  //    }
+  //    #endregion Update User
+  //  }
+  //  catch (Exception)
+  //  {
+  //    await _repository.Users.TransactionRollbackAsync();
+  //    throw;
+  //  }
+  //  finally
+  //  {
+  //    await _repository.Users.TransactionDisposeAsync();
+  //  }
+  //}
+
   public async Task<UsersDto> SaveUser(UsersDto usersDto)
   {
     var res = new UsersDto();
@@ -333,8 +484,6 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
     using var transaction = _repository.Users.TransactionBeginAsync();
     try
     {
-      List<GroupMember> groupMembers = new List<GroupMember>();
-
       #region New User
       if (usersDto.UserId == 0)
       {
@@ -355,9 +504,11 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
             Users objUsers = MyMapper.JsonClone<UsersDto, Users>(usersDto);
             usersDto.UserId = await _repository.Users.CreateAndGetIdAsync(objUsers);
 
+            // Create new GroupMember entities with the newly created UserId
+            List<GroupMember> groupMembers = new List<GroupMember>();
             foreach (var groupMember in usersDto.GroupMembers)
             {
-              groupMembers.Add(new GroupMember { GroupId = groupMember.GroupId, UserId = objUsers.UserId });
+              groupMembers.Add(new GroupMember { GroupId = groupMember.GroupId, UserId = (int)usersDto.UserId });
             }
 
             if (groupMembers.Count > 0)
@@ -384,17 +535,20 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
       #region Update User
       else
       {
-        //var objUserNewByLogInId = GetUserByLoginIdAndNotUserId(users.LoginId, users.UserId);
-        var objUserNewByLogInId = await _repository.Users.FirstOrDefaultAsync( x=> x.LoginId == usersDto.LoginId && x.UserId != usersDto.UserId);
+        var objUserNewByLogInId = await _repository.Users.FirstOrDefaultAsync(
+            x => x.LoginId == usersDto.LoginId && x.UserId != usersDto.UserId,
+            trackChanges: false);
 
         if (objUserNewByLogInId == null)
         {
-          //var objUserforDb = GetUserById(usersDto.UserId);
-          var objUserforDb = await _repository.Users.FirstOrDefaultAsync(x => x.UserId == usersDto.UserId);
+          var objUserforDb = await _repository.Users.FirstOrDefaultAsync(
+              x => x.UserId == usersDto.UserId,
+              trackChanges: false);
+
+          // Update user (same as before)
           objUserforDb.CompanyId = usersDto.CompanyId;
           objUserforDb.LoginId = usersDto.LoginId;
-          var encytpass = EncryptDecryptHelper.Encrypt(usersDto.Password);
-          objUserforDb.Password = encytpass;
+          objUserforDb.Password = EncryptDecryptHelper.Encrypt(usersDto.Password);
           objUserforDb.UserName = usersDto.UserName;
           objUserforDb.IsActive = usersDto.IsActive;
           objUserforDb.AccessParentCompany = usersDto.AccessParentCompany;
@@ -406,29 +560,37 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
             objUserforDb.FailedLoginNo = 0;
           }
 
-          var lastLoginDate = objUserforDb.LastLoginDate.HasValue && objUserforDb.LastLoginDate.Value != DateTime.MinValue
+          var lastLoginDate = objUserforDb.LastLoginDate.HasValue &&
+                             objUserforDb.LastLoginDate.Value != DateTime.MinValue
               ? objUserforDb.LastLoginDate
               : null;
 
           objUserforDb.LastLoginDate = lastLoginDate;
+
           _repository.Users.Update(objUserforDb);
+          await _repository.SaveAsync();
 
-          IEnumerable<GroupMember> groupMembersByUserId = await _repository.GroupMembers.GetListByIdsAsync(x => x.UserId == usersDto.UserId);
+          // ✅ Clear ChangeTracker
+          _repository.Users.ClearChangeTracker();
 
-          if (groupMembersByUserId.Count() > 0)
+          // ✅ Use Direct SQL to delete GroupMembers
+          string deleteSql = $"DELETE FROM GroupMembers WHERE UserId = {usersDto.UserId}";
+          _repository.GroupMembers.ExecuteNonQuery(deleteSql);
+
+          // ✅ Clear ChangeTracker again
+          _repository.GroupMembers.ClearChangeTracker();
+
+          // ✅ Insert new GroupMembers using Direct SQL
+          if (usersDto.GroupMembers != null && usersDto.GroupMembers.Any())
           {
-            _repository.GroupMembers.BulkDelete(groupMembersByUserId);
+            foreach (var gm in usersDto.GroupMembers)
+            {
+              string insertSql = $@"INSERT INTO GroupMembers (GroupId, UserId) 
+                                     VALUES ({gm.GroupId}, {usersDto.UserId})";
+              _repository.GroupMembers.ExecuteNonQuery(insertSql);
+            }
           }
 
-          foreach (var groupMember in usersDto.GroupMembers)
-          {
-            groupMembers.Add(new GroupMember { GroupId = groupMember.GroupId, UserId = (int)usersDto.UserId });
-          }
-
-          if (groupMembers.Count > 0)
-          {
-            await _repository.GroupMembers.BulkInsertAsync(groupMembers);
-          }
           await _repository.Users.TransactionCommitAsync();
 
           return usersDto;
@@ -450,6 +612,7 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
       await _repository.Users.TransactionDisposeAsync();
     }
   }
+
 
   private string ValidateUser(UsersDto users, SystemSettings objsystem)
   {

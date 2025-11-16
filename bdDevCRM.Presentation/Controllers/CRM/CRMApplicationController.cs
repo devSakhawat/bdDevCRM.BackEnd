@@ -1,4 +1,4 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Presentation.Controllers.BaseController;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
