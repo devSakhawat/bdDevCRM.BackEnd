@@ -1,153 +1,135 @@
-﻿
-using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Shared.DataTransferObjects.CRM;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
+/// <summary>
+/// Controller for managing currencies
+/// All methods require authentication via [AuthenticatedUser] attribute
+/// </summary>
+[AuthenticatedUser] // ✅ Controller-level authentication
 public class CurrencyController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _cache;
+
   public CurrencyController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
   {
     //_serviceManager = serviceManager;
     _cache = cache;
   }
 
+  /// <summary>
+  /// Retrieves all currencies for dropdown list
+  /// </summary>
+  /// <returns>List of currencies for dropdown</returns>
   [HttpGet(RouteConstants.CurrencyDDL)]
   public async Task<IActionResult> CurrencyDDL()
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-    {
-      return Unauthorized("Unauthorized attempt to get data!");
-    }
-    var userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    if (currentUser == null)
-    {
-      return Unauthorized("User not found in cache.");
-    }
-
+    // Execute business logic
     var res = await _serviceManager.Currencies.GetCurrenciesDDLAsync();
-    //return Ok(res);
+
+    // Return standardized response
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CurrencyDDL>>("No currency found"));
 
     return Ok(ResponseHelper.Success(res, "Currency retrieved successfully"));
   }
 
-  
+  /// <summary>
+  /// Retrieves paginated summary grid of currencies
+  /// </summary>
+  /// <param name="options">Grid options for pagination, sorting, and filtering</param>
+  /// <returns>Paginated grid of currencies</returns>
   [HttpPost(RouteConstants.CurrencySummary)]
   public async Task<IActionResult> CurrencySummary([FromBody] CRMGridOptions options)
   {
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    // Validate input parameters
+    if (options == null)
+      throw new NullModelBadRequestException("Grid options cannot be null");
+
+    // Execute business logic
     var currencySummary = await _serviceManager.Currencies.CurrecySummary(options);
-    return (currencySummary != null) ? Ok(currencySummary) : NoContent();
+
+    // Return standardized response
+    if (currencySummary == null || !currencySummary.Items.Any())
+      return Ok(ResponseHelper.NoContent<GridEntity<CurrencyDto>>("No data found"));
+
+    return Ok(ResponseHelper.Success(currencySummary, "Data retrieved successfully"));
   }
 
-
+  /// <summary>
+  /// Creates or updates a currency record
+  /// </summary>
+  /// <param name="key">Currency ID (0 for create, >0 for update)</param>
+  /// <param name="modelDto">Currency data</param>
+  /// <returns>Operation result message</returns>
   [HttpPost(RouteConstants.CreateOrUpdateCurrency)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> SaveOrUpdate([FromRoute] int key, [FromBody] CurrencyDto modelDto)
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-    {
-      return Unauthorized("UserId not found in token.");
-    }
-    var userId = Convert.ToInt32(userIdClaim);
-    // userId : which key is responsible to when cache was created.
-    // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-    {
-      return Unauthorized("User not found in cache.");
-    }
-    var res = await _serviceManager.Currencies.SaveOrUpdate(key,modelDto);
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
+    // Validate input parameters
+    if (modelDto == null)
+      throw new NullModelBadRequestException("Currency data cannot be null");
+
+    // Execute business logic
+    var res = await _serviceManager.Currencies.SaveOrUpdate(key, modelDto);
+
+    // Return standardized response
     if (res == OperationMessage.Success)
-    {
-      return Ok(res);
-    }
+      return Ok(ResponseHelper.Success(res, "Currency saved successfully"));
     else
-    {
-      return Conflict(res);
-    }
+      return Conflict(ResponseHelper.Conflict(res));
   }
 
-  //[HttpPut(RouteConstants.UpdateCurrency)]
-  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  //public async Task<IActionResult> UpdateCurrency([FromRoute] int key, [FromBody] WfActionDto modelDto)
-  //{
-  //  var userIdClaim = User.FindFirst("UserId")?.Value;
-  //  if (string.IsNullOrEmpty(userIdClaim))
-  //  {
-  //    return Unauthorized("UserId not found in token.");
-  //  }
-
-  //  var userId = Convert.ToInt32(userIdClaim);
-  //  // userId : which key is responsible to when cache was created.
-  //  // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
-  //  UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-  //  if (currentUser == null)
-  //  {
-  //    return Unauthorized("User not found in cache.");
-  //  }
-  //  var res = await _serviceManager.WfState.CreateActionAsync(modelDto);
-
-  //  if (res == OperationMessage.Success)
-  //  {
-  //    return Ok(res);
-  //  }
-  //  else
-  //  {
-  //    return Conflict(res);
-  //  }
-  //}
-
-
+  /// <summary>
+  /// Deletes a currency record
+  /// </summary>
+  /// <param name="key">Currency ID to delete</param>
+  /// <param name="modelDto">Currency data for validation</param>
+  /// <returns>Operation result message</returns>
   [HttpDelete(RouteConstants.DeleteCurrency)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> DeleteCurrency([FromRoute] int key, [FromBody] CurrencyDto modelDto)
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-    {
-      return Unauthorized("UserId not found in token.");
-    }
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    var userId = Convert.ToInt32(userIdClaim);
-    // userId : which key is responsible to when cache was created.
-    // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-    {
-      return Unauthorized("UnAuthorized attempted");
-    }
+    // Validate input parameters
+    if (key <= 0)
+      throw new IdParametersBadRequestException();
+
+    if (modelDto == null)
+      throw new NullModelBadRequestException("Currency data cannot be null");
+
+    // Execute business logic
     var res = await _serviceManager.Currencies.DeleteCurrency(key, modelDto);
 
+    // Return standardized response
     if (res == OperationMessage.Success)
-    {
-      return Ok(res);
-    }
+      return Ok(ResponseHelper.Success(res, "Currency deleted successfully"));
     else
-    {
-      return Conflict(res);
-    }
+      return Conflict(ResponseHelper.Conflict(res));
   }
-
-
-
-
-
-
 }

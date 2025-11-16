@@ -1,5 +1,6 @@
-using bdDevCRM.Entities.CRMGrid.GRID;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -28,8 +29,12 @@ public class CrmIntakeMonthController : BaseApiController
     if (key <= 0)
       throw new GenericBadRequestException("Invalid intake month ID. ID must be greater than 0.");
 
-    if (!TryGetLoggedInUser(out UsersDto currentUser))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
     if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
       throw new IdParametersBadRequestException();
@@ -48,8 +53,12 @@ public class CrmIntakeMonthController : BaseApiController
   [HttpGet(RouteConstants.IntakeMonthDDL)]
   public async Task<IActionResult> GetIntakeMonthsDDL()
   {
-    if (!TryGetLoggedInUser(out UsersDto currentUser))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
     if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
       throw new IdParametersBadRequestException();
@@ -65,17 +74,21 @@ public class CrmIntakeMonthController : BaseApiController
   //[HttpGet(RouteConstants.IntakeMonthDDL)]
   //public async Task<IActionResult> GetIntakeMonths()
   //{
-  //  if (!TryGetLoggedInUser(out UsersDto currentUser))
-  //    return Unauthorized("Unauthorized attempt to get data!");
-
+  //  // ✅ Get authenticated user from HttpContext
+  //  var currentUser = HttpContext.GetCurrentUser();
+  //  var userId = HttpContext.GetUserId();
+  //
+  //  if (currentUser == null)
+  //    return Unauthorized("User not found in cache.");
+  //
   //  if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
   //    throw new IdParametersBadRequestException();
-
+  //
   //  var intakeMonths = await _serviceManager.CrmIntakeMonths.GetIntakeMonthsAsync(trackChanges: false);
-
+  //
   //  if (intakeMonths == null || !intakeMonths.Any())
   //    return Ok(ResponseHelper.NoContent<IEnumerable<CrmIntakeMonthDto>>("No intake months found"));
-
+  //
   //  return Ok(ResponseHelper.Success(intakeMonths, "Intake months retrieved successfully"));
   //}
 
@@ -83,8 +96,12 @@ public class CrmIntakeMonthController : BaseApiController
   [ServiceFilter(typeof(LogActionAttribute))]
   public async Task<IActionResult> GetSummaryGrid([FromBody] CRMGridOptions options)
   {
-    if (!TryGetLoggedInUser(out UsersDto currentUser))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
     if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
       throw new IdParametersBadRequestException();
@@ -105,8 +122,12 @@ public class CrmIntakeMonthController : BaseApiController
   [ServiceFilter(typeof(LogActionAttribute))]
   public async Task<IActionResult> CreateIntakeMonth([FromBody] CrmIntakeMonthDto intakeMonthDto)
   {
-    if (!TryGetLoggedInUser(out UsersDto currentUser))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
     if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
       throw new IdParametersBadRequestException();
@@ -127,8 +148,12 @@ public class CrmIntakeMonthController : BaseApiController
   [ServiceFilter(typeof(LogActionAttribute))]
   public async Task<IActionResult> SaveOrUpdate(int key, [FromBody] CrmIntakeMonthDto intakeMonthDto)
   {
-    if (!TryGetLoggedInUser(out UsersDto currentUser))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
     if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
       throw new IdParametersBadRequestException();
@@ -148,8 +173,12 @@ public class CrmIntakeMonthController : BaseApiController
     if (key <= 0)
       throw new GenericBadRequestException("Invalid intake month ID. ID must be greater than 0.");
 
-    if (!TryGetLoggedInUser(out UsersDto currentUser))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
     if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
       throw new IdParametersBadRequestException();
@@ -168,8 +197,12 @@ public class CrmIntakeMonthController : BaseApiController
     if (key <= 0)
       throw new GenericBadRequestException("Invalid intake month ID. ID must be greater than 0.");
 
-    if (!TryGetLoggedInUser(out UsersDto currentUser))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
     if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
       throw new IdParametersBadRequestException();

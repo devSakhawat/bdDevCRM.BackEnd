@@ -5,15 +5,19 @@ using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
+/// <summary>
+/// Controller for managing CRM courses
+/// All methods require authentication via [AuthenticatedUser] attribute
+/// </summary>
+[AuthenticatedUser] // ✅ Controller-level authentication
 [ApiController]
 public class CRMCourseController : BaseApiController
 {
@@ -27,43 +31,47 @@ public class CRMCourseController : BaseApiController
   }
 
   // --------- 1. DDL --------------------------------------------------
+  /// <summary>
+  /// Retrieves all courses for dropdown list
+  /// </summary>
+  /// <returns>List of courses for dropdown</returns>
   [HttpGet(RouteConstants.CourseDDL)]
   public async Task<IActionResult> CourseDDL()
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
-
+    // Execute business logic
     var res = await _serviceManager.CrmCourses.GetCoursesDDLAsync(trackChanges: false);
+
+    // Return standardized response
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
 
     return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
   }
 
+  /// <summary>
+  /// Retrieves courses by institute ID for dropdown list
+  /// </summary>
+  /// <param name="instituteId">Institute ID</param>
+  /// <returns>List of courses for the specified institute</returns>
   [HttpGet(RouteConstants.CourseByInstituteIdDDL)]
   public async Task<IActionResult> CourseByInstituteIdDDL([FromRoute] int instituteId)
   {
-    // Parameter validation
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
+
+    // Validate input parameters
     if (instituteId <= 0)
-      throw new GenericBadRequestException("Invalid country ID. Country ID must be greater than 0.");
+      throw new GenericBadRequestException("Invalid institute ID. Institute ID must be greater than 0.");
 
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
-
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
-
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
-
+    // Execute business logic
     var res = await _serviceManager.CrmCourses.GetCourseByInstituteIdDDLAsync(instituteId, trackChanges: false);
+
+    // Return standardized response
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CRMCourseDDLDto>>("No course found"));
 
@@ -71,46 +79,56 @@ public class CRMCourseController : BaseApiController
   }
 
   // --------- 2. Summary Grid ----------------------------------------
+  /// <summary>
+  /// Retrieves paginated summary grid of courses
+  /// </summary>
+  /// <param name="options">Grid options for pagination, sorting, and filtering</param>
+  /// <returns>Paginated grid of courses</returns>
   [HttpPost(RouteConstants.CourseSummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
-
+    // Validate input parameters
     if (options == null)
-      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+      throw new NullModelBadRequestException("CRMGridOptions cannot be null");
 
+    // Execute business logic
     var summaryGrid = await _serviceManager.CrmCourses.SummaryGrid(options);
+
+    // Return standardized response
+    if (summaryGrid == null || !summaryGrid.Items.Any())
+      return Ok(ResponseHelper.NoContent<GridEntity<CrmCourseDto>>("No data found"));
+
     return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
+  /// <summary>
+  /// Creates a new course record
+  /// </summary>
+  /// <param name="modelDto">Course data to create</param>
+  /// <returns>Created course record</returns>
   [HttpPost(RouteConstants.CreateCourse)]
   [RequestSizeLimit(1_000_000)]
   public async Task<IActionResult> CreateNewRecord([FromBody] CrmCourseDto modelDto)
   {
     try
     {
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+      // ✅ Get authenticated user from HttpContext
+      var currentUser = HttpContext.GetCurrentUser();
+      var userId = HttpContext.GetUserId();
 
-      int userId = Convert.ToInt32(userIdClaim);
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
+      // Validate input parameters
       if (modelDto == null)
         return BadRequest(ResponseHelper.BadRequest("Course data is required"));
 
+      // Execute business logic
       CrmCourseDto res = await _serviceManager.CrmCourses.CreateNewRecordAsync(modelDto, currentUser);
 
+      // Validate result
       if (res.CourseId > 0)
         return Ok(ResponseHelper.Created(res, "Course created successfully"));
       else
@@ -123,23 +141,33 @@ public class CRMCourseController : BaseApiController
   }
 
   // --------- 4. Update ----------------------------------------------
+  /// <summary>
+  /// Updates an existing course record
+  /// </summary>
+  /// <param name="key">Course ID</param>
+  /// <param name="modelDto">Updated course data</param>
+  /// <returns>Operation result message</returns>
   [HttpPut(RouteConstants.UpdateCourse)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateCourse([FromRoute] int key, [FromBody] CrmCourseDto modelDto)
   {
     try
     {
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+      // ✅ Get authenticated user from HttpContext
+      var currentUser = HttpContext.GetCurrentUser();
+      var userId = HttpContext.GetUserId();
 
-      int userId = Convert.ToInt32(userIdClaim);
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+      // Validate input parameters
+      if (key <= 0)
+        throw new IdParametersBadRequestException();
 
+      if (modelDto == null)
+        throw new NullModelBadRequestException("Course data cannot be null");
+
+      // Execute business logic
       var res = await _serviceManager.CrmCourses.UpdateRecordAsync(key, modelDto, false);
 
+      // Return standardized response
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "Course updated successfully"));
       else
@@ -151,58 +179,34 @@ public class CRMCourseController : BaseApiController
     }
   }
 
-  //// --------- 5. Delete ----------------------------------------------
-  //[HttpDelete(RouteConstants.DeleteCourse)]
-  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  //public async Task<IActionResult> DeleteCourse([FromRoute] int key, [FromBody] CrmCourseDto modelDto)
-  //{
-  //  try
-  //  {
-  //    int userId = HttpContext.GetUserId();
-  //    var currentUser = HttpContext.GetCurrentUser();
-
-  //    var res = await _serviceManager.CrmCourses.DeleteRecordAsync(key, modelDto);
-
-  //    if (res == OperationMessage.Success)
-  //      return Ok(ResponseHelper.Success(res, "Course deleted successfully"));
-  //    else
-  //      return Conflict(ResponseHelper.Conflict(res));
-  //  }
-  //  catch (Exception)
-  //  {
-  //    throw;
-  //  }
-  //}
-
   // --------- 5. Delete ----------------------------------------------
+  /// <summary>
+  /// Deletes a course record
+  /// </summary>
+  /// <param name="key">Course ID to delete</param>
+  /// <param name="modelDto">Course data for validation</param>
+  /// <returns>Operation result message</returns>
   [HttpDelete(RouteConstants.DeleteCourse)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> DeleteCourse([FromRoute] int key, [FromBody] CrmCourseDto modelDto)
   {
     try
     {
-      // Parameter validation
+      // ✅ Get authenticated user from HttpContext
+      var currentUser = HttpContext.GetCurrentUser();
+      var userId = HttpContext.GetUserId();
+
+      // Validate input parameters
       if (key <= 0)
         return BadRequest(ResponseHelper.BadRequest("Invalid course ID. Course ID must be greater than 0."));
 
       if (modelDto == null)
         return BadRequest(ResponseHelper.BadRequest("Course data is required"));
 
-      // User authentication and validation
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
-
-      if (!int.TryParse(userIdClaim, out int userId))
-        return BadRequest(ResponseHelper.BadRequest("Invalid user ID format"));
-
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
-      // Delete operation
+      // Execute business logic
       var res = await _serviceManager.CrmCourses.DeleteRecordAsync(key, modelDto);
 
+      // Return standardized response
       if (res == OperationMessage.Success)
         return Ok(ResponseHelper.Success(res, "Course deleted successfully"));
       else

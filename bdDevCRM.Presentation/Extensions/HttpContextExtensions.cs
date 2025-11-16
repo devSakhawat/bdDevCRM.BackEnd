@@ -1,38 +1,31 @@
-using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace bdDevCRM.Presentation.Extensions
 {
-  public static class HttpContextExtensions
-  {
-    public static int GetUserId(this HttpContext context)
+    public static class HttpContextExtensions
     {
-      var userIdClaim = context.User?.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        throw new UnauthorizedAccessException("UserId not found in token.");
+        private const string CurrentUserKey = "CurrentUser";
+        private const string UserIdKey = "UserId";
 
-      if (!int.TryParse(userIdClaim, out var userId))
-        throw new UnauthorizedAccessException("Invalid UserId format in token.");
+        public static UsersDto? GetCurrentUser(this HttpContext context)
+        {
+            return context.Items[CurrentUserKey] as UsersDto;
+        }
 
-      return userId;
+        public static int GetUserId(this HttpContext context)
+        {
+            return context.Items[UserIdKey] is int userId ? userId : 0;
+        }
+
+        public static void SetCurrentUser(this HttpContext context, UsersDto user)
+        {
+            context.Items[CurrentUserKey] = user;
+        }
+
+        public static void SetUserId(this HttpContext context, int userId)
+        {
+            context.Items[UserIdKey] = userId;
+        }
     }
-
-    public static UsersDto GetCurrentUser(this HttpContext context)
-    {
-      var userId = context.GetUserId();
-      var serviceProvider = context.RequestServices;
-      var serviceManager = serviceProvider.GetService<IServiceManager>();
-
-      if (serviceManager == null)
-        throw new InvalidOperationException("ServiceManager not found in the service provider.");
-
-      var currentUser = serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        throw new UnauthorizedAccessException("User not found in cache.");
-
-      return currentUser;
-    }
-  }
 }

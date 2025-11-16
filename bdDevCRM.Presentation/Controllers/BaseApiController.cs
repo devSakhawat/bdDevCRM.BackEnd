@@ -10,105 +10,69 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
-#region Old_Code
-
 
 [Route(RouteConstants.BaseRoute)]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-//[AuthorizeUser]
+[EnableCors]
+// [AuthorizeUser]
 // [ServiceFilter(typeof(LogActionAttribute))]
 // [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
-[EnableCors]
 public class BaseApiController : ControllerBase
 {
-  // Inject IServiceManager here
-  protected readonly IServiceManager _serviceManager; // Use 'protected' to make it accessible in derived classes
+    protected readonly IServiceManager _serviceManager;
 
-  // The constructor for BaseApiController now needs IServiceManager
-  public BaseApiController(IServiceManager serviceManager)
-  {
-    _serviceManager = serviceManager;
-  }
-
-  // ---------- Helper Method for Logged-in User ------------------------------------------------
-  protected bool TryGetLoggedInUser(out UsersDto currentUser)
-  {
-    currentUser = null!; // Initialize currentUser to null
-
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
+    public BaseApiController(IServiceManager serviceManager)
     {
-      // Log for debugging if necessary: _serviceManager.Logger.LogWarning("UserId claim not found in token.");
-      return false;
+        _serviceManager = serviceManager;
     }
 
-    if (!int.TryParse(userIdClaim, out int userId))
+    // Centralized method to get authenticated user
+    protected UsersDto GetAuthenticatedUser()
     {
-      // Log for debugging if necessary: _serviceManager.Logger.LogError($"Invalid UserId claim format: {userIdClaim}");
-      return false;
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim))
+            throw new GenericUnauthorizedException("User authentication required.");
+
+        if (!int.TryParse(userIdClaim, out int userId))
+            throw new GenericBadRequestException("Invalid user ID format.");
+
+        UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+
+        if (currentUser == null)
+            throw new GenericUnauthorizedException("User session expired.");
+
+        return currentUser;
     }
 
-    try
+    // OPTIONAL: Get User ID only (without full user object)
+    protected int GetAuthenticatedUserId()
     {
-      currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      return currentUser != null;
-    }
-    catch (UnauthorizedAccessCRMException ex) // Catch your specific unauthorized exception if GetCache throws it
-    {
-      // Log this exception: _serviceManager.Logger.LogError($"User not found in cache or session expired: {ex.Message}");
-      return false;
-    }
-    catch (Exception ex)
-    {
-      // Log any other unexpected errors during cache retrieval
-      // _serviceManager.Logger.LogError($"An unexpected error occurred while retrieving user from cache: {ex.Message}");
-      return false;
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim))
+            throw new GenericUnauthorizedException("User authentication required.");
+
+        if (!int.TryParse(userIdClaim, out int userId))
+            throw new GenericBadRequestException("Invalid user ID format.");
+
+        return userId;
     }
 
-  }
+    // OPTIONAL: Try-pattern for scenarios where user might not exist
+    protected bool TryGetAuthenticatedUser(out UsersDto? currentUser)
+    {
+        currentUser = null;
+
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            return false;
+
+        if (!int.TryParse(userIdClaim, out int userId))
+            return false;
+
+        currentUser = _serviceManager.GetCache<UsersDto>(userId);
+        return currentUser != null;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//using Microsoft.AspNetCore.Mvc;
-
-//namespace bdDevCRM.Presentation.Controllers;
-
-//using bdDevCRM.Presentation.ActionFIlters;
-//using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-//using bdDevCRM.Utilities.Constants;
-//using Microsoft.AspNetCore.Authentication.JwtBearer;
-//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Cors;
-//using Microsoft.AspNetCore.Mvc;
-
-//[Route(RouteConstants.BaseRoute)]
-//[ApiController]
-//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-////[ServiceFilter(typeof(LogActionAttribute))]
-////[ServiceFilter(typeof(ValidateMediaTypeAttribute))]
-//[EnableCors]
-//public class BaseApiController : ControllerBase
-//{
-
-//}
-
-
-#endregion Old_Code
