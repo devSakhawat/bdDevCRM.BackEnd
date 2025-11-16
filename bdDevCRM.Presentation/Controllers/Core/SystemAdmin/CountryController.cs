@@ -7,6 +7,7 @@ using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
