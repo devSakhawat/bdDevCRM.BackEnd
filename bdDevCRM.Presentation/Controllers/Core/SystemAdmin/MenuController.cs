@@ -1,9 +1,9 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +28,7 @@ public class MenuController : BaseApiController
     [HttpGet(RouteConstants.SelectMenuByUserPermission)]
     //[Produces("application/json")]
     [ResponseCache(Duration = 300)] // Browser caching for 5 minutes
-                                    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> SelectMenuByUserPermission()
     {
         var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -118,7 +118,11 @@ public class MenuController : BaseApiController
     public async Task<IActionResult> GetMenuSummary([FromBody] CRMGridOptions options)
     {
         var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
-        return (menuSummary != null) ? Ok(menuSummary) : NoContent();
+
+        if (menuSummary == null)
+            return Ok(ResponseHelper.NoContent<GridEntity<MenuDto>>("No data found!"));
+
+        return Ok(ResponseHelper.Success(menuSummary, "Menu summary retrieved successfully"));
     }
 
 
