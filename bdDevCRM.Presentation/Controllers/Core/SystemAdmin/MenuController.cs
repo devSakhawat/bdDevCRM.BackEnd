@@ -128,7 +128,7 @@ public class MenuController : BaseApiController
 
     [HttpPost(RouteConstants.CreateMenu)]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> SaveMenu([FromBody] MenuDto modelDto)
+    public async Task<IActionResult> CreateMenu([FromBody] MenuDto modelDto)
     {
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (string.IsNullOrEmpty(userIdClaim))
