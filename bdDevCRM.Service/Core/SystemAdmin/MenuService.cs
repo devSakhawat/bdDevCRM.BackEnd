@@ -66,7 +66,7 @@ internal sealed class MenuService : IMenuService
 
   public async Task<GridEntity<MenuDto>> MenuSummary(bool trackChanges, CRMGridOptions options)
   {
-    string menuSummaryQuery = $"Select MenuId,Menu.ModuleId, MenuName, MenuPath, ISNULL(ParentMenu, 0) as ParentMenu ,ModuleName,ToDo,SORORDER\r\n,(Select MenuName from Menu mn where mn.MenuId = menu.ParentMenu) as ParentMenuName \r\nfrom Menu \r\nleft outer join Module on module.ModuleId = menu.ModuleId";
+    string menuSummaryQuery = $"Select MenuId,Menu.ModuleId, MenuName, MenuPath, ISNULL(ParentMenu, 0) as ParentMenu ,ModuleName,ToDo,SORORDER\r\n,(Select MenuName from Menu mn where mn.MenuId = menu.ParentMenu) as ParentMenuName ,IsActive \r\nfrom Menu \r\nleft outer join Module on module.ModuleId = menu.ModuleId";
     string orderBy = "ModuleName asc,ParentMenu asc, MenuName";
 
     var gridEntity = await _repository.Menus.GridData<MenuDto>(menuSummaryQuery, options, orderBy, "");
@@ -213,15 +213,31 @@ internal sealed class MenuService : IMenuService
     return modelDto;
   }
 
-  public async Task DeleteAsync(int key, MenuDto modelDto)
+  //public async Task DeleteAsync(int key, MenuDto modelDto)
+  //{
+  //  if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
+  //  if (key != modelDto.MenuId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
+
+  //  Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == key, trackChanges: false);
+  //  if (entity == null) throw new GenericNotFoundException(new MenuDto().GetType().Name.ToString(), "MenuId", key.ToString());
+
+  //  await _repository.Menus.DeleteAsync(x => x.MenuId == modelDto.MenuId, trackChanges: true);
+  //  await _repository.SaveAsync();
+  //}
+
+  public async Task DeleteAsync(int key)
   {
-    if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
-    if (key != modelDto.MenuId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
+    if (key <= 0)
+      throw new ArgumentOutOfRangeException(nameof(key), "Menu ID must be a positive integer.");
 
     Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == key, trackChanges: false);
-    if (entity == null) throw new GenericNotFoundException(new MenuDto().GetType().Name.ToString(), "MenuId", key.ToString());
+    if (entity == null)
+      throw new GenericNotFoundException("Menu", "MenuId", key.ToString());
 
-    await _repository.Menus.DeleteAsync(x => x.MenuId == modelDto.MenuId, trackChanges: true);
+    // Soft delete - set IsActive to 0
+    entity.IsActive = 0;
+
+    _repository.Menus.UpdateByState(entity);
     await _repository.SaveAsync();
   }
 

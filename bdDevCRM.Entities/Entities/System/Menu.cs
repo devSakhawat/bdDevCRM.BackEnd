@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace bdDevCRM.Entities.Entities.System;
+﻿namespace bdDevCRM.Entities.Entities.System;
 
 public partial class Menu
 {
@@ -18,4 +15,5 @@ public partial class Menu
     public int? Sororder { get; set; }
 
     public int? Todo { get; set; }
+    public int? IsActive { get; set; }
 }

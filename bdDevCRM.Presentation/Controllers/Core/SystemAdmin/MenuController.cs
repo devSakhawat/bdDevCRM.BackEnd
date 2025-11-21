@@ -179,16 +179,34 @@ public class MenuController : BaseApiController
         return Ok(ResponseHelper.Updated(returnData, "Menu created successfully."));
     }
 
+    //[HttpDelete(RouteConstants.DeleteMenu)]
+    ////[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //public async Task<IActionResult> DeleteMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
+    //{
+    //    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    //    await _serviceManager.Menus.DeleteAsync(key, modelDto);
+    //    return Ok("Success");
+    //}
+
     [HttpDelete(RouteConstants.DeleteMenu)]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> DeleteMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> DeleteMenu([FromRoute] int key)
     {
-        var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            throw new GenericUnauthorizedException("User authentication required.");
 
-        await _serviceManager.Menus.DeleteAsync(key, modelDto);
-        return Ok("Success");
+        if (!int.TryParse(userIdClaim, out int userId))
+            throw new GenericBadRequestException("Invalid user ID format.");
+
+        UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+        if (currentUser == null)
+            throw new GenericUnauthorizedException("User session expired.");
+
+        await _serviceManager.Menus.DeleteAsync(key);
+        return Ok(ResponseHelper.Success("Menu deleted successfully."));
     }
-
 
 
 
