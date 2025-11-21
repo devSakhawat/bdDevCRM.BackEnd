@@ -2,6 +2,7 @@
 using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.Controllers.BaseController;
+using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
@@ -12,453 +13,466 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Shared.Exceptions.BaseException;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using Microsoft.Extensions.Caching.Memory;
-using System;
 
+namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
+
+/// <summary>
+/// Controller for managing workflow statuses and actions
+/// All methods require authentication via [AuthenticatedUser] attribute
+/// </summary>
+[AuthenticatedUser] // ✅ Controller-level authentication
 public class StatusController : BaseApiController
 {
-  //private readonly IServiceManager _serviceManager;
-  private readonly IMemoryCache _cache;
+    private readonly IMemoryCache _cache;
 
-  public StatusController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
-  {
-    //_serviceManager = serviceManager;
-    _cache = cache;
-  }
-
-  /// <summary>
-  /// 
-  /// </summary>
-  /// <param name="menuId"></param>
-  /// <returns></returns>
-  /// <exception cref="GenericUnauthorizedException"></exception>
-  /// <exception cref="GenericBadRequestException"></exception>
-  [HttpGet(RouteConstants.StatusByMenuId)]
-  //[AllowAnonymous]
-  public async Task<IActionResult> StatusByMenuId([FromRoute] int menuId)
-  {
-    //var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    //if (menuId == 0 || menuId == null) throw new IdParametersBadRequestException();
-
-    //IEnumerable<WfStateDto> groupPermissions = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
-    //return Ok(groupPermissions);
-
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
-
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
-
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
-
-    if (!currentUser.UserId.HasValue)
-      throw new GenericBadRequestException("Valid UserId is required.");
-
-    var res = await _serviceManager.WfState.StatusByMenuId(menuId, trackChanges: false);
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<WfStateDto>>("No data found!"));
-
-    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
-
-  }
-
-
-  [HttpGet(RouteConstants.ActionsByStatusIdForGroup)]
-  //[AllowAnonymous]
-  public async Task<IActionResult> ActionsByStatusIdForGroup([FromQuery] int statusId)
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    if (statusId == 0 || statusId == null) throw new IdParametersBadRequestException();
-
-    IEnumerable<WfActionDto> groupPermissions = await _serviceManager.WfState.ActionsByStatusIdForGroup(statusId, trackChanges: false);
-    return Ok(groupPermissions);
-  }
-
-  #region WorkFlow start
-  [HttpPost(RouteConstants.WorkFlowSummary)]
-  public async Task<IActionResult> GetWorkFlowSummary([FromBody] CRMGridOptions options)
-  {
-    //int userId = HttpContext.GetUserId();
-    //var currentUser = HttpContext.GetCurrentUser();
-
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
-
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
-
-    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null) throw new IdParametersBadRequestException();
-    var summaryGrid = await _serviceManager.WfState.WorkflowSummary(trackChanges: false, options);
-    if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<WfStateDto>>("No data found"));
-
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
-  }
-
-  #region Old_Code
-  //[HttpPost(RouteConstants.CreateWorkFlow)]
-  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  //public async Task<IActionResult> SaveState([FromBody] WfStateDto modelDto)
-  //{
-  //  var userIdClaim = User.FindFirst("UserId")?.Value;
-  //  if (string.IsNullOrEmpty(userIdClaim))
-  //  {
-  //    return Unauthorized("UserId not found in token.");
-  //  }
-  //  var userId = Convert.ToInt32(userIdClaim);
-  //  // userId : which key is responsible to when cache was created.
-  //  // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
-  //  UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-  //  if (currentUser == null)
-  //  {
-  //    return Unauthorized("User not found in cache.");
-  //  }
-  //  var res = await _serviceManager.WfState.SaveWorkflow(modelDto);
-
-  //  if (res == OperationMessage.Success)
-  //  {
-  //    return Ok(res);
-  //  }
-  //  else
-  //  {
-  //    return Conflict(res);
-  //  }
-  //}
-
-
-  //[HttpPost(RouteConstants.UpdateWorkFlow)]
-  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  //public async Task<IActionResult> UpdateWorkFlow([FromRoute] int key, [FromBody] WfStateDto modelDto)
-  //{
-  //  var userIdClaim = User.FindFirst("UserId")?.Value;
-  //  if (string.IsNullOrEmpty(userIdClaim))
-  //  {
-  //    return Unauthorized("UserId not found in token.");
-  //  }
-  //  var userId = Convert.ToInt32(userIdClaim);
-  //  // userId : which key is responsible to when cache was created.
-  //  // get user from cache. if cache is not found by key then it will throw Unauthorized exception with 401 status code.
-  //  UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-  //  if (currentUser == null)
-  //  {
-  //    return Unauthorized("User not found in cache.");
-  //  }
-  //  var res = await _serviceManager.WfState.SaveWorkflow(modelDto);
-
-  //  if (res == OperationMessage.Success)
-  //  {
-  //    return Ok(res);
-  //  }
-  //  else
-  //  {
-  //    return Conflict(res);
-  //  }
-  //}
-
-  #endregion Old_Code
-
-  // --------- 3. Create ----------------------------------------------
-
-  [HttpPost(RouteConstants.CreateWorkFlow)]
-  [RequestSizeLimit(1_000_000)]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> CreateWorkFlow([FromBody] WfStateDto modelDto)
-  {
-    try
+    public StatusController(IServiceManager serviceManager, IMemoryCache cache) 
+        : base(serviceManager)
     {
-      if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Status data is required"));
-
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
-
-      int userId = Convert.ToInt32(userIdClaim);
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
-      if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Status data is required"));
-
-      WfStateDto res = await _serviceManager.WfState.CreateNewRecordAsync(modelDto, currentUser);
-
-      if (res.WfStateId > 0)
-        return Ok(ResponseHelper.Created(res, "Status created successfully"));
-      else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create data."));
+        _cache = cache;
     }
-    catch (System.Text.Json.JsonException)
+
+    /// <summary>
+    /// Retrieves workflow statuses by menu ID
+    /// </summary>
+    /// <param name="menuId">Menu ID</param>
+    /// <returns>List of workflow statuses</returns>
+    [HttpGet(RouteConstants.StatusByMenuId)]
+    public async Task<IActionResult> StatusByMenuId([FromQuery] int menuId)
     {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in workflow data."));
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate input parameters
+        if (menuId <= 0)
+            throw new IdParametersBadRequestException();
+
+        // Execute business logic
+        var groupPermissions = await _serviceManager.WfState.StatusByMenuId(
+            menuId, trackChanges: false);
+
+        // Return standardized response
+        if (groupPermissions == null || !groupPermissions.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<WfStateDto>>(
+                "No statuses found for this menu"));
+
+        return Ok(ResponseHelper.Success(groupPermissions, 
+            "Statuses retrieved successfully"));
     }
-  }
 
-
-  // --------- Update ----------------------------------------------
-  [HttpPut(RouteConstants.UpdateWorkFlow)]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> UpdateWorkFlow([FromRoute] int key, [FromBody] WfStateDto modelDto)
-  {
-    try
+    /// <summary>
+    /// Retrieves workflow actions by status ID for group
+    /// </summary>
+    /// <param name="statusId">Status ID</param>
+    /// <returns>List of workflow actions</returns>
+    [HttpGet(RouteConstants.ActionsByStatusIdForGroup)]
+    public async Task<IActionResult> ActionsByStatusIdForGroup([FromQuery] int statusId)
     {
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-      int userId = Convert.ToInt32(userIdClaim);
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+        // Validate input parameters
+        if (statusId <= 0)
+            throw new IdParametersBadRequestException();
 
-      var res = await _serviceManager.WfState.UpdateRecordAsync(key, modelDto, false, currentUser);
+        // Execute business logic
+        var groupPermissions = await _serviceManager.WfState
+            .ActionsByStatusIdForGroup(statusId, trackChanges: false);
 
-      if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Record updated successfully"));
-      else
-        return Conflict(ResponseHelper.Conflict(res));
+        // Return standardized response
+        if (groupPermissions == null || !groupPermissions.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<WfActionDto>>(
+                "No actions found for this status"));
+
+        return Ok(ResponseHelper.Success(groupPermissions, 
+            "Actions retrieved successfully"));
     }
-    catch (Exception)
+
+    #region WorkFlow Management
+
+    /// <summary>
+    /// Retrieves paginated workflow summary grid
+    /// </summary>
+    /// <param name="options">Grid options</param>
+    /// <returns>Paginated workflow grid</returns>
+    [HttpPost(RouteConstants.WorkFlowSummary)]
+    public async Task<IActionResult> GetWorkFlowSummary([FromBody] CRMGridOptions options)
     {
-      throw;
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate user data
+        if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
+            throw new IdParametersBadRequestException();
+
+        // Validate input parameters
+        if (options == null)
+            throw new NullModelBadRequestException("Grid options cannot be null");
+
+        // Execute business logic
+        var summaryGrid = await _serviceManager.WfState.WorkflowSummary(
+            trackChanges: false, options);
+
+        // Return standardized response
+        if (summaryGrid == null || !summaryGrid.Items.Any())
+            return Ok(ResponseHelper.NoContent<GridEntity<WfStateDto>>(
+                "No workflow data found"));
+
+        return Ok(ResponseHelper.Success(summaryGrid, 
+            "Workflow data retrieved successfully"));
     }
-  }
 
-  [HttpPost(RouteConstants.CreateAction)]
-  [RequestSizeLimit(1_000_000)]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> CreateAction([FromBody] WfActionDto modelDto)
-  {
-    // Authentication check
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new UnauthorizedException("User authentication required");
-
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new UnauthorizedException("User session expired");
-
-    modelDto.WfActionId = 0;
-
-    WfActionDto result = await _serviceManager.WfState.CreateWfActionNewRecordAsync(modelDto, currentUser, false);
-
-    return Ok(ResponseHelper.Created(result, "Action created successfully"));
-  }
-
-  [HttpPut(RouteConstants.UpdateAction)]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> UpdateAction([FromRoute] int key, [FromBody] WfActionDto modelDto)
-  {
-    // Authentication check
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new UnauthorizedException("User authentication required");
-
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new UnauthorizedException("User session expired");
-
-    // Key validation
-    if (key <= 0)
-      throw new BadRequestException("Valid action ID is required");
-
-    modelDto.WfActionId = key;
-
-    string result = await _serviceManager.WfState.UpdateWfActionRecordAsync(key, modelDto, currentUser, false);
-
-    if (result == OperationMessage.Success)
-      return Ok(ResponseHelper.Updated(result, "Action updated successfully"));
-    else
-      throw new GenericConflictException(result);
-  }
-
-
-  [HttpDelete(RouteConstants.DeleteAction)]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> DeleteAction([FromRoute] int key, [FromBody] WfActionDto modelDto)
-  {
-    // Authentication check
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new UnauthorizedException("User authentication required");
-
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new UnauthorizedException("User session expired");
-
-    // Key validation
-    if (key <= 0)
-      throw new BadRequestException("Valid action ID is required");
-
-    // Ensure ID consistency
-    modelDto.WfActionId = key;
-
-    string result = await _serviceManager.WfState.DeleteAction(key, modelDto);
-
-    return Ok(ResponseHelper.Success(result, "Action deleted successfully"));
-  }
-
-  [HttpGet(RouteConstants.GetNextStatesByMenu)]
-  public async Task<IActionResult> GetNextStatesByMenu([FromQuery] int menuId)
-  {
-    try
+    /// <summary>
+    /// Creates a new workflow status
+    /// </summary>
+    /// <param name="modelDto">Workflow status data</param>
+    /// <returns>Created workflow status</returns>
+    [HttpPost(RouteConstants.CreateWorkFlow)]
+    [RequestSizeLimit(1_000_000)]
+    [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+    public async Task<IActionResult> CreateWorkFlow([FromBody] WfStateDto modelDto)
     {
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-      int userId = Convert.ToInt32(userIdClaim);
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+        // Validate input parameters
+        if (modelDto == null)
+            return BadRequest(ResponseHelper.BadRequest("Status data is required"));
 
-      if (menuId <= 0)
-        return BadRequest(ResponseHelper.BadRequest("Valid menu ID is required"));
+        try
+        {
+            // Execute business logic
+            WfStateDto res = await _serviceManager.WfState
+                .CreateNewRecordAsync(modelDto, currentUser);
 
-      var res = await _serviceManager.WfState.GetNextStatesByMenu(menuId);
-
-      if (res != null && res.Any())
-        return Ok(ResponseHelper.Success(res, "Next states retrieved successfully"));
-      else
-        return Ok(ResponseHelper.NoContent<IEnumerable<WfStateDto>>("No next states found for this menu"));
+            // Return standardized response
+            if (res.WfStateId > 0)
+                return Ok(ResponseHelper.Created(res, 
+                    "Workflow status created successfully"));
+            else
+                return StatusCode(500, ResponseHelper.InternalServerError(
+                    "Failed to create workflow status"));
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return BadRequest(ResponseHelper.BadRequest(
+                "Invalid JSON format in workflow data"));
+        }
     }
-    catch (Exception)
+
+    /// <summary>
+    /// Updates an existing workflow status
+    /// </summary>
+    /// <param name="key">Workflow status ID</param>
+    /// <param name="modelDto">Updated workflow status data</param>
+    /// <returns>Operation result</returns>
+    [HttpPut(RouteConstants.UpdateWorkFlow)]
+    [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+    public async Task<IActionResult> UpdateWorkFlow(
+        [FromRoute] int key, 
+        [FromBody] WfStateDto modelDto)
     {
-      return StatusCode(500, ResponseHelper.InternalServerError("An error occurred while retrieving next states"));
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate input parameters
+        if (key <= 0)
+            throw new IdParametersBadRequestException();
+
+        if (modelDto == null)
+            throw new NullModelBadRequestException("Workflow status data cannot be null");
+
+        // Execute business logic
+        var res = await _serviceManager.WfState.UpdateRecordAsync(
+            key, modelDto, false, currentUser);
+
+        // Return standardized response
+        if (res == OperationMessage.Success)
+            return Ok(ResponseHelper.Success(res, 
+                "Workflow status updated successfully"));
+        else
+            return Conflict(ResponseHelper.Conflict(res));
     }
-  }
 
-
-  [HttpPost(RouteConstants.GetActionSummaryByStatusId)]
-  public async Task<IActionResult> GetActionByStatusId([FromBody] CRMGridOptions options, [FromQuery] int stateId)
-  {
-    try
+    /// <summary>
+    /// Deletes a workflow status
+    /// </summary>
+    /// <param name="key">Workflow status ID</param>
+    /// <param name="modelDto">Workflow status data</param>
+    /// <returns>Operation result</returns>
+    [HttpDelete(RouteConstants.DeleteWorkFlow)]
+    public async Task<IActionResult> DeleteWorkFlow(
+        [FromRoute] int key, 
+        [FromBody] WfStateDto modelDto)
     {
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-      int userId = Convert.ToInt32(userIdClaim);
-      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-      if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+        // Validate input parameters
+        if (key <= 0 || key != modelDto.WfStateId)
+            throw new BadRequestException("Valid workflow status ID is required");
 
-      if (stateId <= 0)
-        return BadRequest(ResponseHelper.BadRequest("Valid state ID is required"));
+        // Execute business logic
+        string result = await _serviceManager.WfState.DeleteWorkflow(key);
 
-      if (options == null)
-        return BadRequest(ResponseHelper.BadRequest("Grid options are required"));
-
-      var res = await _serviceManager.WfState.GetActionByStatusId(stateId, options);
-
-      if (res != null && res.Items.Any())
-        return Ok(ResponseHelper.Success(res, "Actions retrieved successfully"));
-      else
-        return Ok(ResponseHelper.NoContent<GridEntity<WfActionDto>>("No actions found for this status"));
+        // Return standardized response
+        return Ok(ResponseHelper.Success(result, 
+            "Workflow status deleted successfully"));
     }
-    catch (Exception)
+
+    #endregion WorkFlow Management
+
+    #region Workflow Actions
+
+    /// <summary>
+    /// Creates a new workflow action
+    /// </summary>
+    /// <param name="modelDto">Workflow action data</param>
+    /// <returns>Created workflow action</returns>
+    [HttpPost(RouteConstants.CreateAction)]
+    [RequestSizeLimit(1_000_000)]
+    [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+    public async Task<IActionResult> CreateAction([FromBody] WfActionDto modelDto)
     {
-      return StatusCode(500, ResponseHelper.InternalServerError("An error occurred while retrieving actions"));
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate input parameters
+        if (modelDto == null)
+            throw new NullModelBadRequestException("Action data cannot be null");
+
+        modelDto.WfActionId = 0;
+
+        // Execute business logic
+        WfActionDto result = await _serviceManager.WfState
+            .CreateWfActionNewRecordAsync(modelDto, currentUser, false);
+
+        // Return standardized response
+        return Ok(ResponseHelper.Created(result, 
+            "Workflow action created successfully"));
     }
-  }
-  #endregion WorkFlow end
 
+    /// <summary>
+    /// Updates an existing workflow action
+    /// </summary>
+    /// <param name="key">Workflow action ID</param>
+    /// <param name="modelDto">Updated workflow action data</param>
+    /// <returns>Operation result</returns>
+    [HttpPut(RouteConstants.UpdateAction)]
+    [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+    public async Task<IActionResult> UpdateAction(
+        [FromRoute] int key, 
+        [FromBody] WfActionDto modelDto)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-  [HttpGet(RouteConstants.StatusByMenuNUserId)]
-  public async Task<IActionResult> StatusByMenuNUserId()
-  {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
+        // Validate input parameters
+        if (key <= 0)
+            throw new BadRequestException("Valid action ID is required");
 
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
+        if (modelDto == null)
+            throw new NullModelBadRequestException("Action data cannot be null");
 
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
+        modelDto.WfActionId = key;
 
-    //var menu = ManageMenu.GetAsync(this, _serviceManager).GetAwaiter().GetResult();
-    // Prefer await over GetAwaiter().GetResult()
-    var menu = await ManageMenu.GetAsync(this, _serviceManager);
+        // Execute business logic
+        string result = await _serviceManager.WfState
+            .UpdateWfActionRecordAsync(key, modelDto, currentUser, false);
 
-    if (!menu.MenuId.HasValue)
-      throw new GenericBadRequestException("Valid MenuId is required.");
+        // Return standardized response
+        if (result == OperationMessage.Success)
+            return Ok(ResponseHelper.Updated(result, 
+                "Workflow action updated successfully"));
+        else
+            throw new GenericConflictException(result);
+    }
 
-    if (!currentUser.UserId.HasValue)
-      throw new GenericBadRequestException("Valid UserId is required.");
-    // menu.MenuId and currentUser.UserId are nullable so we use .Value after checking HasValue
-    var res = await _serviceManager.WfState.GetWFStateByUserPermission(menu.MenuId.Value, currentUser.UserId.Value);
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
+    /// <summary>
+    /// Deletes a workflow action
+    /// </summary>
+    /// <param name="key">Workflow action ID</param>
+    /// <param name="modelDto">Workflow action data</param>
+    /// <returns>Operation result</returns>
+    [HttpDelete(RouteConstants.DeleteAction)]
+    [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+    public async Task<IActionResult> DeleteAction(
+        [FromRoute] int key, 
+        [FromBody] WfActionDto modelDto)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
-  }
+        // Validate input parameters
+        if (key <= 0)
+            throw new BadRequestException("Valid action ID is required");
 
+        if (modelDto == null)
+            throw new NullModelBadRequestException("Action data cannot be null");
 
-  [HttpGet(RouteConstants.StatusByMenuName)]
-  public async Task<IActionResult> StatusByMenuName([FromBody] string menuName)
-  {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
+        modelDto.WfActionId = key;
 
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
+        // Execute business logic
+        string result = await _serviceManager.WfState.DeleteAction(key, modelDto);
 
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
+        // Return standardized response
+        return Ok(ResponseHelper.Success(result, 
+            "Workflow action deleted successfully"));
+    }
 
-    //var menu = ManageMenu.GetAsync(this, _serviceManager).GetAwaiter().GetResult();
-    // Prefer await over GetAwaiter().GetResult()
-    var menu = await ManageMenu.CheckByMenuName(this, menuName ,_serviceManager);
+    /// <summary>
+    /// Retrieves paginated action summary by status ID
+    /// </summary>
+    /// <param name="options">Grid options</param>
+    /// <param name="stateId">State ID</param>
+    /// <returns>Paginated action grid</returns>
+    [HttpPost(RouteConstants.GetActionSummaryByStatusId)]
+    public async Task<IActionResult> GetActionByStatusId(
+        [FromBody] CRMGridOptions options, 
+        [FromQuery] int stateId)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    if (!menu.MenuId.HasValue)
-      throw new GenericBadRequestException("Valid MenuId is required.");
+        // Validate input parameters
+        if (stateId <= 0)
+            return BadRequest(ResponseHelper.BadRequest("Valid state ID is required"));
 
-    if (!currentUser.UserId.HasValue)
-      throw new GenericBadRequestException("Valid UserId is required.");
-    // menu.MenuId and currentUser.UserId are nullable so we use .Value after checking HasValue
+        if (options == null)
+            return BadRequest(ResponseHelper.BadRequest("Grid options are required"));
 
+        // Execute business logic
+        var res = await _serviceManager.WfState.GetActionByStatusId(stateId, options);
 
-    var res = await _serviceManager.WfState.GetWFStateByUserPermission(menu.MenuId.Value, currentUser.UserId.Value);
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
+        // Return standardized response
+        if (res != null && res.Items.Any())
+            return Ok(ResponseHelper.Success(res, 
+                "Workflow actions retrieved successfully"));
+        else
+            return Ok(ResponseHelper.NoContent<GridEntity<WfActionDto>>(
+                "No actions found for this status"));
+    }
 
-    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
-  }
+    #endregion Workflow Actions
 
-  [HttpDelete(RouteConstants.DeleteWorkFlow)]
-  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> DeleteWorkFlow([FromRoute] int key, [FromBody] WfStateDto modelDto)
-  {
-    // Authentication check
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new UnauthorizedException("User authentication required");
+    #region Next States
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new UnauthorizedException("User session expired");
+    /// <summary>
+    /// Retrieves next states by menu ID
+    /// </summary>
+    /// <param name="menuId">Menu ID</param>
+    /// <returns>List of next states</returns>
+    [HttpGet(RouteConstants.GetNextStatesByMenu)]
+    public async Task<IActionResult> GetNextStatesByMenu([FromQuery] int menuId)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    // Key validation
-    if (key <= 0 && key != modelDto.WfStateId)
-      throw new BadRequestException("Valid workflow status ID is required");
+        // Validate input parameters
+        if (menuId <= 0)
+            return BadRequest(ResponseHelper.BadRequest("Valid menu ID is required"));
 
-    string result = await _serviceManager.WfState.DeleteWorkflow(key);
+        // Execute business logic
+        var res = await _serviceManager.WfState.GetNextStatesByMenu(menuId);
 
-    // If we reach here, deletion was successful
-    return Ok(ResponseHelper.Success(result, "Workflow status deleted successfully"));
-  }
+        // Return standardized response
+        if (res != null && res.Any())
+            return Ok(ResponseHelper.Success(res, 
+                "Next states retrieved successfully"));
+        else
+            return Ok(ResponseHelper.NoContent<IEnumerable<WfStateDto>>(
+                "No next states found for this menu"));
+    }
+
+    #endregion Next States
+
+    #region Status By Menu and User
+
+    /// <summary>
+    /// Retrieves workflow statuses by menu and current user
+    /// </summary>
+    /// <returns>List of workflow statuses</returns>
+    [HttpGet(RouteConstants.StatusByMenuNUserId)]
+    public async Task<IActionResult> StatusByMenuNUserId()
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate user data
+        if (!currentUser.UserId.HasValue)
+            throw new GenericBadRequestException("Valid UserId is required.");
+
+        // Get menu information
+        var menu = await ManageMenu.GetAsync(this, _serviceManager);
+
+        // Validate menu data
+        if (!menu.MenuId.HasValue)
+            throw new GenericBadRequestException("Valid MenuId is required.");
+
+        // Execute business logic
+        var res = await _serviceManager.WfState.GetWFStateByUserPermission(
+            menu.MenuId.Value, currentUser.UserId.Value);
+
+        // Return standardized response
+        if (res == null || !res.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>(
+                "No workflow statuses found for this menu and user"));
+
+        return Ok(ResponseHelper.Success(res, 
+            "Workflow statuses retrieved successfully"));
+    }
+
+    /// <summary>
+    /// Retrieves workflow statuses by menu name
+    /// </summary>
+    /// <param name="menuName">Menu name</param>
+    /// <returns>List of workflow statuses</returns>
+    [HttpGet(RouteConstants.StatusByMenuName)]
+    public async Task<IActionResult> StatusByMenuName([FromBody] string menuName)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate input parameters
+        if (string.IsNullOrWhiteSpace(menuName))
+            throw new GenericBadRequestException("Menu name is required.");
+
+        // Validate user data
+        if (!currentUser.UserId.HasValue)
+            throw new GenericBadRequestException("Valid UserId is required.");
+
+        // Get menu information
+        var menu = await ManageMenu.CheckByMenuName(this, menuName, _serviceManager);
+
+        // Validate menu data
+        if (!menu.MenuId.HasValue)
+            throw new GenericBadRequestException("Valid MenuId is required.");
+
+        // Execute business logic
+        var res = await _serviceManager.WfState.GetWFStateByUserPermission(
+            menu.MenuId.Value, currentUser.UserId.Value);
+
+        // Return standardized response
+        if (res == null || !res.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>(
+                "No workflow statuses found for this menu"));
+
+        return Ok(ResponseHelper.Success(res, 
+            "Workflow statuses retrieved successfully"));
+    }
+
+    #endregion Status By Menu and User
 }

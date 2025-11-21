@@ -1,9 +1,9 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.ServicesContract;
+﻿using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +28,7 @@ public class MenuController : BaseApiController
     [HttpGet(RouteConstants.SelectMenuByUserPermission)]
     //[Produces("application/json")]
     [ResponseCache(Duration = 300)] // Browser caching for 5 minutes
-                                    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> SelectMenuByUserPermission()
     {
         var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
@@ -118,13 +118,17 @@ public class MenuController : BaseApiController
     public async Task<IActionResult> GetMenuSummary([FromBody] CRMGridOptions options)
     {
         var menuSummary = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
-        return (menuSummary != null) ? Ok(menuSummary) : NoContent();
+
+        if (menuSummary == null)
+            return Ok(ResponseHelper.NoContent<GridEntity<MenuDto>>("No data found!"));
+
+        return Ok(ResponseHelper.Success(menuSummary, "Menu summary retrieved successfully"));
     }
 
 
     [HttpPost(RouteConstants.CreateMenu)]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> SaveMenu([FromBody] MenuDto modelDto)
+    public async Task<IActionResult> CreateMenu([FromBody] MenuDto modelDto)
     {
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (string.IsNullOrEmpty(userIdClaim))
@@ -175,16 +179,34 @@ public class MenuController : BaseApiController
         return Ok(ResponseHelper.Updated(returnData, "Menu created successfully."));
     }
 
+    //[HttpDelete(RouteConstants.DeleteMenu)]
+    ////[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //public async Task<IActionResult> DeleteMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
+    //{
+    //    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+
+    //    await _serviceManager.Menus.DeleteAsync(key, modelDto);
+    //    return Ok("Success");
+    //}
+
     [HttpDelete(RouteConstants.DeleteMenu)]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<IActionResult> DeleteMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> DeleteMenu([FromRoute] int key)
     {
-        var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            throw new GenericUnauthorizedException("User authentication required.");
 
-        await _serviceManager.Menus.DeleteAsync(key, modelDto);
-        return Ok("Success");
+        if (!int.TryParse(userIdClaim, out int userId))
+            throw new GenericBadRequestException("Invalid user ID format.");
+
+        UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+        if (currentUser == null)
+            throw new GenericUnauthorizedException("User session expired.");
+
+        await _serviceManager.Menus.DeleteAsync(key);
+        return Ok(ResponseHelper.Success("Menu deleted successfully."));
     }
-
 
 
 

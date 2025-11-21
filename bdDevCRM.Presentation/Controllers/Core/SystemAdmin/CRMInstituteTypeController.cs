@@ -1,16 +1,21 @@
 ﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
-using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
-
+/// <summary>
+/// Controller for managing CRM institute types
+/// All methods require authentication via [AuthenticatedUser] attribute
+/// </summary>
+[AuthenticatedUser] // ✅ Controller-level authentication
 public class CRMInstituteTypeController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
@@ -22,20 +27,22 @@ public class CRMInstituteTypeController : BaseApiController
     _cache = cache;
   }
 
-  // 1️ DDL ------------------------------------------------------------
+  // 1️⃣ DDL ------------------------------------------------------------
+  /// <summary>
+  /// Retrieves all institute types for dropdown list
+  /// </summary>
+  /// <returns>List of institute types for dropdown</returns>
   [HttpGet(RouteConstants.InstituteTypeDDL)]
   public async Task<IActionResult> InstituteTypeDDL()
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
-
+    // Execute business logic
     var res = await _serviceManager.CrmInstituteTypes.GetInstituteTypesDDLAsync(trackChanges: false);
-    //return Ok(res);
+
+    // Return standardized response
     if (res == null || !res.Any())
       return Ok(ResponseHelper.NoContent<IEnumerable<CRMInstituteTypeDto>>("No institute type found"));
 
@@ -43,89 +50,151 @@ public class CRMInstituteTypeController : BaseApiController
   }
 
   // 2️⃣ Summary Grid --------------------------------------------------
+  /// <summary>
+  /// Retrieves paginated summary grid of institute types
+  /// </summary>
+  /// <param name="options">Grid options for pagination, sorting, and filtering</param>
+  /// <returns>Paginated grid of institute types</returns>
   [HttpPost(RouteConstants.InstituteTypeSummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    // Validate input parameters
+    if (options == null)
+      throw new NullModelBadRequestException("CRMGridOptions cannot be null");
 
-    if (options == null) return BadRequest("CRMGridOptions cannot be null.");
-
+    // Execute business logic
     var summary = await _serviceManager.CrmInstituteTypes.SummaryGrid(options);
-    return (summary != null) ? Ok(summary) : NoContent();
+
+    // Return standardized response
+    if (summary == null || !summary.Items.Any())
+      return Ok(ResponseHelper.NoContent<GridEntity<CRMInstituteTypeDto>>("No data found"));
+
+    return Ok(ResponseHelper.Success(summary, "Data retrieved successfully"));
   }
 
   // 3️⃣ Create --------------------------------------------------------
+  /// <summary>
+  /// Creates a new institute type record
+  /// </summary>
+  /// <param name="dto">Institute type data to create</param>
+  /// <returns>Operation result message</returns>
   [HttpPost(RouteConstants.CreateInstituteType)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> Create([FromBody] CRMInstituteTypeDto dto)
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("UserId not found in token.");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    // Validate input parameters
+    if (dto == null)
+      throw new NullModelBadRequestException("Institute type data cannot be null");
 
+    // Execute business logic
     var res = await _serviceManager.CrmInstituteTypes.CreateNewRecordAsync(dto);
-    return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
+
+    // Return standardized response
+    if (res == OperationMessage.Success)
+      return Ok(ResponseHelper.Created(res, "Institute type created successfully"));
+    else
+      return Conflict(ResponseHelper.Conflict(res));
   }
 
   // 4️⃣ Update --------------------------------------------------------
+  /// <summary>
+  /// Updates an existing institute type record
+  /// </summary>
+  /// <param name="key">Institute type ID</param>
+  /// <param name="dto">Updated institute type data</param>
+  /// <returns>Operation result message</returns>
   [HttpPut(RouteConstants.UpdateInstituteType)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> Update([FromRoute] int key, [FromBody] CRMInstituteTypeDto dto)
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("UserId not found in token.");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    // Validate input parameters
+    if (key <= 0)
+      throw new IdParametersBadRequestException();
 
+    if (dto == null)
+      throw new NullModelBadRequestException("Institute type data cannot be null");
+
+    // Execute business logic
     var res = await _serviceManager.CrmInstituteTypes.UpdateRecordAsync(key, dto, false);
-    return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
+
+    // Return standardized response
+    if (res == OperationMessage.Success)
+      return Ok(ResponseHelper.Updated(res, "Institute type updated successfully"));
+    else
+      return Conflict(ResponseHelper.Conflict(res));
   }
 
   // 5️⃣ Delete --------------------------------------------------------
+  /// <summary>
+  /// Deletes an institute type record
+  /// </summary>
+  /// <param name="key">Institute type ID to delete</param>
+  /// <param name="dto">Institute type data for validation</param>
+  /// <returns>Operation result message</returns>
   [HttpDelete(RouteConstants.DeleteInstituteType)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> Delete([FromRoute] int key, [FromBody] CRMInstituteTypeDto dto)
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("UserId not found in token.");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("UnAuthorized attempted");
+    // Validate input parameters
+    if (key <= 0)
+      throw new IdParametersBadRequestException();
 
+    if (dto == null)
+      throw new NullModelBadRequestException("Institute type data cannot be null");
+
+    // Execute business logic
     var res = await _serviceManager.CrmInstituteTypes.DeleteRecordAsync(key, dto);
-    return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
+
+    // Return standardized response
+    if (res == OperationMessage.Success)
+      return Ok(ResponseHelper.Success(res, "Institute type deleted successfully"));
+    else
+      return Conflict(ResponseHelper.Conflict(res));
   }
 
   // 6️⃣ SaveOrUpdate --------------------------------------------------
+  /// <summary>
+  /// Creates or updates an institute type record
+  /// </summary>
+  /// <param name="key">Institute type ID (0 for create, >0 for update)</param>
+  /// <param name="dto">Institute type data</param>
+  /// <returns>Operation result message</returns>
   [HttpPost(RouteConstants.CreateOrUpdateInstituteType)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> SaveOrUpdate([FromRoute] int key,
                                                 [FromBody] CRMInstituteTypeDto dto)
   {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("UserId not found in token.");
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    // Validate input parameters
+    if (dto == null)
+      throw new NullModelBadRequestException("Institute type data cannot be null");
 
+    // Execute business logic
     var res = await _serviceManager.CrmInstituteTypes.SaveOrUpdateAsync(key, dto);
-    return (res == OperationMessage.Success) ? Ok(res) : Conflict(res);
+
+    // Return standardized response
+    if (res == OperationMessage.Success)
+      return Ok(ResponseHelper.Success(res, "Institute type saved successfully"));
+    else
+      return Conflict(ResponseHelper.Conflict(res));
   }
 }

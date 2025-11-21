@@ -1,17 +1,16 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities;
-
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using System.Reflection.Metadata;
-using System.Threading.Tasks;
+
+namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 public class UsersController : BaseApiController
 {
@@ -27,20 +26,21 @@ public class UsersController : BaseApiController
   [HttpPost(RouteConstants.UserSummary)]
   public async Task<IActionResult> UserSummary([FromBody] CRMGridOptions options, [FromQuery] int companyId)
   {
-    //int userId = HttpContext.GetUserId();
-    //var currentUser = HttpContext.GetCurrentUser();
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // Validate user data
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
+      throw new IdParametersBadRequestException();
 
-    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null) throw new IdParametersBadRequestException();
+    // Execute business logic
     var summaryGrid = await _serviceManager.Users.UsersSummary(companyId, trackChanges: false, options, currentUser);
-    //return (groupSummary != null) ? Ok(groupSummary) : NoContent();
+
+    // Return standardized response
     if (summaryGrid == null || !summaryGrid.Items.Any())
       return Ok(ResponseHelper.NoContent<GridEntity<UsersDto>>("No data found"));
 
@@ -51,47 +51,36 @@ public class UsersController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> SaveUser([FromBody] UsersDto usersDto)
   {
-    //int userId = HttpContext.GetUserId();
-    //var currentUser = HttpContext.GetCurrentUser();
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+    // Validate user data
+    if (currentUser == null)
+      return Unauthorized("User not found in cache.");
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
+      throw new IdParametersBadRequestException();
 
-    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null) throw new IdParametersBadRequestException();
+    // Validate input parameters
+    if (usersDto == null)
+      throw new NullModelBadRequestException("User data cannot be null");
 
-    UsersDto res = new UsersDto();
-    if (currentUser != null)
-    {
-      res = await _serviceManager.Users.SaveUser(usersDto);
+    // Execute business logic
+    UsersDto res = await _serviceManager.Users.SaveUser(usersDto);
 
-      ////Audittail
-      //var shortDescription = userId == 0 ? "User Information try to Inserted" : "User Information try to Updated";
-      //var actionType = userId == 0 ? "Insert" : "Update";
-      //var audit = hendler.CreateAuditObject(users, shortDescription, actionType, res);
-      //aService.SendAudit(audit);
+    ////Audittail
+    //var shortDescription = userId == 0 ? "User Information try to Inserted" : "User Information try to Updated";
+    //var actionType = userId == 0 ? "Insert" : "Update";
+    //var audit = hendler.CreateAuditObject(users, shortDescription, actionType, res);
+    //aService.SendAudit(audit);
 
-    }
-
-    //
+    // Validate result
     if (res.UserId <= 0)
-      throw new InvalidUpdateOperationException("Failed to update institute record.");
+      throw new InvalidUpdateOperationException("Failed to save user record.");
 
     // Return success response
-    return Ok(ResponseHelper.Success(usersDto, "Institute updated successfully"));
-
-    //if (res == OperationMessage.Success)
-    //{
-    //  return Ok(res);
-    //}
-    //else
-    //{
-    //  return Conflict(res);
-    //}
+    return Ok(ResponseHelper.Success(res, "User saved successfully"));
   }
   
 
@@ -99,44 +88,39 @@ public class UsersController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateUser([FromRoute] int key, [FromBody] UsersDto usersDto)
   {
-    //int userId = HttpContext.GetUserId();
-    //var currentUser = HttpContext.GetCurrentUser();
+    // ✅ Get authenticated user from HttpContext
+    var currentUser = HttpContext.GetCurrentUser();
+    var userId = HttpContext.GetUserId();
 
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
-
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+    // Validate user data
     if (currentUser == null)
-    {
       return Unauthorized("User not found in cache.");
-    }
 
-    UsersDto res = new UsersDto();
-    if (currentUser != null)
-    {
+    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
+      throw new IdParametersBadRequestException();
 
-      //usersDto.UserName = usersDto.UserName.Replace("'", "''");
-      //usersDto.UserId = userId;
+    // Validate input parameters
+    if (key <= 0)
+      throw new GenericBadRequestException("Invalid user ID. ID must be greater than 0.");
 
-      res = await _serviceManager.Users.SaveUser(usersDto);
+    if (usersDto == null)
+      throw new NullModelBadRequestException("User data cannot be null");
 
-      ////Audittail
-      //var shortDescription = userId == 0 ? "User Information try to Inserted" : "User Information try to Updated";
-      //var actionType = userId == 0 ? "Insert" : "Update";
-      //var audit = hendler.CreateAuditObject(users, shortDescription, actionType, res);
-      //aService.SendAudit(audit);
+    // Execute business logic
+    UsersDto res = await _serviceManager.Users.SaveUser(usersDto);
 
-    }
+    ////Audittail
+    //var shortDescription = userId == 0 ? "User Information try to Inserted" : "User Information try to Updated";
+    //var actionType = userId == 0 ? "Insert" : "Update";
+    //var audit = hendler.CreateAuditObject(users, shortDescription, actionType, res);
+    //aService.SendAudit(audit);
 
-    //
+    // Validate result
     if (res.UserId <= 0)
-      throw new InvalidUpdateOperationException("Failed to update institute record.");
+      throw new InvalidUpdateOperationException("Failed to update user record.");
 
     // Return success response
-    return Ok(ResponseHelper.Success(res, "Institute updated successfully"));
+    return Ok(ResponseHelper.Success(res, "User updated successfully"));
   }
 
 

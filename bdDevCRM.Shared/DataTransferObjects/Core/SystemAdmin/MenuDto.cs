@@ -20,3 +20,16 @@ public class MenuDto : CommonDto
   public string? MenuCode { get; set; }
   public int? IsActive { get; set; }
 }
+
+//IsActive:1
+//IsQuickLink: false
+//MenuCode: ""
+//MenuId: 0
+//MenuName: "Crm Admin"
+//MenuPath: ""
+//MenuType: 0
+//ModuleId: 31
+//ModuleId_input: "CRM"
+//ParentMenu: 611
+//ParentMenu_input: "CRM"
+//SortOrder: 0

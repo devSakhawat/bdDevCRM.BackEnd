@@ -1,88 +1,117 @@
-﻿
-using bdDevCRM.Utilities.CRMGrid.GRID;
+﻿using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
+/// <summary>
+/// Controller for managing access controls
+/// All methods require authentication via [AuthenticatedUser] attribute
+/// </summary>
+[AuthenticatedUser] // ✅ Controller-level authentication
 public class AccessControlController : BaseApiController
 {
-  //private readonly IServiceManager _serviceManager;
-  private readonly IMemoryCache _cache;
-  public AccessControlController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
-  {
-    //_serviceManager = serviceManager;
-    _cache = cache;
-  }
+    //private readonly IServiceManager _serviceManager;
+    private readonly IMemoryCache _cache;
 
-  [HttpPost(RouteConstants.CreateAccessControl)]
-  public async Task<IActionResult> SaveAccessControl([FromBody] AccessControlDto modelDto)
-  {
-    //int userId = HttpContext.GetUserId();
-    //var currentUser = HttpContext.GetCurrentUser();
+    public AccessControlController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
+    {
+        //_serviceManager = serviceManager;
+        _cache = cache;
+    }
 
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+    /// <summary>
+    /// Creates a new access control record
+    /// </summary>
+    /// <param name="modelDto">Access control data to create</param>
+    /// <returns>Created access control record</returns>
+    [HttpPost(RouteConstants.CreateAccessControl)]
+    public async Task<IActionResult> SaveAccessControl([FromBody] AccessControlDto modelDto)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+        // Validate input parameters
+        if (modelDto == null)
+            throw new NullModelBadRequestException("Access control data cannot be null");
 
-    var model = await _serviceManager.AccessControl.CreateAsync(modelDto);
-    //return (model != null) ? Ok(model) : NoContent();
+        // Execute business logic
+        var model = await _serviceManager.AccessControl.CreateAsync(modelDto);
 
-    if (model.AccessId <= 0)
-      throw new InvalidCreateOperationException("Failed to create new record.");
+        // Validate result
+        if (model.AccessId <= 0)
+            throw new InvalidCreateOperationException("Failed to create new record.");
 
-    return Ok(ResponseHelper.Created(model, "new record created successfully."));
-  }
+        // Return standardized response
+        return Ok(ResponseHelper.Created(model, "New record created successfully."));
+    }
 
-  [HttpPut(RouteConstants.UpdateAccessControl)]
-  public async Task<IActionResult> UpdateAccessControl([FromRoute] int key, [FromBody] AccessControlDto modelDto)
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+    /// <summary>
+    /// Updates an existing access control record
+    /// </summary>
+    /// <param name="key">Access control ID</param>
+    /// <param name="modelDto">Updated access control data</param>
+    /// <returns>Updated access control record</returns>
+    [HttpPut(RouteConstants.UpdateAccessControl)]
+    public async Task<IActionResult> UpdateAccessControl([FromRoute] int key, [FromBody] AccessControlDto modelDto)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    AccessControlDto returnData = await _serviceManager.AccessControl.UpdateAsync(key, modelDto);
-    //return (returnData != null) ? Ok(returnData) : NoContent();
+        // Validate input parameters
+        if (key <= 0)
+            throw new IdParametersBadRequestException();
 
-    if (modelDto.AccessId <= 0)
-      throw new InvalidCreateOperationException("Failed to create new record.");
+        if (modelDto == null)
+            throw new NullModelBadRequestException("Access control data cannot be null");
 
-    return Ok(ResponseHelper.Updated(modelDto, "Record updated successfully."));
-  }
+        // Execute business logic
+        AccessControlDto returnData = await _serviceManager.AccessControl.UpdateAsync(key, modelDto);
 
+        // Validate result
+        if (returnData.AccessId <= 0)
+            throw new InvalidUpdateOperationException("Failed to update record.");
 
-  [HttpPost(RouteConstants.AccessControlSummary)]
-  public async Task<IActionResult> AccessControlSummary([FromBody] CRMGridOptions options)
-  {
-    //var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    //var accessSummary = await _serviceManager.AccessControl.AccessControlSummary(trackChanges: false, options);
-    //return (accessSummary != null) ? Ok(accessSummary) : NoContent();
+        // Return standardized response
+        return Ok(ResponseHelper.Updated(returnData, "Record updated successfully."));
+    }
 
+    /// <summary>
+    /// Retrieves paginated summary grid of access controls
+    /// </summary>
+    /// <param name="options">Grid options for pagination, sorting, and filtering</param>
+    /// <returns>Paginated grid of access controls</returns>
+    [HttpPost(RouteConstants.AccessControlSummary)]
+    public async Task<IActionResult> AccessControlSummary([FromBody] CRMGridOptions options)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized("Unauthorized attempt to get data!");
+        // Validate user data
+        if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
+            throw new IdParametersBadRequestException();
 
-    int userId = Convert.ToInt32(userIdClaim);
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null) return Unauthorized("User not found in cache.");
+        // Validate input parameters
+        if (options == null)
+            throw new NullModelBadRequestException("Grid options cannot be null");
 
-    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null) throw new IdParametersBadRequestException();
-    var summaryGrid = await _serviceManager.AccessControl.AccessControlSummary(trackChanges: false, options);
-    if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<AccessControlDto>>("No data found"));
+        // Execute business logic
+        var summaryGrid = await _serviceManager.AccessControl.AccessControlSummary(trackChanges: false, options);
 
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
-  }
+        // Return standardized response
+        if (summaryGrid == null || !summaryGrid.Items.Any())
+            return Ok(ResponseHelper.NoContent<GridEntity<AccessControlDto>>("No data found"));
 
-
-
+        return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    }
 }

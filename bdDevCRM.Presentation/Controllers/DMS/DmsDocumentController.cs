@@ -1,76 +1,180 @@
 ﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.Controllers.BaseController;
+using bdDevCRM.Presentation.Extensions;
+using bdDevCRM.RepositoryDtos.DMS;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
+using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.DMS;
 
+/// <summary>
+/// Controller for managing DMS (Document Management System) documents
+/// All methods require authentication via [AuthenticatedUser] attribute
+/// </summary>
+[AuthenticatedUser] // ✅ Controller-level authentication
 public class DmsDocumentController : BaseApiController
 {
+    private readonly IMemoryCache _cache;
 
-  // private readonly IServiceManager _serviceManager;
-  private readonly IMemoryCache _cache; 
+    public DmsDocumentController(IServiceManager serviceManager, IMemoryCache cache) 
+        : base(serviceManager)
+    {
+        _cache = cache;
+    }
 
-  // The constructor now only needs to pass IServiceManager to the base constructor
-  public DmsDocumentController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager) 
-  {
-    // _serviceManager = serviceManager; // Remove this if you're using _serviceManager from base
-    _cache = cache; // Remove this if no longer needed directly in this controller
-  }
+    /// <summary>
+    /// Retrieves all documents for dropdown list
+    /// </summary>
+    /// <returns>List of documents for dropdown</returns>
+    [HttpGet("ddl")]
+    public async Task<IActionResult> DocumentDDL()
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-  // ---------- 1. DDL ------------------------------------------------
-  [HttpGet("ddl")]
-  public async Task<IActionResult> DocumentDDL()
-  {
-    if (!TryGetLoggedInUser(out var currentUser)) return Unauthorized();
+        // Execute business logic
+        var list = await _serviceManager.DmsDocuments
+            .GetDocumentsDDLAsync(false);
 
-    var list = await _serviceManager.DmsDocuments.GetDocumentsDDLAsync(false);
-    return Ok(list);
-  }
+        // Return standardized response
+        if (list == null || !list.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<object>>(
+                "No documents found"));
 
-  // ---------- 2. Grid (Summary) ------------------------------------
-  [HttpPost("summary")]
-  public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions opt)
-  {
-    if (!TryGetLoggedInUser(out var _)) return Unauthorized();
-    if (opt == null) return BadRequest("Grid options null.");
+        return Ok(ResponseHelper.Success(list, 
+            "Documents retrieved successfully"));
+    }
 
-    var grid = await _serviceManager.DmsDocuments.SummaryGrid(opt);
-    return grid != null ? Ok(grid) : NoContent();
-  }
+    /// <summary>
+    /// Retrieves paginated summary grid of documents
+    /// </summary>
+    /// <param name="opt">Grid options for pagination, sorting, and filtering</param>
+    /// <returns>Paginated grid of documents</returns>
+    [HttpPost("summary")]
+    public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions opt)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-  // ---------- 3. Create --------------------------------------------
-  [HttpPost("create")]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> Create([FromBody] DmsDocumentDto dto)
-  {
-    if (!TryGetLoggedInUser(out var user)) return Unauthorized();
-    dto.UploadedByUserId = user.UserId.ToString();      // inject uploader
+        // Validate input parameters
+        if (opt == null)
+            return BadRequest(ResponseHelper.BadRequest("Grid options cannot be null"));
 
-    var res = await _serviceManager.DmsDocuments.CreateNewRecordAsync(dto);
-    return res == OperationMessage.Success ? Ok(res) : Conflict(res);
-  }
+        // Execute business logic
+        var grid = await _serviceManager.DmsDocuments.SummaryGrid(opt);
 
-  // ---------- 4. Update --------------------------------------------
-  [HttpPut("update/{id:int}")]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  public async Task<IActionResult> Update(int id, [FromBody] DmsDocumentDto dto)
-  {
-    if (!TryGetLoggedInUser(out var _)) return Unauthorized();
-    var res = await _serviceManager.DmsDocuments.UpdateNewRecordAsync(id, dto ,false);
-    return res == OperationMessage.Success ? Ok(res) : Conflict(res);
-  }
+        // Return standardized response
+        if (grid == null || !grid.Items.Any())
+            return Ok(ResponseHelper.NoContent<GridEntity<DmsDocumentDto>>(
+                "No documents found"));
 
-  // ---------- 5. Delete --------------------------------------------
-  [HttpDelete("delete/{id:int}")]
-  public async Task<IActionResult> Delete(int id , DmsDocumentDto dmsDocumentDto)
-  {
-    if (!TryGetLoggedInUser(out var _)) return Unauthorized();
-    var res = await _serviceManager.DmsDocuments.DeleteRecordAsync(id , dmsDocumentDto);
-    return res == OperationMessage.Success ? Ok(res) : Conflict(res);
-  }
+        return Ok(ResponseHelper.Success(grid, 
+            "Documents grid retrieved successfully"));
+    }
 
+    /// <summary>
+    /// Creates a new document record
+    /// </summary>
+    /// <param name="dto">Document data to create</param>
+    /// <returns>Operation result message</returns>
+    [HttpPost("create")]
+    [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+    public async Task<IActionResult> Create([FromBody] DmsDocumentDto dto)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate input parameters
+        if (dto == null)
+            throw new NullModelBadRequestException("Document data cannot be null");
+
+        // Inject uploader information
+        dto.UploadedByUserId = currentUser.UserId.ToString();
+
+        // Execute business logic
+        var res = await _serviceManager.DmsDocuments.CreateNewRecordAsync(dto);
+
+        // Return standardized response
+        if (res == OperationMessage.Success)
+            return Ok(ResponseHelper.Success(res, 
+                "Document created successfully"));
+        else
+            return Conflict(ResponseHelper.Conflict(res));
+    }
+
+    /// <summary>
+    /// Updates an existing document record
+    /// </summary>
+    /// <param name="id">Document ID</param>
+    /// <param name="dto">Updated document data</param>
+    /// <returns>Operation result message</returns>
+    [HttpPut("update/{id:int}")]
+    [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+    public async Task<IActionResult> Update(int id, [FromBody] DmsDocumentDto dto)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate input parameters
+        if (id <= 0)
+            throw new GenericBadRequestException(
+                "Invalid document ID. ID must be greater than 0.");
+
+        if (dto == null)
+            throw new NullModelBadRequestException("Document data cannot be null");
+
+        // Execute business logic
+        var res = await _serviceManager.DmsDocuments
+            .UpdateNewRecordAsync(id, dto, false);
+
+        // Return standardized response
+        if (res == OperationMessage.Success)
+            return Ok(ResponseHelper.Updated(res, 
+                "Document updated successfully"));
+        else
+            return Conflict(ResponseHelper.Conflict(res));
+    }
+
+    /// <summary>
+    /// Deletes a document record
+    /// </summary>
+    /// <param name="id">Document ID to delete</param>
+    /// <param name="dmsDocumentDto">Document data for validation</param>
+    /// <returns>Operation result message</returns>
+    [HttpDelete("delete/{id:int}")]
+    public async Task<IActionResult> Delete(int id, DmsDocumentDto dmsDocumentDto)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
+
+        // Validate input parameters
+        if (id <= 0)
+            throw new GenericBadRequestException(
+                "Invalid document ID. ID must be greater than 0.");
+
+        if (dmsDocumentDto == null)
+            throw new NullModelBadRequestException("Document data cannot be null");
+
+        // Execute business logic
+        var res = await _serviceManager.DmsDocuments.DeleteRecordAsync(id, dmsDocumentDto);
+
+        // Return standardized response
+        if (res == OperationMessage.Success)
+            return Ok(ResponseHelper.Success(res, 
+                "Document deleted successfully"));
+        else
+            return Conflict(ResponseHelper.Conflict(res));
+    }
 }

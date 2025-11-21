@@ -30,8 +30,8 @@ public interface IMenuService
   Task<MenuDto> CreateMenuAsync(MenuDto entityForCreate);
   Task<MenuDto> CreateAsync(MenuDto modelDto);
   Task<MenuDto> UpdateAsync(int key, MenuDto modelDto);
-  Task DeleteAsync(int key, MenuDto modelDto);
-
+  //Task DeleteAsync(int key, MenuDto modelDto);
+  Task DeleteAsync(int key);
   Task DeleteMenuAsync(int MenuId, bool trackChanges);
   Task UpdateMenuAsync(int MenuId, MenuDto MenuForUpdate, bool trackChanges);
 

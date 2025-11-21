@@ -1726,7 +1726,7 @@ public partial class CRMContext : DbContext
       .HasColumnName("IsSystemUser")
       .HasColumnType("bit")
       .HasDefaultValue(false)
-      .IsRequired();
+      .IsRequired(false);
     });
 
     modelBuilder.Entity<WfAction>(entity =>

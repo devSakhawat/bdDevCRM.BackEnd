@@ -1,215 +1,256 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Entities.System;
+﻿using bdDevCRM.Entities.CRMGrid.GRID;
+using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.Controllers.BaseController;
-using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
+using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Common;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using System.Security.AccessControl;
-using System.Text.RegularExpressions;
 
+namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
+
+/// <summary>
+/// Controller for managing user groups and permissions
+/// All methods require authentication via [AuthenticatedUser] attribute
+/// </summary>
+[AuthenticatedUser] // ✅ Controller-level authentication
 public class GroupController : BaseApiController
 {
-  //private readonly IServiceManager _serviceManager;
-  private readonly IMemoryCache _cache;
+    private readonly IMemoryCache _cache;
 
-  public GroupController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
-  {
-    //_serviceManager = serviceManager;
-    _cache = cache;
-  }
+    public GroupController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
+    {
+        _cache = cache;
+    }
 
-  [HttpPost(RouteConstants.GroupSummary)]
-  public async Task<IActionResult> GroupSummary([FromBody] CRMGridOptions options)
-  {
-    var groupSummary = await _serviceManager.Groups.GroupSummary(trackChanges: false, options);
-    return (groupSummary != null) ? Ok(groupSummary) : NoContent();
-  }
+    /// <summary>
+    /// Retrieves paginated summary grid of groups
+    /// </summary>
+    /// <param name="options">Grid options for pagination, sorting, and filtering</param>
+    /// <returns>Paginated grid of groups</returns>
+    [HttpPost(RouteConstants.GroupSummary)]
+    public async Task<IActionResult> GroupSummary([FromBody] CRMGridOptions options)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-  [HttpGet(RouteConstants.GroupPermisionsbyGroupId)]
-  public async Task<IActionResult> GroupPermisionsbyGroupId([FromRoute] int groupId)
-  {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
+        // Validate input parameters
+        if (options == null)
+            throw new NullModelBadRequestException("Grid options cannot be null");
 
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
+        // Execute business logic
+        var groupSummary = await _serviceManager.Groups.GroupSummary(
+            trackChanges: false, options);
 
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
-    if (groupId == 0 || groupId == null) throw new IdParametersBadRequestException();
+        // Return standardized response
+        if (groupSummary == null || !groupSummary.Items.Any())
+            return Ok(ResponseHelper.NoContent<GridEntity<GroupSummaryDto>>(
+                "No groups found"));
 
-    var res = await _serviceManager.Groups.GroupPermisionsbyGroupId(groupId);
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<GroupPermissionDto>>("No data found for the specified group"));
+        return Ok(ResponseHelper.Success(groupSummary, 
+            "Groups retrieved successfully"));
+    }
 
-    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
-  }
+    /// <summary>
+    /// Retrieves all permissions for a specific group
+    /// </summary>
+    /// <param name="groupId">Group ID</param>
+    /// <returns>List of group permissions</returns>
+    [HttpGet(RouteConstants.GroupPermisionsbyGroupId)]
+    public async Task<IActionResult> GroupPermisionsbyGroupId([FromRoute] int groupId)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-  [HttpGet(RouteConstants.GetAccesses)]
-  public async Task<IActionResult> GetAccesses()
-  {
-    //var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+        // Validate input parameters
+        if (groupId <= 0)
+            throw new IdParametersBadRequestException();
 
-    //IEnumerable<AccessControlDto> accessControlls = await _serviceManager.Groups.GetAccesses();
-    //return Ok(accessControlls);
+        // Execute business logic
+        var res = await _serviceManager.Groups.GroupPermisionsbyGroupId(groupId);
 
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
+        // Return standardized response
+        if (res == null || !res.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<GroupPermissionDto>>(
+                "No permissions found for the specified group"));
 
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
+        return Ok(ResponseHelper.Success(res, 
+            "Group permissions retrieved successfully"));
+    }
 
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
+    /// <summary>
+    /// Retrieves all available access controls
+    /// </summary>
+    /// <returns>List of access controls</returns>
+    [HttpGet(RouteConstants.GetAccesses)]
+    public async Task<IActionResult> GetAccesses()
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    var res = await _serviceManager.Groups.GetAccesses();
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<AccessControlDto>>("No data found!"));
+        // Execute business logic
+        var accessControls = await _serviceManager.Groups.GetAccesses();
 
-    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
-  }
+        // Return standardized response
+        if (accessControls == null || !accessControls.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<AccessControlDto>>(
+                "No access controls found"));
 
+        return Ok(ResponseHelper.Success(accessControls, 
+            "Access controls retrieved successfully"));
+    }
 
-  [HttpPost(RouteConstants.CreateGroup)]
-  public async Task<IActionResult> SaveGroup([FromBody] GroupDto objGroup)
-  {
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    //var strGroup = strGroupInfo.Replace("^", "&");
-    //var objGroup = Newtonsoft.Json.JsonConvert.DeserializeObject<GroupDto>(strGroup);
-    if (objGroup == null) throw new ArgumentNullException(nameof(objGroup));
+    /// <summary>
+    /// Creates a new group
+    /// </summary>
+    /// <param name="objGroup">Group data to create</param>
+    /// <returns>Created group record</returns>
+    [HttpPost(RouteConstants.CreateGroup)]
+    public async Task<IActionResult> SaveGroup([FromBody] GroupDto objGroup)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    var model = await _serviceManager.Groups.CreateAsync(objGroup);
-    return (model != null) ? Ok(model) : NoContent();
-  }
+        // Validate input parameters
+        if (objGroup == null)
+            throw new ArgumentNullException(nameof(objGroup));
 
+        // Execute business logic
+        var model = await _serviceManager.Groups.CreateAsync(objGroup);
 
-  [HttpPut(RouteConstants.UpdateGroup)]
-  public async Task<IActionResult> UpdateGroup([FromRoute] int groupId, [FromBody] GroupDto modelDto)
-  {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
+        // Return standardized response
+        if (model == null || model.GroupId <= 0)
+            throw new InvalidCreateOperationException("Failed to create group");
 
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
+        return Ok(ResponseHelper.Created(model, 
+            "Group created successfully"));
+    }
 
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
-    if (groupId == 0 || groupId == null) throw new IdParametersBadRequestException();
+    /// <summary>
+    /// Updates an existing group
+    /// </summary>
+    /// <param name="key">Group ID</param>
+    /// <param name="modelDto">Updated group data</param>
+    /// <returns>Updated group record</returns>
+    [HttpPut(RouteConstants.UpdateGroup)]
+    public async Task<IActionResult> UpdateGroup(
+        [FromRoute] int key, 
+        [FromBody] GroupDto modelDto)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-    var res = await _serviceManager.Groups.UpdateAsync(groupId, modelDto);
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<GroupPermissionDto>>("No data found for the specified group"));
+        // Validate input parameters
+        if (key <= 0)
+            throw new IdParametersBadRequestException();
 
-    return Ok(ResponseHelper.Updated(res, "Data Updated successfully"));
-  }
+        if (modelDto == null)
+            throw new NullModelBadRequestException("Group data cannot be null");
 
+        // Execute business logic
+        var returnData = await _serviceManager.Groups.UpdateAsync(key, modelDto);
 
-  [HttpGet(RouteConstants.Groups)]
-  //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
-  public async Task<IActionResult> GetGroups()
-  {
-    // from claim.
-    var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    // userId : which key is reponsible to when cache was created .
-    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
-    UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
+        // Return standardized response
+        if (returnData == null)
+            throw new InvalidUpdateOperationException("Failed to update group");
 
-    IEnumerable<GroupForUserSettings> groupForUserSettings = await _serviceManager.Groups.GetGroups(trackChanges: false);
-    return Ok(groupForUserSettings.ToList());
-  }
+        return Ok(ResponseHelper.Updated(returnData, 
+            "Group updated successfully"));
+    }
 
+    /// <summary>
+    /// Retrieves all groups for user settings
+    /// </summary>
+    /// <returns>List of groups</returns>
+    [HttpGet(RouteConstants.Groups)]
+    public async Task<IActionResult> GetGroups()
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-  [HttpGet(RouteConstants.GetGroupsByUserId)]
-  //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
-  public async Task<IActionResult> GetGroupsByUserId(int usersUserId)
-  {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
+        // Execute business logic
+        var groupForUserSettings = await _serviceManager.Groups.GetGroups(
+            trackChanges: false);
 
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
+        // Return standardized response
+        if (groupForUserSettings == null || !groupForUserSettings.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<GroupForUserSettings>>(
+                "No groups found"));
 
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
+        return Ok(ResponseHelper.Success(groupForUserSettings.ToList(), 
+            "Groups retrieved successfully"));
+    }
 
-    UsersDto user = _serviceManager.GetCache<UsersDto>(userId);
+    /// <summary>
+    /// Retrieves group memberships for a specific user
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <returns>List of group memberships</returns>
+    [HttpGet(RouteConstants.GroupMemberByUserId)]
+    public async Task<IActionResult> GroupMemberByUserId([FromQuery] int userId)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var currentUserId = HttpContext.GetUserId();
 
-    //IEnumerable<GroupForUserSettings> groupForUserSettings = await _serviceManager.Groups.GetGroups(trackChanges: false);
-    //return Ok(groupForUserSettings.ToList());
+        // Validate input parameters
+        if (userId <= 0)
+            throw new IdParametersBadRequestException();
 
-    var res = await _serviceManager.Groups.GetGroupsByUserId(usersUserId, trackChanges: false);
-    if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<GroupForUserSettings>>("No data found!"));
+        // Execute business logic
+        var groupForUserSettings = await _serviceManager.Groups
+            .GroupMemberByUserId(userId, trackChanges: false);
 
-    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
-  }
+        // Return standardized response
+        if (groupForUserSettings == null || !groupForUserSettings.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<GroupMemberDto>>(
+                "No group memberships found for this user"));
 
+        return Ok(ResponseHelper.Success(groupForUserSettings.ToList(), 
+            "Group memberships retrieved successfully"));
+    }
 
-  //[HttpGet(RouteConstants.GetGroupMemberByUserId)]
-  //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
+    /// <summary>
+    /// Retrieves access permissions for the current user
+    /// </summary>
+    /// <param name="model">Common property model</param>
+    /// <returns>List of permissions</returns>
+    [HttpPost(RouteConstants.GetAccessPermisionForCurrentUser)]
+    public async Task<IActionResult> GetAccessPermisionForCurrentUser([FromBody] CommonProperty model)
+    {
+        // ✅ Get authenticated user from HttpContext
+        var currentUser = HttpContext.GetCurrentUser();
+        var userId = HttpContext.GetUserId();
 
-  [HttpGet(RouteConstants.GroupMemberByUserId)]
-  public async Task<IActionResult> GroupMemberByUserId([FromQuery] int userId)
-  {
-    // from claim.
-    var userIdFromSession = Convert.ToInt32(User.FindFirst("UserId")?.Value);
-    // userId : which key is reponsible to when cache was created .
-    // get user from cache. if cache is not founded by key then it will thow Unauthorized exception with 401 status code.
-    UsersDto user = _serviceManager.GetCache<UsersDto>(userIdFromSession);
+        // Validate input parameters
+        if (model == null)
+            throw new NullModelBadRequestException(nameof(CommonProperty));
 
-    IEnumerable<GroupMemberDto> groupForUserSettings = await _serviceManager.Groups.GroupMemberByUserId( userId ,trackChanges: false);
-    return Ok(groupForUserSettings.ToList());
-  }
+        // Validate user data
+        if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
+            throw new IdParametersBadRequestException();
 
+        // Execute business logic
+        var groupPermissions = await _serviceManager.Groups
+            .GetAccessPermisionForCurrentUser(31, userId);
 
-  //[HttpGet(RouteConstants.GetGroupMemberByUserId)]
-  //[ResponseCache(Duration = 60)] // Browser caching for 1 minute
+        // Return standardized response
+        if (groupPermissions == null || !groupPermissions.Any())
+            return Ok(ResponseHelper.NoContent<IEnumerable<GroupPermissionDto>>(
+                "No group permissions found"));
 
-  [HttpPost(RouteConstants.GetAccessPermisionForCurrentUser)]
-  public async Task<IActionResult> GetAccessPermisionForCurrentUser([FromBody]CommonProperty model)
-  {
-    var userIdClaim = User.FindFirst("UserId")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-      throw new GenericUnauthorizedException("User authentication required.");
-
-    if (!int.TryParse(userIdClaim, out int userId))
-      throw new GenericBadRequestException("Invalid user ID format.");
-
-    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
-    if (currentUser == null)
-      throw new GenericUnauthorizedException("User session expired.");
-
-    if (model == null)
-      throw new NullModelBadRequestException(nameof(CommonProperty));
-    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null) throw new IdParametersBadRequestException();
-
-    IEnumerable<GroupPermissionDto> groupPermissions = await _serviceManager.Groups.GetAccessPermisionForCurrentUser(31, userId);
-    if (groupPermissions == null || !groupPermissions.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<GroupPermissionDto>>("No Group peremission info found"));
-
-    return Ok(ResponseHelper.Success(groupPermissions.ToList(), "Group peremission info retrieved successfully"));
-  }
-
- 
-
-
+        return Ok(ResponseHelper.Success(groupPermissions.ToList(), 
+            "Group permissions retrieved successfully"));
+    }
 }
