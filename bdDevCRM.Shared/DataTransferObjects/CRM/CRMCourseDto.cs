@@ -64,3 +64,4 @@ public class CrmCourseDto
   public string? InstituteName { get; set; }
   public string? CurrencyName { get; set; }
 }
+
