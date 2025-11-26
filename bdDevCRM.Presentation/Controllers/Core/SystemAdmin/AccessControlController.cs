@@ -3,6 +3,7 @@ using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Utilities.CRMGrid.GRID;
@@ -114,4 +115,40 @@ public class AccessControlController : BaseApiController
 
         return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
     }
+
+  // --------- 5. Delete ----------------------------------------------
+  /// <summary>
+  /// Deletes a Access Control record
+  /// </summary>
+  /// <param name="key">Access Control ID to delete</param>
+  /// <param name="modelDto">Access Control data for validation</param>
+  /// <returns>Operation result message</returns>
+  [HttpDelete(RouteConstants.DeleteAccessControl)]
+  //[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+  public async Task<IActionResult> DeleteAccessControl([FromRoute] int key)
+  {
+    try
+    {
+      // ✅ Get authenticated user from HttpContext
+      var currentUser = HttpContext.GetCurrentUser();
+      var userId = HttpContext.GetUserId();
+
+      // Validate input parameters
+      if (key <= 0)
+        return BadRequest(ResponseHelper.BadRequest("Invalid course ID. Course ID must be greater than 0."));
+
+      // Execute business logic
+      var res = await _serviceManager.AccessControl.DeleteRecordAsync(key);
+
+      // Return standardized response
+      if (res == OperationMessage.Success)
+        return Ok(ResponseHelper.Success(res, "Course deleted successfully"));
+      else
+        return Conflict(ResponseHelper.Conflict(res));
+    }
+    catch (Exception)
+    {
+      throw;
+    }
+  }
 }

@@ -1,13 +1,13 @@
 ﻿//using bdDevCRM.Entities.CRMGrid;
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.System;
-
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
-
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 //using bdDevCRM.Utilities.KendoGrid;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.EntityFrameworkCore;
@@ -61,9 +61,6 @@ internal sealed class  AccessControlService : IAccessControlService
     return modelDto;
   }
 
-
-
-
   public async Task<GridEntity<AccessControlDto>> AccessControlSummary(bool trackChanges, CRMGridOptions options)
   {
     string query = "Select AccessId,AccessName from AccessControl";
@@ -71,6 +68,17 @@ internal sealed class  AccessControlService : IAccessControlService
     var gridEntity = await _repository.AccessControls.GridData<AccessControlDto>(query, options, orderBy, "");
 
     return gridEntity;
+  }
+
+  public async Task<string> DeleteRecordAsync(int key)
+  {
+    if (key == null || key == 0)
+      throw new IdMismatchBadRequestException(key.ToString(), nameof(AccessControlDto));
+
+    await _repository.AccessControls.DeleteAsync(x => x.AccessId == key, true);
+    await _repository.SaveAsync();
+    _logger.LogInfo($"AccessControl deleted, id={key}");
+    return OperationMessage.Success;
   }
 
 }
