@@ -1,14 +1,33 @@
-﻿using bdDevCRM.Entities.Entities;
-using bdDevCRM.Entities.Entities.System;
+﻿using bdDevCRM.Entities.Entities.Token;
 using bdDevCRM.Shared.DataTransferObjects.Authentication;
 
 namespace bdDevCRM.ServiceContract.Authentication;
 
 public interface IAuthenticationService
 {
-  //Task<bool> ValidateUser(UserForAuthenticationDto userForAuth);
+  /// <summary>
+  /// Validate user credentials
+  /// </summary>
   bool ValidateUser(UserForAuthenticationDto userForAuth);
-  string CreateToken(UserForAuthenticationDto users);
 
-  string GenerateToken(Users user);
+  /// <summary>
+  /// Create JWT token with refresh token
+  /// </summary>
+  TokenResponse CreateToken(UserForAuthenticationDto userForAuth);
+
+  /// <summary>
+  /// Refresh access token using refresh token
+  /// </summary>
+  Task<TokenResponse> RefreshTokenAsync(string refreshToken, string ipAddress);
+
+  /// <summary>
+  /// Revoke refresh token
+  /// </summary>
+  Task<bool> RevokeTokenAsync(string refreshToken, string ipAddress);
+
+  /// <summary>
+  /// Remove expired refresh tokens from database
+  /// </summary>
+  Task RemoveExpiredTokensAsync();
+
 }

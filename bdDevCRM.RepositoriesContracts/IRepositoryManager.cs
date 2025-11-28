@@ -11,6 +11,7 @@ public interface IRepositoryManager : IDisposable
 {
   // SystemAdmin Part
   ITokenBlacklistRepository TokenBlacklists { get; }
+  IRefreshTokenRepository RefreshTokens { get; }
   ICrmCountryRepository Countries { get; }
   ICompanyRepository Companies { get; }
   ISystemSettingsRepository SystemSettings { get; }

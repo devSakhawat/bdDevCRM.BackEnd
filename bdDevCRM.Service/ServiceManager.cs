@@ -9,6 +9,7 @@ using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.ServiceContract.DMS;
+using bdDevCRM.Services.Authentication;
 using bdDevCRM.Services.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
@@ -97,7 +98,7 @@ public sealed class ServiceManager : IServiceManager
     _companyService = new Lazy<ICompanyService>(() => new CompanyService(repository, logger, configuration));
     _systemSettingsService = new Lazy<ISystemSettingsService>(() => new SystemSettingsService(repository, logger, configuration));
     _userService = new Lazy<IUsersService>(() => new UsersService(repository, logger, configuration));
-    _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(repository, logger, configuration));
+    _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(repository, logger, configuration , httpContextAccessor));
     _menuService = new Lazy<IMenuService>(() => new MenuService(repository, logger, configuration));
     _moduleService = new Lazy<IModuleService>(() => new ModuleService(repository, logger, configuration));
     _groupService = new Lazy<IGroupService>(() => new GroupService(repository, logger, configuration));
