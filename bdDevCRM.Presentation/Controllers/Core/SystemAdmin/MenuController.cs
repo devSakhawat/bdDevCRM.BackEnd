@@ -37,8 +37,9 @@ public class MenuController : BaseApiController
         string cacheKey = $"menu_permissions_{userId}";
         if (_cache.TryGetValue(cacheKey, out IEnumerable<MenuDto> cachedMenus))
         {
-            return Ok(cachedMenus);
+            return Ok(ResponseHelper.Success(cachedMenus, "Menus retrieved from cache"));
         }
+
         var menusDtoTask = _serviceManager.Menus.SelectMenuByUserPermission(userId, trackChanges: false);
 
         // Add timeout to prevent long-running queries
@@ -47,20 +48,22 @@ public class MenuController : BaseApiController
         if (completedTask != menusDtoTask)
         {
             //_logger.LogWarning("Menu query timeout for user {UserId}", userId);
-            return StatusCode(408, "Request timeout while retrieving menu data");
+            throw new RequestTimeoutException("Request timeout while retrieving menu data");
         }
 
         var menusDto = await menusDtoTask;
 
         if (!menusDto.Any())
-            return NoContent();
+            throw new GenericNotFoundException("menus", "userId", userId.ToString());
 
         // Cache the result
-        var cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(5)).SetPriority(CacheItemPriority.High);
+        var cacheOptions = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
+            .SetPriority(CacheItemPriority.High);
 
         _cache.Set(cacheKey, menusDto, cacheOptions);
 
-        return Ok(menusDto);
+        return Ok(ResponseHelper.Success(menusDto, "Menus retrieved successfully"));
     }
 
     [HttpGet(RouteConstants.GetParentMenuByMenu)]
