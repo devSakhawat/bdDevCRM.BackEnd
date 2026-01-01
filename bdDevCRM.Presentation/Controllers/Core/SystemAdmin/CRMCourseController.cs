@@ -17,7 +17,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing CRM courses
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 [ApiController]
 public class CRMCourseController : BaseApiController
 {
@@ -38,7 +38,7 @@ public class CRMCourseController : BaseApiController
     [HttpGet(RouteConstants.CourseDDL)]
     public async Task<IActionResult> CourseDDL()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -60,7 +60,7 @@ public class CRMCourseController : BaseApiController
     [HttpGet(RouteConstants.CourseByInstituteIdDDL)]
     public async Task<IActionResult> CourseByInstituteIdDDL([FromRoute] int instituteId)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -87,7 +87,7 @@ public class CRMCourseController : BaseApiController
     [HttpPost(RouteConstants.CourseSummary)]
     public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -117,7 +117,7 @@ public class CRMCourseController : BaseApiController
     {
         try
         {
-            // ✅ Get authenticated user from HttpContext
+            //Get authenticated user from HttpContext
             var currentUser = HttpContext.GetCurrentUser();
             var userId = HttpContext.GetUserId();
 
@@ -153,7 +153,7 @@ public class CRMCourseController : BaseApiController
     {
         try
         {
-            // ✅ Get authenticated user from HttpContext
+            //Get authenticated user from HttpContext
             var currentUser = HttpContext.GetCurrentUser();
             var userId = HttpContext.GetUserId();
 
@@ -192,7 +192,7 @@ public class CRMCourseController : BaseApiController
     {
         try
         {
-            // ✅ Get authenticated user from HttpContext
+            //Get authenticated user from HttpContext
             var currentUser = HttpContext.GetCurrentUser();
             var userId = HttpContext.GetUserId();
 

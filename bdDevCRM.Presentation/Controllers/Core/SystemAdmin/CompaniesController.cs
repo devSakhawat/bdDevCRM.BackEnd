@@ -13,7 +13,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing companies
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class CompaniesController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
@@ -31,7 +31,7 @@ public class CompaniesController : BaseApiController
   [Produces("application/json", "text/csv")]
   public IActionResult GetCompanies()
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -53,7 +53,7 @@ public class CompaniesController : BaseApiController
   [HttpGet(RouteConstants.ReadCompany)]
   public IActionResult GetCompany([FromQuery] int id)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -76,7 +76,7 @@ public class CompaniesController : BaseApiController
   [HttpPost(RouteConstants.CreateCompany)]
   public IActionResult CreateCompany([FromBody] CompanyDto companyDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -100,7 +100,7 @@ public class CompaniesController : BaseApiController
   [HttpGet("collection/({ids})", Name = "CompanyCollection")]
   public IActionResult GetCompanCollection(IEnumerable<int> ids)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -125,7 +125,7 @@ public class CompaniesController : BaseApiController
   [HttpGet(RouteConstants.GetMotherCompany)]
   public async Task<IActionResult> GetMotherCompany()
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 

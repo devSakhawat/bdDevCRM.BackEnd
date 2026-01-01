@@ -29,7 +29,7 @@ public class CrmIntakeMonthController : BaseApiController
     if (key <= 0)
       throw new GenericBadRequestException("Invalid intake month ID. ID must be greater than 0.");
 
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -53,7 +53,7 @@ public class CrmIntakeMonthController : BaseApiController
   [HttpGet(RouteConstants.IntakeMonthDDL)]
   public async Task<IActionResult> GetIntakeMonthsDDL()
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -74,7 +74,7 @@ public class CrmIntakeMonthController : BaseApiController
   //[HttpGet(RouteConstants.IntakeMonthDDL)]
   //public async Task<IActionResult> GetIntakeMonths()
   //{
-  //  // ✅ Get authenticated user from HttpContext
+  //  //Get authenticated user from HttpContext
   //  var currentUser = HttpContext.GetCurrentUser();
   //  var userId = HttpContext.GetUserId();
   //
@@ -96,7 +96,7 @@ public class CrmIntakeMonthController : BaseApiController
   [ServiceFilter(typeof(LogActionAttribute))]
   public async Task<IActionResult> GetSummaryGrid([FromBody] CRMGridOptions options)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -122,7 +122,7 @@ public class CrmIntakeMonthController : BaseApiController
   [ServiceFilter(typeof(LogActionAttribute))]
   public async Task<IActionResult> CreateIntakeMonth([FromBody] CrmIntakeMonthDto intakeMonthDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -148,7 +148,7 @@ public class CrmIntakeMonthController : BaseApiController
   [ServiceFilter(typeof(LogActionAttribute))]
   public async Task<IActionResult> SaveOrUpdate(int key, [FromBody] CrmIntakeMonthDto intakeMonthDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -173,7 +173,7 @@ public class CrmIntakeMonthController : BaseApiController
     if (key <= 0)
       throw new GenericBadRequestException("Invalid intake month ID. ID must be greater than 0.");
 
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -197,7 +197,7 @@ public class CrmIntakeMonthController : BaseApiController
     if (key <= 0)
       throw new GenericBadRequestException("Invalid intake month ID. ID must be greater than 0.");
 
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 

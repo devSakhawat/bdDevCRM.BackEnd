@@ -16,7 +16,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing currencies
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class CurrencyController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
@@ -35,7 +35,7 @@ public class CurrencyController : BaseApiController
   [HttpGet(RouteConstants.CurrencyDDL)]
   public async Task<IActionResult> CurrencyDDL()
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -57,7 +57,7 @@ public class CurrencyController : BaseApiController
   [HttpPost(RouteConstants.CurrencySummary)]
   public async Task<IActionResult> CurrencySummary([FromBody] CRMGridOptions options)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -85,7 +85,7 @@ public class CurrencyController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> SaveOrUpdate([FromRoute] int key, [FromBody] CurrencyDto modelDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -113,7 +113,7 @@ public class CurrencyController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> DeleteCurrency([FromRoute] int key, [FromBody] CurrencyDto modelDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 

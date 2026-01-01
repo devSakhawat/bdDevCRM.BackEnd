@@ -18,7 +18,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing user groups and permissions
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class GroupController : BaseApiController
 {
     private readonly IMemoryCache _cache;
@@ -36,7 +36,7 @@ public class GroupController : BaseApiController
     [HttpPost(RouteConstants.GroupSummary)]
     public async Task<IActionResult> GroupSummary([FromBody] CRMGridOptions options)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -65,7 +65,7 @@ public class GroupController : BaseApiController
     [HttpGet(RouteConstants.GroupPermisionsbyGroupId)]
     public async Task<IActionResult> GroupPermisionsbyGroupId([FromRoute] int groupId)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -92,7 +92,7 @@ public class GroupController : BaseApiController
     [HttpGet(RouteConstants.GetAccesses)]
     public async Task<IActionResult> GetAccesses()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -116,7 +116,7 @@ public class GroupController : BaseApiController
     [HttpPost(RouteConstants.CreateGroup)]
     public async Task<IActionResult> SaveGroup([FromBody] GroupDto objGroup)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -146,7 +146,7 @@ public class GroupController : BaseApiController
         [FromRoute] int key, 
         [FromBody] GroupDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -175,7 +175,7 @@ public class GroupController : BaseApiController
     [HttpGet(RouteConstants.Groups)]
     public async Task<IActionResult> GetGroups()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -200,7 +200,7 @@ public class GroupController : BaseApiController
     [HttpGet(RouteConstants.GroupMemberByUserId)]
     public async Task<IActionResult> GroupMemberByUserId([FromQuery] int userId)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var currentUserId = HttpContext.GetUserId();
 
@@ -229,7 +229,7 @@ public class GroupController : BaseApiController
     [HttpPost(RouteConstants.GetAccessPermisionForCurrentUser)]
     public async Task<IActionResult> GetAccessPermisionForCurrentUser([FromBody] CommonProperty model)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 

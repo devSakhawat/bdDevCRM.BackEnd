@@ -21,7 +21,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing workflow statuses and actions
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class StatusController : BaseApiController
 {
     private readonly IMemoryCache _cache;
@@ -40,7 +40,7 @@ public class StatusController : BaseApiController
     [HttpGet(RouteConstants.StatusByMenuId)]
     public async Task<IActionResult> StatusByMenuId([FromQuery] int menuId)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -69,7 +69,7 @@ public class StatusController : BaseApiController
     [HttpGet(RouteConstants.ActionsByStatusIdForGroup)]
     public async Task<IActionResult> ActionsByStatusIdForGroup([FromQuery] int statusId)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -100,7 +100,7 @@ public class StatusController : BaseApiController
     [HttpPost(RouteConstants.WorkFlowSummary)]
     public async Task<IActionResult> GetWorkFlowSummary([FromBody] CRMGridOptions options)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -135,7 +135,7 @@ public class StatusController : BaseApiController
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
     public async Task<IActionResult> CreateWorkFlow([FromBody] WfStateDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -176,7 +176,7 @@ public class StatusController : BaseApiController
         [FromRoute] int key, 
         [FromBody] WfStateDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -210,7 +210,7 @@ public class StatusController : BaseApiController
         [FromRoute] int key, 
         [FromBody] WfStateDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -240,7 +240,7 @@ public class StatusController : BaseApiController
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
     public async Task<IActionResult> CreateAction([FromBody] WfActionDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -271,7 +271,7 @@ public class StatusController : BaseApiController
         [FromRoute] int key, 
         [FromBody] WfActionDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -308,7 +308,7 @@ public class StatusController : BaseApiController
         [FromRoute] int key, 
         [FromBody] WfActionDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -340,7 +340,7 @@ public class StatusController : BaseApiController
         [FromBody] CRMGridOptions options, 
         [FromQuery] int stateId)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -375,7 +375,7 @@ public class StatusController : BaseApiController
     [HttpGet(RouteConstants.GetNextStatesByMenu)]
     public async Task<IActionResult> GetNextStatesByMenu([FromQuery] int menuId)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -406,7 +406,7 @@ public class StatusController : BaseApiController
     [HttpGet(RouteConstants.StatusByMenuNUserId)]
     public async Task<IActionResult> StatusByMenuNUserId()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -442,7 +442,7 @@ public class StatusController : BaseApiController
     [HttpGet(RouteConstants.StatusByMenuName)]
     public async Task<IActionResult> StatusByMenuName([FromBody] string menuName)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 

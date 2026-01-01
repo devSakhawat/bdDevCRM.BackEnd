@@ -86,21 +86,21 @@ public class ExceptionMiddleware
         // Conflict Exceptions (409) - Order matters: Most specific first
         GenericConflictException genericConflict => CreateResponse(
             genericConflict.StatusCode,
-            ex.Message, // ✅ Custom message gets priority
+            ex.Message, //Custom message gets priority
             nameof(GenericConflictException),
             correlationId
         ),
 
         DuplicateRecordException duplicate => CreateResponse(
             duplicate.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(DuplicateRecordException),
             correlationId
         ),
 
         ConflictException conflict => CreateResponse(
             conflict.StatusCode,
-            ex.Message, // ✅ Custom message from derived types
+            ex.Message, //Custom message from derived types
             nameof(ConflictException),
             correlationId
         ),
@@ -108,13 +108,13 @@ public class ExceptionMiddleware
         // BadRequest Exceptions (400)
         InvalidCreateOperationException invalidCreate => CreateResponse(
             invalidCreate.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(InvalidCreateOperationException),
             correlationId
         ),
 
         InvalidUpdateOperationException invalidUpdate => CreateResponse(
-            invalidUpdate.StatusCode,  // ✅ Will work after BadRequestException fix
+            invalidUpdate.StatusCode,  //Will work after BadRequestException fix
             ex.Message,
             nameof(InvalidUpdateOperationException),
             correlationId
@@ -122,35 +122,35 @@ public class ExceptionMiddleware
 
         IdMismatchBadRequestException idMismatch => CreateResponse(
             idMismatch.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(IdMismatchBadRequestException),
             correlationId
         ),
 
         NullModelBadRequestException nullModel => CreateResponse(
             nullModel.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(NullModelBadRequestException),
             correlationId
         ),
 
         GenericBadRequestException genericBadRequest => CreateResponse(
             genericBadRequest.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(GenericBadRequestException),
             correlationId
         ),
 
         UsernamePasswordMismatchException authMismatch => CreateResponse(
             authMismatch.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(UsernamePasswordMismatchException),
             correlationId
         ),
 
         BadRequestException badRequest => CreateResponse(
             badRequest.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(BadRequestException),
             correlationId
         ),
@@ -158,14 +158,14 @@ public class ExceptionMiddleware
         // NotFound Exceptions (404)
         GenericNotFoundException genericNotFound => CreateResponse(
             genericNotFound.StatusCode,
-            ex.Message, // ✅ Custom message with details
+            ex.Message, //Custom message with details
             nameof(GenericNotFoundException),
             correlationId
         ),
 
         NotFoundException notFound => CreateResponse(
             notFound.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(NotFoundException),
             correlationId
         ),
@@ -173,21 +173,21 @@ public class ExceptionMiddleware
         // Unauthorized Exceptions (401)
         GenericUnauthorizedException genericUnauthorized => CreateResponse(
             genericUnauthorized.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(GenericUnauthorizedException),
             correlationId
         ),
 
       //  UsernamePasswordMismatchException authMismatch => CreateResponse(
       //    authMismatch.StatusCode,
-      //    ex.Message, // ✅ Custom message
+      //    ex.Message, //Custom message
       //    nameof(UsernamePasswordMismatchException),
       //    correlationId
       //),
 
       UnauthorizedException unauthorized => CreateResponse(
             unauthorized.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(UnauthorizedException),
             correlationId
         ),
@@ -195,7 +195,7 @@ public class ExceptionMiddleware
         // Forbidden Exceptions (403)
         ForbiddenAccessException forbidden => CreateResponse(
             forbidden.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(ForbiddenAccessException),
             correlationId
         ),
@@ -203,7 +203,7 @@ public class ExceptionMiddleware
         // ServiceUnavailable Exceptions (503)
         ServiceUnavailableException serviceUnavailable => CreateResponse(
             serviceUnavailable.StatusCode,
-            ex.Message, // ✅ Custom message
+            ex.Message, //Custom message
             nameof(ServiceUnavailableException),
             correlationId
         ),
@@ -255,7 +255,7 @@ public class ExceptionMiddleware
 
         ArgumentException argument => CreateResponse(
             400,
-            ex.Message, // ✅ Framework message
+            ex.Message, //Framework message
             "ArgumentError",
             correlationId
         ),
@@ -273,7 +273,7 @@ public class ExceptionMiddleware
 
         DbUpdateException dbUpdate => CreateResponse(
             500,
-            SanitizeDatabaseErrorMessage(ex), // ✅ Safe database message
+            SanitizeDatabaseErrorMessage(ex), //Safe database message
             "DatabaseError",
             correlationId,
             includeStackTrace: true

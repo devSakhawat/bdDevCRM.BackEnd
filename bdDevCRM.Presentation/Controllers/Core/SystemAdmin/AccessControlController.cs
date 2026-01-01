@@ -16,7 +16,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing access controls
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class AccessControlController : BaseApiController
 {
     //private readonly IServiceManager _serviceManager;
@@ -36,7 +36,7 @@ public class AccessControlController : BaseApiController
     [HttpPost(RouteConstants.CreateAccessControl)]
     public async Task<IActionResult> SaveAccessControl([FromBody] AccessControlDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -64,7 +64,7 @@ public class AccessControlController : BaseApiController
     [HttpPut(RouteConstants.UpdateAccessControl)]
     public async Task<IActionResult> UpdateAccessControl([FromRoute] int key, [FromBody] AccessControlDto modelDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -94,7 +94,7 @@ public class AccessControlController : BaseApiController
     [HttpPost(RouteConstants.AccessControlSummary)]
     public async Task<IActionResult> AccessControlSummary([FromBody] CRMGridOptions options)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -129,7 +129,7 @@ public class AccessControlController : BaseApiController
   {
     try
     {
-      // ✅ Get authenticated user from HttpContext
+      //Get authenticated user from HttpContext
       var currentUser = HttpContext.GetCurrentUser();
       var userId = HttpContext.GetUserId();
 
