@@ -1,6 +1,7 @@
 ﻿using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.Entities.Entities.System;
+using bdDevCRM.Entities.Entities.Token;
 using Microsoft.EntityFrameworkCore;
 
 namespace bdDevCRM.Sql.Context;
@@ -191,6 +192,8 @@ public partial class CRMContext : DbContext
   public virtual DbSet<WfAction> Wfaction { get; set; }
 
   public virtual DbSet<WfState> Wfstate { get; set; }
+
+  public DbSet<RefreshToken> RefreshTokens { get; set; }
 
   //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 
@@ -1747,6 +1750,38 @@ public partial class CRMContext : DbContext
       entity.Property(e => e.WfStateId).HasColumnName("WfStateId");
       entity.Property(e => e.Sequence).HasColumnName("sequence");
       entity.Property(e => e.StateName).HasMaxLength(50);
+    });
+
+    modelBuilder.Entity<RefreshToken>(entity =>
+    {
+      entity.ToTable("RefreshTokens");
+
+      entity.HasKey(e => e.RefreshTokenId);
+
+      entity.Property(e => e.Token)
+            .IsRequired()
+            .HasMaxLength(500);
+
+      entity.Property(e => e.ReplacedByToken)
+            .HasMaxLength(500);
+
+      entity.Property(e => e.CreatedByIp)
+            .HasMaxLength(100);
+
+      entity.Property(e => e.CreatedDate)
+            .IsRequired();
+
+      entity.Property(e => e.ExpiryDate)
+            .IsRequired();
+
+      entity.Property(e => e.IsRevoked)
+            .HasDefaultValue(false);
+
+      entity.Property(e => e.RevokedDate)
+            .IsRequired(false);
+
+      // Ignore computed property
+      entity.Ignore(e => e.IsActive);
     });
 
     OnModelCreatingPartial(modelBuilder);

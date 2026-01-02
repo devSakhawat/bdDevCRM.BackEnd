@@ -17,7 +17,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing CRM payment methods
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class CrmPaymentMethodController : BaseApiController
 {
     private readonly IMemoryCache _cache;
@@ -36,7 +36,7 @@ public class CrmPaymentMethodController : BaseApiController
     [HttpGet(RouteConstants.PaymentMethodByKey)]
     public async Task<IActionResult> GetPaymentMethod(int key)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -72,7 +72,7 @@ public class CrmPaymentMethodController : BaseApiController
     [HttpGet(RouteConstants.PaymentMethodDDL)]
     public async Task<IActionResult> GetPaymentMethodsDDL()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -100,7 +100,7 @@ public class CrmPaymentMethodController : BaseApiController
     [HttpGet(RouteConstants.OnlinePaymentMethodDDL)]
     public async Task<IActionResult> GetOnlinePaymentMethodsDDL()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -130,7 +130,7 @@ public class CrmPaymentMethodController : BaseApiController
     [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> GetSummaryGrid([FromBody] CRMGridOptions options)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -165,7 +165,7 @@ public class CrmPaymentMethodController : BaseApiController
     public async Task<IActionResult> CreatePaymentMethod(
         [FromBody] CrmPaymentMethodDto paymentMethodDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -204,7 +204,7 @@ public class CrmPaymentMethodController : BaseApiController
         int key, 
         [FromBody] CrmPaymentMethodDto paymentMethodDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -237,7 +237,7 @@ public class CrmPaymentMethodController : BaseApiController
         int key, 
         [FromBody] CrmPaymentMethodDto paymentMethodDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -271,7 +271,7 @@ public class CrmPaymentMethodController : BaseApiController
     [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> DeletePaymentMethod(int key)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 

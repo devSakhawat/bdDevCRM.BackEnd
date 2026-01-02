@@ -19,6 +19,8 @@ public class RepositoryManager : IRepositoryManager
 {
   private readonly CRMContext _repositoryContext;
 
+  private readonly Lazy<ITokenBlacklistRepository> _tokenBlacklistRepository;
+  private readonly Lazy<IRefreshTokenRepository> _refreshTokenRepository;
   private readonly Lazy<ICrmCountryRepository> _countries;
   private readonly Lazy<ICrmInstituteTypeRepository> _crmInstituteTypeRepository;
   private readonly Lazy<ICrmInstituteRepository> _crmInstituteRepository;
@@ -27,7 +29,6 @@ public class RepositoryManager : IRepositoryManager
   private readonly Lazy<IUsersRepository> _usersRepository;
   private readonly Lazy<IAuthenticationRepository> _authenticationRepository;
   private readonly Lazy<IMenuRepository> _menuRepository;
-  private readonly Lazy<ITokenBlacklistRepository> _tokenBlacklistRepository;
   private readonly Lazy<IModuleRepository> _moduleRepository;
   private readonly Lazy<IGroupRepository> _groupsRepository;
   private readonly Lazy<IGroupMemberRepository> _groupMembersRepository;
@@ -94,7 +95,10 @@ public class RepositoryManager : IRepositoryManager
   public RepositoryManager(CRMContext repositoryContext)
   {
     _repositoryContext = repositoryContext;
-    
+
+    _tokenBlacklistRepository = new Lazy<ITokenBlacklistRepository>(() => new TokenBlacklistRepository(_repositoryContext));
+    _refreshTokenRepository = new Lazy<IRefreshTokenRepository>(() => new RefreshTokenRepository(_repositoryContext));
+
     #region System
     _countries = new Lazy<ICrmCountryRepository>(() => new CrmCountryRepository(_repositoryContext));
     _crmInstituteTypeRepository = new Lazy<ICrmInstituteTypeRepository>( () => new CRMInstituteTypeRepository(_repositoryContext));
@@ -105,7 +109,6 @@ public class RepositoryManager : IRepositoryManager
     _usersRepository = new Lazy<IUsersRepository>(() => new UsersRepository(_repositoryContext));
     _authenticationRepository = new Lazy<IAuthenticationRepository>(() => new AuthenticationRepository(_repositoryContext));
     _menuRepository = new Lazy<IMenuRepository>(() => new MenuRepository(_repositoryContext));
-    _tokenBlacklistRepository = new Lazy<ITokenBlacklistRepository>(() => new TokenBlacklistRepository(_repositoryContext));
     _moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(_repositoryContext));
     _groupsRepository = new Lazy<IGroupRepository>(() => new GroupRepository(_repositoryContext));
     _groupMembersRepository = new Lazy<IGroupMemberRepository>(() => new GroupMemberRepository(_repositoryContext));
@@ -175,6 +178,7 @@ public class RepositoryManager : IRepositoryManager
 
   #region SystemAdmin
   public ITokenBlacklistRepository TokenBlacklists => _tokenBlacklistRepository.Value;
+  public IRefreshTokenRepository RefreshTokens => _refreshTokenRepository.Value;
   public ICrmCountryRepository Countries => _countries.Value;
   public ICompanyRepository Companies => _companies.Value;
   public ISystemSettingsRepository SystemSettings => _systemRepository.Value;

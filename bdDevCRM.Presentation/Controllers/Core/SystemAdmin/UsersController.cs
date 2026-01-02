@@ -26,7 +26,7 @@ public class UsersController : BaseApiController
   [HttpPost(RouteConstants.UserSummary)]
   public async Task<IActionResult> UserSummary([FromBody] CRMGridOptions options, [FromQuery] int companyId)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -51,7 +51,7 @@ public class UsersController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> SaveUser([FromBody] UsersDto usersDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -88,7 +88,7 @@ public class UsersController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateUser([FromRoute] int key, [FromBody] UsersDto usersDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 

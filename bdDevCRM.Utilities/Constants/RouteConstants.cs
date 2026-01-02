@@ -17,10 +17,18 @@ public static class RouteConstants
   public const string TestSearch = "test/{key:int}";
   #endregion Test
 
+  //#region Authentication
+  //public const string Login = "login";
+  //public const string GetUserInfo = "user-info";
+  //public const string Logout = "logout";
+  //#endregion Authentication
+
   #region Authentication
   public const string Login = "login";
   public const string GetUserInfo = "user-info";
   public const string Logout = "logout";
+  public const string RefreshToken = "refresh-token";
+  public const string RevokeToken = "revoke-token";
   #endregion Authentication
 
   #region Module

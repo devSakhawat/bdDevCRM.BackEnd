@@ -18,7 +18,7 @@ namespace bdDevCRM.Presentation.Controllers.DMS;
 /// Controller for managing DMS (Document Management System) documents
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class DmsDocumentController : BaseApiController
 {
     private readonly IMemoryCache _cache;
@@ -36,7 +36,7 @@ public class DmsDocumentController : BaseApiController
     [HttpGet("ddl")]
     public async Task<IActionResult> DocumentDDL()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -61,7 +61,7 @@ public class DmsDocumentController : BaseApiController
     [HttpPost("summary")]
     public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions opt)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -90,7 +90,7 @@ public class DmsDocumentController : BaseApiController
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
     public async Task<IActionResult> Create([FromBody] DmsDocumentDto dto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -122,7 +122,7 @@ public class DmsDocumentController : BaseApiController
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
     public async Task<IActionResult> Update(int id, [FromBody] DmsDocumentDto dto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -155,7 +155,7 @@ public class DmsDocumentController : BaseApiController
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id, DmsDocumentDto dmsDocumentDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 

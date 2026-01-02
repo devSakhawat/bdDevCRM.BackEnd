@@ -1,9 +1,11 @@
 ﻿using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Authentication;
+using bdDevCRM.Shared.DataTransferObjects.Core.Authentication;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -39,11 +41,65 @@ public class AuthenticationController : BaseApiController
   [IgnoreMediaTypeValidation]
   public IActionResult Authenticate([FromBody] UserForAuthenticationDto user)
   {
-    if (!_serviceManager.CustomAuthentication.ValidateUser(user)) throw new UsernamePasswordMismatchException();
+    if (!_serviceManager.CustomAuthentication.ValidateUser(user))
+      throw new UsernamePasswordMismatchException();
 
-    var token = _serviceManager.CustomAuthentication.CreateToken(user);
-    return Ok(token);
+    var tokenResponse = _serviceManager.CustomAuthentication.CreateToken(user);
+    return Ok(ResponseHelper.Success(tokenResponse, "Login successful"));
   }
+
+
+  [HttpPost(RouteConstants.RefreshToken)]
+  [AllowAnonymous]
+  [IgnoreMediaTypeValidation]
+  public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+  {
+    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0. 0";
+    var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(request.RefreshToken, ipAddress);
+    return Ok(ResponseHelper.Success(tokenResponse, "Token refreshed successfully"));
+  }
+
+  [HttpPost(RouteConstants.RevokeToken)]
+  [IgnoreMediaTypeValidation]
+  public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequestDto request)
+  {
+    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
+    var result = await _serviceManager.CustomAuthentication.RevokeTokenAsync(request.RefreshToken, ipAddress);
+
+    if (!result) return BadRequest(ResponseHelper.BadRequest("Invalid refresh token"));
+
+    return Ok(ResponseHelper.Success("Token revoked successfully"));
+  }
+
+  [HttpGet(RouteConstants.GetUserInfo)]
+  [AllowAnonymous]
+  public IActionResult GetUserInfo()
+  {
+    var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+    var loginId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
+
+    // UsersDto
+    UsersDto? user = _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
+    if (user == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
+
+    var UserId = User.FindFirst("UserId")?.Value;
+    var cacheKey = $"User_{user.UserId}";
+    // Check if the user is already in the cache then destroy the cache
+    if (_memoryCache.TryGetValue(cacheKey, out _)) _memoryCache.Remove(cacheKey);
+
+    // Set the user in the cache with a 5-hours expiration
+    var cacheEntryOptions = new MemoryCacheEntryOptions()
+        .SetSlidingExpiration(TimeSpan.FromHours(5))
+        .SetAbsoluteExpiration(TimeSpan.FromHours(5));
+    _memoryCache.Set(cacheKey, user, cacheEntryOptions);
+    //_memoryCache.Set(cacheKey, user, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(5) });
+
+
+    user.Password = "";
+    return Ok(user);
+  }
+
 
   #region LoginFrom mvc
 
@@ -248,35 +304,6 @@ public class AuthenticationController : BaseApiController
   #endregion LoginFrom mvc
 
 
-  [HttpGet(RouteConstants.GetUserInfo)]
-  [AllowAnonymous]
-  public IActionResult GetUserInfo()
-  {
-    var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-    var loginId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
-
-    // UsersDto
-    UsersDto? user = _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
-    if (user == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
-
-    var UserId = User.FindFirst("UserId")?.Value;
-    var cacheKey = $"User_{user.UserId}";
-    // Check if the user is already in the cache then destroy the cache
-    if (_memoryCache.TryGetValue(cacheKey, out _)) _memoryCache.Remove(cacheKey);
-
-    // Set the user in the cache with a 5-hours expiration
-    var cacheEntryOptions = new MemoryCacheEntryOptions()
-        .SetSlidingExpiration(TimeSpan.FromHours(5))
-        .SetAbsoluteExpiration(TimeSpan.FromHours(5));
-    _memoryCache.Set(cacheKey, user, cacheEntryOptions);
-    //_memoryCache.Set(cacheKey, user, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(5) });
-
-
-    user.Password = "";
-    return Ok(user);
-  }
-
   //[HttpPost("logout")]
   [HttpPost(RouteConstants.Logout)]
   [IgnoreMediaTypeValidation]
@@ -332,6 +359,7 @@ public class AuthenticationController : BaseApiController
       _memoryCache.Remove(key);
     }
   }
+
 
   private void ClearnAllOfTheMemoryCache()
   {

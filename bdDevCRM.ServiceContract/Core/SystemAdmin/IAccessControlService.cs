@@ -9,4 +9,5 @@ public interface IAccessControlService
   Task<AccessControlDto> UpdateAsync(int key, AccessControlDto modelDto);
 
   Task<GridEntity<AccessControlDto>> AccessControlSummary(bool trackChanges, CRMGridOptions options);
+  Task<string> DeleteRecordAsync(int key);
 }

@@ -15,7 +15,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing CRM institute types
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class CRMInstituteTypeController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
@@ -35,7 +35,7 @@ public class CRMInstituteTypeController : BaseApiController
   [HttpGet(RouteConstants.InstituteTypeDDL)]
   public async Task<IActionResult> InstituteTypeDDL()
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -58,7 +58,7 @@ public class CRMInstituteTypeController : BaseApiController
   [HttpPost(RouteConstants.InstituteTypeSummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -86,7 +86,7 @@ public class CRMInstituteTypeController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> Create([FromBody] CRMInstituteTypeDto dto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -115,7 +115,7 @@ public class CRMInstituteTypeController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> Update([FromRoute] int key, [FromBody] CRMInstituteTypeDto dto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -147,7 +147,7 @@ public class CRMInstituteTypeController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> Delete([FromRoute] int key, [FromBody] CRMInstituteTypeDto dto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -180,7 +180,7 @@ public class CRMInstituteTypeController : BaseApiController
   public async Task<IActionResult> SaveOrUpdate([FromRoute] int key,
                                                 [FromBody] CRMInstituteTypeDto dto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 

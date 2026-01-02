@@ -21,7 +21,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing application modules
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class ModuleController : BaseApiController
 {
     private readonly IMemoryCache _cache;
@@ -40,7 +40,7 @@ public class ModuleController : BaseApiController
     [HttpPost(RouteConstants.ModuleSummary)]
     public async Task<IActionResult> ModuleSummary([FromBody] CRMGridOptions options)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -70,7 +70,7 @@ public class ModuleController : BaseApiController
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> GetModulesAsync()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -99,7 +99,7 @@ public class ModuleController : BaseApiController
     [HttpPost(RouteConstants.CreateModule)]
     public async Task<IActionResult> SaveModule([FromBody] ModuleDto moduleDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -129,7 +129,7 @@ public class ModuleController : BaseApiController
         [FromRoute] int key,
         [FromBody] ModuleDto moduleDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -159,11 +159,9 @@ public class ModuleController : BaseApiController
     /// <param name="moduleDto">Module data for validation</param>
     /// <returns>Operation result message</returns>
     [HttpDelete(RouteConstants.DeleteModule)]
-    public async Task<IActionResult> DeleteModule(
-        [FromRoute] int key,
-        [FromBody] ModuleDto moduleDto)
+    public async Task<IActionResult> DeleteModule([FromRoute] int key)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -171,14 +169,12 @@ public class ModuleController : BaseApiController
         if (key <= 0)
             throw new IdParametersBadRequestException();
 
-        if (moduleDto == null)
-            throw new NullModelBadRequestException("Module data cannot be null");
-
         // Execute business logic
-        await _serviceManager.Modules.DeleteModuleAsync(key, moduleDto);
+        await _serviceManager.Modules.DeleteModuleAsync(key);
 
         // Return standardized response
         return Ok(ResponseHelper.Success<string?>(null,
             "Module deleted successfully"));
     }
+
 }

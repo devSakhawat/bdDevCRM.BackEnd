@@ -570,17 +570,17 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
           _repository.Users.Update(objUserforDb);
           await _repository.SaveAsync();
 
-          // ✅ Clear ChangeTracker
+          //Clear ChangeTracker
           _repository.Users.ClearChangeTracker();
 
-          // ✅ Use Direct SQL to delete GroupMembers
+          //Use Direct SQL to delete GroupMembers
           string deleteSql = $"DELETE FROM GroupMembers WHERE UserId = {usersDto.UserId}";
           _repository.GroupMembers.ExecuteNonQuery(deleteSql);
 
-          // ✅ Clear ChangeTracker again
+          //Clear ChangeTracker again
           _repository.GroupMembers.ClearChangeTracker();
 
-          // ✅ Insert new GroupMembers using Direct SQL
+          //Insert new GroupMembers using Direct SQL
           if (usersDto.GroupMembers != null && usersDto.GroupMembers.Any())
           {
             foreach (var gm in usersDto.GroupMembers)

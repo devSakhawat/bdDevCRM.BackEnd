@@ -17,7 +17,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing CRM intake years
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class CrmIntakeYearController : BaseApiController
 {
     private readonly IMemoryCache _cache;
@@ -35,7 +35,7 @@ public class CrmIntakeYearController : BaseApiController
     [HttpGet(RouteConstants.IntakeYearDDL)]
     public async Task<IActionResult> GetIntakeYearsDDL()
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -65,7 +65,7 @@ public class CrmIntakeYearController : BaseApiController
     [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> GetSummaryGrid([FromBody] CRMGridOptions options)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -98,7 +98,7 @@ public class CrmIntakeYearController : BaseApiController
     [HttpGet(RouteConstants.IntakeYearByKey)]
     public async Task<IActionResult> GetIntakeYear([FromQuery] int key)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -138,7 +138,7 @@ public class CrmIntakeYearController : BaseApiController
     public async Task<IActionResult> CreateIntakeYear(
         [FromBody] CrmIntakeYearDto intakeYearDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -177,7 +177,7 @@ public class CrmIntakeYearController : BaseApiController
         int key, 
         [FromBody] CrmIntakeYearDto intakeYearDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -210,7 +210,7 @@ public class CrmIntakeYearController : BaseApiController
         int key, 
         [FromBody] CrmIntakeYearDto intakeYearDto)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
@@ -244,7 +244,7 @@ public class CrmIntakeYearController : BaseApiController
     [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> DeleteIntakeYear(int key)
     {
-        // ✅ Get authenticated user from HttpContext
+        //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 

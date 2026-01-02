@@ -17,7 +17,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// Controller for managing countries
 /// All methods require authentication via [AuthenticatedUser] attribute
 /// </summary>
-[AuthenticatedUser] // ✅ Controller-level authentication
+[AuthenticatedUser] //Controller-level authentication
 public class CountryController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
@@ -36,7 +36,7 @@ public class CountryController : BaseApiController
   [HttpGet(RouteConstants.CountryDDL)]
   public async Task<IActionResult> CountryDDL()
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -58,7 +58,7 @@ public class CountryController : BaseApiController
   [HttpPost(RouteConstants.CountrySummary)]
   public async Task<IActionResult> SummaryGrid([FromBody] CRMGridOptions options)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -85,7 +85,7 @@ public class CountryController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> CreateNewRcord([FromBody] CrmCountryDto modelDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -113,7 +113,7 @@ public class CountryController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> UpdateCountry([FromRoute] int key, [FromBody] CrmCountryDto modelDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -144,7 +144,7 @@ public class CountryController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> DeleteCountry([FromRoute] int key, [FromBody] CrmCountryDto modelDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 
@@ -175,7 +175,7 @@ public class CountryController : BaseApiController
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   public async Task<IActionResult> SaveOrUpdate([FromRoute] int key, [FromBody] CrmCountryDto modelDto)
   {
-    // ✅ Get authenticated user from HttpContext
+    //Get authenticated user from HttpContext
     var currentUser = HttpContext.GetCurrentUser();
     var userId = HttpContext.GetUserId();
 

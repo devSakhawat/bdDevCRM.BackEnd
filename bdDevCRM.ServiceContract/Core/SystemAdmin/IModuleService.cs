@@ -9,5 +9,5 @@ public interface IModuleService
     Task<List<ModuleDto>> GetModulesAsync(UsersDto currentUser, bool trackChanges);
     Task<ModuleDto> CreateModuleAsync(ModuleDto moduleDto);
     Task<ModuleDto> UpdateModuleAsync(int key, ModuleDto moduleDto);
-    Task DeleteModuleAsync(int key, ModuleDto moduleDto);
+    Task DeleteModuleAsync(int key);
 }
