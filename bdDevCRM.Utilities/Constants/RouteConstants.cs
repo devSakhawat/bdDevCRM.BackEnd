@@ -125,11 +125,11 @@ public static class RouteConstants
   #endregion Employee
 
   #region Branch
-  public const string BranchByCompanyIdForCombo = "branches-by-compnayId-for-combo/companyId/";
+  public const string BranchByCompanyIdForCombo = "branches-by-compnayId/companyId/";
   #endregion Branch
 
   #region Department
-  public const string DepartmentByCompanyIdForCombo = "departments-by-compnayId-for-combo/companyId/";
+  public const string DepartmentByCompanyIdForCombo = "departments-by-compnayId/companyId/";
   #endregion Department
 
   #region Country

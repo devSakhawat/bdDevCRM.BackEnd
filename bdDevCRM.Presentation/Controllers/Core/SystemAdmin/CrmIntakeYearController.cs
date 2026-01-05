@@ -10,14 +10,15 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 /// <summary>
 /// Controller for managing CRM intake years
-/// All methods require authentication via [AuthenticatedUser] attribute
+/// All methods require authentication via [AuthorizeUser] attribute
 /// </summary>
-[AuthenticatedUser] //Controller-level authentication
+[AuthorizeUser] //Controller-level authentication
 public class CrmIntakeYearController : BaseApiController
 {
     private readonly IMemoryCache _cache;

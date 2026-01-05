@@ -2,6 +2,7 @@
 //using bdDevCRM.Entities.CRMGrid;
 using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Controllers.BaseController;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
@@ -19,9 +20,9 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 /// <summary>
 /// Controller for managing application modules
-/// All methods require authentication via [AuthenticatedUser] attribute
+/// All methods require authentication via [AuthorizeUser] attribute
 /// </summary>
-[AuthenticatedUser] //Controller-level authentication
+[AuthorizeUser] //Controller-level authentication
 public class ModuleController : BaseApiController
 {
     private readonly IMemoryCache _cache;

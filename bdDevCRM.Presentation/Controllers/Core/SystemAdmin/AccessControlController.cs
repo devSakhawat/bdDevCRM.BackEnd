@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
@@ -14,9 +15,9 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 /// <summary>
 /// Controller for managing access controls
-/// All methods require authentication via [AuthenticatedUser] attribute
+/// All methods require authentication via [AuthorizeUser] attribute
 /// </summary>
-[AuthenticatedUser] //Controller-level authentication
+[AuthorizeUser] //Controller-level authentication
 public class AccessControlController : BaseApiController
 {
     //private readonly IServiceManager _serviceManager;

@@ -1,5 +1,6 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
+[AuthorizeUser]
 public class UsersController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
@@ -26,19 +28,19 @@ public class UsersController : BaseApiController
   [HttpPost(RouteConstants.UserSummary)]
   public async Task<IActionResult> UserSummary([FromBody] CRMGridOptions options, [FromQuery] int companyId)
   {
-    //Get authenticated user from HttpContext
-    var currentUser = HttpContext.GetCurrentUser();
-    var userId = HttpContext.GetUserId();
+		//Get authenticated user from HttpContext
+		var currentUser = HttpContext.GetCurrentUser();
+		var userId = HttpContext.GetUserId();
 
-    // Validate user data
-    if (currentUser == null)
-      return Unauthorized("User not found in cache.");
+		// Validate user data
+		if (currentUser == null)
+            return Unauthorized("User not found in cache.");
 
-    if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
-      throw new IdParametersBadRequestException();
+        if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
+            throw new IdParametersBadRequestException();
 
-    // Execute business logic
-    var summaryGrid = await _serviceManager.Users.UsersSummary(companyId, trackChanges: false, options, currentUser);
+        // Execute business logic
+        var summaryGrid = await _serviceManager.Users.UsersSummary(companyId, trackChanges: false, options, currentUser);
 
     // Return standardized response
     if (summaryGrid == null || !summaryGrid.Items.Any())
