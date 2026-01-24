@@ -472,7 +472,8 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
     else
     {
       Users userByUserId = await _repository.Users.GetByIdAsync(x => x.UserId == usersDto.UserId, trackChanges: false);
-      usersDto.Password = usersDto.Password == "" ? EncryptDecryptHelper.Decrypt(userByUserId.Password) : usersDto.Password;
+
+      usersDto.Password = string.IsNullOrEmpty(usersDto.Password) ? EncryptDecryptHelper.Decrypt(userByUserId.Password) : usersDto.Password;
       validate = ValidateUser(usersDto, objsystem);
     }
 
@@ -583,12 +584,12 @@ left join Department on Employment.DepartmentId = Department.DepartmentId
           //Insert new GroupMembers using Direct SQL
           if (usersDto.GroupMembers != null && usersDto.GroupMembers.Any())
           {
+            string insertSql = string.Empty;
             foreach (var gm in usersDto.GroupMembers)
             {
-              string insertSql = $@"INSERT INTO GroupMembers (GroupId, UserId) 
-                                     VALUES ({gm.GroupId}, {usersDto.UserId})";
-              _repository.GroupMembers.ExecuteNonQuery(insertSql);
+              insertSql += $@"INSERT INTO GroupMembers (GroupId, UserId) VALUES ({gm.GroupId}, {usersDto.UserId});";
             }
+            _repository.GroupMembers.ExecuteNonQuery(insertSql);
           }
 
           await _repository.Users.TransactionCommitAsync();

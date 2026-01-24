@@ -28,4 +28,8 @@
     <ProjectReference Include="..\bdDevCRM.Service\bdDevCRM.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Uploads\" />
+  </ItemGroup>
+
 </Project>

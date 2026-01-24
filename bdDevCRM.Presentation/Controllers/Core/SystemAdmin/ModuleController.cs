@@ -80,16 +80,13 @@ public class ModuleController : BaseApiController
             throw new GenericBadRequestException("Invalid menu name.");
 
         // Execute business logic
-        var res = await _serviceManager.Modules.GetModulesAsync(
-            currentUser, false);
+        var res = await _serviceManager.Modules.GetModulesAsync(currentUser, false);
 
         // Return standardized response
         if (res == null || !res.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<ModuleDto>>(
-                "No modules found"));
+            return Ok(ResponseHelper.NoContent<IEnumerable<ModuleDto>>("No modules found"));
 
-        return Ok(ResponseHelper.Success(res,
-            "Modules retrieved successfully"));
+        return Ok(ResponseHelper.Success(res, "Modules retrieved successfully"));
     }
 
     /// <summary>

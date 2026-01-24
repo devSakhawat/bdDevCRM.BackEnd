@@ -1,16 +1,18 @@
 ﻿using bdDevCRM.Entities.CRMGrid;
-using bdDevCRM.Utilities.CRMGrid.GRID;
-
+using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
+using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
+[AuthenticatedUser]
 public class QueryAnalyzerController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
@@ -43,8 +45,13 @@ public class QueryAnalyzerController : BaseApiController
     if (currentUser == null)
       throw new GenericUnauthorizedException("User session expired.");
 
-    IEnumerable<QueryAnalyzerDto> queryAnalyzers = await _serviceManager.QueryAnalyzer.CustomizedReportByPermission(currentUser, trackChanges: false);
-    return Ok(queryAnalyzers);
+    IEnumerable<QueryAnalyzerDto> res = await _serviceManager.QueryAnalyzer.CustomizedReportByPermission(currentUser, trackChanges: false);
+    //return Ok(queryAnalyzers);
+
+    if (res == null || !res.Any())
+      return Ok(ResponseHelper.NoContent<IEnumerable<QueryAnalyzerDto>>("No reports found"));
+
+    return Ok(ResponseHelper.Success(res, "reports retrieved successfully"));
   }
 
 
