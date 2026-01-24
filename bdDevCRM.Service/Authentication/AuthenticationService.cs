@@ -8,6 +8,7 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions.BaseException;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -36,8 +37,11 @@ public class AuthenticationService : IAuthenticationService
     public bool ValidateUser(UserForAuthenticationDto userForAuth)
     {
         var user = _repository.Users.GetUserByLoginIdAsync(userForAuth.LoginId, trackChanges: false);
-        if (user == null) return false;
 
+
+
+        if (user == null) return false;
+       
         // Password validation logic here
         // TODO: Implement proper password validation
         // Example: BCrypt. Verify(userForAuth.Password, user.Password)
@@ -259,12 +263,12 @@ public class AuthenticationService : IAuthenticationService
     private List<Claim> GetClaims(UsersDto user)
     {
         return new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, user.LoginId),
-        new Claim("UserId", user.UserId.ToString()),
-        new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
-        new Claim(ClaimTypes.Email, user.EmailAddress ?? string.Empty)
-    };
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.LoginId),
+            new Claim("UserId", user.UserId.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new Claim(ClaimTypes.Email, user.EmailAddress ?? string.Empty)
+        };
     }
 
     /// <summary>

@@ -8,14 +8,15 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 /// <summary>
 /// Controller for managing CRM institute types
-/// All methods require authentication via [AuthenticatedUser] attribute
+/// All methods require authentication via [AuthorizeUser] attribute
 /// </summary>
-[AuthenticatedUser] //Controller-level authentication
+[AuthorizeUser] //Controller-level authentication
 public class CRMInstituteTypeController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;

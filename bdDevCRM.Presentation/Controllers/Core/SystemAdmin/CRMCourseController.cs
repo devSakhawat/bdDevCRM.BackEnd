@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
@@ -15,9 +16,9 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 /// <summary>
 /// Controller for managing CRM courses
-/// All methods require authentication via [AuthenticatedUser] attribute
+/// All methods require authentication via [AuthorizeUser] attribute
 /// </summary>
-[AuthenticatedUser] //Controller-level authentication
+[AuthorizeUser] //Controller-level authentication
 [ApiController]
 public class CRMCourseController : BaseApiController
 {

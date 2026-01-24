@@ -11,14 +11,15 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 
 namespace bdDevCRM.Presentation.Controllers.DMS;
 
 /// <summary>
 /// Controller for managing DMS (Document Management System) documents
-/// All methods require authentication via [AuthenticatedUser] attribute
+/// All methods require authentication via [AuthorizeUser] attribute
 /// </summary>
-[AuthenticatedUser] //Controller-level authentication
+[AuthorizeUser] //Controller-level authentication
 public class DmsDocumentController : BaseApiController
 {
     private readonly IMemoryCache _cache;

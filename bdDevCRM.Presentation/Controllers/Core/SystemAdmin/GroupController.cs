@@ -1,5 +1,6 @@
 ﻿using bdDevCRM.Entities.CRMGrid.GRID;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Controllers.BaseController;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
@@ -16,9 +17,9 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 /// <summary>
 /// Controller for managing user groups and permissions
-/// All methods require authentication via [AuthenticatedUser] attribute
+/// All methods require authentication via [AuthorizeUser] attribute
 /// </summary>
-[AuthenticatedUser] //Controller-level authentication
+[AuthorizeUser] //Controller-level authentication
 public class GroupController : BaseApiController
 {
     private readonly IMemoryCache _cache;
