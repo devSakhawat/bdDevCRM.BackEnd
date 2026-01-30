@@ -22,7 +22,11 @@ public static class ServiceExtensions
   public static void ConfigureCors(this IServiceCollection services) => services.AddCors(options =>
   {
     options.AddPolicy("CorsPolicy", builder =>
-    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    builder
+      .WithOrigins("http://localhost:4200", "https://localhost:4200") // Specify allowed origins
+      .AllowAnyMethod()
+      .AllowAnyHeader()
+      .AllowCredentials()); // Important for cookies
   });
 
   public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
@@ -155,6 +159,16 @@ public static class ServiceExtensions
       options.ValueLengthLimit = int.MaxValue;
       options.ValueCountLimit = int.MaxValue;
       options.KeyLengthLimit = int.MaxValue;
+    });
+  }
+
+  public static void ConfigureCookiePolicy(this IServiceCollection services)
+  {
+    services.Configure<CookiePolicyOptions>(options =>
+    {
+      options.MinimumSameSitePolicy = SameSiteMode.Strict;
+      options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
+      options.Secure = CookieSecurePolicy.Always; // Require HTTPS
     });
   }
 
