@@ -19,11 +19,21 @@ namespace bdDevCRM.Api.Extensions;
 
 public static class ServiceExtensions
 {
-  public static void ConfigureCors(this IServiceCollection services) => services.AddCors(options =>
+  public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
   {
-    options.AddPolicy("CorsPolicy", builder =>
-    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-  });
+    var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+      ?? new[] { "http://localhost:4200", "https://localhost:4200" };
+
+    services.AddCors(options =>
+    {
+      options.AddPolicy("CorsPolicy", builder =>
+        builder
+          .WithOrigins(allowedOrigins)
+          .AllowAnyMethod()
+          .AllowAnyHeader()
+          .AllowCredentials());
+    });
+  }
 
   public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
   {
@@ -155,6 +165,16 @@ public static class ServiceExtensions
       options.ValueLengthLimit = int.MaxValue;
       options.ValueCountLimit = int.MaxValue;
       options.KeyLengthLimit = int.MaxValue;
+    });
+  }
+
+  public static void ConfigureCookiePolicy(this IServiceCollection services)
+  {
+    services.Configure<CookiePolicyOptions>(options =>
+    {
+      options.MinimumSameSitePolicy = SameSiteMode.Strict;
+      options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
+      options.Secure = CookieSecurePolicy.Always; // Require HTTPS
     });
   }
 

@@ -9,6 +9,7 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -30,11 +31,13 @@ public class AuthenticationController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _memoryCache;
+  private readonly IWebHostEnvironment _environment;
 
-  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache) : base(serviceManager)
+  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache, IWebHostEnvironment environment) : base(serviceManager)
   {
     //_serviceManager = serviceManager;
     _memoryCache = memoryCache;
+    _environment = environment;
   }
 
 	[HttpPost(RouteConstants.Login)]
@@ -47,6 +50,9 @@ public class AuthenticationController : BaseApiController
 			throw new UsernamePasswordMismatchException();
 
 		var tokenResponse = _serviceManager.CustomAuthentication.CreateToken(user);
+
+		// Set refresh token in HTTP-only cookie
+		SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
 
 		var userDto = _serviceManager.Users.GetUserByLoginIdAsync(user.LoginId.Trim(), false);
 
@@ -66,7 +72,16 @@ public class AuthenticationController : BaseApiController
 			_memoryCache.Set(cacheKey, userDto, cacheOptions);
 		}
 
-		return Ok(ResponseHelper.Success(tokenResponse, "Login successful"));
+		// Return response without exposing refresh token
+		var response = new
+		{
+			AccessToken = tokenResponse.AccessToken,
+			AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+			TokenType = tokenResponse.TokenType,
+			ExpiresIn = tokenResponse.ExpiresIn
+		};
+
+		return Ok(ResponseHelper.Success(response, "Login successful"));
 	}
 
 	[HttpGet(RouteConstants.GetUserInfo)]
@@ -114,23 +129,60 @@ public class AuthenticationController : BaseApiController
 	[HttpPost(RouteConstants.RefreshToken)]
   [AllowAnonymous]
   [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+  public async Task<IActionResult> RefreshToken()
   {
-    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0. 0";
-    var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(request.RefreshToken, ipAddress);
-    return Ok(ResponseHelper.Success(tokenResponse, "Token refreshed successfully"));
+    // Get refresh token from cookie
+    if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+    {
+      ClearRefreshTokenCookie(); // Ensure cleanup on missing/corrupted cookie
+      return Unauthorized(ResponseHelper.Unauthorized("Refresh token not found"));
+    }
+
+    var ipAddress = GetClientIpAddress();
+    
+    try
+    {
+      var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(refreshToken, ipAddress);
+
+      // Set new refresh token in cookie
+      SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
+
+      // Return new access token
+      var response = new
+      {
+        AccessToken = tokenResponse.AccessToken,
+        AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+        TokenType = tokenResponse.TokenType,
+        ExpiresIn = tokenResponse.ExpiresIn
+      };
+
+      return Ok(ResponseHelper.Success(response, "Token refreshed successfully"));
+    }
+    catch (UnauthorizedException)
+    {
+      ClearRefreshTokenCookie(); // Clear cookie on any auth failure
+      throw;
+    }
   }
 
   [HttpPost(RouteConstants.RevokeToken)]
+  [AllowAnonymous]
   [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequestDto request)
+  public async Task<IActionResult> RevokeToken()
   {
-    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
-    var result = await _serviceManager.CustomAuthentication.RevokeTokenAsync(request.RefreshToken, ipAddress);
+    if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+      return BadRequest(ResponseHelper.BadRequest("No refresh token found"));
 
-    if (!result) return BadRequest(ResponseHelper.BadRequest("Invalid refresh token"));
+    var ipAddress = GetClientIpAddress();
+    
+    var result = await _serviceManager.CustomAuthentication.RevokeTokenAsync(refreshToken, ipAddress);
 
-    return Ok(ResponseHelper.Success("Token revoked successfully"));
+    if (!result)
+      return BadRequest(ResponseHelper.BadRequest("Invalid or already revoked token"));
+
+    ClearRefreshTokenCookie();
+
+    return Ok(ResponseHelper.Success<object>(null, "Token revoked successfully"));
   }
 
 
@@ -370,6 +422,7 @@ public class AuthenticationController : BaseApiController
 
 	//[HttpPost("logout")]
 	[HttpPost(RouteConstants.Logout)]
+  [AllowAnonymous]
   [IgnoreMediaTypeValidation]
   public async Task<IActionResult> Logout()
   {
@@ -377,7 +430,33 @@ public class AuthenticationController : BaseApiController
     {
       var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-      await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
+      // Only blacklist if token is provided
+      if (!string.IsNullOrEmpty(token))
+      {
+        await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
+      }
+
+      var userId = HttpContext.GetUserId();
+      
+      if (userId != 0)
+      {
+        var ipAddress = GetClientIpAddress();
+        
+        // Revoke all user tokens
+        try
+        {
+          await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
+        }
+        catch (Exception ex)
+        {
+          // Log error but continue with logout process
+          // Note: Access token is already blacklisted, so partial failure is acceptable
+          Console.WriteLine($"Failed to revoke refresh tokens during logout: {ex.Message}");
+        }
+      }
+
+      // Clear cookie (works even without valid access token)
+      ClearRefreshTokenCookie();
 
       // Clear user-specific cache entries
       var userIdClaim = User.FindFirst("UserId")?.Value;
@@ -393,7 +472,7 @@ public class AuthenticationController : BaseApiController
       // Clear the entire memory cache
       ClearMemoryCache();
 
-      return Ok(new { message = "Logged out successfully." });
+      return Ok(ResponseHelper.Success<object>(null, "Logged out successfully"));
     }
     catch (Exception ex)
     {
@@ -705,6 +784,48 @@ public class AuthenticationController : BaseApiController
         error = ex.Message
       });
     }
+  }
+
+  // Helper methods for cookie management and IP address retrieval
+  private void SetRefreshTokenCookie(string refreshToken, DateTime expiry)
+  {
+    var cookieOptions = new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = !_environment.IsDevelopment(), // Allow HTTP in development, require HTTPS in production
+      SameSite = SameSiteMode.Strict,
+      Expires = expiry,
+      Path = "/",
+      IsEssential = true
+    };
+    
+    Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+  }
+
+  private void ClearRefreshTokenCookie()
+  {
+    Response.Cookies.Delete("refreshToken", new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = !_environment.IsDevelopment(),
+      SameSite = SameSiteMode.Strict,
+      Path = "/"
+    });
+  }
+
+  private string GetClientIpAddress()
+  {
+    // Note: In production, validate that requests come from trusted proxies before using
+    // X-Forwarded-For header to prevent IP spoofing attacks
+    var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+    if (!string.IsNullOrEmpty(forwardedFor))
+      return forwardedFor.Split(',')[0].Trim();
+    
+    var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
+    if (!string.IsNullOrEmpty(realIp))
+      return realIp;
+    
+    return HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "Unknown";
   }
 
 }

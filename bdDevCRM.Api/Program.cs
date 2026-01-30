@@ -1,4 +1,5 @@
-﻿using bdDevCRM.Api.ContentFormatter;
+﻿using bdDevCRM.Api.BackgroundServices;
+using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Api.Extensions;
 using bdDevCRM.Api.Middleware;
 using bdDevCRM.Presentation;
@@ -18,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.ConfigureCors();
+builder.Services.ConfigureCors(builder.Configuration);
 builder.Services.Configureiisintegration();
 builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureRepositoryManager();
@@ -27,6 +28,7 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureResponseCompression();
 builder.Services.ConfigureGzipCompression();
 builder.Services.ConfigureFileLimit();
+builder.Services.ConfigureCookiePolicy();
 
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -96,6 +98,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.ConfigureAuthentication(builder.Configuration);
 builder.Services.ConfigureAuthorization();
 
+// Add background service for token cleanup
+builder.Services.AddHostedService<TokenCleanupBackgroundService>();
+
 var app = builder.Build();
 
 //app.UseExceptionHandler(opt => { });
@@ -158,6 +163,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 
 // Add these lines in this specific order
+app.UseCookiePolicy(); // Add cookie policy before authentication
 app.UseAuthentication(); // Must come before authorization
 //app.UseMiddleware<TokenBlacklistMiddleware>();
 app.UseAuthorization();
