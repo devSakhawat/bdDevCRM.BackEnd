@@ -9,6 +9,7 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -30,11 +31,13 @@ public class AuthenticationController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _memoryCache;
+  private readonly IWebHostEnvironment _environment;
 
-  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache) : base(serviceManager)
+  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache, IWebHostEnvironment environment) : base(serviceManager)
   {
     //_serviceManager = serviceManager;
     _memoryCache = memoryCache;
+    _environment = environment;
   }
 
 	[HttpPost(RouteConstants.Login)]
@@ -130,29 +133,40 @@ public class AuthenticationController : BaseApiController
   {
     // Get refresh token from cookie
     if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+    {
+      ClearRefreshTokenCookie(); // Ensure cleanup on missing/corrupted cookie
       return Unauthorized(ResponseHelper.Unauthorized("Refresh token not found"));
+    }
 
     var ipAddress = GetClientIpAddress();
     
-    var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(refreshToken, ipAddress);
-
-    // Set new refresh token in cookie
-    SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
-
-    // Return new access token
-    var response = new
+    try
     {
-      AccessToken = tokenResponse.AccessToken,
-      AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
-      TokenType = tokenResponse.TokenType,
-      ExpiresIn = tokenResponse.ExpiresIn
-    };
+      var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(refreshToken, ipAddress);
 
-    return Ok(ResponseHelper.Success(response, "Token refreshed successfully"));
+      // Set new refresh token in cookie
+      SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
+
+      // Return new access token
+      var response = new
+      {
+        AccessToken = tokenResponse.AccessToken,
+        AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+        TokenType = tokenResponse.TokenType,
+        ExpiresIn = tokenResponse.ExpiresIn
+      };
+
+      return Ok(ResponseHelper.Success(response, "Token refreshed successfully"));
+    }
+    catch (UnauthorizedException)
+    {
+      ClearRefreshTokenCookie(); // Clear cookie on any auth failure
+      throw;
+    }
   }
 
   [HttpPost(RouteConstants.RevokeToken)]
-  [AuthorizeUser]
+  [AllowAnonymous]
   [IgnoreMediaTypeValidation]
   public async Task<IActionResult> RevokeToken()
   {
@@ -408,7 +422,7 @@ public class AuthenticationController : BaseApiController
 
 	//[HttpPost("logout")]
 	[HttpPost(RouteConstants.Logout)]
-  [AuthorizeUser]
+  [AllowAnonymous]
   [IgnoreMediaTypeValidation]
   public async Task<IActionResult> Logout()
   {
@@ -416,7 +430,11 @@ public class AuthenticationController : BaseApiController
     {
       var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-      await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
+      // Only blacklist if token is provided
+      if (!string.IsNullOrEmpty(token))
+      {
+        await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
+      }
 
       var userId = HttpContext.GetUserId();
       
@@ -425,10 +443,19 @@ public class AuthenticationController : BaseApiController
         var ipAddress = GetClientIpAddress();
         
         // Revoke all user tokens
-        await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
+        try
+        {
+          await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
+        }
+        catch (Exception ex)
+        {
+          // Log error but continue with logout process
+          // Note: Access token is already blacklisted, so partial failure is acceptable
+          Console.WriteLine($"Failed to revoke refresh tokens during logout: {ex.Message}");
+        }
       }
 
-      // Clear cookie
+      // Clear cookie (works even without valid access token)
       ClearRefreshTokenCookie();
 
       // Clear user-specific cache entries
@@ -765,7 +792,7 @@ public class AuthenticationController : BaseApiController
     var cookieOptions = new CookieOptions
     {
       HttpOnly = true,
-      Secure = true, // Set to true in production with HTTPS
+      Secure = !_environment.IsDevelopment(), // Allow HTTP in development, require HTTPS in production
       SameSite = SameSiteMode.Strict,
       Expires = expiry,
       Path = "/",
@@ -780,7 +807,7 @@ public class AuthenticationController : BaseApiController
     Response.Cookies.Delete("refreshToken", new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
+      Secure = !_environment.IsDevelopment(),
       SameSite = SameSiteMode.Strict,
       Path = "/"
     });
@@ -788,6 +815,8 @@ public class AuthenticationController : BaseApiController
 
   private string GetClientIpAddress()
   {
+    // Note: In production, validate that requests come from trusted proxies before using
+    // X-Forwarded-For header to prevent IP spoofing attacks
     var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
     if (!string.IsNullOrEmpty(forwardedFor))
       return forwardedFor.Split(',')[0].Trim();

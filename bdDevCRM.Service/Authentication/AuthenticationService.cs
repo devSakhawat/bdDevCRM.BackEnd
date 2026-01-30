@@ -237,6 +237,7 @@ public class AuthenticationService : IAuthenticationService
     /// </summary>
     public async Task RevokeAllUserTokensAsync(int userId, string ipAddress)
     {
+        // Note: ipAddress can be logged for audit trail purposes if needed
         await _repository.RefreshTokens.RevokeAllTokensByUserIdAsync(userId);
         await _repository.SaveAsync();
     }

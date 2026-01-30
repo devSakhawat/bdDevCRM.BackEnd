@@ -19,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.ConfigureCors();
+builder.Services.ConfigureCors(builder.Configuration);
 builder.Services.Configureiisintegration();
 builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureRepositoryManager();

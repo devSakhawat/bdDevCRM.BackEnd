@@ -19,15 +19,21 @@ namespace bdDevCRM.Api.Extensions;
 
 public static class ServiceExtensions
 {
-  public static void ConfigureCors(this IServiceCollection services) => services.AddCors(options =>
+  public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
   {
-    options.AddPolicy("CorsPolicy", builder =>
-    builder
-      .WithOrigins("http://localhost:4200", "https://localhost:4200") // Specify allowed origins
-      .AllowAnyMethod()
-      .AllowAnyHeader()
-      .AllowCredentials()); // Important for cookies
-  });
+    var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+      ?? new[] { "http://localhost:4200", "https://localhost:4200" };
+
+    services.AddCors(options =>
+    {
+      options.AddPolicy("CorsPolicy", builder =>
+        builder
+          .WithOrigins(allowedOrigins)
+          .AllowAnyMethod()
+          .AllowAnyHeader()
+          .AllowCredentials());
+    });
+  }
 
   public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
   {
