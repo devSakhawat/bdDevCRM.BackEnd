@@ -19,7 +19,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 /// All methods require authentication via [AuthorizeUser] attribute
 /// </summary>
 [AuthorizeUser] //Controller-level authentication
-[ApiController]
+//[ApiController]
 public class CRMCourseController : BaseApiController
 {
     private readonly IMemoryCache _cache;

@@ -14,7 +14,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 
-[AuthenticatedUser]
+[AuthorizeUser]
 public class UsersController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;

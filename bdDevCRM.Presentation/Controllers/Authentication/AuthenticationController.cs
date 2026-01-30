@@ -4,16 +4,18 @@ using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Authentication;
-using bdDevCRM.Shared.DataTransferObjects.Core.Authentication;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Shared.Exceptions.BaseException;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections;
 using System.IdentityModel.Tokens.Jwt;
@@ -30,346 +32,164 @@ public class AuthenticationController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;
   private readonly IMemoryCache _memoryCache;
+  private readonly IWebHostEnvironment _environment;
 
-  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache) : base(serviceManager)
+  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache, IWebHostEnvironment environment) : base(serviceManager)
   {
     //_serviceManager = serviceManager;
     _memoryCache = memoryCache;
+    _environment = environment;
   }
 
-	[HttpPost(RouteConstants.Login)]
-	[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-	[AllowAnonymous]
-	[IgnoreMediaTypeValidation]
-	public IActionResult Authenticate([FromBody] UserForAuthenticationDto user)
-	{
-		if (!_serviceManager.CustomAuthentication.ValidateUser(user))
-			throw new UsernamePasswordMismatchException();
-
-		var tokenResponse = _serviceManager.CustomAuthentication.CreateToken(user);
-
-		var userDto = _serviceManager.Users.GetUserByLoginIdAsync(user.LoginId.Trim(), false);
-
-		if (userDto != null)
-		{
-			userDto.Password = "";
-            userDto.HrRecordId = userDto.EmployeeId;
-
-			var cacheKey = $"User_{userDto.UserId}";
-			var cacheOptions = new MemoryCacheEntryOptions()
-				.SetSlidingExpiration(TimeSpan.FromHours(5))
-				.SetAbsoluteExpiration(TimeSpan.FromHours(5));
-
-			if (_memoryCache.TryGetValue(cacheKey, out _))
-				_memoryCache.Remove(cacheKey);
-
-			_memoryCache.Set(cacheKey, userDto, cacheOptions);
-		}
-
-		return Ok(ResponseHelper.Success(tokenResponse, "Login successful"));
-	}
-
-	[HttpGet(RouteConstants.GetUserInfo)]
-	[AuthorizeUser]
-	public IActionResult GetUserInfo()
-	{
-		var currentUser = HttpContext.GetCurrentUser();
-
-        if (currentUser == null)
-        {
-			var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-			var loginId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-			if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
-
-			// UsersDto
-			UsersDto? userDto = _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
-			if (userDto == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
-			userDto.Password = "";
-			userDto.HrRecordId = userDto.EmployeeId;
-			var UserId = User.FindFirst("UserId")?.Value;
-			var cacheKey = $"User_{userDto.UserId}";
-			// Check if the user is already in the cache then destroy the cache
-			if (_memoryCache.TryGetValue(cacheKey, out _)) _memoryCache.Remove(cacheKey);
-
-			// Set the user in the cache with a 5-hours expiration
-			var cacheEntryOptions = new MemoryCacheEntryOptions()
-				.SetSlidingExpiration(TimeSpan.FromHours(5))
-				.SetAbsoluteExpiration(TimeSpan.FromHours(5));
-			_memoryCache.Set(cacheKey, userDto, cacheEntryOptions);
-			//_memoryCache.Set(cacheKey, user, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(5) });
-
-
-			userDto.Password = "";
-			return Ok(ResponseHelper.Success(currentUser, "User info retrieved"));
-		}
-        if (currentUser.HrRecordId == null || currentUser.HrRecordId == 0) currentUser.HrRecordId = currentUser.EmployeeId;
-
-		// Password clear (security)
-		currentUser.Password = "";
-
-		return Ok(ResponseHelper.Success(currentUser, "User info retrieved"));
-	}
-
-
-	[HttpPost(RouteConstants.RefreshToken)]
+  [HttpPost(RouteConstants.Login)]
+  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
   [AllowAnonymous]
   [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+  public IActionResult Authenticate([FromBody] UserForAuthenticationDto user)
   {
-    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0. 0";
-    var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(request.RefreshToken, ipAddress);
-    return Ok(ResponseHelper.Success(tokenResponse, "Token refreshed successfully"));
+    if (!_serviceManager.CustomAuthentication.ValidateUser(user))
+      throw new UsernamePasswordMismatchException();
+
+    var tokenResponse = _serviceManager.CustomAuthentication.CreateToken(user);
+
+    // Set refresh token in HTTP-only cookie
+    SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
+
+    var userDto = _serviceManager.Users.GetUserByLoginIdAsync(user.LoginId.Trim(), false);
+
+    if (userDto != null)
+    {
+      userDto.Password = "";
+      userDto.HrRecordId = userDto.EmployeeId;
+
+      var cacheKey = $"User_{userDto.UserId}";
+      var cacheOptions = new MemoryCacheEntryOptions()
+        .SetSlidingExpiration(TimeSpan.FromHours(5))
+        .SetAbsoluteExpiration(TimeSpan.FromHours(5));
+
+      if (_memoryCache.TryGetValue(cacheKey, out _))
+        _memoryCache.Remove(cacheKey);
+
+      _memoryCache.Set(cacheKey, userDto, cacheOptions);
+    }
+
+    // Return response without exposing refresh token
+    var response = new
+    {
+      AccessToken = tokenResponse.AccessToken,
+      AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+      TokenType = tokenResponse.TokenType,
+      ExpiresIn = tokenResponse.ExpiresIn
+    };
+
+    return Ok(ResponseHelper.Success(response, "Login successful"));
+  }
+
+  [HttpGet(RouteConstants.GetUserInfo)]
+  [AuthorizeUser]
+  public IActionResult GetUserInfo()
+  {
+    var currentUser = HttpContext.GetCurrentUser();
+
+    if (currentUser == null)
+    {
+      var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+      var loginId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+      if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
+
+      // UsersDto
+      UsersDto? userDto = _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
+      if (userDto == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
+      userDto.Password = "";
+      userDto.HrRecordId = userDto.EmployeeId;
+      var UserId = User.FindFirst("UserId")?.Value;
+      var cacheKey = $"User_{userDto.UserId}";
+      // Check if the user is already in the cache then destroy the cache
+      if (_memoryCache.TryGetValue(cacheKey, out _)) _memoryCache.Remove(cacheKey);
+
+      // Set the user in the cache with a 5-hours expiration
+      var cacheEntryOptions = new MemoryCacheEntryOptions()
+        .SetSlidingExpiration(TimeSpan.FromHours(5))
+        .SetAbsoluteExpiration(TimeSpan.FromHours(5));
+      _memoryCache.Set(cacheKey, userDto, cacheEntryOptions);
+      //_memoryCache.Set(cacheKey, user, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(5) });
+
+
+      userDto.Password = "";
+      return Ok(ResponseHelper.Success(currentUser, "User info retrieved"));
+    }
+    if (currentUser.HrRecordId == null || currentUser.HrRecordId == 0) currentUser.HrRecordId = currentUser.EmployeeId;
+
+    // Password clear (security)
+    currentUser.Password = "";
+
+    return Ok(ResponseHelper.Success(currentUser, "User info retrieved"));
+  }
+
+
+  [HttpPost(RouteConstants.RefreshToken)]
+  [AllowAnonymous]
+  [IgnoreMediaTypeValidation]
+  public async Task<IActionResult> RefreshToken()
+  {
+    // Get refresh token from cookie
+    if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+    {
+      ClearRefreshTokenCookie(); // Ensure cleanup on missing/corrupted cookie
+      return Unauthorized(ResponseHelper.Unauthorized("Refresh token not found"));
+    }
+
+    var ipAddress = GetClientIpAddress();
+
+    try
+    {
+      var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(refreshToken, ipAddress);
+
+      // Set new refresh token in cookie
+      SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
+
+      // Return new access token
+      var response = new
+      {
+        AccessToken = tokenResponse.AccessToken,
+        AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+        TokenType = tokenResponse.TokenType,
+        ExpiresIn = tokenResponse.ExpiresIn
+      };
+
+      return Ok(ResponseHelper.Success(response, "Token refreshed successfully"));
+    }
+    catch (UnauthorizedException)
+    {
+      ClearRefreshTokenCookie(); // Clear cookie on any auth failure
+      throw;
+    }
   }
 
   [HttpPost(RouteConstants.RevokeToken)]
+  [AllowAnonymous]
   [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> RevokeToken([FromBody] RefreshTokenRequestDto request)
+  public async Task<IActionResult> RevokeToken()
   {
-    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
-    var result = await _serviceManager.CustomAuthentication.RevokeTokenAsync(request.RefreshToken, ipAddress);
+    if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+      return BadRequest(ResponseHelper.BadRequest("No refresh token found"));
 
-    if (!result) return BadRequest(ResponseHelper.BadRequest("Invalid refresh token"));
+    var ipAddress = GetClientIpAddress();
 
-    return Ok(ResponseHelper.Success("Token revoked successfully"));
+    var result = await _serviceManager.CustomAuthentication.RevokeTokenAsync(refreshToken, ipAddress);
+
+    if (!result)
+      return BadRequest(ResponseHelper.BadRequest("Invalid or already revoked token"));
+
+    ClearRefreshTokenCookie();
+
+    return Ok(ResponseHelper.Success<object>(null, "Token revoked successfully"));
   }
 
 
-
-	//[HttpGet(RouteConstants.GetUserInfo)]
-	//[AllowAnonymous]
-	//public IActionResult GetUserInfo()
-	//{
-	//  var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-	//  var loginId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-	//  if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
-
-	//  // UsersDto
-	//  UsersDto? user = _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
-	//  if (user == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
-
-	//  var UserId = User.FindFirst("UserId")?.Value;
-	//  var cacheKey = $"User_{user.UserId}";
-	//  // Check if the user is already in the cache then destroy the cache
-	//  if (_memoryCache.TryGetValue(cacheKey, out _)) _memoryCache.Remove(cacheKey);
-
-	//  // Set the user in the cache with a 5-hours expiration
-	//  var cacheEntryOptions = new MemoryCacheEntryOptions()
-	//      .SetSlidingExpiration(TimeSpan.FromHours(5))
-	//      .SetAbsoluteExpiration(TimeSpan.FromHours(5));
-	//  _memoryCache.Set(cacheKey, user, cacheEntryOptions);
-	//  //_memoryCache.Set(cacheKey, user, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(5) });
-
-
-	//  user.Password = "";
-	//  return Ok(user);
-	//}
-
-
-	#region LoginFrom mvc
-
-	//[HttpPost("validateLogin")]
-	//public async Task<IActionResult> ValidateUserLogin(string loginId, string password, bool isRememberMe)
-	//{
-	//  var res = "";
-	//  var user = "";
-	//  try
-	//  {
-	//    var replacements = new Dictionary<char, char> { //!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~
-	//                  { '+', ' ' }, // Add more replacements as needed
-	//     };
-
-	//    string encryptedpwd = "";
-	//    if (!CommonHelper.IsEncrypted(password))
-	//    {
-	//      encryptedpwd = EncryptDecryptHelper.Encrypt(password);
-	//      string pwdc = CommonHelper.ReplaceMultipleSpecificSpecialCharacters(encryptedpwd, replacements);
-	//      encryptedpwd = "enc_" + pwdc;
-
-	//    }
-	//    else
-	//    {
-	//      encryptedpwd = password;
-	//    }
-
-	//    #region Front end part
-	//    //var cookie = new HttpCookie("passwordRemember");
-	//    //cookie.Values["userid"] = loginId;
-	//    //cookie.Values["pwd"] = encryptedpwd;
-
-	//    //if (isRememberMe)
-	//    //{
-	//    //  cookie.Expires = DateTime.Now.AddDays(15);
-	//    //  cookie.Values["isRemember"] = "1";
-	//    //}
-	//    //else
-	//    //{
-	//    //  cookie.Values["isRemember"] = "0";
-	//    //  cookie.Expires = DateTime.Now.AddDays(-1);
-	//    //}
-	//    //Response.Cookies.Add(cookie);
-	//    #endregion Front end part
-
-	//    var rep = new Dictionary<char, char>
-	//              {
-	//                  //!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~
-	//                  { ' ', '+' },
-	//                  // Add more replacements as needed
-	//              };
-
-	//    if (CommonHelper.IsEncrypted(password))
-	//    {
-	//      string sub = password.Substring("enc_".Length);
-	//      string pwdc = CommonHelper.ReplaceMultipleSpecificSpecialCharacters(sub, rep);
-	//      string dcrpwd = EncryptDecryptHelper.Decrypt(pwdc);
-	//      password = dcrpwd;
-	//    }
-
-	//    AssemblyInfoDto objAssemblyInfo = await _serviceManager.SystemSettings.GetAssemblyInfoResult();
-	//    var isValid = false;
-
-	//    //Checking Currect Password with Entering Password
-	//    if (objAssemblyInfo.AssemblyInfoId == 12)
-	//    {
-	//      var userInfo = await _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
-	//      var currentPassword = userInfo.Password;
-	//      string dycryptPass = EncryptDecryptHelper.Decrypt(currentPassword);
-
-	//      if (password != dycryptPass)
-	//      {
-	//        return "Wrong Password! Please Enter Currect Password.";
-	//      }
-	//    }
-
-	//    user = _serviceManager.aut.ValidateUserLogin(loginId, password, objasm, isValid);
-
-
-	//    if ((user.Split('^')[0] == "Success") || (user.Split('^')[0] == "CHANGESHORT") ||
-	//        (user.Split('^')[0] == "CHANGELEAVE") || (user.Split('^')[0] == "CHANGESuccess") ||
-	//        (user.Split('^')[0] == "LATE") || (user.Split('^')[0] == "SHORT") || (user.Split('^')[0] == "LEAVE"))
-	//    {
-	//      var currentUser = loginService.GetCurrentUser(user);
-
-	//      Session["themeName"] = currentUser.Theme;
-	//      Session["CurrentUser"] = currentUser;
-	//      if (user.Split('^')[0] == "SHORT" || user.Split('^')[0] == "LEAVE")
-	//      {
-	//        var attendanceLog =
-	//            (AttendanceLog)JsonConvert.DeserializeObject(user.Split('^')[12], typeof(AttendanceLog));
-	//        Session["Attendance"] = attendanceLog;
-	//      }
-	//      else
-	//      {
-	//        Session["Attendance"] = null;
-	//      }
-
-	//      var lvEmail = System.Web.HttpContext.Current.Session["LeaveApprovalEmail"];
-	//      if (lvEmail != null)
-	//      {
-	//        res = "lvEmail";
-	//        return res;
-	//      }
-
-	//      var osEmail = System.Web.HttpContext.Current.Session["OnsiteClientEmail"];
-	//      if (osEmail != null)
-	//      {
-	//        res = "osEmail";
-	//        return res;
-	//      }
-
-	//      var mvEmail = System.Web.HttpContext.Current.Session["MovementLogAuth"];
-	//      if (mvEmail != null)
-	//      {
-	//        res = "mvEmail";
-	//        return res;
-	//      }
-	//      var atEmail = System.Web.HttpContext.Current.Session["AttendanceAdjustmentEmail"];
-	//      if (atEmail != null)
-	//      {
-	//        res = "atEmail";
-	//        return res;
-	//      }
-	//      var vhcEmail = System.Web.HttpContext.Current.Session["RequisitionEmail"];
-	//      if (vhcEmail != null)
-	//      {
-	//        res = "vhcEmail";
-	//        return res;
-	//      }
-	//      var performacneEmail = System.Web.HttpContext.Current.Session["performanceReviewEmail"];
-	//      if (performacneEmail != null)
-	//      {
-	//        res = "prEmail";
-	//        return res;
-	//      }
-	//      var performacneEmailForBG = System.Web.HttpContext.Current.Session["performanceReviewEmailForBG"];
-	//      if (performacneEmailForBG != null)
-	//      {
-	//        res = "prEmailForBG";
-	//        return res;
-	//      }
-	//      var performanceEvaluationEmailForBG = System.Web.HttpContext.Current.Session["performanceEvaluationEmailForBG"];
-	//      if (performanceEvaluationEmailForBG != null)
-	//      {
-	//        res = "prevalutionEmailForBG";
-	//        return res;
-	//      }
-	//      var surveyEmail = System.Web.HttpContext.Current.Session["SurveyEmail"];
-	//      if (surveyEmail != null)
-	//      {
-	//        res = "SurveyEmail";
-	//        return res;
-	//      }
-	//      var proEmpEmail = System.Web.HttpContext.Current.Session["PromotedEmployeeReviewEmail"];
-	//      if (proEmpEmail != null)
-	//      {
-	//        res = "proEmpEmail";
-	//        return res;
-	//      }
-
-	//      var JCPEmail = System.Web.HttpContext.Current.Session["JobConfirmationEmail"];
-	//      if (JCPEmail != null)
-	//      {
-	//        res = "jobConMail";
-	//        return res;
-	//      }
-
-	//      var JobVacancySession = System.Web.HttpContext.Current.Session["selectedJobVacanchyForActionDataForBG"];
-	//      if (JobVacancySession != null)
-	//      {
-	//        res = "jobVacancy";
-	//        return res;
-	//      }
-	//    }
-	//    else if (user == "CompanyInActive")
-	//    {
-	//      return user;
-	//    }
-	//    else
-	//    {
-	//      Session["CurrentUser"] = null;
-	//    }
-	//    res = "Success"; //For Audit trail
-	//  }
-	//  catch (Exception ex)
-	//  {
-	//    res = ex.Message;
-	//    return res;
-	//  }
-	//  var struser = ((Users)(Session["CurrentUser"]));
-	//  if (struser != null)
-	//  {
-	//    //Audittail
-	//    var audit = hendler.GetAuditInfo(struser.UserId, struser.UserName + " is try to login", "Login", res);
-
-
-	//    aService.SendAudit(audit);
-	//  }
-	//  return user.Split('^')[0];
-	//}
-	#endregion LoginFrom mvc
-
-
-	//[HttpPost("logout")]
-	[HttpPost(RouteConstants.Logout)]
+  //[HttpPost("logout")]
+  [HttpPost(RouteConstants.Logout)]
+  [AllowAnonymous]
   [IgnoreMediaTypeValidation]
   public async Task<IActionResult> Logout()
   {
@@ -377,7 +197,33 @@ public class AuthenticationController : BaseApiController
     {
       var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-      await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
+      // Only blacklist if token is provided
+      if (!string.IsNullOrEmpty(token))
+      {
+        await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
+      }
+
+      var userId = HttpContext.GetUserId();
+
+      if (userId != 0)
+      {
+        var ipAddress = GetClientIpAddress();
+
+        // Revoke all user tokens
+        try
+        {
+          await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
+        }
+        catch (Exception ex)
+        {
+          // Log error but continue with logout process
+          // Note: Access token is already blacklisted, so partial failure is acceptable
+          Console.WriteLine($"Failed to revoke refresh tokens during logout: {ex.Message}");
+        }
+      }
+
+      // Clear cookie (works even without valid access token)
+      ClearRefreshTokenCookie();
 
       // Clear user-specific cache entries
       var userIdClaim = User.FindFirst("UserId")?.Value;
@@ -393,7 +239,7 @@ public class AuthenticationController : BaseApiController
       // Clear the entire memory cache
       ClearMemoryCache();
 
-      return Ok(new { message = "Logged out successfully." });
+      return Ok(ResponseHelper.Success<object>(null, "Logged out successfully"));
     }
     catch (Exception ex)
     {
@@ -705,6 +551,48 @@ public class AuthenticationController : BaseApiController
         error = ex.Message
       });
     }
+  }
+
+  // Helper methods for cookie management and IP address retrieval
+  private void SetRefreshTokenCookie(string refreshToken, DateTime expiry)
+  {
+    var cookieOptions = new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = !_environment.IsDevelopment(), // Allow HTTP in development, require HTTPS in production
+      SameSite = SameSiteMode.Strict,
+      Expires = expiry,
+      Path = "/",
+      IsEssential = true
+    };
+
+    Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+  }
+
+  private void ClearRefreshTokenCookie()
+  {
+    Response.Cookies.Delete("refreshToken", new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = !_environment.IsDevelopment(),
+      SameSite = SameSiteMode.Strict,
+      Path = "/"
+    });
+  }
+
+  private string GetClientIpAddress()
+  {
+    // Note: In production, validate that requests come from trusted proxies before using
+    // X-Forwarded-For header to prevent IP spoofing attacks
+    var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+    if (!string.IsNullOrEmpty(forwardedFor))
+      return forwardedFor.Split(',')[0].Trim();
+
+    var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
+    if (!string.IsNullOrEmpty(realIp))
+      return realIp;
+
+    return HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "Unknown";
   }
 
 }

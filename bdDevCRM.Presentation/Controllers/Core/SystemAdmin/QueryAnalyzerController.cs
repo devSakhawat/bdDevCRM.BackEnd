@@ -1,5 +1,6 @@
 ﻿using bdDevCRM.Entities.CRMGrid;
 using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
-[AuthenticatedUser]
+[AuthorizeUser]
 public class QueryAnalyzerController : BaseApiController
 {
   //private readonly IServiceManager _serviceManager;

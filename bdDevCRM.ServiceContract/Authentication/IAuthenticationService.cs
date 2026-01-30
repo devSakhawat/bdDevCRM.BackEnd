@@ -30,4 +30,9 @@ public interface IAuthenticationService
   /// </summary>
   Task RemoveExpiredTokensAsync();
 
+  /// <summary>
+  /// Revokes all active refresh tokens for a user (e.g., on logout from all devices or password change)
+  /// </summary>
+  Task RevokeAllUserTokensAsync(int userId, string ipAddress);
+
 }

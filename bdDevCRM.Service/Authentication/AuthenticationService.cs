@@ -117,6 +117,15 @@ public class AuthenticationService : IAuthenticationService
         if (storedToken == null)
             throw new UnauthorizedException("Refresh token not found");
 
+        // Token reuse detection (security breach)
+        if (storedToken.IsRevoked)
+        {
+            // This token was already used - possible attack!
+            // Revoke all tokens for this user as a security measure
+            await RevokeAllUserTokensAsync(storedToken.UserId, ipAddress);
+            throw new UnauthorizedException("Token reuse detected. All tokens have been revoked for security.");
+        }
+
         if (!storedToken.IsActive)
             throw new UnauthorizedException("Refresh token is expired or revoked");
 
@@ -221,6 +230,16 @@ public class AuthenticationService : IAuthenticationService
         await _repository.SaveAsync();
 
         Console.WriteLine($"✅ Successfully deleted {expiredTokens.Count()} expired tokens");
+    }
+
+    /// <summary>
+    /// Revokes all active refresh tokens for a user (e.g., on logout from all devices or password change)
+    /// </summary>
+    public async Task RevokeAllUserTokensAsync(int userId, string ipAddress)
+    {
+        // Note: ipAddress can be logged for audit trail purposes if needed
+        await _repository.RefreshTokens.RevokeAllTokensByUserIdAsync(userId);
+        await _repository.SaveAsync();
     }
 
 

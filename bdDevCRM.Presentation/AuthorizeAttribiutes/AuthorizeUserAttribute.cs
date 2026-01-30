@@ -11,97 +11,68 @@ namespace bdDevCRM.Presentation.AuthorizeAttribiutes;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class AuthorizeUserAttribute : Attribute, IAuthorizationFilter
 {
-	public void OnAuthorization(AuthorizationFilterContext context)
-	{
-		var httpContext = context.HttpContext;
+  public void OnAuthorization(AuthorizationFilterContext context)
+  {
+    var httpContext = context.HttpContext;
+    var userIdClaim = httpContext.User.FindFirst("UserId")?.Value;
 
-		var userIdClaim = httpContext.User.FindFirst("UserId")?.Value;
+    if (string.IsNullOrEmpty(userIdClaim))
+    {
+      context.Result = new UnauthorizedResult();
+      return;
+    }
 
-		if (string.IsNullOrEmpty(userIdClaim))
-		{
-			context.Result = new UnauthorizedResult();
-			return;
-		}
+    var serviceManager = httpContext.RequestServices.GetService<IServiceManager>();
+    var memoryCache = httpContext.RequestServices.GetService<IMemoryCache>();
 
-		var serviceManager = httpContext.RequestServices.GetService<IServiceManager>();
-		var memoryCache = httpContext.RequestServices.GetService<IMemoryCache>();
+    try
+    {
+      int userId = Convert.ToInt32(userIdClaim);
+      UsersDto? user = null;
 
-		if (serviceManager == null || memoryCache == null)
-		{
-			context.Result = new StatusCodeResult(500); // Internal server error
-			return;
-		}
+      var cacheKey = $"User_{userId}";
 
-		try
-		{
-			int userId = Convert.ToInt32(userIdClaim);
-			UsersDto? user = null;
+      // Try cache first
+      if (memoryCache.TryGetValue(cacheKey, out UsersDto? cachedUser))
+      {
+        user = cachedUser;
+      }
 
-			var cacheKey = $"User_{userId}";
-			if (memoryCache.TryGetValue(cacheKey, out UsersDto? cachedUser))
-			{
-				user = cachedUser;
-			}
+      // Fallback to database if cache miss
+      if (user == null)
+      {
+        user = serviceManager.Users.GetUser(userId, false);
 
-			if (user == null)
-			{
-				user = serviceManager.Users.GetUser(userId, false);
+        if (user != null)
+        {
+          var cacheOptions = new MemoryCacheEntryOptions()
+              .SetSlidingExpiration(TimeSpan.FromHours(5))
+              .SetAbsoluteExpiration(TimeSpan.FromHours(5));
 
-				if (user != null)
-				{
+          memoryCache.Set(cacheKey, user, cacheOptions);
+        }
+      }
 
-					var cacheOptions = new MemoryCacheEntryOptions()
-						.SetSlidingExpiration(TimeSpan.FromHours(5))
-						.SetAbsoluteExpiration(TimeSpan.FromHours(5));
+      if (user == null)
+      {
+        context.Result = new UnauthorizedObjectResult(
+            "User not found. Please log in again.");
+        return;
+      }
 
-					memoryCache.Set(cacheKey, user, cacheOptions);
-				}
-			}
+      // Set user in HttpContext
+      httpContext.SetCurrentUser(user);
+      httpContext.SetUserId(userId);
+    }
+    catch (Exception ex)
+    {
+      context.Result = new UnauthorizedObjectResult(
+          $"Authentication failed: {ex.Message}");
+    }
+  }
 
-
-			if (user == null)
-			{
-				context.Result = new UnauthorizedObjectResult(
-					"User not found. Please log in again."
-				);
-				return;
-			}
-
-
-			httpContext.SetCurrentUser(user);
-			httpContext.SetUserId(userId);
-		}
-		catch (Exception ex)
-		{
-			context.Result = new UnauthorizedObjectResult($"Authentication failed: {ex.Message}");
-		}
-	}
 }
 
 
-//[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-//public class AuthorizeUserAttribute : Attribute, IAuthorizationFilter
-//{
-//  public void OnAuthorization(AuthorizationFilterContext context)
-//  {
-//    var httpContext = context.HttpContext;
-//    var userIdClaim = httpContext.User.FindFirst("UserId")?.Value;
-//    if (string.IsNullOrEmpty(userIdClaim))
-//    {
-//      context.Result = new UnauthorizedResult();
-//      return;
-//    }
-
-//    var serviceManager = context.HttpContext.RequestServices.GetService<bdDevCRM.ServicesContract.IServiceManager>();
-//    try
-//    {
-//      var user = serviceManager.GetCache<UsersDto>(Convert.ToInt32(userIdClaim));
-//    }
-//    catch
-//    {
-//      context.Result = new UnauthorizedObjectResult("User not found in cache or session expired. Please log in again.");
-//    }
-//  }
-//}
 
 // [AllowAnonymous] use anywhere you want to allow anonymous access.

@@ -1,4 +1,5 @@
 ﻿using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
@@ -14,7 +15,7 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 
 //public class EmployeeController : BaseApiController
-[AuthenticatedUser]
+[AuthorizeUser]
 public class MenuController : BaseApiController
 {
     //private readonly IServiceManager _serviceManager;
