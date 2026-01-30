@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -222,22 +223,13 @@ public class AuthenticationController : BaseApiController
         }
       }
 
-      // Clear cookie (works even without valid access token)
-      ClearRefreshTokenCookie();
-
-      // Clear user-specific cache entries
-      var userIdClaim = User.FindFirst("UserId")?.Value;
-      if (!string.IsNullOrEmpty(userIdClaim))
-      {
-        var cacheKey = $"User_{userIdClaim}";
-        if (_memoryCache.TryGetValue(cacheKey, out _))
-        {
-          _memoryCache.Remove(cacheKey); // Remove the specific cache entry
-        }
-      }
+      // ✅ Clear user cache
+      AuthorizeUserAttribute.ClearUserCache(_memoryCache, userId);
 
       // Clear the entire memory cache
       ClearMemoryCache();
+
+      ClearRefreshTokenCookie();
 
       return Ok(ResponseHelper.Success<object>(null, "Logged out successfully"));
     }
@@ -246,6 +238,7 @@ public class AuthenticationController : BaseApiController
       return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred during logout." });
     }
   }
+
 
   private void ClearMemoryCache()
   {
