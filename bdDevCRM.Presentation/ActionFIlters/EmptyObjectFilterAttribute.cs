@@ -36,7 +36,7 @@ public class EmptyObjectFilterAttribute : IActionFilter
     var dtoArgument = context.ActionArguments
         .FirstOrDefault(arg => arg.Value != null && arg.Value.GetType().Name.Contains("Dto"));
 
-    if (dtoArgument.Value == null) // Null check করে
+    if (dtoArgument.Value == null) // Null check
     {
       context.Result = new BadRequestObjectResult(
           $"Object is null. Controller: {controller}, Action: {action}"

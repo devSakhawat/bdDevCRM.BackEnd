@@ -223,7 +223,7 @@ public class AuthenticationController : BaseApiController
         }
       }
 
-      // ✅ Clear user cache
+      // Clear user cache
       AuthorizeUserAttribute.ClearUserCache(_memoryCache, userId);
 
       // Clear the entire memory cache
@@ -488,13 +488,13 @@ public class AuthenticationController : BaseApiController
           issuedAt = jsonToken.IssuedAt,
           validFrom = jsonToken.ValidFrom,
           validTo = jsonToken.ValidTo,
-          isExpired = jsonToken.ValidTo < DateTime.Now, // FIXED: Use Now consistently
+          isExpired = jsonToken.ValidTo < DateTime.Now, 
           // Enhanced debugging information
           hasExpirationClaim = jsonToken.Payload.Exp != null,
           expirationTimestamp = jsonToken.Payload.Exp,
           notBeforeTimestamp = jsonToken.Payload.Nbf,
-          currentUtcTime = DateTime.Now, // FIXED: Use Now consistently
-          tokenAge = DateTime.Now - jsonToken.ValidFrom // FIXED: Use Now consistently
+          currentUtcTime = DateTime.Now, 
+          tokenAge = DateTime.Now - jsonToken.ValidFrom 
         }
       };
     }

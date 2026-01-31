@@ -153,10 +153,10 @@ app.UseStaticFiles(new StaticFileOptions
   RequestPath = "/Uploads",
   OnPrepareResponse = ctx =>
   {
-    // CORS headers properly set
-    ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-    ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
-    ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");
+    // this is menual CORS headers properly set
+    //ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+    //ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
+    //ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");
     ctx.Context.Response.Headers.Append("Cache-Control", "public, max-age=3600");
   }
 });

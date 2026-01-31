@@ -21,19 +21,45 @@ public static class ServiceExtensions
 {
   public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
   {
-    var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
-      ?? new[] { "http://localhost:4200", "https://localhost:4200" };
-
     services.AddCors(options =>
     {
       options.AddPolicy("CorsPolicy", builder =>
         builder
-          .WithOrigins(allowedOrigins)
+          .SetIsOriginAllowed(_ => true)  // Allow all origins (dev only)
           .AllowAnyMethod()
           .AllowAnyHeader()
-          .AllowCredentials());
+          .AllowCredentials()
+      );
     });
   }
+
+
+  // Deployment only
+  //  Warning: Remove .SetIsOriginAllowed(_ => true) in production!
+  //public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
+  //{
+  //  var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+  //    ?? new[] {
+  //    //"http://localhost:4200",   // Angular
+  //    //"https://localhost:4200",  // Angular HTTPS
+  //    //"http://localhost:5000",   // ASP.NET
+  //    //"https://localhost:5001",  // ASP.NET HTTPS
+  //    "https://localhost:7145",   // Your actual port?
+  //    "https://localhost:7290"   // Backend URL (if calling itself)
+  //    };
+
+  //  services.AddCors(options =>
+  //  {
+  //    options.AddPolicy("CorsPolicy", builder =>
+  //      builder
+  //        .WithOrigins(allowedOrigins)
+  //        .AllowAnyMethod()
+  //        .AllowAnyHeader()
+  //        .AllowCredentials()
+  //        .SetIsOriginAllowed(origin => true) //Development only
+  //    );
+  //  });
+  //}
 
   public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
   {
