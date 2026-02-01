@@ -47,16 +47,22 @@ public class AuthenticationController : BaseApiController
   [IgnoreMediaTypeValidation]
   public IActionResult Authenticate([FromBody] UserForAuthenticationDto user)
   {
+    // 1. Validate user exists
+    var userDto = _serviceManager.Users.GetUserByLoginIdAsync(user.LoginId.Trim(), false);
+    if (userDto == null)
+      throw new UsernamePasswordMismatchException();
+
+    // 2. Validate credentials
     if (!_serviceManager.CustomAuthentication.ValidateUser(user))
       throw new UsernamePasswordMismatchException();
 
+    // 3. Generate tokens (access + refresh)
     var tokenResponse = _serviceManager.CustomAuthentication.CreateToken(user);
 
-    // Set refresh token in HTTP-only cookie
+    // 4. Set refresh token in HTTP-only cookie
     SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
 
-    var userDto = _serviceManager.Users.GetUserByLoginIdAsync(user.LoginId.Trim(), false);
-
+    // 5. Cache user data (replace Session)
     if (userDto != null)
     {
       userDto.Password = "";
@@ -73,7 +79,7 @@ public class AuthenticationController : BaseApiController
       _memoryCache.Set(cacheKey, userDto, cacheOptions);
     }
 
-    // Return response without exposing refresh token
+    // 6. Return access token only (refresh token in cookie)
     var response = new
     {
       AccessToken = tokenResponse.AccessToken,
