@@ -63,21 +63,18 @@ public class AuthenticationController : BaseApiController
     SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
 
     // 5. Cache user data (replace Session)
-    if (userDto != null)
-    {
-      userDto.Password = "";
-      userDto.HrRecordId = userDto.EmployeeId;
+    userDto.Password = "";
+    userDto.HrRecordId = userDto.EmployeeId;
 
-      var cacheKey = $"User_{userDto.UserId}";
-      var cacheOptions = new MemoryCacheEntryOptions()
-        .SetSlidingExpiration(TimeSpan.FromHours(5))
-        .SetAbsoluteExpiration(TimeSpan.FromHours(5));
+    var cacheKey = $"User_{userDto.UserId}";
+    var cacheOptions = new MemoryCacheEntryOptions()
+      .SetSlidingExpiration(TimeSpan.FromHours(5))
+      .SetAbsoluteExpiration(TimeSpan.FromHours(5));
 
-      if (_memoryCache.TryGetValue(cacheKey, out _))
-        _memoryCache.Remove(cacheKey);
+    if (_memoryCache.TryGetValue(cacheKey, out _))
+      _memoryCache.Remove(cacheKey);
 
-      _memoryCache.Set(cacheKey, userDto, cacheOptions);
-    }
+    _memoryCache.Set(cacheKey, userDto, cacheOptions);
 
     // 6. Return access token only (refresh token in cookie)
     var response = new
