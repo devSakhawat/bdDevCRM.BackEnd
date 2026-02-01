@@ -28,7 +28,7 @@ public class UsersRepositoryDto
   public DateTime LastUpdateDate { get; set; }
   public DateTime LastLoginDate { get; set; }
   public int? FailedLoginNo { get; set; }
-  public bool? IsActive { get; set; }
+  public bool IsActive { get; set; } = true;
   public bool? IsExpired { get; set; }
   public string IsFirstLogin { get; set; }
   public string CompanyName { get; set; }

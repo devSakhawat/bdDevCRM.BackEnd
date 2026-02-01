@@ -106,4 +106,5 @@ public class EncryptDecryptHelper
     string plainText = Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
     return plainText;
   }
+
 }
