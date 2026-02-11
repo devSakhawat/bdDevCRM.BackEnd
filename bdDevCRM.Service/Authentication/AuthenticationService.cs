@@ -50,7 +50,7 @@ public class AuthenticationService : IAuthenticationService
 	public async Task<LoginValidationResult> ValidateUserLogin(UserForAuthenticationDto userForAuth, UsersDto userDB)
 	{
 		var systemSettings = await _repository.SystemSettings.GetSystemSettingsDataByCompanyId((int)userDB.CompanyId);
-		Users userEntity = new Users();
+		Users userEntity = MyMapper.JsonClone<UsersDto, Users>(userDB);
 		// ============================================================================
 		// STEP 1: Check if User Exists
 		// ============================================================================
@@ -148,9 +148,8 @@ public class AuthenticationService : IAuthenticationService
 		// ============================================================================
 		// STEP 6: Reset Failed Login Counter
 		// ============================================================================
-
-		userEntity.FailedLoginNo = 0;
-		userEntity.LastLoginDate = DateTime.Now;
+		userEntity.FailedLoginNo = userDB.FailedLoginNo = 0;
+		userEntity.LastLoginDate = userDB.LastLoginDate = DateTime.Now;
 		_repository.Users.UpdateUser(userEntity);
 
 
@@ -159,7 +158,7 @@ public class AuthenticationService : IAuthenticationService
 		// ============================================================================
 
 		var license = new bdDevsLicense();
-		var userSession = MapToUserSession(MyMapper.JsonClone<Users, UsersDto>(userEntity));
+		var userSession = MapToUserSession(userDB);
 		userSession.ExpiryDate = license.GetExpiryDate();
 		userSession.LicenseUserCount = license.GetNumberOfUser();
 
