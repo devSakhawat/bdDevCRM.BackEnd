@@ -34,7 +34,12 @@ public class MenuController : BaseApiController
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> SelectMenuByUserPermission()
     {
-        var userId = Convert.ToInt32(User.FindFirst("UserId")?.Value);
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId) || userId <= 0)
+        {
+            return Unauthorized(ResponseHelper.Unauthorized("User authentication required. Please log in again."));
+        }
 
         // Try to get from cache first
         string cacheKey = $"menu_permissions_{userId}";
@@ -57,7 +62,7 @@ public class MenuController : BaseApiController
         var menusDto = await menusDtoTask;
 
         if (!menusDto.Any())
-            throw new GenericNotFoundException("menus", "userId", userId.ToString());
+            return Ok(ResponseHelper.Success(Enumerable.Empty<MenuDto>(), "No menus found for this user."));
 
         // Cache the result
         var cacheOptions = new MemoryCacheEntryOptions()
