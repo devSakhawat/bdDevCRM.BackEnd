@@ -36,13 +36,23 @@ internal sealed class MenuService : IMenuService
 
     public async Task<IEnumerable<MenuDto>> SelectMenuByUserPermission(int userid, bool trackChanges)
     {
+        if (userid <= 0)
+        {
+            _logger.LogWarn($"SelectMenuByUserPermission called with invalid userId: {userid}");
+            return Enumerable.Empty<MenuDto>();
+        }
+
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var menuRepositoryDtos = await _repository.Menus.SelectMenuByUserPermission(userid, trackChanges);
         stopwatch.Stop();
 
         _logger.LogInfo($"Menu query execution time: {stopwatch.ElapsedMilliseconds}ms for user {userid}");
 
-        if (!menuRepositoryDtos.Any()) throw new GenericListNotFoundException("Menu");
+        if (!menuRepositoryDtos.Any())
+        {
+            _logger.LogWarn($"No menu permissions found for userId: {userid}");
+            return Enumerable.Empty<MenuDto>();
+        }
 
         var menusDto = MyMapper.JsonCloneIEnumerableToList<MenuRepositoryDto, MenuDto>(menuRepositoryDtos);
         return menusDto;
