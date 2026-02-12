@@ -1,4 +1,5 @@
-﻿using bdDevCRM.Entities.Entities.System;
+﻿using Azure;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Entities.Token;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
@@ -194,7 +195,7 @@ public class AuthenticationService : IAuthenticationService
 
 		// 2. Generate refresh token (long-lived: 7 days)
 		var refreshToken = GenerateRefreshToken();
-		var refreshTokenExpiry = DateTime.UtcNow.AddHours(8);
+		var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
 		// 3. Save refresh token to database
 		var refreshTokenEntity = new RefreshToken

@@ -61,7 +61,7 @@ public class AuthenticationController : BaseApiController
 		// ============================================================================
 		LoginValidationResult validationResult = await _serviceManager.CustomAuthentication.ValidateUserLogin(user, userDto);
 
-		if (!validationResult.IsSuccess)
+		 if (!validationResult.IsSuccess)
 		{
 			return validationResult.Status switch
 			{
@@ -224,10 +224,10 @@ public class AuthenticationController : BaseApiController
 		return Ok(ResponseHelper.Success<object>(null, "Token revoked successfully"));
 	}
 
-
+	[AuthorizeUser]
 	//[HttpPost("logout")]
 	[HttpPost(RouteConstants.Logout)]
-	[AllowAnonymous]
+	//[AllowAnonymous]
 	[IgnoreMediaTypeValidation]
 	public async Task<IActionResult> Logout()
 	{
@@ -235,29 +235,31 @@ public class AuthenticationController : BaseApiController
 		{
 			var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-			// Only blacklist if token is provided
-			if (!string.IsNullOrEmpty(token))
-			{
-				await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
-			}
+			//// Only blacklist if token is provided
+			//if (!string.IsNullOrEmpty(token))
+			//{
+			//	await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
+			//}
 
+			var currentUser = HttpContext.GetCurrentUser();
 			var userId = HttpContext.GetUserId();
 
 			if (userId != 0)
 			{
 				var ipAddress = GetClientIpAddress();
+				await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
 
-				// Revoke all user tokens
-				try
-				{
-					await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
-				}
-				catch (Exception ex)
-				{
-					// Log error but continue with logout process
-					// Note: Access token is already blacklisted, so partial failure is acceptable
-					Console.WriteLine($"Failed to revoke refresh tokens during logout: {ex.Message}");
-				}
+				//// Revoke all user tokens
+				//try
+				//{
+				//	await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
+				//}
+				//catch (Exception ex)
+				//{
+				//	// Log error but continue with logout process
+				//	// Note: Access token is already blacklisted, so partial failure is acceptable
+				//	Console.WriteLine($"Failed to revoke refresh tokens during logout: {ex.Message}");
+				//}
 			}
 
 			// Clear user cache
