@@ -1,4 +1,6 @@
-﻿using bdDevCRM.Presentation.ActionFIlters;
+﻿using Azure.Core;
+using bdDevCRM.Entities.Entities.Token;
+using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
@@ -17,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
@@ -110,14 +113,18 @@ public class AuthenticationController : BaseApiController
 		// STEP 5: Build Response
 		// ============================================================================
 
-		var response = new
+		var response = new TokenResponseDto
 		{
 			AccessToken = tokenResponse.AccessToken,
+			//RefreshToken = tokenResponse.RefreshToken,
 			AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+			RefreshTokenExpiry = tokenResponse.RefreshTokenExpiry,
 			TokenType = tokenResponse.TokenType,
 			ExpiresIn = tokenResponse.ExpiresIn,
 			UserSession = validationResult.UserSession,
-			Status = validationResult.Status.ToString()
+			Status = validationResult.Status.ToString(),
+			IsSuccess = validationResult.IsSuccess,
+			//IsSuccess = true
 		};
 
 		return Ok(ResponseHelper.Success(response, validationResult.Message));
@@ -186,13 +193,24 @@ public class AuthenticationController : BaseApiController
 			// Set new refresh token in cookie
 			SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
 
-			// Return new access token
-			var response = new
+			//// Return new access token
+			//var response = new
+			//{
+			//	AccessToken = tokenResponse.AccessToken,
+			//	AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+			//	TokenType = tokenResponse.TokenType,
+			//	ExpiresIn = tokenResponse.ExpiresIn
+			//};
+
+			var response = new TokenResponseDto
 			{
 				AccessToken = tokenResponse.AccessToken,
+				//RefreshToken = tokenResponse.RefreshToken,
 				AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+				RefreshTokenExpiry = tokenResponse.RefreshTokenExpiry,
 				TokenType = tokenResponse.TokenType,
-				ExpiresIn = tokenResponse.ExpiresIn
+				ExpiresIn = tokenResponse.ExpiresIn,
+				IsSuccess = true,
 			};
 
 			return Ok(ResponseHelper.Success(response, "Token refreshed successfully"));

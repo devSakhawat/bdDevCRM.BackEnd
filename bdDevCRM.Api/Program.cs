@@ -28,7 +28,8 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureResponseCompression();
 builder.Services.ConfigureGzipCompression();
 builder.Services.ConfigureFileLimit();
-builder.Services.ConfigureCookiePolicy();
+//builder.Services.ConfigureCookiePolicy();
+builder.Services.ConfigureCookiePolicy(builder.Environment);
 
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
