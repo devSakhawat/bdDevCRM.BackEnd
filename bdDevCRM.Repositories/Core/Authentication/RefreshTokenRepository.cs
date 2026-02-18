@@ -9,15 +9,6 @@ public class RefreshTokenRepository : RepositoryBase<RefreshToken>, IRefreshToke
 {
   public RefreshTokenRepository(CRMContext context) : base(context) { }
 
-
-  /// <summary>
-  /// Get all expired tokens
-  /// যেসব token expire হয়ে গেছে সেগুলো খুঁজে বের করা
-  /// 
-  /// Logic:
-  /// 1. ExpiryDate < DateTime.UtcNow (expire হয়ে গেছে)
-  /// 2.  অথবা IsRevoked = true (manually revoke করা হয়েছে)
-  /// </summary>
   public async Task<IEnumerable<RefreshToken>> GetExpiredTokensAsync()
   {
     return await ListByConditionAsync(rt => rt.ExpiryDate < DateTime.UtcNow || rt.IsRevoked, trackChanges: false);

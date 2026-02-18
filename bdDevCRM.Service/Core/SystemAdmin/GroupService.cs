@@ -76,7 +76,7 @@ internal sealed class GroupService : IGroupService
         if (key != modelDto.GroupId) throw new IdMismatchBadRequestException(key.ToString(), new GroupDto().GetType().Name);
 
         bool isGroupExists = await _repository.Groups.ExistsAsync(m => m.GroupId != key);
-        // Uncomment if you want to check for duplicate group names during update
+        
         // if (isGroupExists) throw new DuplicateRecordException("Group", "GroupName");
 
         if (modelDto.IsDefault == 1)

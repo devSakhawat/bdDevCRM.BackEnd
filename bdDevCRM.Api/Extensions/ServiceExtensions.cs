@@ -13,195 +13,228 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 namespace bdDevCRM.Api.Extensions;
 
 public static class ServiceExtensions
 {
-  public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
-  {
-    services.AddCors(options =>
-    {
-      options.AddPolicy("CorsPolicy", builder =>
-        builder
-          .SetIsOriginAllowed(_ => true)  // Allow all origins (dev only)
-          .AllowAnyMethod()
-          .AllowAnyHeader()
-          .AllowCredentials()
-      );
-    });
-  }
+	public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddCors(options =>
+		{
+			options.AddPolicy("CorsPolicy", builder =>
+		  builder
+			.SetIsOriginAllowed(_ => true)  // Allow all origins (dev only)
+			.AllowAnyMethod()
+			.AllowAnyHeader()
+			.AllowCredentials()
+		);
+		});
+	}
 
 
-  // Deployment only
-  //  Warning: Remove .SetIsOriginAllowed(_ => true) in production!
-  //public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
-  //{
-  //  var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-  //    ?? new[] {
-  //    //"http://localhost:4200",   // Angular
-  //    //"https://localhost:4200",  // Angular HTTPS
-  //    //"http://localhost:5000",   // ASP.NET
-  //    //"https://localhost:5001",  // ASP.NET HTTPS
-  //    "https://localhost:7145",   // Your actual port?
-  //    "https://localhost:7290"   // Backend URL (if calling itself)
-  //    };
+	// Deployment only
+	//  Warning: Remove .SetIsOriginAllowed(_ => true) in production!
+	//public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
+	//{
+	//  var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+	//    ?? new[] {
+	//    //"http://localhost:4200",   // Angular
+	//    //"https://localhost:4200",  // Angular HTTPS
+	//    //"http://localhost:5000",   // ASP.NET
+	//    //"https://localhost:5001",  // ASP.NET HTTPS
+	//    "https://localhost:7145",   // Your actual port?
+	//    "https://localhost:7290"   // Backend URL (if calling itself)
+	//    };
 
-  //  services.AddCors(options =>
-  //  {
-  //    options.AddPolicy("CorsPolicy", builder =>
-  //      builder
-  //        .WithOrigins(allowedOrigins)
-  //        .AllowAnyMethod()
-  //        .AllowAnyHeader()
-  //        .AllowCredentials()
-  //        .SetIsOriginAllowed(origin => true) //Development only
-  //    );
-  //  });
-  //}
+	//  services.AddCors(options =>
+	//  {
+	//    options.AddPolicy("CorsPolicy", builder =>
+	//      builder
+	//        .WithOrigins(allowedOrigins)
+	//        .AllowAnyMethod()
+	//        .AllowAnyHeader()
+	//        .AllowCredentials()
+	//        .SetIsOriginAllowed(origin => true) //Development only
+	//    );
+	//  });
+	//}
 
-  public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
-  {
-    options.AutomaticAuthentication = false;
-  });
+	public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
+	{
+		options.AutomaticAuthentication = false;
+	});
 
-  public static void ConfigureLoggerService(this IServiceCollection services)
-  {
-    services.AddSingleton<ILoggerManager, LoggerManager>();
-  }
+	public static void ConfigureLoggerService(this IServiceCollection services)
+	{
+		services.AddSingleton<ILoggerManager, LoggerManager>();
+	}
 
-  public static void ConfigureRepositoryManager(this IServiceCollection services) => services.AddScoped<IRepositoryManager, RepositoryManager>();
+	public static void ConfigureRepositoryManager(this IServiceCollection services) => services.AddScoped<IRepositoryManager, RepositoryManager>();
 
-  public static void ConfigureServiceManager(this IServiceCollection services) => services.AddScoped<IServiceManager, ServiceManager>();
+	public static void ConfigureServiceManager(this IServiceCollection services) => services.AddScoped<IServiceManager, ServiceManager>();
 
-  public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) => services.AddDbContext<CRMContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbLocation")));
+	public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) => services.AddDbContext<CRMContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbLocation")));
 
-  public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
+	public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
 
-  public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
-  {
-    services.AddAuthentication(options =>
-    {
-      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-      options.TokenValidationParameters = new TokenValidationParameters
-      {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = configuration["Jwt:Issuer"],
-        ValidAudience = configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]))
-      };
+	public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddAuthentication(options =>
+		{
+			options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+			options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+		})
+		.AddJwtBearer(options =>
+		{
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuer = true,
+				ValidateAudience = true,
+				ValidateLifetime = true,
+				ValidateIssuerSigningKey = true,
+				ValidIssuer = configuration["Jwt:Issuer"],
+				ValidAudience = configuration["Jwt:Audience"],
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]))
+			};
 
-      //options.Events = new JwtBearerEvents
-      //{
-      //  OnTokenValidated = async context =>
-      //  {
-      //    try
-      //    {
+			//options.Events = new JwtBearerEvents
+			//{
+			//  OnTokenValidated = async context =>
+			//  {
+			//    try
+			//    {
 
-      //      var token = context.SecurityToken as JwtSecurityToken;
-      //      if (token == null)
-      //      {
-      //        context.Fail("Invalid token format.");
-      //        return;
-      //      }
+			//      var token = context.SecurityToken as JwtSecurityToken;
+			//      if (token == null)
+			//      {
+			//        context.Fail("Invalid token format.");
+			//        return;
+			//      }
 
-      //      var rawToken = token.RawData;
-      //      if (string.IsNullOrEmpty(rawToken))
-      //      {
-      //        context.Fail("Token data is missing.");
-      //        return;
-      //      }
+			//      var rawToken = token.RawData;
+			//      if (string.IsNullOrEmpty(rawToken))
+			//      {
+			//        context.Fail("Token data is missing.");
+			//        return;
+			//      }
 
-      //      var tokenBlacklistService = context.HttpContext.RequestServices.GetRequiredService<ITokenBlacklistService>();
+			//      var tokenBlacklistService = context.HttpContext.RequestServices.GetRequiredService<ITokenBlacklistService>();
 
-      //      if (await tokenBlacklistService.IsTokenBlacklisted(rawToken))
-      //      {
-      //        context.Fail("Token is blacklisted.");
-      //      }
-      //    }
-      //    catch (Exception ex)
-      //    {
-      //      context.Fail($"An error occurred during token validation: {ex.Message}");
-      //    }
-      //  }
-      //};
-    });
-  }
+			//      if (await tokenBlacklistService.IsTokenBlacklisted(rawToken))
+			//      {
+			//        context.Fail("Token is blacklisted.");
+			//      }
+			//    }
+			//    catch (Exception ex)
+			//    {
+			//      context.Fail($"An error occurred during token validation: {ex.Message}");
+			//    }
+			//  }
+			//};
+		});
+	}
 
-  public static void ConfigureApiBehaviorOptions(this IServiceCollection services, IConfiguration configuration)
-  {
-    services.Configure<ApiBehaviorOptions>(options =>
-    {
-      options.SuppressModelStateInvalidFilter = true;
-      options.InvalidModelStateResponseFactory = actionContext =>
-      {
-        var errors = actionContext.ModelState
-           .Where(e => e.Value.Errors.Count() > 0)
-           .SelectMany(x => x.Value.Errors)
-           .Select(y => y.ErrorMessage).ToArray();
+	public static void ConfigureApiBehaviorOptions(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.Configure<ApiBehaviorOptions>(options =>
+		{
+			options.SuppressModelStateInvalidFilter = true;
+			options.InvalidModelStateResponseFactory = actionContext =>
+		{
+			  var errors = actionContext.ModelState
+			 .Where(e => e.Value.Errors.Count() > 0)
+			 .SelectMany(x => x.Value.Errors)
+			 .Select(y => y.ErrorMessage).ToArray();
 
-        var errorResponse = new ApiValidationErrorResponse
-        {
-          Errors = errors
-        };
-        return new BadRequestObjectResult(errorResponse);
-      };
-    });
-  }
+			  var errorResponse = new ApiValidationErrorResponse
+			  {
+				  Errors = errors
+			  };
+			  return new BadRequestObjectResult(errorResponse);
+		  };
+		});
+	}
 
-  public static void ConfigureAuthorization(this IServiceCollection services)
-  {
-    services.AddAuthorization();
-  }
+	public static void ConfigureAuthorization(this IServiceCollection services)
+	{
+		services.AddAuthorization();
+	}
 
-  public static void ConfigureResponseCompression(this IServiceCollection services)
-  {
-    services.AddResponseCompression(options =>
-      {
-        options.EnableForHttps = true;
-        options.Providers.Add<GzipCompressionProvider>();
-        options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-            new[] { "application/json" }
-        );
-      }
-    );
-  }
+	public static void ConfigureResponseCompression(this IServiceCollection services)
+	{
+		services.AddResponseCompression(options =>
+		  {
+			  options.EnableForHttps = true;
+			  options.Providers.Add<GzipCompressionProvider>();
+			  options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+			  new[] { "application/json" }
+		  );
+		  }
+		);
+	}
 
-  public static void ConfigureGzipCompression(this IServiceCollection services)
-  {
-    services.Configure<GzipCompressionProviderOptions>(options =>
-    {
-      options.Level = System.IO.Compression.CompressionLevel.Optimal;
-    });
-  }
+	public static void ConfigureGzipCompression(this IServiceCollection services)
+	{
+		services.Configure<GzipCompressionProviderOptions>(options =>
+		{
+			options.Level = System.IO.Compression.CompressionLevel.Optimal;
+		});
+	}
 
-  public static void ConfigureFileLimit(this IServiceCollection services)
-  {
-    services.Configure<FormOptions>(options =>
-    {
-      options.MultipartBodyLengthLimit = 10_000_000; // 100MB
-      options.ValueLengthLimit = int.MaxValue;
-      options.ValueCountLimit = int.MaxValue;
-      options.KeyLengthLimit = int.MaxValue;
-    });
-  }
+	public static void ConfigureFileLimit(this IServiceCollection services)
+	{
+		services.Configure<FormOptions>(options =>
+		{
+			options.MultipartBodyLengthLimit = 10_000_000; // 100MB
+			options.ValueLengthLimit = int.MaxValue;
+			options.ValueCountLimit = int.MaxValue;
+			options.KeyLengthLimit = int.MaxValue;
+		});
+	}
 
-  public static void ConfigureCookiePolicy(this IServiceCollection services)
-  {
-    services.Configure<CookiePolicyOptions>(options =>
-    {
-      options.MinimumSameSitePolicy = SameSiteMode.Strict;
-      options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
-      options.Secure = CookieSecurePolicy.Always; // Require HTTPS
-    });
-  }
+	public static void ConfigureCookiePolicy(this IServiceCollection services)
+	{
+		services.Configure<CookiePolicyOptions>(options =>
+		{
+			options.MinimumSameSitePolicy = SameSiteMode.Strict;
+			options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
+			options.Secure = CookieSecurePolicy.Always; // Require HTTPS
+		});
+	}
 
+	public static void ConfigureAddSwaggerGen(this IServiceCollection services)
+	{
+		services.AddSwaggerGen(options =>
+		{
+			options.SwaggerDoc("v1", new OpenApiInfo { Title = "dbDevCRM.BackEnd", Version = "v1" });
+			options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+			{
+				Name = "Authorization",
+				//Type = SecuritySchemeType.Http,
+				Type = SecuritySchemeType.ApiKey,
+				Scheme = "Bearer",
+				BearerFormat = "JWT",
+				In = ParameterLocation.Header,
+				Description = "Format: Bearer {token}\r\nExample: Bearer eyJhbGciOiJIUzI1NiIs..."
+			});
+			options.AddSecurityRequirement(new OpenApiSecurityRequirement
+			{
+				{
+				  new OpenApiSecurityScheme
+				  {
+					Reference = new OpenApiReference
+					{
+					  Type = ReferenceType.SecurityScheme,
+					  Id = "Bearer"
+					}
+				  },
+				  Array.Empty<string>()
+				}
+			});
+		});
+
+	}
 }

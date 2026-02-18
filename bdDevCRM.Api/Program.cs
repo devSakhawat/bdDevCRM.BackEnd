@@ -65,7 +65,7 @@ builder.Services.AddControllers(config =>
 {
   config.RespectBrowserAcceptHeader = true;
   config.ReturnHttpNotAcceptable = true;
-  // CSV formatter remove করুন
+  // CSV formatter remove 
 })
 .AddXmlDataContractSerializerFormatters()
 .AddApplicationPart(typeof(PresentationReference).Assembly)
@@ -92,7 +92,9 @@ builder.Services.AddMvcCore(options =>
 //builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
+// New
+builder.Services.ConfigureAddSwaggerGen();
 
 // Add Authentication/Authorization
 builder.Services.ConfigureAuthentication(builder.Configuration);
