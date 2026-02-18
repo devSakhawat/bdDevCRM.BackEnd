@@ -38,6 +38,7 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<IQueryAnalyzerService> _queryAnalyzerService;
   private readonly Lazy<IStatusService> _statusService;
   private readonly Lazy<IAccessControlService> _accessControlService;
+  private readonly Lazy<IPropertyInspectorService> _propertyInspectorService;
 
   #region HR Area
   private readonly Lazy<IEmployeeService> _employeeService;
@@ -92,6 +93,7 @@ public sealed class ServiceManager : IServiceManager
   {
     _cache = cache;
 
+    _propertyInspectorService = new Lazy<IPropertyInspectorService>(() => new PropertyInspectorService(configuration, logger, httpContextAccessor));
     _tokenBlackListService = new Lazy<ITokenBlacklistService>(() => new TokenBlacklistService(configuration, repository, logger));
     _countryService = new Lazy<ICrmCountryService>(() => new CrmCountryService(repository, logger, configuration));
     _currencyService = new Lazy<ICurrencyService>(() => new CurrencyService(repository, logger, configuration));
@@ -154,7 +156,8 @@ public sealed class ServiceManager : IServiceManager
     _dmsdocumentAccessLogService = new Lazy<IDmsDocumentAccessLogService>(() => new DmsDocumentAccessLogService(repository, logger, configuration));
     #endregion
   }
-
+  
+  public IPropertyInspectorService PropertyInspectorService => _propertyInspectorService.Value;
   public ITokenBlacklistService TokenBlacklist => _tokenBlackListService.Value;
   public ICrmCountryService CrmCountries => _countryService.Value;
   public ICurrencyService Currencies => _currencyService.Value;

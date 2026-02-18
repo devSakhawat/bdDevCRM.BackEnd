@@ -50,11 +50,12 @@ public class AuthenticationService : IAuthenticationService
 	public async Task<LoginValidationResult> ValidateUserLogin(UserForAuthenticationDto userForAuth, UsersDto userDB)
 	{
 		var systemSettings = await _repository.SystemSettings.GetSystemSettingsDataByCompanyId((int)userDB.CompanyId);
-		Users userEntity = new Users();
-		// ============================================================================
-		// STEP 1: Check if User Exists
-		// ============================================================================
-		if (userDB == null || userDB.UserId == 0)
+		//Users userEntity = new Users();
+		Users userEntity = MyMapper.JsonClone<UsersDto, Users>(userDB);
+    // ============================================================================
+    // STEP 1: Check if User Exists
+    // ============================================================================
+    if (userDB == null || userDB.UserId == 0)
 		{
 			return new LoginValidationResult
 			{
@@ -108,7 +109,7 @@ public class AuthenticationService : IAuthenticationService
 			}
 
 			// Always save failed login attempts
-			userEntity = MyMapper.JsonClone<UsersDto, Users>(userDB);
+			//userEntity = MyMapper.JsonClone<UsersDto, Users>(userDB);
 			_repository.Users.UpdateUser(userEntity);
 			await _repository.SaveAsync();
 
@@ -152,6 +153,15 @@ public class AuthenticationService : IAuthenticationService
 		userEntity.FailedLoginNo = 0;
 		userEntity.LastLoginDate = DateTime.Now;
 		_repository.Users.UpdateUser(userEntity);
+		
+
+		// ============================================================================
+		// STEP 7: User IP and Device Information.
+		// ============================================================================
+
+		userEntity.FailedLoginNo = 0;
+		userEntity.LastLoginDate = DateTime.Now;
+		_repository.Users.UpdateUser(userEntity);
 
 
 		// ============================================================================
@@ -159,7 +169,9 @@ public class AuthenticationService : IAuthenticationService
 		// ============================================================================
 
 		var license = new bdDevsLicense();
-		var userSession = MapToUserSession(MyMapper.JsonClone<Users, UsersDto>(userEntity));
+    userDB = MyMapper.JsonClone<Users, UsersDto>(userEntity);
+
+    var userSession = MapToUserSession(userDB);
 		userSession.ExpiryDate = license.GetExpiryDate();
 		userSession.LicenseUserCount = license.GetNumberOfUser();
 
@@ -433,10 +445,11 @@ public class AuthenticationService : IAuthenticationService
 		return (true, string.Empty);
 	}
 
-	/// <summary>
-	/// Map user DTO to session data
-	/// </summary>
-	private UserSessionData MapToUserSession(UsersDto user)
+  /// <summary>
+  /// Map user DTO to session data
+  /// Parameter will be UsersDto because Users Has no FullLogoPath and few property.
+  /// </summary>
+  private UserSessionData MapToUserSession(UsersDto user)
 	{
 		return new UserSessionData
 		{
