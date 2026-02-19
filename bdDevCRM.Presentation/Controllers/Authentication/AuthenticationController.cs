@@ -53,7 +53,7 @@ public class AuthenticationController : BaseApiController
 		// STEP 1: Get User Data
 		// ============================================================================
 
-		var userDto = _serviceManager.Users.GetUserByLoginIdAsync(user.LoginId.Trim(), false);
+		var userDto = _serviceManager.Users.GetUserByLoginIdRaw(user.LoginId.Trim(), false);
 		if (userDto == null)
 		{
 			return Unauthorized(ResponseHelper.Unauthorized("Invalid username or password"));
@@ -89,7 +89,7 @@ public class AuthenticationController : BaseApiController
 		// STEP 3: Generate Tokens
 		// ============================================================================
 
-		var tokenResponse = _serviceManager.CustomAuthentication.CreateToken(user);
+		var tokenResponse = await _serviceManager.CustomAuthentication.CreateToken(user);
 
 		// Set refresh token in HTTP-only cookie
 		SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
@@ -143,7 +143,7 @@ public class AuthenticationController : BaseApiController
 			if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
 
 			// UsersDto
-			UsersDto? userDto = _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
+			UsersDto? userDto = _serviceManager.Users.GetUserByLoginIdRaw(loginId, false);
 			if (userDto == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
 			userDto.Password = "";
 			userDto.HrRecordId = userDto.EmployeeId;
@@ -189,18 +189,8 @@ public class AuthenticationController : BaseApiController
 		try
 		{
 			var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(refreshToken, ipAddress);
-
 			// Set new refresh token in cookie
 			SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
-
-			//// Return new access token
-			//var response = new
-			//{
-			//	AccessToken = tokenResponse.AccessToken,
-			//	AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
-			//	TokenType = tokenResponse.TokenType,
-			//	ExpiresIn = tokenResponse.ExpiresIn
-			//};
 
 			var response = new TokenResponseDto
 			{

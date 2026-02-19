@@ -19,7 +19,7 @@ public interface IAuthenticationService
 	/// <summary>
 	/// Create JWT token with refresh token
 	/// </summary>
-	TokenResponse CreateToken(UserForAuthenticationDto userForAuth);
+	Task<TokenResponse> CreateToken(UserForAuthenticationDto userForAuth);
 
 	/// <summary>
 	/// Refresh access token using refresh token

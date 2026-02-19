@@ -38,7 +38,7 @@ public class AuthenticationService : IAuthenticationService
 	/// </summary>
 	public bool ValidateUser(UserForAuthenticationDto userForAuth)
 	{
-		var user = _repository.Users.GetUserByLoginIdAsync(userForAuth.LoginId, trackChanges: false);
+		var user = _repository.Users.GetUserByLoginIdRaw(userForAuth.LoginId, trackChanges: false);
 
 		if (user == null) return false;
 
@@ -182,9 +182,9 @@ public class AuthenticationService : IAuthenticationService
 	/// Create JWT token with refresh token
 	/// Access token and refresh token expiry times are configurable
 	/// </summary>
-	public TokenResponse CreateToken(UserForAuthenticationDto userForAuth)
+	public async Task<TokenResponse> CreateToken(UserForAuthenticationDto userForAuth)
 	{
-		var user = _repository.Users.GetUserByLoginIdAsync(userForAuth.LoginId, trackChanges: false);
+		var user = _repository.Users.GetUserByLoginIdRaw(userForAuth.LoginId, trackChanges: false);
 		if (user == null) throw new UnauthorizedException("User not found");
 
 		UsersDto usersDto = MyMapper.JsonClone<UsersRepositoryDto, UsersDto>(user);
@@ -209,7 +209,7 @@ public class AuthenticationService : IAuthenticationService
 		};
 
 		_repository.RefreshTokens.Create(refreshTokenEntity);
-		_repository.SaveAsync();
+		await _repository.SaveAsync();
 
 		// 4. Return token response
 		return new TokenResponse
@@ -240,7 +240,7 @@ public class AuthenticationService : IAuthenticationService
 		var hashedToken = HashToken(refreshToken);
 
 		// 2. Find token in database
-		var storedToken = await _repository.RefreshTokens.GetByIdAsync(predicate: t => t.Token == hashedToken, trackChanges: true);
+		var storedToken = await _repository.RefreshTokens.FirstOrDefaultAsync( t => t.Token == hashedToken, trackChanges: false);
 
 
 		// 3. Validate token
