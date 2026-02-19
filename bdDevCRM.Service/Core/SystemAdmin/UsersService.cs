@@ -81,9 +81,9 @@ left join Employment on Employment.HRRecordId=Users.EmployeeId where Users.Emplo
     return usersDto;
   }
 
-  public UsersDto? GetUserByLoginIdAsync(string loginId, bool trackChanges)
+  public UsersDto? GetUserByLoginIdRaw(string loginId, bool trackChanges)
   {
-    UsersRepositoryDto? user = _repository.Users.GetUserByLoginIdAsync(loginId, trackChanges);
+    UsersRepositoryDto? user = _repository.Users.GetUserByLoginIdRaw(loginId, trackChanges);
     if (user == null) return null;
 
     UsersDto usersDto = MyMapper.JsonClone<UsersRepositoryDto, UsersDto>(user);

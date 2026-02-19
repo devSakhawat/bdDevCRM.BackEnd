@@ -28,7 +28,8 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureResponseCompression();
 builder.Services.ConfigureGzipCompression();
 builder.Services.ConfigureFileLimit();
-builder.Services.ConfigureCookiePolicy();
+//builder.Services.ConfigureCookiePolicy();
+builder.Services.ConfigureCookiePolicy(builder.Environment);
 
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -65,7 +66,7 @@ builder.Services.AddControllers(config =>
 {
   config.RespectBrowserAcceptHeader = true;
   config.ReturnHttpNotAcceptable = true;
-  // CSV formatter remove করুন
+  // CSV formatter remove 
 })
 .AddXmlDataContractSerializerFormatters()
 .AddApplicationPart(typeof(PresentationReference).Assembly)
@@ -92,7 +93,9 @@ builder.Services.AddMvcCore(options =>
 //builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
+// New
+builder.Services.ConfigureAddSwaggerGen();
 
 // Add Authentication/Authorization
 builder.Services.ConfigureAuthentication(builder.Configuration);
@@ -153,10 +156,10 @@ app.UseStaticFiles(new StaticFileOptions
   RequestPath = "/Uploads",
   OnPrepareResponse = ctx =>
   {
-    // CORS headers properly set
-    ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-    ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
-    ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");
+    // this is menual CORS headers properly set
+    //ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+    //ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
+    //ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");
     ctx.Context.Response.Headers.Append("Cache-Control", "public, max-age=3600");
   }
 });

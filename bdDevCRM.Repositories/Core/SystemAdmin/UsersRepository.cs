@@ -38,7 +38,7 @@ public class UsersRepository : RepositoryBase<Users>, IUsersRepository
 
 
   // Get a single Users by LoginId
-  public UsersRepositoryDto? GetUserByLoginIdAsync(string loginId, bool trackChanges)
+  public UsersRepositoryDto? GetUserByLoginIdRaw(string loginId, bool trackChanges)
   {
     string quary = string.Format(SELECT_USERS_BY_LOGINID_SQL, loginId);
     UsersRepositoryDto userRepositoryDto = ExecuteSingleDataSyncronous<UsersRepositoryDto>(quary);

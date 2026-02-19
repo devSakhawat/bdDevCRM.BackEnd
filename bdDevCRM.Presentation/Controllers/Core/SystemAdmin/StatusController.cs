@@ -39,8 +39,8 @@ public class StatusController : BaseApiController
     /// <param name="menuId">Menu ID</param>
     /// <returns>List of workflow statuses</returns>
     [HttpGet(RouteConstants.StatusByMenuId)]
-    public async Task<IActionResult> StatusByMenuId([FromQuery] int menuId)
-    {
+    public async Task<IActionResult> StatusByMenuId([FromRoute] int menuId)
+	{
         //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();

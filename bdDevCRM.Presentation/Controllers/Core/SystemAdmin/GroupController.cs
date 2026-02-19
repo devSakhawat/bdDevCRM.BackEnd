@@ -143,30 +143,27 @@ public class GroupController : BaseApiController
     /// <param name="modelDto">Updated group data</param>
     /// <returns>Updated group record</returns>
     [HttpPut(RouteConstants.UpdateGroup)]
-    public async Task<IActionResult> UpdateGroup(
-        [FromRoute] int key, 
-        [FromBody] GroupDto modelDto)
+    public async Task<IActionResult> UpdateGroup([FromRoute] int groupId, [FromBody] GroupDto modelDto)
     {
         //Get authenticated user from HttpContext
         var currentUser = HttpContext.GetCurrentUser();
         var userId = HttpContext.GetUserId();
 
         // Validate input parameters
-        if (key <= 0)
+        if (groupId <= 0)
             throw new IdParametersBadRequestException();
 
         if (modelDto == null)
             throw new NullModelBadRequestException("Group data cannot be null");
 
         // Execute business logic
-        var returnData = await _serviceManager.Groups.UpdateAsync(key, modelDto);
+        var returnData = await _serviceManager.Groups.UpdateAsync(groupId, modelDto);
 
         // Return standardized response
         if (returnData == null)
             throw new InvalidUpdateOperationException("Failed to update group");
 
-        return Ok(ResponseHelper.Updated(returnData, 
-            "Group updated successfully"));
+        return Ok(ResponseHelper.Updated(returnData, "Group updated successfully"));
     }
 
     /// <summary>
