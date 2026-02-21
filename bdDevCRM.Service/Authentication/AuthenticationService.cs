@@ -1,4 +1,5 @@
-﻿using bdDevCRM.Entities.Entities.System;
+﻿using Azure;
+using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Entities.Token;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
@@ -37,7 +38,7 @@ public class AuthenticationService : IAuthenticationService
 	/// </summary>
 	public bool ValidateUser(UserForAuthenticationDto userForAuth)
 	{
-		var user = _repository.Users.GetUserByLoginIdAsync(userForAuth.LoginId, trackChanges: false);
+		var user = _repository.Users.GetUserByLoginIdRaw(userForAuth.LoginId, trackChanges: false);
 
 		if (user == null) return false;
 
@@ -50,12 +51,11 @@ public class AuthenticationService : IAuthenticationService
 	public async Task<LoginValidationResult> ValidateUserLogin(UserForAuthenticationDto userForAuth, UsersDto userDB)
 	{
 		var systemSettings = await _repository.SystemSettings.GetSystemSettingsDataByCompanyId((int)userDB.CompanyId);
-		//Users userEntity = new Users();
 		Users userEntity = MyMapper.JsonClone<UsersDto, Users>(userDB);
-    // ============================================================================
-    // STEP 1: Check if User Exists
-    // ============================================================================
-    if (userDB == null || userDB.UserId == 0)
+		// ============================================================================
+		// STEP 1: Check if User Exists
+		// ============================================================================
+		if (userDB == null || userDB.UserId == 0)
 		{
 			return new LoginValidationResult
 			{
@@ -109,7 +109,7 @@ public class AuthenticationService : IAuthenticationService
 			}
 
 			// Always save failed login attempts
-			//userEntity = MyMapper.JsonClone<UsersDto, Users>(userDB);
+			userEntity = MyMapper.JsonClone<UsersDto, Users>(userDB);
 			_repository.Users.UpdateUser(userEntity);
 			await _repository.SaveAsync();
 
@@ -149,19 +149,10 @@ public class AuthenticationService : IAuthenticationService
 		// ============================================================================
 		// STEP 6: Reset Failed Login Counter
 		// ============================================================================
-
-		userEntity.FailedLoginNo = 0;
-		userEntity.LastLoginDate = DateTime.Now;
+		userEntity.FailedLoginNo = userDB.FailedLoginNo = 0;
+		userEntity.LastLoginDate = userDB.LastLoginDate = DateTime.Now;
 		_repository.Users.UpdateUser(userEntity);
-		
-
-		// ============================================================================
-		// STEP 7: User IP and Device Information.
-		// ============================================================================
-
-		userEntity.FailedLoginNo = 0;
-		userEntity.LastLoginDate = DateTime.Now;
-		_repository.Users.UpdateUser(userEntity);
+		await _repository.SaveAsync();
 
 
 		// ============================================================================
@@ -169,9 +160,7 @@ public class AuthenticationService : IAuthenticationService
 		// ============================================================================
 
 		var license = new bdDevsLicense();
-    userDB = MyMapper.JsonClone<Users, UsersDto>(userEntity);
-
-    var userSession = MapToUserSession(userDB);
+		var userSession = MapToUserSession(userDB);
 		userSession.ExpiryDate = license.GetExpiryDate();
 		userSession.LicenseUserCount = license.GetNumberOfUser();
 
@@ -194,20 +183,20 @@ public class AuthenticationService : IAuthenticationService
 	/// Create JWT token with refresh token
 	/// Access token and refresh token expiry times are configurable
 	/// </summary>
-	public TokenResponse CreateToken(UserForAuthenticationDto userForAuth)
+	public async Task<TokenResponse> CreateToken(UserForAuthenticationDto userForAuth)
 	{
-		var user = _repository.Users.GetUserByLoginIdAsync(userForAuth.LoginId, trackChanges: false);
+		var user = _repository.Users.GetUserByLoginIdRaw(userForAuth.LoginId, trackChanges: false);
 		if (user == null) throw new UnauthorizedException("User not found");
 
 		UsersDto usersDto = MyMapper.JsonClone<UsersRepositoryDto, UsersDto>(user);
 
 		// 1. Generate access token (short-lived: 15 minutes)
 		var accessToken = GenerateAccessToken(usersDto);
-		var accessTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+		var accessTokenExpiry = DateTime.Now.AddMinutes(15);
 
 		// 2. Generate refresh token (long-lived: 7 days)
 		var refreshToken = GenerateRefreshToken();
-		var refreshTokenExpiry = DateTime.UtcNow.AddHours(8);
+		var refreshTokenExpiry = DateTime.Now.AddDays(7);
 
 		// 3. Save refresh token to database
 		var refreshTokenEntity = new RefreshToken
@@ -215,13 +204,13 @@ public class AuthenticationService : IAuthenticationService
 			UserId = user.UserId,
 			Token = HashToken(refreshToken),
 			ExpiryDate = refreshTokenExpiry,
-			CreatedDate = DateTime.UtcNow,
+			CreatedDate = DateTime.Now,
 			CreatedByIp = GetCurrentIpAddress(),
 			IsRevoked = false
 		};
 
 		_repository.RefreshTokens.Create(refreshTokenEntity);
-		_repository.SaveAsync();
+		await _repository.SaveAsync();
 
 		// 4. Return token response
 		return new TokenResponse
@@ -252,8 +241,15 @@ public class AuthenticationService : IAuthenticationService
 		var hashedToken = HashToken(refreshToken);
 
 		// 2. Find token in database
-		var storedToken = await _repository.RefreshTokens.GetByIdAsync(predicate: t => t.Token == hashedToken, trackChanges: true);
-
+		RefreshToken storedToken;
+		try
+		{
+			storedToken = _repository.RefreshTokens.FirstOrDefault(t => t.Token == hashedToken, trackChanges: true);
+		}
+		catch (Exception ex)
+		{
+			throw new UnauthorizedException($"Failed to query refresh token: {ex.Message}");
+		}
 
 		// 3. Validate token
 		if (storedToken == null)
@@ -445,11 +441,10 @@ public class AuthenticationService : IAuthenticationService
 		return (true, string.Empty);
 	}
 
-  /// <summary>
-  /// Map user DTO to session data
-  /// Parameter will be UsersDto because Users Has no FullLogoPath and few property.
-  /// </summary>
-  private UserSessionData MapToUserSession(UsersDto user)
+	/// <summary>
+	/// Map user DTO to session data
+	/// </summary>
+	private UserSessionData MapToUserSession(UsersDto user)
 	{
 		return new UserSessionData
 		{

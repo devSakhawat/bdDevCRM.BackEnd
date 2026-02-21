@@ -15,7 +15,7 @@ public interface IUsersService
 
   Task<IEnumerable<UsersDto>> GetUsersAsync(bool trackChanges);
   Task<UsersDto> GetUserAsync(int UsersId, bool trackChanges);
-  UsersDto? GetUserByLoginIdAsync(string loginId, bool trackChanges);
+  UsersDto? GetUserByLoginIdRaw(string loginId, bool trackChanges);
   void CreateUser(UsersDto model);
   void UpdateUser(UsersDto model);
   void DeleteUser(UsersDto model);

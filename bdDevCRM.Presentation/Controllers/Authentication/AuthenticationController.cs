@@ -1,4 +1,6 @@
-﻿using bdDevCRM.Presentation.ActionFIlters;
+﻿using Azure.Core;
+using bdDevCRM.Entities.Entities.Token;
+using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
@@ -17,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
@@ -50,7 +53,7 @@ public class AuthenticationController : BaseApiController
 		// STEP 1: Get User Data
 		// ============================================================================
 
-		var userDto = _serviceManager.Users.GetUserByLoginIdAsync(user.LoginId.Trim(), false);
+		var userDto = _serviceManager.Users.GetUserByLoginIdRaw(user.LoginId.Trim(), false);
 		if (userDto == null)
 		{
 			return Unauthorized(ResponseHelper.Unauthorized("Invalid username or password"));
@@ -86,7 +89,7 @@ public class AuthenticationController : BaseApiController
 		// STEP 3: Generate Tokens
 		// ============================================================================
 
-		var tokenResponse = _serviceManager.CustomAuthentication.CreateToken(user);
+		var tokenResponse = await _serviceManager.CustomAuthentication.CreateToken(user);
 
 		// Set refresh token in HTTP-only cookie
 		SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
@@ -110,14 +113,18 @@ public class AuthenticationController : BaseApiController
 		// STEP 5: Build Response
 		// ============================================================================
 
-		var response = new
+		var response = new TokenResponseDto
 		{
 			AccessToken = tokenResponse.AccessToken,
+			//RefreshToken = tokenResponse.RefreshToken,
 			AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+			RefreshTokenExpiry = tokenResponse.RefreshTokenExpiry,
 			TokenType = tokenResponse.TokenType,
 			ExpiresIn = tokenResponse.ExpiresIn,
 			UserSession = validationResult.UserSession,
-			Status = validationResult.Status.ToString()
+			Status = validationResult.Status.ToString(),
+			IsSuccess = validationResult.IsSuccess,
+			//IsSuccess = true
 		};
 
 		return Ok(ResponseHelper.Success(response, validationResult.Message));
@@ -136,7 +143,7 @@ public class AuthenticationController : BaseApiController
 			if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
 
 			// UsersDto
-			UsersDto? userDto = _serviceManager.Users.GetUserByLoginIdAsync(loginId, false);
+			UsersDto? userDto = _serviceManager.Users.GetUserByLoginIdRaw(loginId, false);
 			if (userDto == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
 			userDto.Password = "";
 			userDto.HrRecordId = userDto.EmployeeId;
@@ -182,17 +189,18 @@ public class AuthenticationController : BaseApiController
 		try
 		{
 			var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(refreshToken, ipAddress);
-
 			// Set new refresh token in cookie
 			SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
 
-			// Return new access token
-			var response = new
+			var response = new TokenResponseDto
 			{
 				AccessToken = tokenResponse.AccessToken,
+				//RefreshToken = tokenResponse.RefreshToken,
 				AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+				RefreshTokenExpiry = tokenResponse.RefreshTokenExpiry,
 				TokenType = tokenResponse.TokenType,
-				ExpiresIn = tokenResponse.ExpiresIn
+				ExpiresIn = tokenResponse.ExpiresIn,
+				IsSuccess = true,
 			};
 
 			return Ok(ResponseHelper.Success(response, "Token refreshed successfully"));
