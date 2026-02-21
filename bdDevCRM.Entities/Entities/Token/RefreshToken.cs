@@ -33,10 +33,15 @@ public class RefreshToken
   /// </summary>
   public DateTime CreatedDate { get; set; }
 
-  /// <summary>
-  /// Is token revoked?
-  /// </summary>
-  public bool IsRevoked { get; set; }
+	/// <summary>
+	/// IP address where token was created
+	/// </summary>
+	public string CreatedByIp { get; set; }
+
+	/// <summary>
+	/// Is token revoked?
+	/// </summary>
+	public bool IsRevoked { get; set; }
 
   /// <summary>
   /// Date when token was revoked
@@ -44,14 +49,9 @@ public class RefreshToken
   public DateTime? RevokedDate { get; set; }
 
   /// <summary>
-  /// IP address where token was created
-  /// </summary>
-  public string CreatedByIp { get; set; }
-
-  /// <summary>
   /// Token replaced by new refresh token (for rotation)
   /// </summary>
-  public string ReplacedByToken { get; set; }
+  public string? ReplacedByToken { get; set; }
 
   /// <summary>
   /// Is token active (not expired and not revoked)
