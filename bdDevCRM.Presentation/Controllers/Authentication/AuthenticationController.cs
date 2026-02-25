@@ -173,7 +173,7 @@ public class AuthenticationController : BaseApiController
 
 
 	[HttpPost(RouteConstants.RefreshToken)]
-	[AllowAnonymous]
+	//[AllowAnonymous]
 	[IgnoreMediaTypeValidation]
 	public async Task<IActionResult> RefreshToken()
 	{
@@ -235,7 +235,7 @@ public class AuthenticationController : BaseApiController
 	[AuthorizeUser]
 	//[HttpPost("logout")]
 	[HttpPost(RouteConstants.Logout)]
-	//[AllowAnonymous]
+	[AllowAnonymous]
 	[IgnoreMediaTypeValidation]
 	public async Task<IActionResult> Logout()
 	{
