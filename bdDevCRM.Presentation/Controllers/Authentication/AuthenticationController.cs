@@ -286,48 +286,6 @@ public class AuthenticationController : BaseApiController
 		}
 	}
 
-
-	private void ClearMemoryCache()
-	{
-		var memCache = _memoryCache as MemoryCache;
-		if (memCache == null) return;
-
-		var coherentState = typeof(MemoryCache).GetProperty("CoherentState",
-			BindingFlags.NonPublic | BindingFlags.Instance);
-
-		var coherentStateValue = coherentState?.GetValue(memCache);
-		if (coherentStateValue == null) return;
-
-		var entriesCollection = coherentStateValue.GetType()
-			.GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
-
-		var cacheItems = entriesCollection?.GetValue(coherentStateValue) as IDictionary;
-		if (cacheItems == null) return;
-
-		foreach (var key in cacheItems.Keys.Cast<object>().ToList())
-		{
-			_memoryCache.Remove(key);
-		}
-	}
-
-
-	private void ClearnAllOfTheMemoryCache()
-	{
-		var field = typeof(MemoryCache).GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-		if (field != null)
-		{
-			var entries = field.GetValue(_memoryCache) as IDictionary;
-			if (entries != null)
-			{
-				foreach (var key in entries.Keys.Cast<object>().ToList())
-				{
-					_memoryCache.Remove(key);
-				}
-			}
-		}
-	}
-
-
 	[HttpGet("test-token")]
 	[AllowAnonymous]
 	public IActionResult TestTokenGeneration()
@@ -513,48 +471,6 @@ public class AuthenticationController : BaseApiController
 		}
 	}
 
-	private object GetTokenInfoSafely(string token)
-	{
-		try
-		{
-			var handler = new JwtSecurityTokenHandler();
-			var jsonToken = handler.ReadJwtToken(token);
-
-			return new
-			{
-				header = new
-				{
-					algorithm = jsonToken.Header.Alg,
-					type = jsonToken.Header.Typ
-				},
-				payload = new
-				{
-					claims = jsonToken.Claims.Select(c => new { c.Type, c.Value }).ToList(),
-					issuer = jsonToken.Issuer,
-					audience = jsonToken.Audiences.FirstOrDefault(),
-					issuedAt = jsonToken.IssuedAt,
-					validFrom = jsonToken.ValidFrom,
-					validTo = jsonToken.ValidTo,
-					isExpired = jsonToken.ValidTo < DateTime.Now,
-					// Enhanced debugging information
-					hasExpirationClaim = jsonToken.Payload.Exp != null,
-					expirationTimestamp = jsonToken.Payload.Exp,
-					notBeforeTimestamp = jsonToken.Payload.Nbf,
-					currentUtcTime = DateTime.Now,
-					tokenAge = DateTime.Now - jsonToken.ValidFrom
-				}
-			};
-		}
-		catch (Exception ex)
-		{
-			return new
-			{
-				error = "Could not decode token",
-				exception = ex.Message
-			};
-		}
-	}
-
 	[HttpGet("jwt-config")]
 	[AllowAnonymous]
 	public IActionResult GetJwtConfiguration()
@@ -593,8 +509,50 @@ public class AuthenticationController : BaseApiController
 		}
 	}
 
-	// Helper methods for cookie management and IP address retrieval
-	private void SetRefreshTokenCookie(string refreshToken, DateTime expiry)
+  private object GetTokenInfoSafely(string token)
+  {
+    try
+    {
+      var handler = new JwtSecurityTokenHandler();
+      var jsonToken = handler.ReadJwtToken(token);
+
+      return new
+      {
+        header = new
+        {
+          algorithm = jsonToken.Header.Alg,
+          type = jsonToken.Header.Typ
+        },
+        payload = new
+        {
+          claims = jsonToken.Claims.Select(c => new { c.Type, c.Value }).ToList(),
+          issuer = jsonToken.Issuer,
+          audience = jsonToken.Audiences.FirstOrDefault(),
+          issuedAt = jsonToken.IssuedAt,
+          validFrom = jsonToken.ValidFrom,
+          validTo = jsonToken.ValidTo,
+          isExpired = jsonToken.ValidTo < DateTime.Now,
+          // Enhanced debugging information
+          hasExpirationClaim = jsonToken.Payload.Exp != null,
+          expirationTimestamp = jsonToken.Payload.Exp,
+          notBeforeTimestamp = jsonToken.Payload.Nbf,
+          currentUtcTime = DateTime.Now,
+          tokenAge = DateTime.Now - jsonToken.ValidFrom
+        }
+      };
+    }
+    catch (Exception ex)
+    {
+      return new
+      {
+        error = "Could not decode token",
+        exception = ex.Message
+      };
+    }
+  }
+
+  // Helper methods for cookie management and IP address retrieval
+  private void SetRefreshTokenCookie(string refreshToken, DateTime expiry)
 	{
 		var cookieOptions = new CookieOptions
 		{
@@ -634,5 +592,45 @@ public class AuthenticationController : BaseApiController
 
 		return HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "Unknown";
 	}
+
+  private void ClearMemoryCache()
+  {
+    var memCache = _memoryCache as MemoryCache;
+    if (memCache == null) return;
+
+    var coherentState = typeof(MemoryCache).GetProperty("CoherentState",
+      BindingFlags.NonPublic | BindingFlags.Instance);
+
+    var coherentStateValue = coherentState?.GetValue(memCache);
+    if (coherentStateValue == null) return;
+
+    var entriesCollection = coherentStateValue.GetType()
+      .GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    var cacheItems = entriesCollection?.GetValue(coherentStateValue) as IDictionary;
+    if (cacheItems == null) return;
+
+    foreach (var key in cacheItems.Keys.Cast<object>().ToList())
+    {
+      _memoryCache.Remove(key);
+    }
+  }
+
+  private void ClearnAllOfTheMemoryCache()
+  {
+    var field = typeof(MemoryCache).GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
+    if (field != null)
+    {
+      var entries = field.GetValue(_memoryCache) as IDictionary;
+      if (entries != null)
+      {
+        foreach (var key in entries.Keys.Cast<object>().ToList())
+        {
+          _memoryCache.Remove(key);
+        }
+      }
+    }
+  }
+
 
 }

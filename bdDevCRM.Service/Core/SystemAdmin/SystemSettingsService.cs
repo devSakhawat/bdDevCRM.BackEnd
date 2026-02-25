@@ -1,13 +1,10 @@
 ﻿using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Entities.Entities.System;
 
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
-using bdDevCRM.Shared.DataTransferObjects;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace bdDevCRM.Service.Core.SystemAdmin;
 

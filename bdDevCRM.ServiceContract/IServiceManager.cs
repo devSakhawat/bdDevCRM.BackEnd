@@ -10,6 +10,7 @@ namespace bdDevCRM.ServicesContract;
 
 public interface IServiceManager
 {
+  IPropertyInspectorService PropertyInspectorService { get; }
   ITokenBlacklistService TokenBlacklist { get; }
   ICrmCountryService CrmCountries { get; }
   ICurrencyService Currencies { get; }
