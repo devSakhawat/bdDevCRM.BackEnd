@@ -243,8 +243,11 @@ public class MenuController : BaseApiController
         }
 
         IEnumerable<MenuForDDLDto> menusDto = await _serviceManager.Menus.MenuForDDL();
-        return Ok(menusDto.ToList());
-    }
+		if (!menusDto.Any())
+			throw new InvalidCreateOperationException("Failed to create record.");
+
+		return Ok(ResponseHelper.Success(menusDto, "Menus retrieved successfully"));
+	}
 
 
 
