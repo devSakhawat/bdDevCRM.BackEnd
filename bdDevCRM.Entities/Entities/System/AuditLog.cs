@@ -1,49 +1,72 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace bdDevCRM.Entities.Entities.System;
 
-public partial class AuditLog
+[Table("AuditLogs", Schema = "dbo")]
+public class AuditLog
 {
-    public int AuditId { get; set; }
+    [Key]
+    public long AuditId { get; set; }
 
-    public int HrRecordId { get; set; }
+    // Who
+    public int? UserId { get; set; }
 
-    public string? ClientUser { get; set; }
+    [MaxLength(100)]
+    public string? Username { get; set; }
 
-    public string? ClientIp { get; set; }
+    [MaxLength(50)]
+    public string? IpAddress { get; set; }
 
-    public string? MacAddress { get; set; }
+    [MaxLength(500)]
+    public string? UserAgent { get; set; }
 
-    public string? BrowserInfo { get; set; }
+    // What
+    [Required]
+    [MaxLength(50)]
+    public string Action { get; set; } = string.Empty;
 
-    public int? AuditTypeId { get; set; }
+    [Required]
+    [MaxLength(100)]
+    public string EntityType { get; set; } = string.Empty;
 
-    public string? AuditDetails { get; set; }
+    [MaxLength(100)]
+    public string? EntityId { get; set; }
 
-    public DateTime? AuditDate { get; set; }
+    [MaxLength(200)]
+    public string? Endpoint { get; set; }
 
-    public string? RequestedUrl { get; set; }
+    [MaxLength(100)]
+    public string? Module { get; set; }
 
-    public string? ReferrerUrl { get; set; }
+    // Details
+    public string? OldValue { get; set; }
+    public string? NewValue { get; set; }
+    public string? Changes { get; set; }
 
-    public string? DomainName { get; set; }
+    // When
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-    public string? ActionName { get; set; }
+    // Context
+    [MaxLength(100)]
+    public string? CorrelationId { get; set; }
 
-    public string? ControllerName { get; set; }
+    [MaxLength(100)]
+    public string? SessionId { get; set; }
 
-    public string? RequestedParams { get; set; }
+    [MaxLength(100)]
+    public string? RequestId { get; set; }
 
-    public string? TableName { get; set; }
+    // Result
+    public bool Success { get; set; } = true;
+    public int? StatusCode { get; set; }
 
-    public int? IdentityInTable { get; set; }
+    [MaxLength(2000)]
+    public string? ErrorMessage { get; set; }
 
-    public int? MenuId { get; set; }
+    public int? DurationMs { get; set; }
 
-    public int? ModuleId { get; set; }
-
-    public string? AuditStatus { get; set; }
-
-    public string? ExceptionLog { get; set; }
+    // Relationships
+    [ForeignKey(nameof(UserId))]
+    public virtual Users? User { get; set; }
 }
