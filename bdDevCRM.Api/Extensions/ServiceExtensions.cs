@@ -8,6 +8,7 @@ using bdDevCRM.Services;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Sql.Context;
+using bdDevCRM.Sql.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -53,33 +54,62 @@ public static class ServiceExtensions
 	//}
 
 	
-	//Warning: Remove.SetIsOriginAllowed(_ => true) in production!
-	public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
-	{
-		var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-		  ?? new[] {
-	    //"http://localhost:4200",   // Angular
-	    //"https://localhost:4200",  // Angular HTTPS
-	    //"http://localhost:5000",   // ASP.NET
-	    //"https://localhost:5001",  // ASP.NET HTTPS
-	    "https://localhost:7145",   // Your actual port?
-	    "https://localhost:7290"   // Backend URL (if calling itself)
-		  };
+	////Warning: Remove.SetIsOriginAllowed(_ => true) in production!
+	//public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
+	//{
+	//	var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+	//	  ?? new[] {
+	//    //"http://localhost:4200",   // Angular
+	//    //"https://localhost:4200",  // Angular HTTPS
+	//    //"http://localhost:5000",   // ASP.NET
+	//    //"https://localhost:5001",  // ASP.NET HTTPS
+	//    "https://localhost:7145",   // Your actual port?
+	//    "https://localhost:7290"   // Backend URL (if calling itself)
+	//	  };
 
-		services.AddCors(options =>
-		{
-			options.AddPolicy("CorsPolicy", builder =>
-			builder
-			  .WithOrigins(allowedOrigins)
-			  .AllowAnyMethod()
-			  .AllowAnyHeader()
-			  .AllowCredentials() // for Cookie
-			  .SetIsOriginAllowed(origin => true) //Development only
-		  );
-		});
-	}
+	//	services.AddCors(options =>
+	//	{
+	//		options.AddPolicy("CorsPolicy", builder =>
+	//		builder
+	//		  .WithOrigins(allowedOrigins)
+	//		  .AllowAnyMethod()
+	//		  .AllowAnyHeader()
+	//		  .AllowCredentials() // for Cookie
+	//		  .SetIsOriginAllowed(origin => true) //Development only
+	//	  );
+	//	});
+	//}
 
-	public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
+
+  public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
+  {
+    var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+    var allowCredentials = configuration.GetValue<bool>("Cors:AllowCredentials");
+    var preflightMaxAge = configuration.GetValue<int?>("Cors:PreflightMaxAge") ?? 0;
+
+    services.AddCors(options =>
+    {
+      options.AddPolicy("CorsPolicy", builder =>
+      {
+        builder
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+
+        if (allowCredentials)
+        {
+          builder.AllowCredentials();
+        }
+
+        if (preflightMaxAge > 0)
+        {
+          builder.SetPreflightMaxAge(TimeSpan.FromSeconds(preflightMaxAge));
+        }
+      });
+    });
+  }
+
+  public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
 	{
 		options.AutomaticAuthentication = false;
 	});
@@ -93,9 +123,36 @@ public static class ServiceExtensions
 
 	public static void ConfigureServiceManager(this IServiceCollection services) => services.AddScoped<IServiceManager, ServiceManager>();
 
-	public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) => services.AddDbContext<CRMContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbLocation")));
+  //public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) => services.AddDbContext<CRMContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbLocation")));
 
-	public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
+  // Add inside your existing ServiceExtensions class
+  public static void ConfigureInterceptors(this IServiceCollection services)
+  {
+    // Required for interceptor to access HttpContext
+    services.AddHttpContextAccessor();
+
+    // Register interceptor as scoped (same lifetime as DbContext)
+    services.AddScoped<AuditSaveChangesInterceptor>();
+  }
+
+  // Modify ConfigureSqlContext to use the overload that injects the IServiceProvider
+  public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
+  {
+    services.AddDbContext<CRMContext>((serviceProvider, options) =>
+    {
+      var connectionString = configuration.GetConnectionString("DbLocation") ?? configuration["ConnectionStrings:DbLocation"];
+      options.UseSqlServer(connectionString);
+
+      // Resolve interceptor from DI and add
+      var auditInterceptor = serviceProvider.GetService<AuditSaveChangesInterceptor>();
+      if (auditInterceptor != null)
+      {
+        options.AddInterceptors(auditInterceptor);
+      }
+    });
+  }
+
+  public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
 
 	public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{

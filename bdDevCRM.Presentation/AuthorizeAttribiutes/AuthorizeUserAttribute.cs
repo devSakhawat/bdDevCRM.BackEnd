@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
@@ -24,8 +25,9 @@ public class AuthorizeUserAttribute : Attribute, IAuthorizationFilter
 
   public void OnAuthorization(AuthorizationFilterContext context)
   {
-    var stopwatch = Stopwatch.StartNew();
     var httpContext = context.HttpContext;
+    var env = httpContext.RequestServices.GetService<IHostEnvironment>();
+    var stopwatch = Stopwatch.StartNew();
 
     // Get required services
     var serviceManager = httpContext.RequestServices.GetService<IServiceManager>();
@@ -113,12 +115,23 @@ public class AuthorizeUserAttribute : Attribute, IAuthorizationFilter
       logger?.LogError(ex, "Authorization filter exception after {ElapsedMs}ms",
           stopwatch.ElapsedMilliseconds);
 
+      //context.Result = new UnauthorizedObjectResult(new
+      //{
+      //  StatusCode = 401,
+      //  Message = "Authentication failed. Please log in again.",
+      //  ErrorCode = "AUTH_EXCEPTION",
+      //  Details = ex.Message // Remove in production
+      //});
+
+      // Only show details in development
+      var isDev = env?.IsDevelopment() ?? false;
       context.Result = new UnauthorizedObjectResult(new
       {
         StatusCode = 401,
-        Message = "Authentication failed. Please log in again.",
+        Message = isDev ? $"Authentication failed. {ex.Message}" : "Authentication failed. Please log in again.",
         ErrorCode = "AUTH_EXCEPTION",
-        Details = ex.Message // Remove in production
+        // Only include error details if development
+        Details = isDev ? ex.ToString() : null
       });
     }
   }
