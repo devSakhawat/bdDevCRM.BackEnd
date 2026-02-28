@@ -1,7 +1,6 @@
 using bdDevCRM.Api.BackgroundServices;
 using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Api.Extensions;
-using bdDevCRM.Api.Formatters;
 using bdDevCRM.Api.Middleware;
 using bdDevCRM.Presentation;
 using bdDevCRM.Presentation.ActionFIlters;
@@ -77,9 +76,8 @@ try
         config.RespectBrowserAcceptHeader = true;
         config.ReturnHttpNotAcceptable = true;
 
-        // Add custom formatters for content negotiation (CSV, XML)
+        // Add custom CSV formatter for content negotiation (already exists in ContentFormatter)
         config.OutputFormatters.Add(new CsvOutputFormatter());
-        config.OutputFormatters.Add(new EnhancedXmlFormatter());
     })
     .AddXmlDataContractSerializerFormatters()
     .AddApplicationPart(typeof(PresentationReference).Assembly)
