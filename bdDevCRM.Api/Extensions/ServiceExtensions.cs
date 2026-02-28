@@ -131,8 +131,9 @@ public static class ServiceExtensions
     // Required for interceptor to access HttpContext
     services.AddHttpContextAccessor();
 
-    // Register interceptor as scoped (same lifetime as DbContext)
+    // Register interceptors as scoped (same lifetime as DbContext)
     services.AddScoped<AuditSaveChangesInterceptor>();
+    services.AddScoped<SlowQueryLoggingInterceptor>();
   }
 
   // Modify ConfigureSqlContext to use the overload that injects the IServiceProvider
@@ -143,11 +144,18 @@ public static class ServiceExtensions
       var connectionString = configuration.GetConnectionString("DbLocation") ?? configuration["ConnectionStrings:DbLocation"];
       options.UseSqlServer(connectionString);
 
-      // Resolve interceptor from DI and add
+      // Resolve interceptors from DI and add
       var auditInterceptor = serviceProvider.GetService<AuditSaveChangesInterceptor>();
+      var slowQueryInterceptor = serviceProvider.GetService<SlowQueryLoggingInterceptor>();
+
       if (auditInterceptor != null)
       {
         options.AddInterceptors(auditInterceptor);
+      }
+
+      if (slowQueryInterceptor != null)
+      {
+        options.AddInterceptors(slowQueryInterceptor);
       }
     });
   }
@@ -324,4 +332,40 @@ public static class ServiceExtensions
 
 	}
 
+	// Distributed Cache Configuration
+	public static void ConfigureDistributedCache(this IServiceCollection services, IConfiguration configuration)
+	{
+		var enableDistributedCache = configuration.GetValue<bool>("CacheSettings:EnableDistributedCache", false);
+
+		if (enableDistributedCache)
+		{
+			// Configure Redis
+			services.AddStackExchangeRedisCache(options =>
+			{
+				options.Configuration = configuration["Redis:Configuration"];
+				options.InstanceName = configuration["Redis:InstanceName"];
+			});
+		}
+		else
+		{
+			// Fallback to in-memory distributed cache for development
+			services.AddDistributedMemoryCache();
+		}
+	}
+
+	// Application Insights Configuration
+	public static void ConfigureApplicationInsights(this IServiceCollection services, IConfiguration configuration)
+	{
+		var instrumentationKey = configuration["ApplicationInsights:InstrumentationKey"];
+
+		if (!string.IsNullOrEmpty(instrumentationKey))
+		{
+			services.AddApplicationInsightsTelemetry(options =>
+			{
+				options.ConnectionString = $"InstrumentationKey={instrumentationKey}";
+				options.EnableAdaptiveSampling = configuration.GetValue<bool>("ApplicationInsights:EnableAdaptiveSampling", true);
+				options.EnableQuickPulseMetricStream = configuration.GetValue<bool>("ApplicationInsights:EnableQuickPulseMetricStream", true);
+			});
+		}
+	}
 }
