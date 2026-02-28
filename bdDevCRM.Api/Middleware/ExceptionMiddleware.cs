@@ -77,19 +77,28 @@ public class ExceptionMiddleware
     /// <summary>
     /// Maps exceptions to structured API responses with priority-based messaging
     /// </summary>
-    private ApiException MapExceptionToResponse(Exception ex, string correlationId) => ex switch
+    private ApiException MapExceptionToResponse(Exception ex, string correlationId)
     {
         // ==========================================
-        // 🔴 CUSTOM BUSINESS LOGIC EXCEPTIONS (Highest Priority)
+        // 🔴 HANDLE BaseCustomException FIRST (Highest Priority)
         // ==========================================
+        if (ex is BaseCustomException customEx)
+        {
+            return CreateResponseFromCustomException(customEx, correlationId);
+        }
 
-        // Conflict Exceptions (409) - Order matters: Most specific first
-        GenericConflictException genericConflict => CreateResponse(
-            genericConflict.StatusCode,
-            ex.Message, //Custom message gets priority
-            nameof(GenericConflictException),
-            correlationId
-        ),
+        // ==========================================
+        // 🟡 FALLBACK TO PATTERN MATCHING
+        // ==========================================
+        return ex switch
+        {
+            // Conflict Exceptions (409) - Order matters: Most specific first
+            GenericConflictException genericConflict => CreateResponse(
+                genericConflict.StatusCode,
+                ex.Message, //Custom message gets priority
+                nameof(GenericConflictException),
+                correlationId
+            ),
 
         DuplicateRecordException duplicate => CreateResponse(
             duplicate.StatusCode,
@@ -292,7 +301,47 @@ public class ExceptionMiddleware
             correlationId,
             includeStackTrace: _env.IsDevelopment()
         ),
-    };
+        };
+    }
+
+    /// <summary>
+    /// Creates response from BaseCustomException with ErrorCode and AdditionalData
+    /// </summary>
+    private ApiException CreateResponseFromCustomException(BaseCustomException customEx, string correlationId)
+    {
+        var response = new ApiException(customEx.StatusCode, customEx.UserFriendlyMessage ?? customEx.Message)
+        {
+            ErrorType = customEx.ErrorCode, // Use ErrorCode instead of class name
+            CorrelationId = correlationId,
+        };
+
+        // Add AdditionalData to response details if available and in development
+        if (customEx.AdditionalData.Any() && _env.IsDevelopment())
+        {
+            var additionalDataJson = JsonSerializer.Serialize(customEx.AdditionalData, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            });
+
+            response.Details = $"Additional Context:\n{additionalDataJson}";
+        }
+
+        // Include stack trace in development mode
+        if (_env.IsDevelopment() && !string.IsNullOrEmpty(customEx.StackTrace))
+        {
+            if (!string.IsNullOrEmpty(response.Details))
+            {
+                response.Details += $"\n\nStack Trace:\n{customEx.StackTrace}";
+            }
+            else
+            {
+                response.Details = $"Stack Trace:\n{customEx.StackTrace}";
+            }
+        }
+
+        return response;
+    }
 
     /// <summary>
     /// Creates structured API exception response
