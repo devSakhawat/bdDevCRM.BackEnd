@@ -21,11 +21,7 @@ public class StandardExceptionMiddleware
     private readonly ILoggerManager _loggerManager;
     private const string ApiVersion = "1.0";
 
-    public StandardExceptionMiddleware(
-          RequestDelegate next,
-          IHostEnvironment env,
-          ILogger<StandardExceptionMiddleware> logger,
-          ILoggerManager loggerManager)
+    public StandardExceptionMiddleware( RequestDelegate next, IHostEnvironment env, ILogger<StandardExceptionMiddleware> logger, ILoggerManager loggerManager)
     {
         _next = next;
         _env = env;
