@@ -133,9 +133,6 @@ try
     // NEW: Structured logging middleware
     app.UseMiddleware<StructuredLoggingMiddleware>();
 
-    // NEW: Rate limit header middleware
-    app.UseMiddleware<RateLimitHeaderMiddleware>();
-
     // NEW: Cache header middleware
     app.UseMiddleware<CacheHeaderMiddleware>();
 
