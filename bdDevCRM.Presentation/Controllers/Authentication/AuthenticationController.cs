@@ -173,7 +173,7 @@ public class AuthenticationController : BaseApiController
 
 
 	[HttpPost(RouteConstants.RefreshToken)]
-	[AllowAnonymous]
+	//[AllowAnonymous]
 	[IgnoreMediaTypeValidation]
 	public async Task<IActionResult> RefreshToken()
 	{
@@ -235,7 +235,7 @@ public class AuthenticationController : BaseApiController
 	[AuthorizeUser]
 	//[HttpPost("logout")]
 	[HttpPost(RouteConstants.Logout)]
-	//[AllowAnonymous]
+	[AllowAnonymous]
 	[IgnoreMediaTypeValidation]
 	public async Task<IActionResult> Logout()
 	{
@@ -285,48 +285,6 @@ public class AuthenticationController : BaseApiController
 			return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred during logout." });
 		}
 	}
-
-
-	private void ClearMemoryCache()
-	{
-		var memCache = _memoryCache as MemoryCache;
-		if (memCache == null) return;
-
-		var coherentState = typeof(MemoryCache).GetProperty("CoherentState",
-			BindingFlags.NonPublic | BindingFlags.Instance);
-
-		var coherentStateValue = coherentState?.GetValue(memCache);
-		if (coherentStateValue == null) return;
-
-		var entriesCollection = coherentStateValue.GetType()
-			.GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
-
-		var cacheItems = entriesCollection?.GetValue(coherentStateValue) as IDictionary;
-		if (cacheItems == null) return;
-
-		foreach (var key in cacheItems.Keys.Cast<object>().ToList())
-		{
-			_memoryCache.Remove(key);
-		}
-	}
-
-
-	private void ClearnAllOfTheMemoryCache()
-	{
-		var field = typeof(MemoryCache).GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-		if (field != null)
-		{
-			var entries = field.GetValue(_memoryCache) as IDictionary;
-			if (entries != null)
-			{
-				foreach (var key in entries.Keys.Cast<object>().ToList())
-				{
-					_memoryCache.Remove(key);
-				}
-			}
-		}
-	}
-
 
 	[HttpGet("test-token")]
 	[AllowAnonymous]
@@ -513,48 +471,6 @@ public class AuthenticationController : BaseApiController
 		}
 	}
 
-	private object GetTokenInfoSafely(string token)
-	{
-		try
-		{
-			var handler = new JwtSecurityTokenHandler();
-			var jsonToken = handler.ReadJwtToken(token);
-
-			return new
-			{
-				header = new
-				{
-					algorithm = jsonToken.Header.Alg,
-					type = jsonToken.Header.Typ
-				},
-				payload = new
-				{
-					claims = jsonToken.Claims.Select(c => new { c.Type, c.Value }).ToList(),
-					issuer = jsonToken.Issuer,
-					audience = jsonToken.Audiences.FirstOrDefault(),
-					issuedAt = jsonToken.IssuedAt,
-					validFrom = jsonToken.ValidFrom,
-					validTo = jsonToken.ValidTo,
-					isExpired = jsonToken.ValidTo < DateTime.Now,
-					// Enhanced debugging information
-					hasExpirationClaim = jsonToken.Payload.Exp != null,
-					expirationTimestamp = jsonToken.Payload.Exp,
-					notBeforeTimestamp = jsonToken.Payload.Nbf,
-					currentUtcTime = DateTime.Now,
-					tokenAge = DateTime.Now - jsonToken.ValidFrom
-				}
-			};
-		}
-		catch (Exception ex)
-		{
-			return new
-			{
-				error = "Could not decode token",
-				exception = ex.Message
-			};
-		}
-	}
-
 	[HttpGet("jwt-config")]
 	[AllowAnonymous]
 	public IActionResult GetJwtConfiguration()
@@ -593,8 +509,50 @@ public class AuthenticationController : BaseApiController
 		}
 	}
 
-	// Helper methods for cookie management and IP address retrieval
-	private void SetRefreshTokenCookie(string refreshToken, DateTime expiry)
+  private object GetTokenInfoSafely(string token)
+  {
+    try
+    {
+      var handler = new JwtSecurityTokenHandler();
+      var jsonToken = handler.ReadJwtToken(token);
+
+      return new
+      {
+        header = new
+        {
+          algorithm = jsonToken.Header.Alg,
+          type = jsonToken.Header.Typ
+        },
+        payload = new
+        {
+          claims = jsonToken.Claims.Select(c => new { c.Type, c.Value }).ToList(),
+          issuer = jsonToken.Issuer,
+          audience = jsonToken.Audiences.FirstOrDefault(),
+          issuedAt = jsonToken.IssuedAt,
+          validFrom = jsonToken.ValidFrom,
+          validTo = jsonToken.ValidTo,
+          isExpired = jsonToken.ValidTo < DateTime.Now,
+          // Enhanced debugging information
+          hasExpirationClaim = jsonToken.Payload.Exp != null,
+          expirationTimestamp = jsonToken.Payload.Exp,
+          notBeforeTimestamp = jsonToken.Payload.Nbf,
+          currentUtcTime = DateTime.Now,
+          tokenAge = DateTime.Now - jsonToken.ValidFrom
+        }
+      };
+    }
+    catch (Exception ex)
+    {
+      return new
+      {
+        error = "Could not decode token",
+        exception = ex.Message
+      };
+    }
+  }
+
+  // Helper methods for cookie management and IP address retrieval
+  private void SetRefreshTokenCookie(string refreshToken, DateTime expiry)
 	{
 		var cookieOptions = new CookieOptions
 		{
@@ -620,19 +578,67 @@ public class AuthenticationController : BaseApiController
 		});
 	}
 
-	private string GetClientIpAddress()
-	{
-		// Note: In production, validate that requests come from trusted proxies before using
-		// X-Forwarded-For header to prevent IP spoofing attacks
-		var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-		if (!string.IsNullOrEmpty(forwardedFor))
-			return forwardedFor.Split(',')[0].Trim();
+  //private string GetClientIpAddress()
+  //{
+  //	// Note: In production, validate that requests come from trusted proxies before using
+  //	// X-Forwarded-For header to prevent IP spoofing attacks
+  //	var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+  //	if (!string.IsNullOrEmpty(forwardedFor))
+  //		return forwardedFor.Split(',')[0].Trim();
 
-		var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
-		if (!string.IsNullOrEmpty(realIp))
-			return realIp;
+  //	var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
+  //	if (!string.IsNullOrEmpty(realIp))
+  //		return realIp;
 
-		return HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "Unknown";
-	}
+  //	return HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "Unknown";
+  //}
+
+  private string GetClientIpAddress()
+  {
+    // SECURITY: Do NOT trust X-Forwarded-For or X-Real-IP headers unless behind a trusted proxy!
+    // This app is not behind a reverse proxy, so only use RemoteIpAddress.
+    var remoteIp = HttpContext.Connection.RemoteIpAddress;
+    return remoteIp?.ToString() ?? "Unknown";
+  }
+
+  private void ClearMemoryCache()
+  {
+    var memCache = _memoryCache as MemoryCache;
+    if (memCache == null) return;
+
+    var coherentState = typeof(MemoryCache).GetProperty("CoherentState",
+      BindingFlags.NonPublic | BindingFlags.Instance);
+
+    var coherentStateValue = coherentState?.GetValue(memCache);
+    if (coherentStateValue == null) return;
+
+    var entriesCollection = coherentStateValue.GetType()
+      .GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    var cacheItems = entriesCollection?.GetValue(coherentStateValue) as IDictionary;
+    if (cacheItems == null) return;
+
+    foreach (var key in cacheItems.Keys.Cast<object>().ToList())
+    {
+      _memoryCache.Remove(key);
+    }
+  }
+
+  private void ClearnAllOfTheMemoryCache()
+  {
+    var field = typeof(MemoryCache).GetField("_entries", BindingFlags.NonPublic | BindingFlags.Instance);
+    if (field != null)
+    {
+      var entries = field.GetValue(_memoryCache) as IDictionary;
+      if (entries != null)
+      {
+        foreach (var key in entries.Keys.Cast<object>().ToList())
+        {
+          _memoryCache.Remove(key);
+        }
+      }
+    }
+  }
+
 
 }

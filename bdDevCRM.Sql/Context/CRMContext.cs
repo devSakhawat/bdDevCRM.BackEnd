@@ -2,18 +2,35 @@
 using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Entities.Token;
+using bdDevCRM.Sql.Interceptors;
 using Microsoft.EntityFrameworkCore;
 
 namespace bdDevCRM.Sql.Context;
 
 public partial class CRMContext : DbContext
 {
+  private readonly AuditSaveChangesInterceptor _auditInterceptor;
+
+  public CRMContext(DbContextOptions<CRMContext> options, AuditSaveChangesInterceptor auditInterceptor) : base(options)
+  {
+    _auditInterceptor = auditInterceptor;
+  }
+
+  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+  {
+    if (_auditInterceptor != null)
+    {
+      optionsBuilder.AddInterceptors(_auditInterceptor);
+    }
+
+    base.OnConfiguring(optionsBuilder);
+  }
+
   public CRMContext()
   {
   }
 
-  public CRMContext(DbContextOptions<CRMContext> options)
-      : base(options)
+  public CRMContext(DbContextOptions<CRMContext> options) : base(options)
   {
   }
 

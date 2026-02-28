@@ -152,6 +152,7 @@ public class AuthenticationService : IAuthenticationService
 		userEntity.FailedLoginNo = userDB.FailedLoginNo = 0;
 		userEntity.LastLoginDate = userDB.LastLoginDate = DateTime.Now;
 		_repository.Users.UpdateUser(userEntity);
+		await _repository.SaveAsync();
 
 
 		// ============================================================================
@@ -191,11 +192,11 @@ public class AuthenticationService : IAuthenticationService
 
 		// 1. Generate access token (short-lived: 15 minutes)
 		var accessToken = GenerateAccessToken(usersDto);
-		var accessTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+		var accessTokenExpiry = DateTime.Now.AddMinutes(15);
 
 		// 2. Generate refresh token (long-lived: 7 days)
 		var refreshToken = GenerateRefreshToken();
-		var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+		var refreshTokenExpiry = DateTime.Now.AddDays(7);
 
 		// 3. Save refresh token to database
 		var refreshTokenEntity = new RefreshToken
@@ -203,7 +204,7 @@ public class AuthenticationService : IAuthenticationService
 			UserId = user.UserId,
 			Token = HashToken(refreshToken),
 			ExpiryDate = refreshTokenExpiry,
-			CreatedDate = DateTime.UtcNow,
+			CreatedDate = DateTime.Now,
 			CreatedByIp = GetCurrentIpAddress(),
 			IsRevoked = false
 		};
@@ -240,8 +241,15 @@ public class AuthenticationService : IAuthenticationService
 		var hashedToken = HashToken(refreshToken);
 
 		// 2. Find token in database
-		var storedToken = await _repository.RefreshTokens.FirstOrDefaultAsync( t => t.Token == hashedToken, trackChanges: false);
-
+		RefreshToken storedToken;
+		try
+		{
+			storedToken = _repository.RefreshTokens.FirstOrDefault(t => t.Token == hashedToken, trackChanges: true);
+		}
+		catch (Exception ex)
+		{
+			throw new UnauthorizedException($"Failed to query refresh token: {ex.Message}");
+		}
 
 		// 3. Validate token
 		if (storedToken == null)

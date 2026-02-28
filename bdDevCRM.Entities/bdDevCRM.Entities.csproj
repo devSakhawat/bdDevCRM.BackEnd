@@ -9,12 +9,18 @@
   <ItemGroup>
     <Compile Remove="bdDevCRM.Sql\**" />
     <Compile Remove="CRMGrid\StaticData\**" />
+    <Compile Remove="Entities\Core\**" />
+    <Compile Remove="Entities\Entities\**" />
     <Compile Remove="Repository\**" />
     <EmbeddedResource Remove="bdDevCRM.Sql\**" />
     <EmbeddedResource Remove="CRMGrid\StaticData\**" />
+    <EmbeddedResource Remove="Entities\Core\**" />
+    <EmbeddedResource Remove="Entities\Entities\**" />
     <EmbeddedResource Remove="Repository\**" />
     <None Remove="bdDevCRM.Sql\**" />
     <None Remove="CRMGrid\StaticData\**" />
+    <None Remove="Entities\Core\**" />
+    <None Remove="Entities\Entities\**" />
     <None Remove="Repository\**" />
   </ItemGroup>
 
@@ -31,11 +37,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Entities\Core\" />
-    <Folder Include="Entities\Entities\" />
   </ItemGroup>
 
 </Project>
