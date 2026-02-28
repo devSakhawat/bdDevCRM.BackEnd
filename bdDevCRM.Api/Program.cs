@@ -1,6 +1,7 @@
 using bdDevCRM.Api.BackgroundServices;
 using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Api.Extensions;
+using bdDevCRM.Api.Formatters;
 using bdDevCRM.Api.Middleware;
 using bdDevCRM.Presentation;
 using bdDevCRM.Presentation.ActionFIlters;
@@ -75,6 +76,10 @@ try
     {
         config.RespectBrowserAcceptHeader = true;
         config.ReturnHttpNotAcceptable = true;
+
+        // Add custom formatters for content negotiation (CSV, XML)
+        config.OutputFormatters.Add(new CsvOutputFormatter());
+        config.OutputFormatters.Add(new EnhancedXmlFormatter());
     })
     .AddXmlDataContractSerializerFormatters()
     .AddApplicationPart(typeof(PresentationReference).Assembly)
@@ -124,7 +129,17 @@ try
     }
 
     // Exception handling middleware (must be first)
-    app.UseMiddleware<ExceptionMiddleware>();
+    // Use StandardExceptionMiddleware for consistent response format
+    app.UseMiddleware<StandardExceptionMiddleware>();
+
+    // NEW: Structured logging middleware
+    app.UseMiddleware<StructuredLoggingMiddleware>();
+
+    // NEW: Rate limit header middleware
+    app.UseMiddleware<RateLimitHeaderMiddleware>();
+
+    // NEW: Cache header middleware
+    app.UseMiddleware<CacheHeaderMiddleware>();
 
     // NEW: Performance monitoring middleware
     app.UseMiddleware<PerformanceMonitoringMiddleware>();
