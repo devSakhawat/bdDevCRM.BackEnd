@@ -58,7 +58,7 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<AssignApprover> AssignApprover { get; set; }
 
-  public virtual DbSet<AuditLog> AuditLog { get; set; }
+  public virtual DbSet<AuditLog> AuditLogs { get; set; }
 
   public virtual DbSet<AuditTrail> AuditTrail { get; set; }
 
