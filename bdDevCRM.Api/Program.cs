@@ -75,6 +75,9 @@ try
     {
         config.RespectBrowserAcceptHeader = true;
         config.ReturnHttpNotAcceptable = true;
+
+        // Add custom CSV formatter for content negotiation (already exists in ContentFormatter)
+        config.OutputFormatters.Add(new CsvOutputFormatter());
     })
     .AddXmlDataContractSerializerFormatters()
     .AddApplicationPart(typeof(PresentationReference).Assembly)
@@ -124,7 +127,14 @@ try
     }
 
     // Exception handling middleware (must be first)
-    app.UseMiddleware<ExceptionMiddleware>();
+    // Use StandardExceptionMiddleware for consistent response format
+    app.UseMiddleware<StandardExceptionMiddleware>();
+
+    // NEW: Structured logging middleware
+    app.UseMiddleware<StructuredLoggingMiddleware>();
+
+    // NEW: Cache header middleware
+    app.UseMiddleware<CacheHeaderMiddleware>();
 
     // NEW: Performance monitoring middleware
     app.UseMiddleware<PerformanceMonitoringMiddleware>();
