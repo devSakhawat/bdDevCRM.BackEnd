@@ -578,20 +578,28 @@ public class AuthenticationController : BaseApiController
 		});
 	}
 
-	private string GetClientIpAddress()
-	{
-		// Note: In production, validate that requests come from trusted proxies before using
-		// X-Forwarded-For header to prevent IP spoofing attacks
-		var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-		if (!string.IsNullOrEmpty(forwardedFor))
-			return forwardedFor.Split(',')[0].Trim();
+  //private string GetClientIpAddress()
+  //{
+  //	// Note: In production, validate that requests come from trusted proxies before using
+  //	// X-Forwarded-For header to prevent IP spoofing attacks
+  //	var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+  //	if (!string.IsNullOrEmpty(forwardedFor))
+  //		return forwardedFor.Split(',')[0].Trim();
 
-		var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
-		if (!string.IsNullOrEmpty(realIp))
-			return realIp;
+  //	var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
+  //	if (!string.IsNullOrEmpty(realIp))
+  //		return realIp;
 
-		return HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "Unknown";
-	}
+  //	return HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "Unknown";
+  //}
+
+  private string GetClientIpAddress()
+  {
+    // SECURITY: Do NOT trust X-Forwarded-For or X-Real-IP headers unless behind a trusted proxy!
+    // This app is not behind a reverse proxy, so only use RemoteIpAddress.
+    var remoteIp = HttpContext.Connection.RemoteIpAddress;
+    return remoteIp?.ToString() ?? "Unknown";
+  }
 
   private void ClearMemoryCache()
   {

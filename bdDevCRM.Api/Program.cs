@@ -24,6 +24,7 @@ builder.Services.Configureiisintegration();
 builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
+builder.Services.ConfigureInterceptors();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureResponseCompression();
 builder.Services.ConfigureGzipCompression();
