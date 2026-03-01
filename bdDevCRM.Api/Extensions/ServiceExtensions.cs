@@ -374,59 +374,18 @@ public static class ServiceExtensions
 	{
 		if (environment == null) environment = new WebHostEnvironmentMock();
 
-		var seqUrl = configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
-		var seqApiKey = configuration["Seq:ApiKey"];
-
+		// Ensure you have Serilog.Settings.Configuration package to support ReadFrom.Configuration
 		Log.Logger = new LoggerConfiguration()
-			// Minimum log levels
-			.MinimumLevel.Information()
-			.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-			.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-			.MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Information)
-			.MinimumLevel.Override("System", LogEventLevel.Warning)
-
-			// Enrichers (add context to logs)
+			.ReadFrom.Configuration(configuration) // <-- read appsettings.json Serilog section
 			.Enrich.FromLogContext()
 			.Enrich.WithMachineName()
 			.Enrich.WithThreadId()
 			.Enrich.WithProperty("Application", "bdDevCRM")
 			.Enrich.WithProperty("Environment", environment.EnvironmentName)
-			.Enrich.WithCorrelationId()
-
-			// Console sink (for development)
-			.WriteTo.Console(
-				outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}",
-				restrictedToMinimumLevel: LogEventLevel.Information
-			)
-
-			// Application log file (all levels)
-			.WriteTo.File(
-				path: "logs/app-.log",
-				rollingInterval: RollingInterval.Day,
-				retainedFileCountLimit: 30,
-				outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}",
-				restrictedToMinimumLevel: LogEventLevel.Information
-			)
-
-			// Error log file (errors only)
-			.WriteTo.File(
-				path: "logs/errors-.log",
-				rollingInterval: RollingInterval.Day,
-				retainedFileCountLimit: 90,
-				restrictedToMinimumLevel: LogEventLevel.Error,
-				outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}"
-			)
-
-			// Seq sink (optional - for production monitoring)
-			.WriteTo.Seq(
-				serverUrl: seqUrl,
-				apiKey: seqApiKey,
-				restrictedToMinimumLevel: LogEventLevel.Information
-			)
-
+			// Optional: keep WithCorrelationId if you add the enricher package
+			.Enrich.WithCorrelationId() // make sure Serilog.Enrichers.CorrelationId is installed
 			.CreateLogger();
 
-		// register serilog logger into DI (optional)
 		services.AddSingleton<Serilog.ILogger>(Log.Logger);
 	}
 
@@ -440,5 +399,76 @@ public static class ServiceExtensions
 		public IFileProvider? WebRootFileProvider { get; set; }
 		public IFileProvider? ContentRootFileProvider { get; set; }
 	}
+
+	//public static void ConfigureSerilog(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+	//{
+	//	if (environment == null) environment = new WebHostEnvironmentMock();
+
+	//	var seqUrl = configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
+	//	var seqApiKey = configuration["Seq:ApiKey"];
+
+	//	Log.Logger = new LoggerConfiguration()
+	//		// Minimum log levels
+	//		.MinimumLevel.Information()
+	//		.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+	//		.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+	//		.MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Information)
+	//		.MinimumLevel.Override("System", LogEventLevel.Warning)
+
+	//		// Enrichers (add context to logs)
+	//		.Enrich.FromLogContext()
+	//		.Enrich.WithMachineName()
+	//		.Enrich.WithThreadId()
+	//		.Enrich.WithProperty("Application", "bdDevCRM")
+	//		.Enrich.WithProperty("Environment", environment.EnvironmentName)
+	//		.Enrich.WithCorrelationId()
+
+	//		// Console sink (for development)
+	//		.WriteTo.Console(
+	//			outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+	//			restrictedToMinimumLevel: LogEventLevel.Information
+	//		)
+
+	//		// Application log file (all levels)
+	//		.WriteTo.File(
+	//			path: "logs/app-.log",
+	//			rollingInterval: RollingInterval.Day,
+	//			retainedFileCountLimit: 30,
+	//			outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+	//			restrictedToMinimumLevel: LogEventLevel.Information
+	//		)
+
+	//		// Error log file (errors only)
+	//		.WriteTo.File(
+	//			path: "logs/errors-.log",
+	//			rollingInterval: RollingInterval.Day,
+	//			retainedFileCountLimit: 90,
+	//			restrictedToMinimumLevel: LogEventLevel.Error,
+	//			outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}"
+	//		)
+
+	//		// Seq sink (optional - for production monitoring)
+	//		.WriteTo.Seq(
+	//			serverUrl: seqUrl,
+	//			apiKey: seqApiKey,
+	//			restrictedToMinimumLevel: LogEventLevel.Information
+	//		)
+
+	//		.CreateLogger();
+
+	//	// register serilog logger into DI (optional)
+	//	services.AddSingleton<Serilog.ILogger>(Log.Logger);
+	//}
+
+	//// A tiny local fallback for environment when null — won't be used in real Program.cs, but keeps null-safety for unit tests.
+	//private class WebHostEnvironmentMock : IWebHostEnvironment
+	//{
+	//	public string EnvironmentName { get; set; } = "Production";
+	//	public string ApplicationName { get; set; } = AppDomain.CurrentDomain.FriendlyName;
+	//	public string WebRootPath { get; set; } = string.Empty;
+	//	public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+	//	public IFileProvider? WebRootFileProvider { get; set; }
+	//	public IFileProvider? ContentRootFileProvider { get; set; }
+	//}
 
 }
