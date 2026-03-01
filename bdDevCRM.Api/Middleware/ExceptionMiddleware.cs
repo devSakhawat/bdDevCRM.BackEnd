@@ -5,6 +5,7 @@ using bdDevCRM.Shared.Exceptions.BaseException;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace bdDevCRM.Api.Middleware;
@@ -47,13 +48,16 @@ public class ExceptionMiddleware
     /// </summary>
     private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
-        // Generate correlation ID for tracking
-        string correlationId = Guid.NewGuid().ToString();
+		// Try to reuse correlation id set by CorrelationIdMiddleware
+		string correlationId = context.Items["CorrelationId"] as string
+							   ?? context.Request.Headers["X-Correlation-ID"].FirstOrDefault()
+							   ?? Activity.Current?.GetBaggageItem("CorrelationId")
+							   ?? Guid.NewGuid().ToString(); // fallback
 
-        // Log the error with full details
-        _logger.LogError(ex, $"[{correlationId}] {ex.GetType().Name}: {ex.Message}");
 
-        context.Response.ContentType = "application/json";
+		// Log the error with full details
+		_logger.LogError(ex, $"[{correlationId}] {ex.GetType().Name}: {ex.Message}");
+		context.Response.ContentType = "application/json";
 
         // Map exception to API response
         ApiException response = MapExceptionToResponse(ex, correlationId);

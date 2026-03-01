@@ -16,14 +16,12 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Use Serilog
-builder.Host.UseSerilog();
-
 // Add services to the container
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureCors(builder.Configuration);
 builder.Services.Configureiisintegration();
 //builder.Services.ConfigureLoggerService();
+// Use Serilog
 builder.Services.ConfigureSerilog(builder.Configuration, builder.Environment);
 builder.Host.UseSerilog();
 
