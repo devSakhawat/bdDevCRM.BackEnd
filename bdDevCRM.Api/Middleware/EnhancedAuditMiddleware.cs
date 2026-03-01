@@ -59,6 +59,13 @@ public class EnhancedAuditMiddleware
 
             stopwatch.Stop();
 
+            // IMPORTANT: rewind response stream before reading/copying
+            responseBody.Position = 0;
+
+            // OPTIONAL: read response body for audit (if you want to store it)
+            // string responseText = await new StreamReader(responseBody, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true).ReadToEndAsync();
+            // responseBody.Position = 0;
+
             // Create audit log
             var auditLog = CreateAuditLog(context, requestBody, stopwatch.ElapsedMilliseconds, correlationId);
 
@@ -78,7 +85,8 @@ public class EnhancedAuditMiddleware
                 }
             });
 
-            // Copy response back
+            // Copy response back — responseBody.Position must be at 0
+            responseBody.Position = 0;
             await responseBody.CopyToAsync(originalBodyStream);
         }
         catch (Exception ex)
@@ -122,46 +130,63 @@ public class EnhancedAuditMiddleware
         return false;
     }
 
-    private AuditLog CreateAuditLog(HttpContext context, string? requestBody, long durationMs, string correlationId)
-    {
-        var user = context.User;
-        var request = context.Request;
-        var response = context.Response;
+	// Defensive session access inside CreateAuditLog
+	private AuditLog CreateAuditLog(HttpContext context, string? requestBody, long durationMs, string correlationId)
+	{
+		var user = context.User;
+		var request = context.Request;
+		var response = context.Response;
 
-        return new AuditLog
-        {
-            // Who
-            UserId = GetUserId(user),
-            Username = user?.Identity?.Name ?? "Anonymous",
-            IpAddress = context.Connection.RemoteIpAddress?.ToString(),
-            UserAgent = request.Headers["User-Agent"].FirstOrDefault(),
+		// SAFE session access: check feature first
+		string? sessionId = null;
+		var sessionFeature = context.Features.Get<Microsoft.AspNetCore.Http.Features.ISessionFeature>();
+		if (sessionFeature != null)
+		{
+			try
+			{
+				// context.Session can still throw in rare cases, so guard with try/catch
+				sessionId = context.Session?.Id;
+			}
+			catch
+			{
+				sessionId = null;
+			}
+		}
 
-            // What
-            Action = GetActionFromMethod(request.Method),
-            EntityType = GetEntityTypeFromPath(request.Path),
-            EntityId = GetEntityIdFromPath(request.Path),
-            Endpoint = $"{request.Method} {request.Path}",
-            Module = GetModuleFromPath(request.Path),
+		return new AuditLog
+		{
+			// Who
+			UserId = GetUserId(user),
+			Username = user?.Identity?.Name ?? "Anonymous",
+			IpAddress = context.Connection.RemoteIpAddress?.ToString(),
+			UserAgent = request.Headers["User-Agent"].FirstOrDefault(),
 
-            // Details
-            NewValue = requestBody,
+			// What
+			Action = GetActionFromMethod(request.Method),
+			EntityType = GetEntityTypeFromPath(request.Path),
+			EntityId = GetEntityIdFromPath(request.Path),
+			Endpoint = $"{request.Method} {request.Path}",
+			Module = GetModuleFromPath(request.Path),
 
-            // When
-            Timestamp = DateTime.UtcNow,
+			// Details
+			NewValue = requestBody,
 
-            // Context
-            CorrelationId = correlationId,
-            SessionId = context.Session?.Id,
-            RequestId = context.TraceIdentifier,
+			// When
+			Timestamp = DateTime.UtcNow,
 
-            // Result
-            Success = response.StatusCode >= 200 && response.StatusCode < 300,
-            StatusCode = response.StatusCode,
-            DurationMs = (int)durationMs
-        };
-    }
+			// Context
+			CorrelationId = correlationId,
+			SessionId = sessionId, // safe value or null
+			RequestId = context.TraceIdentifier,
 
-    private AuditLog CreateErrorAuditLog(HttpContext context, Exception ex, long durationMs, string correlationId)
+			// Result
+			Success = response.StatusCode >= 200 && response.StatusCode < 300,
+			StatusCode = response.StatusCode,
+			DurationMs = (int)durationMs
+		};
+	}
+
+	private AuditLog CreateErrorAuditLog(HttpContext context, Exception ex, long durationMs, string correlationId)
     {
         var auditLog = CreateAuditLog(context, null, durationMs, correlationId);
         auditLog.Success = false;

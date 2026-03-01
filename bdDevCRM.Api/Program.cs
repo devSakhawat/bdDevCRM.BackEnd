@@ -139,8 +139,11 @@ try
     // NEW: Performance monitoring middleware
     app.UseMiddleware<PerformanceMonitoringMiddleware>();
 
-    // NEW: Enhanced audit middleware
-    if (builder.Configuration.GetValue<bool>("AuditLogging:EnableAuditMiddleware", true))
+	// Session must be before authentication
+	app.UseSession();
+
+	// NEW: Enhanced audit middleware
+	if (builder.Configuration.GetValue<bool>("AuditLogging:EnableAuditMiddleware", true))
     {
         app.UseMiddleware<EnhancedAuditMiddleware>();
     }
@@ -167,8 +170,7 @@ try
         }
     });
 
-    // Session must be before authentication
-    app.UseSession();
+
 
     // Authentication and Authorization
     app.UseCookiePolicy();
