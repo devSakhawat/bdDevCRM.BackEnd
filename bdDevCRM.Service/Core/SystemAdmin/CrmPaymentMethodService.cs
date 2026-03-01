@@ -6,16 +6,17 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.Core.SystemAdmin;
 
 internal sealed class CrmPaymentMethodService : ICrmPaymentMethodService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<CrmPaymentMethodService> _logger;
   private readonly IConfiguration _config;
 
-  public CrmPaymentMethodService(IRepositoryManager repository, ILoggerManager logger, IConfiguration config)
+  public CrmPaymentMethodService(IRepositoryManager repository, ILogger<CrmPaymentMethodService> logger, IConfiguration config)
   {
     _repository = repository;
     _logger = logger;

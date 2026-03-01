@@ -5,6 +5,7 @@ using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.Authentication;
 using bdDevCRM.Shared.Exceptions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace bdDevCRM.Service.Authentication;
@@ -13,8 +14,8 @@ public class TokenBlacklistService : ITokenBlacklistService
 {
   private readonly IConfiguration _configuration;
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
-  public TokenBlacklistService(IConfiguration configuration, IRepositoryManager repository, ILoggerManager logger)
+  private readonly ILogger<TokenBlacklistService> _logger;
+  public TokenBlacklistService(IConfiguration configuration, IRepositoryManager repository, ILogger<TokenBlacklistService> logger)
   {
     _configuration = configuration;
     _repository = repository;

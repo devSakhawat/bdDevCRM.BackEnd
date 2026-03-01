@@ -1,25 +1,26 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmApplicantInfoService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmApplicantInfoService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmApplicantInfoService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmApplicantInfoService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -99,7 +100,7 @@ internal sealed class CrmApplicantInfoService(
     
     _repository.CrmApplicantInfoes.Update(applicantInfo);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmApplicantInfo updated, id={key}");
+    _logger.LogInformation("CrmApplicantInfo updated, id={Id}", key);
     return OperationMessage.Success;
   }
 
@@ -110,7 +111,7 @@ internal sealed class CrmApplicantInfoService(
 
     await _repository.CrmApplicantInfoes.DeleteAsync(x => x.ApplicantId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmApplicantInfo deleted, id={key}");
+    _logger.LogInformation("CrmApplicantInfo deleted, id={Id}", key);
     return OperationMessage.Success;
   }
 

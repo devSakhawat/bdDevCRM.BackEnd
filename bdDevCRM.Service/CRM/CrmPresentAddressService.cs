@@ -1,25 +1,26 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmPresentAddressService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmPresentAddressService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmPresentAddressService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmPresentAddressService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -97,7 +98,7 @@ internal sealed class CrmPresentAddressService(
     
     _repository.CrmPresentAddresses.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmPresentAddress updated, id={key}");
+    _logger.LogInformation("CrmPresentAddress updated, id={PresentAddressId}", key);
     return OperationMessage.Success;
   }
 
@@ -108,7 +109,7 @@ internal sealed class CrmPresentAddressService(
 
     await _repository.CrmPresentAddresses.DeleteAsync(x => x.PresentAddressId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmPresentAddress deleted, id={key}");
+    _logger.LogInformation("CrmPresentAddress deleted, id={PresentAddressId}", key);
     return OperationMessage.Success;
   }
 

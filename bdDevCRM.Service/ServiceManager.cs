@@ -18,6 +18,7 @@ using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Services;
 
@@ -87,73 +88,74 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<IDmsDocumentFolderService> _dmsdocumentFolderService;
   private readonly Lazy<IDmsDocumentVersionService> _dmsdocumentVersionService;
   private readonly Lazy<IDmsDocumentAccessLogService> _dmsdocumentAccessLogService;
-  #endregion
+	#endregion
 
-  public ServiceManager(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IMemoryCache cache ,IHttpContextAccessor httpContextAccessor)
+	// Note: replaced ILoggerManager with ILoggerFactory to create typed ILogger<T> for each service.
+	public ServiceManager(IRepositoryManager repository, ILoggerFactory loggerFactory, IConfiguration configuration, IMemoryCache cache, IHttpContextAccessor httpContextAccessor)
   {
     _cache = cache;
 
-    _propertyInspectorService = new Lazy<IPropertyInspectorService>(() => new PropertyInspectorService(configuration, logger, httpContextAccessor));
-    _tokenBlackListService = new Lazy<ITokenBlacklistService>(() => new TokenBlacklistService(configuration, repository, logger));
-    _countryService = new Lazy<ICrmCountryService>(() => new CrmCountryService(repository, logger, configuration));
-    _currencyService = new Lazy<ICurrencyService>(() => new CurrencyService(repository, logger, configuration));
-    _companyService = new Lazy<ICompanyService>(() => new CompanyService(repository, logger, configuration));
-    _systemSettingsService = new Lazy<ISystemSettingsService>(() => new SystemSettingsService(repository, logger, configuration));
-    _userService = new Lazy<IUsersService>(() => new UsersService(repository, logger, configuration));
-    _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(repository, logger, configuration , httpContextAccessor));
-    _menuService = new Lazy<IMenuService>(() => new MenuService(repository, logger, configuration));
-    _moduleService = new Lazy<IModuleService>(() => new ModuleService(repository, logger, configuration));
-    _groupService = new Lazy<IGroupService>(() => new GroupService(repository, logger, configuration));
-    _queryAnalyzerService = new Lazy<IQueryAnalyzerService>(() => new QueryAnalyzerService(repository, logger, configuration));
-    _statusService = new Lazy<IStatusService>(() => new StatusService(repository, logger, configuration));
-    _accessControlService = new Lazy<IAccessControlService>(() => new AccessControlService(repository, logger, configuration));
+    _propertyInspectorService = new Lazy<IPropertyInspectorService>(() => new PropertyInspectorService(configuration, loggerFactory.CreateLogger<PropertyInspectorService>(), httpContextAccessor));
+    _tokenBlackListService = new Lazy<ITokenBlacklistService>(() => new TokenBlacklistService(configuration, repository, loggerFactory.CreateLogger<TokenBlacklistService>()));
+    _countryService = new Lazy<ICrmCountryService>(() => new CrmCountryService(repository, loggerFactory.CreateLogger<CrmCountryService>(), configuration));
+    _currencyService = new Lazy<ICurrencyService>(() => new CurrencyService(repository, loggerFactory.CreateLogger<CurrencyService>(), configuration));
+    _companyService = new Lazy<ICompanyService>(() => new CompanyService(repository, loggerFactory.CreateLogger<CompanyService>(), configuration));
+    _systemSettingsService = new Lazy<ISystemSettingsService>(() => new SystemSettingsService(repository, loggerFactory.CreateLogger<SystemSettingsService>(), configuration));
+    _userService = new Lazy<IUsersService>(() => new UsersService(repository, loggerFactory.CreateLogger<UsersService>(), configuration));
+    _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(repository, loggerFactory.CreateLogger<AuthenticationService>(), configuration , httpContextAccessor));
+    _menuService = new Lazy<IMenuService>(() => new MenuService(repository, loggerFactory.CreateLogger<MenuService>(), configuration));
+    _moduleService = new Lazy<IModuleService>(() => new ModuleService(repository, loggerFactory.CreateLogger<ModuleService>(), configuration));
+    _groupService = new Lazy<IGroupService>(() => new GroupService(repository, loggerFactory.CreateLogger<GroupService>(), configuration));
+    _queryAnalyzerService = new Lazy<IQueryAnalyzerService>(() => new QueryAnalyzerService(repository, loggerFactory.CreateLogger<QueryAnalyzerService>(), configuration));
+    _statusService = new Lazy<IStatusService>(() => new StatusService(repository, loggerFactory.CreateLogger<StatusService>(), configuration));
+    _accessControlService = new Lazy<IAccessControlService>(() => new AccessControlService(repository, loggerFactory.CreateLogger<AccessControlService>(), configuration));
 
     // HR Area
-    _employeeService = new Lazy<IEmployeeService>(() => new EmployeeService(repository, logger, configuration));
-    _branchService = new Lazy<IBranchService>(() => new BranchService(repository, logger, configuration));
-    _departmentService = new Lazy<IDepartmentService>(() => new DepartmentService(repository, logger, configuration));
+    _employeeService = new Lazy<IEmployeeService>(() => new EmployeeService(repository, loggerFactory.CreateLogger<EmployeeService>(), configuration));
+    _branchService = new Lazy<IBranchService>(() => new BranchService(repository, loggerFactory.CreateLogger<BranchService>(), configuration));
+    _departmentService = new Lazy<IDepartmentService>(() => new DepartmentService(repository, loggerFactory.CreateLogger<DepartmentService>(), configuration));
 
     #region CRM
-    _crminstitute = new Lazy<ICrmInstituteService>(() => new CrmInstituteService(repository, logger, configuration, httpContextAccessor));
-    _crminstituteType = new Lazy<ICrmInstituteTypeService>(() => new CrmInstituteTypeService(repository, logger, configuration));
-    _crmcourse = new Lazy<ICrmCourseService>(() => new CrmCourseService(repository, logger, configuration, httpContextAccessor));
-    _crmmonth = new Lazy<ICrmMonthService>(() => new CrmMonthService(repository, logger, configuration));
-    _crmyear = new Lazy<ICrmYearService>(() => new CrmYearService(repository, logger, configuration));
+    _crminstitute = new Lazy<ICrmInstituteService>(() => new CrmInstituteService(repository, loggerFactory.CreateLogger<CrmInstituteService>(), configuration, httpContextAccessor));
+    _crminstituteType = new Lazy<ICrmInstituteTypeService>(() => new CrmInstituteTypeService(repository, loggerFactory.CreateLogger<CrmInstituteTypeService>(), configuration));
+    _crmcourse = new Lazy<ICrmCourseService>(() => new CrmCourseService(repository, loggerFactory.CreateLogger<CrmCourseService>(), configuration, httpContextAccessor));
+    _crmmonth = new Lazy<ICrmMonthService>(() => new CrmMonthService(repository, loggerFactory.CreateLogger<CrmMonthService>(), configuration));
+    _crmyear = new Lazy<ICrmYearService>(() => new CrmYearService(repository, loggerFactory.CreateLogger<CrmYearService>(), configuration));
 
     // New CRM services initialization
-    _crmIntakeMonthService = new Lazy<ICrmIntakeMonthService>(() => new CrmIntakeMonthService(repository, logger, configuration));
-    _crmIntakeYearService = new Lazy<ICrmIntakeYearService>(() => new CrmIntakeYearService(repository, logger, configuration));
-    _crmPaymentMethodService = new Lazy<ICrmPaymentMethodService>(() => new CrmPaymentMethodService(repository, logger, configuration));
+    _crmIntakeMonthService = new Lazy<ICrmIntakeMonthService>(() => new CrmIntakeMonthService(repository, loggerFactory.CreateLogger<CrmIntakeMonthService>(), configuration));
+    _crmIntakeYearService = new Lazy<ICrmIntakeYearService>(() => new CrmIntakeYearService(repository, loggerFactory.CreateLogger<CrmIntakeYearService>(), configuration));
+    _crmPaymentMethodService = new Lazy<ICrmPaymentMethodService>(() => new CrmPaymentMethodService(repository, loggerFactory.CreateLogger<CrmPaymentMethodService>(), configuration));
 
     // Existing Crm services initialization
-    _crmApplicationService = new Lazy<ICrmApplicationService>(() => new CrmApplicationService(repository, logger, configuration, httpContextAccessor));
-    _applicantCourseService = new Lazy<ICrmApplicantCourseService>(() => new CrmApplicantCourseService(repository, logger, configuration, httpContextAccessor));
-    _applicantInfoService = new Lazy<ICrmApplicantInfoService>(() => new CrmApplicantInfoService(repository, logger, configuration, httpContextAccessor));
-    _permanentAddressService = new Lazy<ICrmPermanentAddressService>(() => new CrmPermanentAddressService(repository, logger, configuration, httpContextAccessor));
-    _presentAddressService = new Lazy<ICrmPresentAddressService>(() => new CrmPresentAddressService(repository, logger, configuration, httpContextAccessor));
+    _crmApplicationService = new Lazy<ICrmApplicationService>(() => new CrmApplicationService(repository, loggerFactory.CreateLogger<CrmApplicationService>(), configuration, httpContextAccessor));
+    _applicantCourseService = new Lazy<ICrmApplicantCourseService>(() => new CrmApplicantCourseService(repository, loggerFactory.CreateLogger<CrmApplicantCourseService>(), configuration, httpContextAccessor));
+    _applicantInfoService = new Lazy<ICrmApplicantInfoService>(() => new CrmApplicantInfoService(repository, loggerFactory.CreateLogger<CrmApplicantInfoService>(), configuration, httpContextAccessor));
+    _permanentAddressService = new Lazy<ICrmPermanentAddressService>(() => new CrmPermanentAddressService(repository, loggerFactory.CreateLogger<CrmPermanentAddressService>(), configuration, httpContextAccessor));
+    _presentAddressService = new Lazy<ICrmPresentAddressService>(() => new CrmPresentAddressService(repository, loggerFactory.CreateLogger<CrmPresentAddressService>(), configuration, httpContextAccessor));
     
     // New 10 Crm services initialization
-    _educationHistoryService = new Lazy<ICrmEducationHistoryService>(() => new CrmEducationHistoryService(repository, logger, configuration, httpContextAccessor));
-    _ieltsinformationService = new Lazy<ICrmIELTSInformationService>(() => new CrmIELTSInformationService(repository, logger, configuration, httpContextAccessor));
-    _toeflinformationService = new Lazy<ICrmTOEFLInformationService>(() => new CrmTOEFLInformationService(repository, logger, configuration, httpContextAccessor));
-    _PTEInformationService = new Lazy<ICrmPTEInformationService>(() => new CrmPTEInformationService(repository, logger, configuration, httpContextAccessor));
-    _gmatinformationService = new Lazy<ICrmGmatinformationService>(() => new CrmGMATInformationService(repository, logger, configuration, httpContextAccessor));
-    _othersinformationService = new Lazy<ICrmOthersInformationService>(() => new CrmOthersInformationService(repository, logger, configuration, httpContextAccessor));
-    _workExperienceService = new Lazy<ICrmWorkExperienceService>(() => new CrmWorkExperienceService(repository, logger, configuration, httpContextAccessor));
-    _applicantReferenceService = new Lazy<ICrmApplicantReferenceService>(() => new CrmApplicantReferenceService(repository, logger, configuration, httpContextAccessor));
-    _statementOfPurposeService = new Lazy<ICrmStatementOfPurposeService>(() => new CrmStatementOfPurposeService(repository, logger, configuration, httpContextAccessor));
-    _additionalInfoService = new Lazy<ICrmAdditionalInfoService>(() => new CrmAdditionalInfoService(repository, logger, configuration, httpContextAccessor));
-    _additionalDocumentService = new Lazy<ICrmAdditionalDocumentService>(() => new CrmAdditionalDocumentsService(repository, logger, configuration, httpContextAccessor));
+    _educationHistoryService = new Lazy<ICrmEducationHistoryService>(() => new CrmEducationHistoryService(repository, loggerFactory.CreateLogger<CrmEducationHistoryService>(), configuration, httpContextAccessor));
+    _ieltsinformationService = new Lazy<ICrmIELTSInformationService>(() => new CrmIELTSInformationService(repository, loggerFactory.CreateLogger<CrmIELTSInformationService>(), configuration, httpContextAccessor));
+    _toeflinformationService = new Lazy<ICrmTOEFLInformationService>(() => new CrmTOEFLInformationService(repository, loggerFactory.CreateLogger<CrmTOEFLInformationService>(), configuration, httpContextAccessor));
+    _PTEInformationService = new Lazy<ICrmPTEInformationService>(() => new CrmPTEInformationService(repository, loggerFactory.CreateLogger<CrmPTEInformationService>(), configuration, httpContextAccessor));
+    _gmatinformationService = new Lazy<ICrmGmatinformationService>(() => new CrmGMATInformationService(repository, loggerFactory.CreateLogger<CrmGMATInformationService>(), configuration, httpContextAccessor));
+    _othersinformationService = new Lazy<ICrmOthersInformationService>(() => new CrmOthersInformationService(repository, loggerFactory.CreateLogger<CrmOthersInformationService>(), configuration, httpContextAccessor));
+    _workExperienceService = new Lazy<ICrmWorkExperienceService>(() => new CrmWorkExperienceService(repository, loggerFactory.CreateLogger<CrmWorkExperienceService>(), configuration, httpContextAccessor));
+    _applicantReferenceService = new Lazy<ICrmApplicantReferenceService>(() => new CrmApplicantReferenceService(repository, loggerFactory.CreateLogger<CrmApplicantReferenceService>(), configuration, httpContextAccessor));
+    _statementOfPurposeService = new Lazy<ICrmStatementOfPurposeService>(() => new CrmStatementOfPurposeService(repository, loggerFactory.CreateLogger<CrmStatementOfPurposeService>(), configuration, httpContextAccessor));
+    _additionalInfoService = new Lazy<ICrmAdditionalInfoService>(() => new CrmAdditionalInfoService(repository, loggerFactory.CreateLogger<CrmAdditionalInfoService>(), configuration, httpContextAccessor));
+    _additionalDocumentService = new Lazy<ICrmAdditionalDocumentService>(() => new CrmAdditionalDocumentsService(repository, loggerFactory.CreateLogger<CrmAdditionalDocumentsService>(), configuration, httpContextAccessor));
     #endregion Crm
 
     #region DMS Lazy Initializations
-    _dmsdocumentService = new Lazy<IDmsDocumentService>(() => new DmsDocumentService(repository, logger, configuration, httpContextAccessor));
-    _dmsdocumentTypeService = new Lazy<IDmsDocumentTypeService>(() => new DmsDocumentTypeService(repository, logger, configuration));
-    _dmsdocumentTagService = new Lazy<IDmsDocumentTagService>(() => new DmsDocumentTagService(repository, logger, configuration));
-    _dmsdocumentTagMapService = new Lazy<IDmsDocumentTagMapService>(() => new DmsDocumentTagMapService(repository, logger, configuration));
-    _dmsdocumentFolderService = new Lazy<IDmsDocumentFolderService>(() => new DmsDocumentFolderService(repository, logger, configuration));
-    _dmsdocumentVersionService = new Lazy<IDmsDocumentVersionService>(() => new DmsDocumentVersionService(repository, logger, configuration));
-    _dmsdocumentAccessLogService = new Lazy<IDmsDocumentAccessLogService>(() => new DmsDocumentAccessLogService(repository, logger, configuration));
+    _dmsdocumentService = new Lazy<IDmsDocumentService>(() => new DmsDocumentService(repository, loggerFactory.CreateLogger<DmsDocumentService>(), configuration, httpContextAccessor));
+    _dmsdocumentTypeService = new Lazy<IDmsDocumentTypeService>(() => new DmsDocumentTypeService(repository, loggerFactory.CreateLogger<DmsDocumentTypeService>(), configuration));
+    _dmsdocumentTagService = new Lazy<IDmsDocumentTagService>(() => new DmsDocumentTagService(repository, loggerFactory.CreateLogger<DmsDocumentTagService>(), configuration));
+    _dmsdocumentTagMapService = new Lazy<IDmsDocumentTagMapService>(() => new DmsDocumentTagMapService(repository, loggerFactory.CreateLogger<DmsDocumentTagMapService>(), configuration));
+    _dmsdocumentFolderService = new Lazy<IDmsDocumentFolderService>(() => new DmsDocumentFolderService(repository, loggerFactory.CreateLogger<DmsDocumentFolderService>(), configuration));
+    _dmsdocumentVersionService = new Lazy<IDmsDocumentVersionService>(() => new DmsDocumentVersionService(repository, loggerFactory.CreateLogger<DmsDocumentVersionService>(), configuration));
+    _dmsdocumentAccessLogService = new Lazy<IDmsDocumentAccessLogService>(() => new DmsDocumentAccessLogService(repository, loggerFactory.CreateLogger<DmsDocumentAccessLogService>(), configuration));
     #endregion
   }
   
@@ -161,10 +163,10 @@ public sealed class ServiceManager : IServiceManager
   public ITokenBlacklistService TokenBlacklist => _tokenBlackListService.Value;
   public ICrmCountryService CrmCountries => _countryService.Value;
   public ICurrencyService Currencies => _currencyService.Value;
-  public ICompanyService Companies => _companyService.Value;
+  public ICompanyService Companies => _companyService.Value; // preserve original property but safe-guard compiled name
   public ISystemSettingsService SystemSettings => _systemSettingsService.Value;
   public IUsersService Users => _userService.Value;
-  public IAuthenticationService CustomAuthentication => _authenticationService.Value;
+  public IAuthenticationService CustomAuthentication =>  _authenticationService.Value;
   public IMenuService Menus => _menuService.Value;
   public IModuleService Modules => _moduleService.Value;
   public IGroupService Groups => _groupService.Value;

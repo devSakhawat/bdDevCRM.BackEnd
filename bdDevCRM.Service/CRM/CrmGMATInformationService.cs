@@ -1,25 +1,26 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmGMATInformationService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmGMATInformationService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmGmatinformationService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmGMATInformationService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -90,7 +91,7 @@ internal sealed class CrmGMATInformationService(
 
     _repository.CrmGMATInformations.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmGMATInformation updated, id={key}");
+    _logger.LogInformation("CrmGMATInformation updated, id={GMATInformationId}", key);
     return OperationMessage.Success;
   }
 
@@ -101,7 +102,7 @@ internal sealed class CrmGMATInformationService(
 
     await _repository.CrmGMATInformations.DeleteAsync(x => x.GMATInformationId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmGMATInformation deleted, id={key}");
+    _logger.LogInformation("CrmGMATInformation deleted, id={GMATInformationId}", key);
     return OperationMessage.Success;
   }
 

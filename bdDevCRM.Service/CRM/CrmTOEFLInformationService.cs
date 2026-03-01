@@ -9,17 +9,18 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmTOEFLInformationService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmTOEFLInformationService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmTOEFLInformationService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmTOEFLInformationService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -90,7 +91,7 @@ internal sealed class CrmTOEFLInformationService(
     
     _repository.CrmTOEFLInformations.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmTOEFLInformation updated, id={key}");
+    _logger.LogInformation("CrmTOEFLInformation updated, id={TOEFLInformationId}", key);
     return OperationMessage.Success;
   }
 
@@ -101,7 +102,7 @@ internal sealed class CrmTOEFLInformationService(
 
     await _repository.CrmTOEFLInformations.DeleteAsync(x => x.TOEFLInformationId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmTOEFLInformation deleted, id={key}");
+    _logger.LogInformation("CrmTOEFLInformation deleted, id={TOEFLInformationId}", key);
     return OperationMessage.Success;
   }
 

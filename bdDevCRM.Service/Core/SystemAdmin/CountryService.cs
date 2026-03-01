@@ -9,6 +9,7 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
@@ -17,10 +18,10 @@ internal sealed class CrmCountryService : ICrmCountryService
 {
 
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<CrmCountryService> _logger;
   private readonly IConfiguration _configuration;
 
-  public CrmCountryService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public CrmCountryService(IRepositoryManager repository, ILogger<CrmCountryService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
@@ -69,7 +70,7 @@ internal sealed class CrmCountryService : ICrmCountryService
           throw new InvalidCreateOperationException();
         }
 
-        _logger.LogWarn($"New record create to CrmCountry. New id: {lastCreatedId} by .");
+        _logger.LogWarning("New record created in CrmCountry. New id: {lastCreatedId} by .", lastCreatedId);
         return OperationMessage.Success;
       }
       else
@@ -97,7 +98,7 @@ internal sealed class CrmCountryService : ICrmCountryService
         _repository.Countries.Update(countryObj);
         await _repository.SaveAsync();
 
-        _logger.LogWarn($"Country with Id: {key} is about to be updated from the database by .");
+        _logger.LogWarning("Country with Id: {countryId} is about to be updated from the database by .", key);
         res = OperationMessage.Success;
       }
       else
@@ -124,7 +125,7 @@ internal sealed class CrmCountryService : ICrmCountryService
 
     await _repository.Countries.DeleteAsync(x => x.CountryId == modelDto.CountryId, trackChanges: true);
     await _repository.SaveAsync();
-    _logger.LogWarn($"Country with Id: {key} is about to be deleted from the database.");
+    _logger.LogWarning("Country with Id: {countryId} is about to be deleted from the database.", key);
     return OperationMessage.Success;
   }
 
@@ -148,7 +149,7 @@ internal sealed class CrmCountryService : ICrmCountryService
         }
 
         await _repository.SaveAsync();
-        _logger.LogWarn($"New record create to Country. New id: {lastCreatedId} by .");
+        _logger.LogWarning("New record created in Country. New id: {lastCreatedId} by .", lastCreatedId);
         return OperationMessage.Success;
       }
       else
@@ -170,7 +171,7 @@ internal sealed class CrmCountryService : ICrmCountryService
           _repository.Countries.Update(country);
           await _repository.SaveAsync();
 
-          _logger.LogWarn($"Country with Id: {key} is about to be updated from the database by .");
+          _logger.LogWarning("Country with Id: {countryId} is about to be updated from the database by .", key);
           res = OperationMessage.Success;
         }
         else
@@ -199,7 +200,7 @@ internal sealed class CrmCountryService : ICrmCountryService
   public async Task DeleteRecordAsync2(int countryId, bool trackChanges)
   {
     var country = await _repository.Countries.FirstOrDefaultAsync(c => c.CountryId.Equals(countryId));
-    _logger.LogWarn($"Country with Id: {countryId} is about to be deleted from the database.");
+    _logger.LogWarning("Country with Id: {countryId} is about to be deleted from the database.", countryId);
     _repository.Countries.DeleteCountry(country);
     await _repository.SaveAsync();
   }

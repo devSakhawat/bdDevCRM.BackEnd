@@ -1,4 +1,3 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
@@ -9,16 +8,18 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Shared.Exceptions.BaseException;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
-internal sealed class CrmApplicationService(IRepositoryManager repository, ILoggerManager logger, IConfiguration config, IHttpContextAccessor httpContextAccessor) : ICrmApplicationService
+internal sealed class CrmApplicationService(IRepositoryManager repository, ILogger<CrmApplicationService> logger, IConfiguration config, IHttpContextAccessor httpContextAccessor) : ICrmApplicationService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmApplicationService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -465,7 +466,7 @@ internal sealed class CrmApplicationService(IRepositoryManager repository, ILogg
     // If no data found, return an empty DTO
     if (result == null)
     {
-      _logger.LogWarn($"No application found with ApplicationId: {applicationId}");
+      _logger.LogWarning("No application found with ApplicationId: {ApplicationId}", applicationId);
       return new GetApplicationDto(); // Return empty DTO if no data found
     }
 

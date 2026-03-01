@@ -1,13 +1,13 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.DMS;
-
+﻿using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +19,10 @@ namespace bdDevCRM.Service.DMS;
 internal sealed class DmsDocumentTagService : IDmsDocumentTagService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<DmsDocumentTagService> _logger;
   private readonly IConfiguration _configuration;
 
-  public DmsDocumentTagService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DmsDocumentTagService(IRepositoryManager repository, ILogger<DmsDocumentTagService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
@@ -65,7 +65,7 @@ internal sealed class DmsDocumentTagService : IDmsDocumentTagService
       throw new InvalidCreateOperationException();
 
     await _repository.SaveAsync();
-    _logger.LogWarn($"New document tag created with Id: {createdId}");
+    _logger.LogWarning("New document tag created with Id: {CreatedId}", createdId);
 
     return OperationMessage.Success;
   }
@@ -83,7 +83,7 @@ internal sealed class DmsDocumentTagService : IDmsDocumentTagService
 
     _repository.DmsDocumentTags.Update(tag);
     await _repository.SaveAsync();
-    _logger.LogWarn($"Tag with Id: {key} updated.");
+    _logger.LogWarning("Tag with Id: {TagId} updated.", key);
 
     return OperationMessage.Success;
   }
@@ -104,7 +104,7 @@ internal sealed class DmsDocumentTagService : IDmsDocumentTagService
     await _repository.DmsDocumentTags.DeleteAsync(x => x.TagId == key, true);
     await _repository.SaveAsync();
 
-    _logger.LogWarn($"Tag with Id: {key} deleted.");
+    _logger.LogWarning("Tag with Id: {TagId} deleted.", key);
 
     return OperationMessage.Success;
   }
@@ -123,7 +123,7 @@ internal sealed class DmsDocumentTagService : IDmsDocumentTagService
         throw new InvalidCreateOperationException();
 
       await _repository.SaveAsync();
-      _logger.LogWarn($"New document tag created with Id: {createdId}");
+      _logger.LogWarning("New document tag created with Id: {CreatedId}", createdId);
       return OperationMessage.Success;
     }
     else if (key > 0 && key == modelDto.TagId)
@@ -135,7 +135,7 @@ internal sealed class DmsDocumentTagService : IDmsDocumentTagService
         _repository.DmsDocumentTags.Update(updateTag);
         await _repository.SaveAsync();
 
-        _logger.LogWarn($"Tag with Id: {key} updated.");
+        _logger.LogWarning("Tag with Id: {TagId} updated.", key);
         return OperationMessage.Success;
       }
       else

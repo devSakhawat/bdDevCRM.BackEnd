@@ -8,6 +8,7 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
@@ -16,11 +17,11 @@ namespace bdDevCRM.Services.Core.SystemAdmin;
 internal sealed class CompanyService : ICompanyService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<CompanyService> _logger;
   private readonly IConfiguration _configuration;
 
 
-  public CompanyService(IRepositoryManager repository, ILoggerManager logger ,IConfiguration configuration)
+  public CompanyService(IRepositoryManager repository, ILogger<CompanyService> logger ,IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
@@ -130,7 +131,7 @@ internal sealed class CompanyService : ICompanyService
   public async Task DeleteCompanyAsync(int companyId, bool trackChanges)
   {
     var Company = await _repository.Companies.FirstOrDefaultAsync(x => x.CompanyId.Equals(companyId), trackChanges);
-    _logger.LogWarn($"Company with Id: {companyId} is about to be deleted from the database.");
+    _logger.LogWarning("Company with Id: {companyId} is about to be deleted from the database.", companyId);
     _repository.Companies.DeleteCompany(Company);
     await _repository.SaveAsync();
 

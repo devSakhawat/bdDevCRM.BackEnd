@@ -1,25 +1,26 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmAdditionalInfoService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmAdditionalInfoService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmAdditionalInfoService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmAdditionalInfoService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -86,7 +87,7 @@ internal sealed class CrmAdditionalInfoService(
     
     _repository.CrmAdditionalInfoes.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"AdditionalInfo updated, id={key}");
+    _logger.LogInformation("AdditionalInfo updated, id={Id}", key);
     return OperationMessage.Success;
   }
 
@@ -97,7 +98,7 @@ internal sealed class CrmAdditionalInfoService(
 
     await _repository.CrmAdditionalInfoes.DeleteAsync(x => x.AdditionalInfoId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"AdditionalInfo deleted, id={key}");
+    _logger.LogInformation("AdditionalInfo deleted, id={Id}", key);
     return OperationMessage.Success;
   }
 

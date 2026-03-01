@@ -9,6 +9,7 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.Core.HR;
 
@@ -19,10 +20,10 @@ internal sealed class DepartmentService : IDepartmentService
             "Select Department.* from Department inner join CompanyDepartmentMap on CompanyDepartmentMap.DepartmentId =Department.DepartmentId  where CompanyId = {0} and IsActive=1 {1} order by DepartmentName asc";
 
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<DepartmentService> _logger;
   private readonly IConfiguration _configuration;
 
-  public DepartmentService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DepartmentService(IRepositoryManager repository, ILogger<DepartmentService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;

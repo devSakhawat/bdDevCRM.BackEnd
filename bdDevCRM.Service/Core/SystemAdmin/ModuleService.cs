@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
@@ -19,10 +20,10 @@ namespace bdDevCRM.Services.Core.SystemAdmin;
 internal sealed class ModuleService : IModuleService
 {
     private readonly IRepositoryManager _repository;
-    private readonly ILoggerManager _logger;
+    private readonly ILogger<ModuleService> _logger;
     private readonly IConfiguration _configuration;
 
-    public ModuleService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+    public ModuleService(IRepositoryManager repository, ILogger<ModuleService> logger, IConfiguration configuration)
     {
         _repository = repository;
         _logger = logger;

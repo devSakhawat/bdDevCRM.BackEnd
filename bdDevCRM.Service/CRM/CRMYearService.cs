@@ -9,16 +9,17 @@ using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmYearService : ICrmYearService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<CrmYearService> _logger;
   private readonly IConfiguration _configuration;
 
 
-  public CrmYearService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public CrmYearService(IRepositoryManager repository, ILogger<CrmYearService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;

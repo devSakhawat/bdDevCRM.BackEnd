@@ -1,13 +1,13 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.DMS;
-
+﻿using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +19,10 @@ namespace bdDevCRM.Service.DMS;
 internal sealed class DmsDocumentTypeService : IDmsDocumentTypeService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<DmsDocumentTypeService> _logger;
   private readonly IConfiguration _configuration;
 
-  public DmsDocumentTypeService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DmsDocumentTypeService(IRepositoryManager repository, ILogger<DmsDocumentTypeService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
@@ -65,7 +65,7 @@ internal sealed class DmsDocumentTypeService : IDmsDocumentTypeService
       throw new InvalidCreateOperationException();
 
     await _repository.SaveAsync();
-    _logger.LogWarn($"New document type created with Id: {createdId}");
+    _logger.LogWarning("New document type created with Id: {CreatedId}", createdId);
 
     return OperationMessage.Success;
   }
@@ -83,7 +83,7 @@ internal sealed class DmsDocumentTypeService : IDmsDocumentTypeService
 
     _repository.DmsDocumentTypes.Update(type);
     await _repository.SaveAsync();
-    _logger.LogWarn($"document type with Id: {key} updated.");
+    _logger.LogWarning("Document type with Id: {DocumentTypeId} updated.", key);
 
     return OperationMessage.Success;
   }
@@ -104,7 +104,7 @@ internal sealed class DmsDocumentTypeService : IDmsDocumentTypeService
     await _repository.DmsDocumentTypes.DeleteAsync(x => x.DocumentTypeId == key, true);
     await _repository.SaveAsync();
 
-    _logger.LogWarn($"document type with Id: {key} deleted.");
+    _logger.LogWarning("Document type with Id: {DocumentTypeId} deleted.", key);
 
     return OperationMessage.Success;
   }
@@ -123,7 +123,7 @@ internal sealed class DmsDocumentTypeService : IDmsDocumentTypeService
         throw new InvalidCreateOperationException();
 
       await _repository.SaveAsync();
-      _logger.LogWarn($"New document type created with Id: {createdId}");
+      _logger.LogWarning("New document type created with Id: {CreatedId}", createdId);
       return OperationMessage.Success;
     }
     else if (key > 0 && key == modelDto.DocumentTypeId)
@@ -135,7 +135,7 @@ internal sealed class DmsDocumentTypeService : IDmsDocumentTypeService
         _repository.DmsDocumentTypes.Update(updateType);
         await _repository.SaveAsync();
 
-        _logger.LogWarn($"document type with Id: {key} updated.");
+        _logger.LogWarning($"document type with Id: {key} updated.");
         return OperationMessage.Success;
       }
       else

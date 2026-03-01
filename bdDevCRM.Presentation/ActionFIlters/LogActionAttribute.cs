@@ -1,6 +1,7 @@
 ﻿using bdDevCRM.RepositoriesContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using System.Diagnostics;
 using System.IO;
@@ -10,9 +11,9 @@ using System.Text.RegularExpressions;
 
 public class LogActionAttribute : IAsyncActionFilter
 {
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<LogActionAttribute> _logger;
 
-  public LogActionAttribute(ILoggerManager logger)
+  public LogActionAttribute(ILogger<LogActionAttribute> logger)
   {
     _logger = logger;
   }
@@ -48,7 +49,7 @@ public class LogActionAttribute : IAsyncActionFilter
       requestBody = MaskSensitiveData(rawBody);
     }
 
-    _logger.LogInfo($"[REQUEST] User: {user}, Method: {method}, Path: {path}, Query: {queryString}, Headers: {headers}, Body: {requestBody}");
+    _logger.LogInformation("[REQUEST] User: {User}, Method: {Method}, Path: {Path}, Query: {QueryString}, Headers: {Headers}, Body: {Body}", user, method, path, queryString, headers, requestBody);
 
     // Execute action
     ActionExecutedContext executedContext = null;
@@ -68,7 +69,7 @@ public class LogActionAttribute : IAsyncActionFilter
         exceptionDetails = $"{executedContext.Exception.Message} | StackTrace: {executedContext.Exception.StackTrace}";
       }
 
-      _logger.LogInfo($"[RESPONSE] Status Code: {statusCode}, Execution Time: {stopwatch.ElapsedMilliseconds} ms, Exception: {exceptionDetails}");
+      _logger.LogInformation("[RESPONSE] Status Code: {StatusCode}, Execution Time: {ElapsedMilliseconds} ms, Exception: {ExceptionDetails}", statusCode, stopwatch.ElapsedMilliseconds, exceptionDetails);
     }
   }
 

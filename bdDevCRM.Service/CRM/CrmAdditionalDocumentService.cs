@@ -1,4 +1,3 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
@@ -6,22 +5,24 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmAdditionalDocumentsService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmAdditionalDocumentsService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmAdditionalDocumentService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmAdditionalDocumentsService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -88,7 +89,7 @@ internal sealed class CrmAdditionalDocumentsService(
 
     _repository.CrmAdditionalDocuments.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"AdditionalDocument updated, id={key}");
+    _logger.LogInformation("AdditionalDocument updated, id={Id}", key);
     return OperationMessage.Success;
   }
 
@@ -99,7 +100,7 @@ internal sealed class CrmAdditionalDocumentsService(
 
     await _repository.CrmAdditionalDocuments.DeleteAsync(x => x.AdditionalDocumentId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"AdditionalDocument deleted, id={key}");
+    _logger.LogInformation("AdditionalDocument deleted, id={Id}", key);
     return OperationMessage.Success;
   }
 

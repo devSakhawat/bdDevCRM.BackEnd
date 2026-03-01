@@ -12,6 +12,7 @@ using bdDevCRM.Utilities.OthersLibrary;
 using bdDevs.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -25,12 +26,14 @@ public class AuthenticationService : IAuthenticationService
 	private readonly IRepositoryManager _repository;
 	private readonly IConfiguration _configuration;
 	private readonly IHttpContextAccessor _httpContextAccessor;
+	private readonly ILogger<AuthenticationService> _logger;
 
-	public AuthenticationService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+	public AuthenticationService(IRepositoryManager repository, ILogger<AuthenticationService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
 	{
 		_repository = repository;
 		_configuration = configuration;
 		_httpContextAccessor = httpContextAccessor;
+		_logger = logger;
 	}
 
 	/// <summary>

@@ -1,7 +1,5 @@
 ﻿//using bdDevCRM.Api.ApiResponseError;
 using bdDevCRM.Api.ContentFormatter;
-using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.LoggerSevice;
 using bdDevCRM.Repositories;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Services;
@@ -14,8 +12,11 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Events;
 using System.Text;
 
 namespace bdDevCRM.Api.Extensions;
@@ -53,7 +54,7 @@ public static class ServiceExtensions
 	//	});
 	//}
 
-	
+
 	////Warning: Remove.SetIsOriginAllowed(_ => true) in production!
 	//public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
 	//{
@@ -81,86 +82,86 @@ public static class ServiceExtensions
 	//}
 
 
-  public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
-  {
-    var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
-    var allowCredentials = configuration.GetValue<bool>("Cors:AllowCredentials");
-    var preflightMaxAge = configuration.GetValue<int?>("Cors:PreflightMaxAge") ?? 0;
-
-    services.AddCors(options =>
-    {
-      options.AddPolicy("CorsPolicy", builder =>
-      {
-        builder
-            .WithOrigins(allowedOrigins)
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-
-        if (allowCredentials)
-        {
-          builder.AllowCredentials();
-        }
-
-        if (preflightMaxAge > 0)
-        {
-          builder.SetPreflightMaxAge(TimeSpan.FromSeconds(preflightMaxAge));
-        }
-      });
-    });
-  }
-
-  public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
+	public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
 	{
-		options.AutomaticAuthentication = false;
-	});
+		var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+		var allowCredentials = configuration.GetValue<bool>("Cors:AllowCredentials");
+		var preflightMaxAge = configuration.GetValue<int?>("Cors:PreflightMaxAge") ?? 0;
 
-	public static void ConfigureLoggerService(this IServiceCollection services)
-	{
-		services.AddSingleton<ILoggerManager, LoggerManager>();
+		services.AddCors(options =>
+		{
+			options.AddPolicy("CorsPolicy", builder =>
+		{
+			  builder
+			  .WithOrigins(allowedOrigins)
+			  .AllowAnyHeader()
+			  .AllowAnyMethod();
+
+			  if (allowCredentials)
+			  {
+				  builder.AllowCredentials();
+			  }
+
+			  if (preflightMaxAge > 0)
+			  {
+				  builder.SetPreflightMaxAge(TimeSpan.FromSeconds(preflightMaxAge));
+			  }
+		  });
+		});
 	}
+
+	public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
+	  {
+		  options.AutomaticAuthentication = false;
+	  });
+
+	//public static void ConfigureLoggerService(this IServiceCollection services)
+	//{
+	//	services.AddSingleton<ILoggerManager, LoggerManager>();
+	//}
 
 	public static void ConfigureRepositoryManager(this IServiceCollection services) => services.AddScoped<IRepositoryManager, RepositoryManager>();
 
 	public static void ConfigureServiceManager(this IServiceCollection services) => services.AddScoped<IServiceManager, ServiceManager>();
 
-  //public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) => services.AddDbContext<CRMContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbLocation")));
+	//public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) => services.AddDbContext<CRMContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbLocation")));
 
-  // Add inside your existing ServiceExtensions class
-  public static void ConfigureInterceptors(this IServiceCollection services)
-  {
-    // Required for interceptor to access HttpContext
-    services.AddHttpContextAccessor();
+	// Add inside your existing ServiceExtensions class
+	public static void ConfigureInterceptors(this IServiceCollection services)
+	{
+		// Required for interceptor to access HttpContext
+		services.AddHttpContextAccessor();
 
-    // Register interceptors as scoped (same lifetime as DbContext)
-    services.AddScoped<AuditSaveChangesInterceptor>();
-    services.AddScoped<SlowQueryLoggingInterceptor>();
-  }
+		// Register interceptors as scoped (same lifetime as DbContext)
+		services.AddScoped<AuditSaveChangesInterceptor>();
+		services.AddScoped<SlowQueryLoggingInterceptor>();
+	}
 
-  // Modify ConfigureSqlContext to use the overload that injects the IServiceProvider
-  public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
-  {
-    services.AddDbContext<CRMContext>((serviceProvider, options) =>
-    {
-      var connectionString = configuration.GetConnectionString("DbLocation") ?? configuration["ConnectionStrings:DbLocation"];
-      options.UseSqlServer(connectionString);
+	// Modify ConfigureSqlContext to use the overload that injects the IServiceProvider
+	public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddDbContext<CRMContext>((serviceProvider, options) =>
+		{
+			var connectionString = configuration.GetConnectionString("DbLocation") ?? configuration["ConnectionStrings:DbLocation"];
+			options.UseSqlServer(connectionString);
 
-      // Resolve interceptors from DI and add
-      var auditInterceptor = serviceProvider.GetService<AuditSaveChangesInterceptor>();
-      var slowQueryInterceptor = serviceProvider.GetService<SlowQueryLoggingInterceptor>();
+			// Resolve interceptors from DI and add
+			var auditInterceptor = serviceProvider.GetService<AuditSaveChangesInterceptor>();
+			var slowQueryInterceptor = serviceProvider.GetService<SlowQueryLoggingInterceptor>();
 
-      if (auditInterceptor != null)
-      {
-        options.AddInterceptors(auditInterceptor);
-      }
+			if (auditInterceptor != null)
+			{
+				options.AddInterceptors(auditInterceptor);
+			}
 
-      if (slowQueryInterceptor != null)
-      {
-        options.AddInterceptors(slowQueryInterceptor);
-      }
-    });
-  }
+			if (slowQueryInterceptor != null)
+			{
+				options.AddInterceptors(slowQueryInterceptor);
+			}
+		});
+	}
 
-  public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
+	public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) => builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
 
 	public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
@@ -226,17 +227,17 @@ public static class ServiceExtensions
 			options.SuppressModelStateInvalidFilter = true;
 			options.InvalidModelStateResponseFactory = actionContext =>
 		{
-			  var errors = actionContext.ModelState
-			 .Where(e => e.Value.Errors.Count() > 0)
-			 .SelectMany(x => x.Value.Errors)
-			 .Select(y => y.ErrorMessage).ToArray();
+			var errors = actionContext.ModelState
+		   .Where(e => e.Value.Errors.Count() > 0)
+		   .SelectMany(x => x.Value.Errors)
+		   .Select(y => y.ErrorMessage).ToArray();
 
-			  var errorResponse = new ApiValidationErrorResponse
-			  {
-				  Errors = errors
-			  };
-			  return new BadRequestObjectResult(errorResponse);
-		  };
+			var errorResponse = new ApiValidationErrorResponse
+			{
+				Errors = errors
+			};
+			return new BadRequestObjectResult(errorResponse);
+		};
 		});
 	}
 
@@ -368,4 +369,76 @@ public static class ServiceExtensions
 			});
 		}
 	}
+
+	public static void ConfigureSerilog(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+	{
+		if (environment == null) environment = new WebHostEnvironmentMock();
+
+		var seqUrl = configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
+		var seqApiKey = configuration["Seq:ApiKey"];
+
+		Log.Logger = new LoggerConfiguration()
+			// Minimum log levels
+			.MinimumLevel.Information()
+			.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+			.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+			.MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Information)
+			.MinimumLevel.Override("System", LogEventLevel.Warning)
+
+			// Enrichers (add context to logs)
+			.Enrich.FromLogContext()
+			.Enrich.WithMachineName()
+			.Enrich.WithThreadId()
+			.Enrich.WithProperty("Application", "bdDevCRM")
+			.Enrich.WithProperty("Environment", environment.EnvironmentName)
+			.Enrich.WithCorrelationId()
+
+			// Console sink (for development)
+			.WriteTo.Console(
+				outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+				restrictedToMinimumLevel: LogEventLevel.Information
+			)
+
+			// Application log file (all levels)
+			.WriteTo.File(
+				path: "logs/app-.log",
+				rollingInterval: RollingInterval.Day,
+				retainedFileCountLimit: 30,
+				outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+				restrictedToMinimumLevel: LogEventLevel.Information
+			)
+
+			// Error log file (errors only)
+			.WriteTo.File(
+				path: "logs/errors-.log",
+				rollingInterval: RollingInterval.Day,
+				retainedFileCountLimit: 90,
+				restrictedToMinimumLevel: LogEventLevel.Error,
+				outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj} {Properties:j}{NewLine}{Exception}"
+			)
+
+			// Seq sink (optional - for production monitoring)
+			.WriteTo.Seq(
+				serverUrl: seqUrl,
+				apiKey: seqApiKey,
+				restrictedToMinimumLevel: LogEventLevel.Information
+			)
+
+			.CreateLogger();
+
+		// register serilog logger into DI (optional)
+		services.AddSingleton<Serilog.ILogger>(Log.Logger);
+	}
+
+	// A tiny local fallback for environment when null — won't be used in real Program.cs, but keeps null-safety for unit tests.
+	private class WebHostEnvironmentMock : IWebHostEnvironment
+	{
+		public string EnvironmentName { get; set; } = "Production";
+		public string ApplicationName { get; set; } = AppDomain.CurrentDomain.FriendlyName;
+		public string WebRootPath { get; set; } = string.Empty;
+		public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+		public IFileProvider? WebRootFileProvider { get; set; }
+		public IFileProvider? ContentRootFileProvider { get; set; }
+	}
+
 }

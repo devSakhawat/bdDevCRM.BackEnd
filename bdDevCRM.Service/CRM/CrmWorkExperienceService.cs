@@ -9,17 +9,18 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmWorkExperienceService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmWorkExperienceService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmWorkExperienceService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmWorkExperienceService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -71,7 +72,7 @@ internal sealed class CrmWorkExperienceService(
     dto.CreatedDate = entity.CreatedDate;
     dto.CreatedBy = entity.CreatedBy;
 
-    _logger.LogInfo($"New CrmWorkExperience created, id={dto.WorkExperienceId}");
+    _logger.LogInformation("New CrmWorkExperience created, id={WorkExperienceId}", dto.WorkExperienceId);
 
     return dto;
   }
@@ -88,7 +89,7 @@ internal sealed class CrmWorkExperienceService(
 
     _repository.CrmWorkExperiences.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmWorkExperience updated, id={key}");
+    _logger.LogInformation("CrmWorkExperience updated, id={WorkExperienceId}", key);
     return OperationMessage.Success;
   }
 
@@ -99,7 +100,7 @@ internal sealed class CrmWorkExperienceService(
 
     await _repository.CrmWorkExperiences.DeleteAsync(x => x.WorkExperienceId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmWorkExperience deleted, id={key}");
+    _logger.LogInformation("CrmWorkExperience deleted, id={WorkExperienceId}", key);
     return OperationMessage.Success;
   }
 

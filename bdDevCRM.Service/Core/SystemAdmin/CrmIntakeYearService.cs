@@ -7,16 +7,17 @@ using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.Core.SystemAdmin;
 
 internal sealed class CrmIntakeYearService : ICrmIntakeYearService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<CrmIntakeYearService> _logger;
   private readonly IConfiguration _config;
 
-  public CrmIntakeYearService(IRepositoryManager repository, ILoggerManager logger, IConfiguration config)
+  public CrmIntakeYearService(IRepositoryManager repository, ILogger<CrmIntakeYearService> logger, IConfiguration config)
   {
     _repository = repository;
     _logger = logger;

@@ -5,16 +5,17 @@ using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.Core.SystemAdmin;
 
 internal sealed class SystemSettingsService : ISystemSettingsService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<SystemSettingsService> _logger;
   private readonly IConfiguration _configuration;
 
-  public SystemSettingsService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public SystemSettingsService(IRepositoryManager repository, ILogger<SystemSettingsService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;

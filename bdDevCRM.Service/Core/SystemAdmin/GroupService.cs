@@ -7,16 +7,17 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
 internal sealed class GroupService : IGroupService
 {
     private readonly IRepositoryManager _repository;
-    private readonly ILoggerManager _logger;
+    private readonly ILogger<GroupService> _logger;
     private readonly IConfiguration _configuration;
 
-    public GroupService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+    public GroupService(IRepositoryManager repository, ILogger<GroupService> logger, IConfiguration configuration)
     {
         _repository = repository;
         _logger = logger;
