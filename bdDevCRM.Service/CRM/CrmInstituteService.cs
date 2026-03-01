@@ -1,27 +1,28 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.CRM;
+﻿using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 namespace bdDevCRM.Service.CRM;
 
 
 internal sealed class CrmInstituteService : ICrmInstituteService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<CrmInstituteService> _logger;
   private readonly IConfiguration _config;
   private readonly IHttpContextAccessor _httpContextAccessor;
 
 
-  public CrmInstituteService(IRepositoryManager repo, ILoggerManager logger, IConfiguration config, IHttpContextAccessor httpContextAccessor)
+  public CrmInstituteService(IRepositoryManager repo, ILogger<CrmInstituteService> logger, IConfiguration config, IHttpContextAccessor httpContextAccessor)
   {
     _repository = repo;
     _logger = logger;
@@ -99,7 +100,7 @@ left join DMSDocument docProspectus on CRMInstitute.InstituteId = docProspectus.
     var entity = MyMapper.JsonClone<CrmInstituteDto, CrmInstitute>(updateDto);
     _repository.CrmInstitutes.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmInstitute updated, id={key}");
+    _logger.LogInformation("CrmInstitute updated, id={InstituteId}", key);
     return MyMapper.JsonClone<CrmInstitute, CrmInstituteDto>(entity);
   }
 
@@ -110,7 +111,7 @@ left join DMSDocument docProspectus on CRMInstitute.InstituteId = docProspectus.
 
     await _repository.CrmInstitutes.DeleteAsync(x => x.InstituteId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmInstitute deleted, id={key}");
+    _logger.LogInformation("CrmInstitute deleted, id={InstituteId}", key);
     return OperationMessage.Success;
   }
 

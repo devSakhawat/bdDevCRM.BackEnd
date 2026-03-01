@@ -1,11 +1,12 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.System;
+﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
@@ -13,10 +14,10 @@ namespace bdDevCRM.Services.Core.SystemAdmin;
 internal sealed class QueryAnalyzerService : IQueryAnalyzerService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<QueryAnalyzerService> _logger;
   private readonly IConfiguration _configuration;
 
-  public QueryAnalyzerService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public QueryAnalyzerService(IRepositoryManager repository, ILogger<QueryAnalyzerService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;

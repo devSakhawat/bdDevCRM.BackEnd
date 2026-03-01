@@ -1,22 +1,23 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmMonthService : ICrmMonthService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<CrmMonthService> _logger;
   private readonly IConfiguration _config;
 
-  public CrmMonthService(IRepositoryManager repository, ILoggerManager logger, IConfiguration config)
+  public CrmMonthService(IRepositoryManager repository, ILogger<CrmMonthService> logger, IConfiguration config)
   {
     _repository = repository;
     _logger = logger;

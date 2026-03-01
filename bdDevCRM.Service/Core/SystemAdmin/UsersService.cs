@@ -1,16 +1,16 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.System;
-
+﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.HR;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
+using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Common;
 using bdDevCRM.Utilities.Constants;
-using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -19,13 +19,13 @@ namespace bdDevCRM.Services.Core.SystemAdmin;
 internal sealed class UsersService : IUsersService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<UsersService> _logger;
   private readonly IConfiguration _configuration;
 
   private const string SELECT_USERS_BY_HRRECORDID = @"Select Users.*,Employment.BRANCHID from Users 
 left join Employment on Employment.HRRecordId=Users.EmployeeId where Users.EmployeeId = {0}";
 
-  public UsersService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public UsersService(IRepositoryManager repository, ILogger<UsersService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;

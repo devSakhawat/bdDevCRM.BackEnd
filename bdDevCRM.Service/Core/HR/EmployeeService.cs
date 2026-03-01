@@ -8,6 +8,7 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.ComponentModel.Design;
 
 namespace bdDevCRM.Service.Core.HR;
@@ -16,10 +17,10 @@ namespace bdDevCRM.Service.Core.HR;
 internal sealed class EmployeeService : IEmployeeService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<EmployeeService> _logger;
   private readonly IConfiguration _configuration;
 
-  public EmployeeService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public EmployeeService(IRepositoryManager repository, ILogger<EmployeeService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;

@@ -1,4 +1,5 @@
 using bdDevCRM.RepositoriesContracts;
+using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Shared.Exceptions.BaseException;
@@ -18,10 +19,10 @@ public class StandardExceptionMiddleware
     private readonly RequestDelegate _next;
     private readonly IHostEnvironment _env;
     private readonly ILogger<StandardExceptionMiddleware> _logger;
-    private readonly ILoggerManager _loggerManager;
+    private readonly ILogger<StandardExceptionMiddleware> _loggerManager;
     private const string ApiVersion = "1.0";
 
-    public StandardExceptionMiddleware( RequestDelegate next, IHostEnvironment env, ILogger<StandardExceptionMiddleware> logger, ILoggerManager loggerManager)
+    public StandardExceptionMiddleware( RequestDelegate next, IHostEnvironment env, ILogger<StandardExceptionMiddleware> logger, ILogger<StandardExceptionMiddleware> loggerManager)
     {
         _next = next;
         _env = env;

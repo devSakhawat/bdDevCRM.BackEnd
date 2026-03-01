@@ -1,13 +1,13 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.DMS;
-
+﻿using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +19,10 @@ namespace bdDevCRM.Service.DMS;
 internal sealed class DmsDocumentVersionService : IDmsDocumentVersionService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<DmsDocumentVersionService> _logger;
   private readonly IConfiguration _configuration;
 
-  public DmsDocumentVersionService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DmsDocumentVersionService(IRepositoryManager repository, ILogger<DmsDocumentVersionService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
@@ -63,7 +63,7 @@ internal sealed class DmsDocumentVersionService : IDmsDocumentVersionService
       throw new InvalidCreateOperationException();
 
     await _repository.SaveAsync();
-    _logger.LogWarn($"New document version created with Id: {createdId}");
+    _logger.LogWarning("New document version created with Id: {CreatedId}", createdId);
 
     return OperationMessage.Success;
   }
@@ -81,7 +81,7 @@ internal sealed class DmsDocumentVersionService : IDmsDocumentVersionService
 
     _repository.DmsDocumentVersions.Update(version);
     await _repository.SaveAsync();
-    _logger.LogWarn($"document version with Id: {key} updated.");
+    _logger.LogWarning("Document version with Id: {VersionId} updated.", key);
 
     return OperationMessage.Success;
   }
@@ -102,7 +102,7 @@ internal sealed class DmsDocumentVersionService : IDmsDocumentVersionService
     await _repository.DmsDocumentVersions.DeleteAsync(x => x.VersionId == key, true);
     await _repository.SaveAsync();
 
-    _logger.LogWarn($"document version with Id: {key} deleted.");
+    _logger.LogWarning("Document version with Id: {VersionId} deleted.", key);
 
     return OperationMessage.Success;
   }
@@ -118,7 +118,7 @@ internal sealed class DmsDocumentVersionService : IDmsDocumentVersionService
         throw new InvalidCreateOperationException();
 
       await _repository.SaveAsync();
-      _logger.LogWarn($"New document version created with Id: {createdId}");
+      _logger.LogWarning("New document version created with Id: {CreatedId}", createdId);
       return OperationMessage.Success;
     }
     else if (key > 0 && key == modelDto.VersionId)
@@ -130,7 +130,7 @@ internal sealed class DmsDocumentVersionService : IDmsDocumentVersionService
         _repository.DmsDocumentVersions.Update(updateVersion);
         await _repository.SaveAsync();
 
-        _logger.LogWarn($"document version with Id: {key} updated.");
+        _logger.LogWarning("Document version with Id: {VersionId} updated.", key);
         return OperationMessage.Success;
       }
       else

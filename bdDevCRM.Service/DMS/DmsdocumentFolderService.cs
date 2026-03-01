@@ -1,13 +1,13 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.DMS;
-
+﻿using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,10 +20,10 @@ namespace bdDevCRM.Service.DMS;
 internal sealed class DmsDocumentFolderService : IDmsDocumentFolderService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<DmsDocumentFolderService> _logger;
   private readonly IConfiguration _configuration;
 
-  public DmsDocumentFolderService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DmsDocumentFolderService(IRepositoryManager repository, ILogger<DmsDocumentFolderService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
@@ -67,7 +67,7 @@ internal sealed class DmsDocumentFolderService : IDmsDocumentFolderService
       throw new InvalidCreateOperationException();
 
     await _repository.SaveAsync();
-    _logger.LogWarn($"New document folder created with Id: {createdId}");
+    _logger.LogWarning("New document folder created with Id: {FolderId}", createdId);
 
     return OperationMessage.Success;
   }
@@ -85,7 +85,7 @@ internal sealed class DmsDocumentFolderService : IDmsDocumentFolderService
 
     _repository.DmsDocumentFolders.Update(folder);
     await _repository.SaveAsync();
-    _logger.LogWarn($"Folder with Id: {key} updated.");
+    _logger.LogWarning("Folder with Id: {FolderId} updated.", key);
 
     return OperationMessage.Success;
   }
@@ -106,7 +106,7 @@ internal sealed class DmsDocumentFolderService : IDmsDocumentFolderService
     await _repository.DmsDocumentFolders.DeleteAsync(x => x.FolderId == key, true);
     await _repository.SaveAsync();
 
-    _logger.LogWarn($"Folder with Id: {key} deleted.");
+    _logger.LogWarning("Folder with Id: {FolderId} deleted.", key);
 
     return OperationMessage.Success;
   }
@@ -125,7 +125,7 @@ internal sealed class DmsDocumentFolderService : IDmsDocumentFolderService
         throw new InvalidCreateOperationException();
 
       await _repository.SaveAsync();
-      _logger.LogWarn($"New document folder created with Id: {createdId}");
+      _logger.LogWarning("New document folder created with Id: {FolderId}", createdId);
       return OperationMessage.Success;
     }
     else if (key > 0 && key == modelDto.FolderId)
@@ -137,7 +137,7 @@ internal sealed class DmsDocumentFolderService : IDmsDocumentFolderService
         _repository.DmsDocumentFolders.Update(updateFolder);
         await _repository.SaveAsync();
 
-        _logger.LogWarn($"Folder with Id: {key} updated.");
+        _logger.LogWarning("Folder with Id: {FolderId} updated.", key);
         return OperationMessage.Success;
       }
       else

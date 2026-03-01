@@ -1,25 +1,26 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmEducationHistoryService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmEducationHistoryService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmEducationHistoryService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmEducationHistoryService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -86,7 +87,7 @@ internal sealed class CrmEducationHistoryService(
     
     _repository.CrmEducationHistories.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmEducationHistory updated, id={key}");
+    _logger.LogInformation("CrmEducationHistory updated, id={EducationHistoryId}", key);
     return OperationMessage.Success;
   }
 
@@ -97,7 +98,7 @@ internal sealed class CrmEducationHistoryService(
 
     await _repository.CrmEducationHistories.DeleteAsync(x => x.EducationHistoryId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmEducationHistory deleted, id={key}");
+    _logger.LogInformation("CrmEducationHistory deleted, id={EducationHistoryId}", key);
     return OperationMessage.Success;
   }
 

@@ -18,18 +18,15 @@ public class ExceptionMiddleware
     private readonly RequestDelegate _next;
     private readonly IHostEnvironment _env;
     private readonly ILogger<ExceptionMiddleware> _logger;
-    private readonly ILoggerManager _loggerManager;
 
     public ExceptionMiddleware(
           RequestDelegate next,
           IHostEnvironment env,
-          ILogger<ExceptionMiddleware> logger,
-          ILoggerManager loggerManager)
+          ILogger<ExceptionMiddleware> logger)
     {
         _next = next;
         _env = env;
         _logger = logger;
-        _loggerManager = loggerManager;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -55,7 +52,6 @@ public class ExceptionMiddleware
 
         // Log the error with full details
         _logger.LogError(ex, $"[{correlationId}] {ex.GetType().Name}: {ex.Message}");
-        _loggerManager.LogError($"[{correlationId}] {ex.GetType().Name}: {ex.Message}");
 
         context.Response.ContentType = "application/json";
 

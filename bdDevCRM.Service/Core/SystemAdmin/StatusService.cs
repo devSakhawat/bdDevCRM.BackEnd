@@ -1,5 +1,4 @@
 ﻿using Azure;
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.RepositoriesContracts;
@@ -9,8 +8,10 @@ using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 
@@ -19,11 +20,11 @@ namespace bdDevCRM.Service.Core.SystemAdmin;
 internal sealed class StatusService : IStatusService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<StatusService> _logger;
   private readonly IConfiguration _configuration;
 
 
-  public StatusService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public StatusService(IRepositoryManager repository, ILogger<StatusService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
@@ -105,7 +106,7 @@ INNER JOIN MODULE ON MENU.ModuleId = MODULE.ModuleId
     var entity = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);
     _repository.WfStates.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"Status updated, id={key}");
+    _logger.LogInformation("Status updated, id={WfStateId}", key);
     return OperationMessage.Success;
   }
 
@@ -136,7 +137,7 @@ INNER JOIN MODULE ON MENU.ModuleId = MODULE.ModuleId
     var entity = MyMapper.JsonClone<WfActionDto, WfAction>(modelDto);
     _repository.WfActions.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"Action updated, id={key}");
+    _logger.LogInformation("Action updated, id={WfActionId}", key);
     return OperationMessage.Success;
   }
 
@@ -280,7 +281,7 @@ INNER JOIN MODULE ON MENU.ModuleId = MODULE.ModuleId
     // If no actions exist, proceed with deletion
     await _repository.WfStates.DeleteAsync(x => x.WfStateId == key, trackChanges: true);
     await _repository.SaveAsync();
-    _logger.LogWarn($"Workflow status deleted, id={key}");
+    _logger.LogWarning("Workflow status deleted, id={WfStateId}", key);
     return OperationMessage.Success;
   }
 

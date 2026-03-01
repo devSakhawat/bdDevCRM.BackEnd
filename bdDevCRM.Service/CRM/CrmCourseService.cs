@@ -3,23 +3,24 @@ using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using bdDevCRM.Utilities.CRMGrid.GRID;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmCourseService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmCourseService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmCourseService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmCourseService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -95,7 +96,7 @@ internal sealed class CrmCourseService(
     var entity = MyMapper.JsonClone<CrmCourseDto, CrmCourse>(dto);
     _repository.CrmCourses.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmCourse updated, id={key}");
+    _logger.LogInformation("CrmCourse updated, id={CourseId}", key);
     return OperationMessage.Success;
   }
 
@@ -106,7 +107,7 @@ internal sealed class CrmCourseService(
 
     await _repository.CrmCourses.DeleteAsync(x => x.CourseId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmCourse deleted, id={key}");
+    _logger.LogInformation("CrmCourse deleted, id={CourseId}", key);
     return OperationMessage.Success;
   }
 

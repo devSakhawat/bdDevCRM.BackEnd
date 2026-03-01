@@ -1,25 +1,26 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmPTEInformationService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmPTEInformationService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmPTEInformationService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmPTEInformationService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -90,7 +91,7 @@ internal sealed class CrmPTEInformationService(
     
     _repository.CrmPTEInformations.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmPTEInformation updated, id={key}");
+    _logger.LogInformation("CrmPTEInformation updated, id={PTEInformationId}", key);
     return OperationMessage.Success;
   }
 
@@ -101,7 +102,7 @@ internal sealed class CrmPTEInformationService(
 
     await _repository.CrmPTEInformations.DeleteAsync(x => x.PTEInformationId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmPTEInformation deleted, id={key}");
+    _logger.LogInformation("CrmPTEInformation deleted, id={PTEInformationId}", key);
     return OperationMessage.Success;
   }
 

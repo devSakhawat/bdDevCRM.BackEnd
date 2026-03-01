@@ -1,25 +1,26 @@
-using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmPermanentAddressService(
     IRepositoryManager repository,
-    ILoggerManager logger,
+    ILogger<CrmPermanentAddressService> logger,
     IConfiguration config,
     IHttpContextAccessor httpContextAccessor) : ICrmPermanentAddressService
 {
   private readonly IRepositoryManager _repository = repository;
-  private readonly ILoggerManager _logger = logger;
+  private readonly ILogger<CrmPermanentAddressService> _logger = logger;
   private readonly IConfiguration _config = config;
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -97,7 +98,7 @@ internal sealed class CrmPermanentAddressService(
     
     _repository.CrmPermanentAddresses.Update(entity);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmPermanentAddress updated, id={key}");
+    _logger.LogInformation("CrmPermanentAddress updated, id={PermanentAddressId}", key);
     return OperationMessage.Success;
   }
 
@@ -108,7 +109,7 @@ internal sealed class CrmPermanentAddressService(
 
     await _repository.CrmPermanentAddresses.DeleteAsync(x => x.PermanentAddressId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"CrmPermanentAddress deleted, id={key}");
+    _logger.LogInformation("CrmPermanentAddress deleted, id={PermanentAddressId}", key);
     return OperationMessage.Success;
   }
 

@@ -9,6 +9,7 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
 using System.Linq.Expressions;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
@@ -16,10 +17,10 @@ namespace bdDevCRM.Services.Core.SystemAdmin;
 internal sealed class MenuService : IMenuService
 {
     private readonly IRepositoryManager _repository;
-    private readonly ILoggerManager _logger;
+    private readonly ILogger<MenuService> _logger;
     private readonly IConfiguration _configuration;
 
-    public MenuService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+    public MenuService(IRepositoryManager repository, ILogger<MenuService> logger, IConfiguration configuration)
     {
         _repository = repository;
         _logger = logger;
@@ -38,7 +39,7 @@ internal sealed class MenuService : IMenuService
     {
         if (userid <= 0)
         {
-            _logger.LogWarn($"SelectMenuByUserPermission called with invalid userId: {userid}");
+            _logger.LogWarning("SelectMenuByUserPermission called with invalid userId: {userid}", userid);
             return Enumerable.Empty<MenuDto>();
         }
 
@@ -46,11 +47,11 @@ internal sealed class MenuService : IMenuService
         var menuRepositoryDtos = await _repository.Menus.SelectMenuByUserPermission(userid, trackChanges);
         stopwatch.Stop();
 
-        _logger.LogInfo($"Menu query execution time: {stopwatch.ElapsedMilliseconds}ms for user {userid}");
+        _logger.LogInformation("Menu query execution time: {ElapsedMilliseconds}ms for user {UserId}", stopwatch.ElapsedMilliseconds, userid);
 
         if (!menuRepositoryDtos.Any())
         {
-            _logger.LogWarn($"No menu permissions found for userId: {userid}");
+            _logger.LogWarning("No menu permissions found for userId: {UserId}", userid);
             return Enumerable.Empty<MenuDto>();
         }
 
@@ -150,7 +151,7 @@ internal sealed class MenuService : IMenuService
     public async Task DeleteMenuAsync(int menuId, bool trackChanges)
     {
         var Menu = await _repository.Menus.FirstOrDefaultAsync(x => x.MenuId.Equals(menuId));
-        _logger.LogWarn($"Menu with Id: {menuId} is about to be deleted from the database.");
+        _logger.LogWarning("Menu with Id: {MenuId} is about to be deleted from the database.", menuId);
         if (Menu != null) _repository.Menus.DeleteMenu(Menu);
         await _repository.SaveAsync();
     }

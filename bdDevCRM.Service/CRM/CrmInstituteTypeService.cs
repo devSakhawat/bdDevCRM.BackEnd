@@ -1,23 +1,23 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.CRM;
-
+﻿using bdDevCRM.Entities.Entities.CRM;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.CRM;
 using bdDevCRM.Shared.DataTransferObjects.CRM;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace bdDevCRM.Service.CRM;
 
 internal sealed class CrmInstituteTypeService : ICrmInstituteTypeService
 {
   private readonly IRepositoryManager _repo;
-  private readonly ILoggerManager _log;
+  private readonly ILogger<CrmInstituteTypeService> _log;
   private readonly IConfiguration _configuration;
 
-  public CrmInstituteTypeService(IRepositoryManager repo, ILoggerManager log, IConfiguration configuration)
+  public CrmInstituteTypeService(IRepositoryManager repo, ILogger<CrmInstituteTypeService> log, IConfiguration configuration)
   {
     _repo = repo;
     _log = log;
@@ -53,7 +53,7 @@ internal sealed class CrmInstituteTypeService : ICrmInstituteTypeService
     int id = await _repo.CrmInstituteTypes.CreateAndGetIdAsync(entity);
     if (id <= 0) throw new InvalidCreateOperationException();
 
-    _log.LogInfo($"InstituteType created, id={id}");
+    _log.LogInformation("InstituteType created, id={InstituteTypeId}", id);
     return OperationMessage.Success;
   }
 
@@ -68,7 +68,7 @@ internal sealed class CrmInstituteTypeService : ICrmInstituteTypeService
     var entity = MyMapper.JsonClone<CRMInstituteTypeDto, CrmInstituteType>(dto);
     _repo.CrmInstituteTypes.Update(entity);
     await _repo.SaveAsync();
-    _log.LogInfo($"InstituteType updated, id={key}");
+    _log.LogInformation("InstituteType updated, id={InstituteTypeId}", key);
     return OperationMessage.Success;
   }
 
@@ -79,7 +79,7 @@ internal sealed class CrmInstituteTypeService : ICrmInstituteTypeService
 
     await _repo.CrmInstituteTypes.DeleteAsync(x => x.InstituteTypeId == key, true);
     await _repo.SaveAsync();
-    _log.LogInfo($"InstituteType deleted, id={key}");
+    _log.LogInformation("InstituteType deleted, id={InstituteTypeId}", key);
     return OperationMessage.Success;
   }
 

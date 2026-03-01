@@ -9,8 +9,8 @@ namespace bdDevCRM.Api;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
-  private readonly ILoggerManager _logger;
-  public GlobalExceptionHandler(ILoggerManager logger)
+  private readonly ILogger<GlobalExceptionHandler> _logger;
+  public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
   {
     _logger = logger;
   }

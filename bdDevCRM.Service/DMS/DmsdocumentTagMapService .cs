@@ -1,10 +1,10 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-
-using bdDevCRM.RepositoriesContracts;
+﻿using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +16,10 @@ namespace bdDevCRM.Service.DMS;
 internal sealed class DmsDocumentTagMapService : IDmsDocumentTagMapService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<DmsDocumentTagMapService> _logger;
   private readonly IConfiguration _configuration;
 
-  public DmsDocumentTagMapService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public DmsDocumentTagMapService(IRepositoryManager repository, ILogger<DmsDocumentTagMapService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;

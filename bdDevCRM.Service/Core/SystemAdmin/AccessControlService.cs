@@ -12,6 +12,7 @@ using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,10 +22,10 @@ namespace bdDevCRM.Services.Core.SystemAdmin;
 internal sealed class  AccessControlService : IAccessControlService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<AccessControlService> _logger;
   private readonly IConfiguration _configuration;
 
-  public AccessControlService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration)
+  public AccessControlService(IRepositoryManager repository, ILogger<AccessControlService> logger, IConfiguration configuration)
   {
     _repository = repository;
     _logger = logger;
@@ -77,7 +78,7 @@ internal sealed class  AccessControlService : IAccessControlService
 
     await _repository.AccessControls.DeleteAsync(x => x.AccessId == key, true);
     await _repository.SaveAsync();
-    _logger.LogInfo($"AccessControl deleted, id={key}");
+    _logger.LogInformation("AccessControl deleted, id={key}", key);
     return OperationMessage.Success;
   }
 

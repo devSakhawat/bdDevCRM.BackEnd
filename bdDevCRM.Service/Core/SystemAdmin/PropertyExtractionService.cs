@@ -10,11 +10,11 @@ namespace bdDevCRM.Service.Core.SystemAdmin;
 internal sealed class PropertyInspectorService : IPropertyInspectorService
 {
   private readonly Dictionary<string, Type> _typeCache;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<PropertyInspectorService> _logger;
   private readonly IConfiguration _config;
   private readonly IHttpContextAccessor _httpContextAccessor;
 
-  public PropertyInspectorService(IConfiguration config , ILoggerManager logger ,IHttpContextAccessor httpContextAccessor)
+  public PropertyInspectorService(IConfiguration config , ILogger<PropertyInspectorService> logger ,IHttpContextAccessor httpContextAccessor)
   {
     _config = config;
     _logger = logger;
@@ -25,7 +25,6 @@ internal sealed class PropertyInspectorService : IPropertyInspectorService
 
   private void CacheTypes()
   {
-    // Performance এর জন্য সব types cache করে রাখা
     var types = AppDomain.CurrentDomain.GetAssemblies()
         .SelectMany(a => a.GetTypes())
         .Where(t => t.IsClass && !t.IsAbstract);
@@ -118,7 +117,7 @@ internal sealed class PropertyInspectorService : IPropertyInspectorService
           var list = enumerable.Cast<object>().ToList();
           result[key] = list;
 
-          // Collection items flatten করা
+          // Collection items flatten
           for (int i = 0; i < list.Count; i++)
           {
             var itemDict = FlattenObject(list[i], $"{key}[{i}]");
@@ -140,7 +139,7 @@ internal sealed class PropertyInspectorService : IPropertyInspectorService
       }
       catch (Exception ex)
       {
-        _logger.LogWarn("Error reading property {PropertyName}" + prop.Name + ex.Message.ToString());
+        _logger.LogWarning("Error reading property {PropertyName}: {ErrorMessage}", prop.Name, ex.Message);
       }
     }
 

@@ -1,16 +1,16 @@
-﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Entities.Entities.DMS;
-
+﻿using bdDevCRM.Entities.Entities.DMS;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.ServiceContract.DMS;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.DataTransferObjects.DMS;
-using bdDevCRM.Utilities.Constants;
 using bdDevCRM.Shared.Exceptions;
+using bdDevCRM.Utilities.Constants;
+using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Utilities.OthersLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net.NetworkInformation;
 
@@ -20,11 +20,11 @@ namespace bdDevCRM.Service.DMS;
 internal sealed class DmsDocumentService : IDmsDocumentService
 {
   private readonly IRepositoryManager _repository;
-  private readonly ILoggerManager _logger;
+  private readonly ILogger<DmsDocumentService> _logger;
   private readonly IConfiguration _configuration;
   private readonly IHttpContextAccessor _httpContextAccessor;
 
-  public DmsDocumentService(IRepositoryManager repository, ILoggerManager logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+  public DmsDocumentService(IRepositoryManager repository, ILogger<DmsDocumentService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
   {
     _repository = repository;
     _logger = logger;
@@ -69,7 +69,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
       throw new InvalidCreateOperationException();
 
     await _repository.SaveAsync();
-    _logger.LogWarn($"New document created with Id: {createdId}");
+    _logger.LogWarning("New document created with Id: {DocumentId}", createdId);
 
     return OperationMessage.Success;
   }
@@ -88,7 +88,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
     _repository.DmsDocuments.Update(document);
     await _repository.SaveAsync();
 
-    _logger.LogWarn($"Document with Id: {key} updated.");
+    _logger.LogWarning("Document with Id: {DocumentId} updated.", key);
 
     return OperationMessage.Success;
   }
@@ -109,7 +109,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
     await _repository.DmsDocuments.DeleteAsync(x => x.DocumentId == key, true);
     await _repository.SaveAsync();
 
-    _logger.LogWarn($"Document with Id: {key} deleted.");
+    _logger.LogWarning("Document with Id: {DocumentId} deleted.", key);
 
     return OperationMessage.Success;
   }
@@ -128,7 +128,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
         throw new InvalidCreateOperationException();
 
       await _repository.SaveAsync();
-      _logger.LogWarn($"New document created with Id: {createdId}");
+      _logger.LogWarning("New document created with Id: {DocumentId}", createdId);
       return OperationMessage.Success;
     }
     else if (key > 0 && key == modelDto.DocumentId)
@@ -140,7 +140,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
         _repository.DmsDocuments.Update(updateDoc);
         await _repository.SaveAsync();
 
-        _logger.LogWarn($"Document with Id: {key} updated.");
+        _logger.LogWarning("Document with Id: {DocumentId} updated.", key);
         return OperationMessage.Success;
       }
       else
@@ -193,7 +193,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
       ////await _repository.SaveAsync();
       //await _repository.DmsDocuments.TransactionCommitAsync();
 
-      _logger.LogInfo($"DMS document created successfylly - DocumentId: {document.DocumentId}");
+      _logger.LogInformation("DMS document created successfully - DocumentId: {DocumentId}", document.DocumentId);
 
       return document.FilePath; // Return the file path or any other relevant information
     }
@@ -548,7 +548,7 @@ internal sealed class DmsDocumentService : IDmsDocumentService
 
       await _repository.DmsDocuments.TransactionCommitAsync();
 
-      _logger.LogInfo($"DMS document updated with versioning - DocumentId: {document.DocumentId}, Version: {version.VersionNumber}");
+      _logger.LogInformation("DMS document updated with versioning - DocumentId: {DocumentId}, Version: {VersionNumber}", document.DocumentId, version.VersionNumber);
 
       return document.FilePath;
     }
