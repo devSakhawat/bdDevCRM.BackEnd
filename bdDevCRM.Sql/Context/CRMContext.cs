@@ -58,7 +58,7 @@ public partial class CRMContext : DbContext
 
   public virtual DbSet<AssignApprover> AssignApprover { get; set; }
 
-  public virtual DbSet<AuditLog> AuditLog { get; set; }
+  public virtual DbSet<AuditLog> AuditLogs { get; set; }
 
   public virtual DbSet<AuditTrail> AuditTrail { get; set; }
 
@@ -376,39 +376,47 @@ public partial class CRMContext : DbContext
 
     modelBuilder.Entity<AuditLog>(entity =>
     {
-      entity.HasNoKey();
+      entity.HasKey(e => e.AuditId);
 
-      entity.Property(e => e.ActionName)
-          .HasMaxLength(150)
-          .IsUnicode(false);
-      entity.Property(e => e.AuditDate).HasColumnType("datetime");
       entity.Property(e => e.AuditId).ValueGeneratedOnAdd();
-      entity.Property(e => e.AuditStatus)
-          .HasMaxLength(50)
-          .IsUnicode(false);
-      entity.Property(e => e.BrowserInfo)
-          .HasMaxLength(500)
-          .IsUnicode(false);
-      entity.Property(e => e.ClientIp)
-          .HasMaxLength(50)
-          .HasColumnName("ClientIP");
-      entity.Property(e => e.ClientUser).HasMaxLength(500);
-      entity.Property(e => e.ControllerName)
-          .HasMaxLength(50)
-          .IsUnicode(false);
-      entity.Property(e => e.DomainName)
-          .HasMaxLength(150)
-          .IsUnicode(false);
-      entity.Property(e => e.ExceptionLog).IsUnicode(false);
-      entity.Property(e => e.MacAddress).HasMaxLength(500);
-      entity.Property(e => e.ReferrerUrl)
-          .HasMaxLength(250)
-          .IsUnicode(false);
-      entity.Property(e => e.RequestedParams).IsUnicode(false);
-      entity.Property(e => e.RequestedUrl).IsUnicode(false);
-      entity.Property(e => e.TableName)
-          .HasMaxLength(50)
-          .IsUnicode(false);
+
+      // Who
+      entity.Property(e => e.UserId);
+      entity.Property(e => e.Username).HasMaxLength(100);
+      entity.Property(e => e.IpAddress).HasMaxLength(50);
+      entity.Property(e => e.UserAgent).HasMaxLength(500);
+
+      // What
+      entity.Property(e => e.Action).HasMaxLength(50).IsRequired();
+      entity.Property(e => e.EntityType).HasMaxLength(100).IsRequired();
+      entity.Property(e => e.EntityId).HasMaxLength(100);
+      entity.Property(e => e.Endpoint).HasMaxLength(200);
+      entity.Property(e => e.Module).HasMaxLength(100);
+
+      // Details
+      entity.Property(e => e.OldValue);
+      entity.Property(e => e.NewValue);
+      entity.Property(e => e.Changes);
+
+      // When
+      entity.Property(e => e.Timestamp).HasDefaultValueSql("GETUTCDATE()");
+
+      // Context
+      entity.Property(e => e.CorrelationId).HasMaxLength(100);
+      entity.Property(e => e.SessionId).HasMaxLength(100);
+      entity.Property(e => e.RequestId).HasMaxLength(100);
+
+      // Result
+      entity.Property(e => e.Success).HasDefaultValue(true);
+      entity.Property(e => e.StatusCode);
+      entity.Property(e => e.ErrorMessage).HasMaxLength(2000);
+      entity.Property(e => e.DurationMs);
+
+      // Relationships
+      entity.HasOne(e => e.User)
+          .WithMany()
+          .HasForeignKey(e => e.UserId)
+          .OnDelete(DeleteBehavior.SetNull);
     });
 
     modelBuilder.Entity<AuditTrail>(entity =>

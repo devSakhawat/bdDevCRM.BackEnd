@@ -47,6 +47,7 @@ public class AuthenticationController : BaseApiController
 	[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
 	[AllowAnonymous]
 	[IgnoreMediaTypeValidation]
+	[Produces("application/json")]
 	public async Task<IActionResult> Authenticate([FromBody] UserForAuthenticationDto user)
 	{
 		// ============================================================================
