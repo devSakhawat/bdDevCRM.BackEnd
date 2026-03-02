@@ -8,67 +8,39 @@ public class ValidateMediaTypeAttribute : IActionFilter
 {
   public void OnActionExecuting(ActionExecutingContext context)
   {
-    var hasIgnoreAttribute = context.ActionDescriptor.EndpointMetadata.Any(meta => meta is IgnoreMediaTypeValidationAttribute);
+    // ✅ IgnoreMediaTypeValidation attribute check
+    var hasIgnoreAttribute = context.ActionDescriptor.EndpointMetadata
+        .Any(meta => meta is IgnoreMediaTypeValidationAttribute);
 
-    if (hasIgnoreAttribute)
+    if (hasIgnoreAttribute) return;
+
+    var acceptHeader = context.HttpContext.Request.Headers.Accept.FirstOrDefault();
+
+    if (string.IsNullOrWhiteSpace(acceptHeader))
     {
+      context.Result = new BadRequestObjectResult(new
+      {
+        Message = "Accept header is missing.",
+        ErrorCode = "MISSING_ACCEPT_HEADER"
+      });
       return;
     }
 
-    var acceptHeaderPresent = context.HttpContext.Request.Headers.ContainsKey("Accept");
-
-    if (!acceptHeaderPresent)
+    if (!MediaTypeHeaderValue.TryParse(acceptHeader, out var outMediaType))
     {
-      context.Result = new BadRequestObjectResult("Accept header is missing.");
+      context.Result = new BadRequestObjectResult(new
+      {
+        Message = "Invalid media type in Accept header.",
+        ErrorCode = "INVALID_MEDIA_TYPE"
+      });
       return;
     }
 
-    var mediaType = context.HttpContext.Request.Headers["Accept"].FirstOrDefault();
-
-    if (!MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue? outMediaType))
-    {
-      context.Result = new BadRequestObjectResult("Media type not present. Please add Accept header with the required media type.");
-      return;
-    }
-
-    context.HttpContext.Items.Add("AcceptHeaderMediaType", outMediaType);
+    context.HttpContext.Items["AcceptHeaderMediaType"] = outMediaType;
   }
 
   public void OnActionExecuted(ActionExecutedContext context) { }
 }
 
-
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-public class IgnoreMediaTypeValidationAttribute : Attribute
-{
-}
-
-
-
-
-// old code 
-//public class ValidateMediaTypeAttribute : IActionFilter
-//{
-//  public void OnActionExecuting(ActionExecutingContext context)
-//  {
-//    var acceptHeaderPresent = context.HttpContext.Request.Headers.ContainsKey("Accept");
-
-//    if (!acceptHeaderPresent)
-//    {
-//      context.Result = new BadRequestObjectResult($"Accept header is missing.");
-//      return;
-//    }
-
-//    var mediaType = context.HttpContext.Request.Headers["Accept"].FirstOrDefault();
-
-//    if (!MediaTypeHeaderValue.TryParse(mediaType, out MediaTypeHeaderValue? outMediaType))
-//    {
-//      context.Result = new BadRequestObjectResult($"Media type not present. Please add Accept header with the required media type.");
-//      return;
-//    }
-
-//    context.HttpContext.Items.Add("AcceptHeaderMediaType", outMediaType);
-//  }
-
-//  public void OnActionExecuted(ActionExecutedContext context) { }
-//}
+public class IgnoreMediaTypeValidationAttribute : Attribute { }

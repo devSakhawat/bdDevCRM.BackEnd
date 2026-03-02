@@ -15,9 +15,6 @@ using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.GetConnectionString("DbLocation");
-var jwtSecret = builder.Configuration["Jwt:SecretKey"];
-
 
 // Add services to the container
 builder.Services.AddHttpContextAccessor();
@@ -40,45 +37,50 @@ builder.Services.ConfigureCookiePolicy(builder.Environment);
 // NEW: Configure distributed cache (Hybrid Redis + Memory)
 builder.Services.ConfigureDistributedCache(builder.Configuration);
 builder.Services.AddSingleton<IHybridCacheService, HybridCacheService>();
-
 // NEW: Configure Application Insights
 builder.Services.ConfigureApplicationInsights(builder.Configuration);
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-	options.SuppressModelStateInvalidFilter = true;
+  options.SuppressModelStateInvalidFilter = true;
 });
 
-builder.Services.AddScoped<LogActionAttribute>();
+// Audit Log Queue + Background Writer
+builder.Services.AddSingleton<AuditLogQueue>();
+builder.Services.AddHostedService<AuditLogWriterService>();
+
 builder.Services.AddScoped<EmptyObjectFilterAttribute>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
 builder.Services.AddControllers(config =>
 {
-	config.RespectBrowserAcceptHeader = true;
-	config.ReturnHttpNotAcceptable = true;
-
-	// Add custom CSV formatter for content negotiation (already exists in ContentFormatter)
-	config.OutputFormatters.Add(new CsvOutputFormatter());
+  config.RespectBrowserAcceptHeader = true;
+  config.ReturnHttpNotAcceptable = true;
+  // Add custom CSV formatter for content negotiation (already exists in ContentFormatter)
+  config.OutputFormatters.Add(new CsvOutputFormatter());
 })
 .AddXmlDataContractSerializerFormatters()
 .AddApplicationPart(typeof(PresentationReference).Assembly)
 .AddNewtonsoftJson(options =>
 {
-	options.SerializerSettings.ContractResolver = new DefaultContractResolver
-	{
-		NamingStrategy = new DefaultNamingStrategy()
-	};
+  options.SerializerSettings.ContractResolver = new DefaultContractResolver
+  {
+    NamingStrategy = new DefaultNamingStrategy()
+  };
 });
 
 // Register MemoryCache
 builder.Services.AddMemoryCache();
 
 // Add NewtonsoftJsonPatchInputFormatter
+//builder.Services.AddMvcCore(options =>
+//{
+//  options.InputFormatters.Add(GetJsonPatchInputFormatter());
+//});
 builder.Services.AddMvcCore(options =>
 {
-	var jsonPatchInputFormatter = GetJsonPatchInputFormatter();
-	options.InputFormatters.Add(jsonPatchInputFormatter);
+  var jsonPatchInputFormatter = GetJsonPatchInputFormatter();
+  options.InputFormatters.Add(jsonPatchInputFormatter);
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -94,99 +96,116 @@ builder.Services.AddHostedService<TokenCleanupBackgroundService>();
 // Add session support for audit middleware
 builder.Services.AddSession(options =>
 {
-	options.IdleTimeout = TimeSpan.FromMinutes(30);
-	options.Cookie.HttpOnly = true;
-	options.Cookie.IsEssential = true;
+  options.IdleTimeout = TimeSpan.FromMinutes(30);
+  options.Cookie.HttpOnly = true;
+  options.Cookie.IsEssential = true;
 });
+
+
+//// Services
+//builder.Services.AddHealthChecks()
+//    .AddSqlServer( builder.Configuration.GetConnectionString("DbLocation")!, name: "database", timeout: TimeSpan.FromSeconds(5))
+//    .AddCheck("audit-queue", () =>
+//    {
+//      var queue = app.Services.GetRequiredService<AuditLogQueue>();
+//      return queue.Count < 9000
+//          ? Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy($"Queue: {queue.Count}")
+//          : Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded($"Queue nearly full: {queue.Count}");
+//    });
+
+
+
+
+
+
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
-// Exception handling middleware (must be first)
-// Use StandardExceptionMiddleware for consistent response format
+// 1 Exception handler — MUST be outermost
 app.UseMiddleware<StandardExceptionMiddleware>();
 
-// NEW: Correlation ID middleware
+// 2️ Correlation ID + PipelineContext creation + Stopwatch start
 app.UseMiddleware<CorrelationIdMiddleware>();
 
-// NEW: Structured logging middleware
-app.UseMiddleware<StructuredLoggingMiddleware>();
-
-// NEW: Cache header middleware
-app.UseMiddleware<CacheHeaderMiddleware>();
-
-// NEW: Performance monitoring middleware
+// 3️ Performance monitoring (reads shared stopwatch)
 app.UseMiddleware<PerformanceMonitoringMiddleware>();
 
-// Session must be before authentication
-app.UseSession();
+// 4️ Structured logging (reads shared body + stopwatch)
+app.UseMiddleware<StructuredLoggingMiddleware>();
 
 // NEW: Enhanced audit middleware
 if (builder.Configuration.GetValue<bool>("AuditLogging:EnableAuditMiddleware", true))
 {
-	app.UseMiddleware<EnhancedAuditMiddleware>();
+  app.UseMiddleware<EnhancedAuditMiddleware>();
 }
 
 // Enable compression middleware
+// Infrastructure
 app.UseResponseCompression();
-
 app.UseHttpsRedirection();
-
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-	ForwardedHeaders = ForwardedHeaders.All
+  ForwardedHeaders = ForwardedHeaders.All
 });
 
 app.UseCors("CorsPolicy");
 
 app.UseStaticFiles(new StaticFileOptions
 {
-	FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads")),
-	RequestPath = "/Uploads",
-	OnPrepareResponse = ctx =>
-	{
-		ctx.Context.Response.Headers.Append("Cache-Control", "public, max-age=3600");
-	}
+  FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Uploads")),
+  RequestPath = "/Uploads",
+  OnPrepareResponse = ctx =>
+  {
+    ctx.Context.Response.Headers.Append("Cache-Control", "public, max-age=3600");
+  }
 });
 
-
-
-// Authentication and Authorization
+// Auth
+// Session must be before authentication
+app.UseSession();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// 5️⃣ Audit (AFTER auth — needs context.User)
+if (builder.Configuration.GetValue<bool>("AuditLogging:EnableAuditMiddleware", true))
+{
+  app.UseMiddleware<EnhancedAuditMiddleware>();
+}
+
 app.MapControllers();
 
+// Startup with proper shutdown
 try
 {
-	Log.Information("bdDevCRM Backend API started successfully");
-	app.Run();
+  Log.Information("bdDevCRM Backend API started successfully");
+  app.Run();
 }
 catch (Exception ex)
 {
-	Log.Fatal(ex, "Application terminated unexpectedly");
+  Log.Fatal(ex, "Application terminated unexpectedly");
 }
 finally
 {
-	Log.CloseAndFlush();
+  Log.CloseAndFlush();
 }
 
 
 // Helper method to get NewtonsoftJsonPatchInputFormatter
 NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() =>
-	new ServiceCollection()
-		.AddLogging()
-		.AddMvc()
-		.AddNewtonsoftJson()
-		.Services.BuildServiceProvider()
-		.GetRequiredService<IOptions<MvcOptions>>()
-		.Value.InputFormatters
-		.OfType<NewtonsoftJsonPatchInputFormatter>()
-		.First();
+    new ServiceCollection()
+        .AddLogging()
+        .AddMvc()
+        .AddNewtonsoftJson()
+        .Services.BuildServiceProvider()
+        .GetRequiredService<IOptions<MvcOptions>>()
+        .Value.InputFormatters
+        .OfType<NewtonsoftJsonPatchInputFormatter>()
+        .First();

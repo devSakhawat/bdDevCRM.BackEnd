@@ -1,4 +1,20 @@
-﻿using bdDevCRM.RepositoriesContracts;
+﻿
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Shared.Exceptions.BaseException;
@@ -16,176 +32,176 @@ namespace bdDevCRM.Api.Middleware;
 /// </summary>
 public class ExceptionMiddleware
 {
-    private readonly RequestDelegate _next;
-    private readonly IHostEnvironment _env;
-    private readonly ILogger<ExceptionMiddleware> _logger;
+  private readonly RequestDelegate _next;
+  private readonly IHostEnvironment _env;
+  private readonly ILogger<ExceptionMiddleware> _logger;
 
-    public ExceptionMiddleware(
-          RequestDelegate next,
-          IHostEnvironment env,
-          ILogger<ExceptionMiddleware> logger)
+  public ExceptionMiddleware(
+        RequestDelegate next,
+        IHostEnvironment env,
+        ILogger<ExceptionMiddleware> logger)
+  {
+    _next = next;
+    _env = env;
+    _logger = logger;
+  }
+
+  public async Task InvokeAsync(HttpContext context)
+  {
+    try
     {
-        _next = next;
-        _env = env;
-        _logger = logger;
+      await _next(context);
+    }
+    catch (Exception ex)
+    {
+      await HandleExceptionAsync(context, ex);
+    }
+  }
+
+  /// <summary>
+  /// Handles exceptions and returns appropriate API response
+  /// Priority: Custom Message → System Message → Generic Message
+  /// </summary>
+  private async Task HandleExceptionAsync(HttpContext context, Exception ex)
+  {
+    // Try to reuse correlation id set by CorrelationIdMiddleware
+    string correlationId = context.Items["CorrelationId"] as string
+                 ?? context.Request.Headers["X-Correlation-ID"].FirstOrDefault()
+                 ?? Activity.Current?.GetBaggageItem("CorrelationId")
+                 ?? Guid.NewGuid().ToString(); // fallback
+
+
+    // Log the error with full details
+    _logger.LogError(ex, $"[{correlationId}] {ex.GetType().Name}: {ex.Message}");
+    context.Response.ContentType = "application/json";
+
+    // Map exception to API response
+    ApiException response = MapExceptionToResponse(ex, correlationId);
+
+    context.Response.StatusCode = response.StatusCode;
+
+    var options = new JsonSerializerOptions
+    {
+      PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+      WriteIndented = _env.IsDevelopment(),
+    };
+
+    var json = JsonSerializer.Serialize(response, options);
+    await context.Response.WriteAsync(json);
+  }
+
+  /// <summary>
+  /// Maps exceptions to structured API responses with priority-based messaging
+  /// </summary>
+  private ApiException MapExceptionToResponse(Exception ex, string correlationId)
+  {
+    // ==========================================
+    // 🔴 HANDLE BaseCustomException FIRST (Highest Priority)
+    // ==========================================
+    if (ex is BaseCustomException customEx)
+    {
+      return CreateResponseFromCustomException(customEx, correlationId);
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    // ==========================================
+    // 🟡 FALLBACK TO PATTERN MATCHING
+    // ==========================================
+    return ex switch
     {
-        try
-        {
-            await _next(context);
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(context, ex);
-        }
-    }
+      // Conflict Exceptions (409) - Order matters: Most specific first
+      GenericConflictException genericConflict => CreateResponse(
+          genericConflict.StatusCode,
+          ex.Message, //Custom message gets priority
+          nameof(GenericConflictException),
+          correlationId
+      ),
 
-    /// <summary>
-    /// Handles exceptions and returns appropriate API response
-    /// Priority: Custom Message → System Message → Generic Message
-    /// </summary>
-    private async Task HandleExceptionAsync(HttpContext context, Exception ex)
-    {
-		// Try to reuse correlation id set by CorrelationIdMiddleware
-		string correlationId = context.Items["CorrelationId"] as string
-							   ?? context.Request.Headers["X-Correlation-ID"].FirstOrDefault()
-							   ?? Activity.Current?.GetBaggageItem("CorrelationId")
-							   ?? Guid.NewGuid().ToString(); // fallback
+      DuplicateRecordException duplicate => CreateResponse(
+          duplicate.StatusCode,
+          ex.Message, //Custom message
+          nameof(DuplicateRecordException),
+          correlationId
+      ),
 
+      ConflictException conflict => CreateResponse(
+          conflict.StatusCode,
+          ex.Message, //Custom message from derived types
+          nameof(ConflictException),
+          correlationId
+      ),
 
-		// Log the error with full details
-		_logger.LogError(ex, $"[{correlationId}] {ex.GetType().Name}: {ex.Message}");
-		context.Response.ContentType = "application/json";
+      // BadRequest Exceptions (400)
+      InvalidCreateOperationException invalidCreate => CreateResponse(
+          invalidCreate.StatusCode,
+          ex.Message, //Custom message
+          nameof(InvalidCreateOperationException),
+          correlationId
+      ),
 
-        // Map exception to API response
-        ApiException response = MapExceptionToResponse(ex, correlationId);
+      InvalidUpdateOperationException invalidUpdate => CreateResponse(
+          invalidUpdate.StatusCode,  //Will work after BadRequestException fix
+          ex.Message,
+          nameof(InvalidUpdateOperationException),
+          correlationId
+      ),
 
-        context.Response.StatusCode = response.StatusCode;
+      IdMismatchBadRequestException idMismatch => CreateResponse(
+          idMismatch.StatusCode,
+          ex.Message, //Custom message
+          nameof(IdMismatchBadRequestException),
+          correlationId
+      ),
 
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = _env.IsDevelopment(),
-        };
+      NullModelBadRequestException nullModel => CreateResponse(
+          nullModel.StatusCode,
+          ex.Message, //Custom message
+          nameof(NullModelBadRequestException),
+          correlationId
+      ),
 
-        var json = JsonSerializer.Serialize(response, options);
-        await context.Response.WriteAsync(json);
-    }
+      GenericBadRequestException genericBadRequest => CreateResponse(
+          genericBadRequest.StatusCode,
+          ex.Message, //Custom message
+          nameof(GenericBadRequestException),
+          correlationId
+      ),
 
-    /// <summary>
-    /// Maps exceptions to structured API responses with priority-based messaging
-    /// </summary>
-    private ApiException MapExceptionToResponse(Exception ex, string correlationId)
-    {
-        // ==========================================
-        // 🔴 HANDLE BaseCustomException FIRST (Highest Priority)
-        // ==========================================
-        if (ex is BaseCustomException customEx)
-        {
-            return CreateResponseFromCustomException(customEx, correlationId);
-        }
+      UsernamePasswordMismatchException authMismatch => CreateResponse(
+          authMismatch.StatusCode,
+          ex.Message, //Custom message
+          nameof(UsernamePasswordMismatchException),
+          correlationId
+      ),
 
-        // ==========================================
-        // 🟡 FALLBACK TO PATTERN MATCHING
-        // ==========================================
-        return ex switch
-        {
-            // Conflict Exceptions (409) - Order matters: Most specific first
-            GenericConflictException genericConflict => CreateResponse(
-                genericConflict.StatusCode,
-                ex.Message, //Custom message gets priority
-                nameof(GenericConflictException),
-                correlationId
-            ),
+      BadRequestException badRequest => CreateResponse(
+          badRequest.StatusCode,
+          ex.Message, //Custom message
+          nameof(BadRequestException),
+          correlationId
+      ),
 
-        DuplicateRecordException duplicate => CreateResponse(
-            duplicate.StatusCode,
-            ex.Message, //Custom message
-            nameof(DuplicateRecordException),
-            correlationId
-        ),
+      // NotFound Exceptions (404)
+      GenericNotFoundException genericNotFound => CreateResponse(
+          genericNotFound.StatusCode,
+          ex.Message, //Custom message with details
+          nameof(GenericNotFoundException),
+          correlationId
+      ),
 
-        ConflictException conflict => CreateResponse(
-            conflict.StatusCode,
-            ex.Message, //Custom message from derived types
-            nameof(ConflictException),
-            correlationId
-        ),
+      NotFoundException notFound => CreateResponse(
+          notFound.StatusCode,
+          ex.Message, //Custom message
+          nameof(NotFoundException),
+          correlationId
+      ),
 
-        // BadRequest Exceptions (400)
-        InvalidCreateOperationException invalidCreate => CreateResponse(
-            invalidCreate.StatusCode,
-            ex.Message, //Custom message
-            nameof(InvalidCreateOperationException),
-            correlationId
-        ),
-
-        InvalidUpdateOperationException invalidUpdate => CreateResponse(
-            invalidUpdate.StatusCode,  //Will work after BadRequestException fix
-            ex.Message,
-            nameof(InvalidUpdateOperationException),
-            correlationId
-        ),
-
-        IdMismatchBadRequestException idMismatch => CreateResponse(
-            idMismatch.StatusCode,
-            ex.Message, //Custom message
-            nameof(IdMismatchBadRequestException),
-            correlationId
-        ),
-
-        NullModelBadRequestException nullModel => CreateResponse(
-            nullModel.StatusCode,
-            ex.Message, //Custom message
-            nameof(NullModelBadRequestException),
-            correlationId
-        ),
-
-        GenericBadRequestException genericBadRequest => CreateResponse(
-            genericBadRequest.StatusCode,
-            ex.Message, //Custom message
-            nameof(GenericBadRequestException),
-            correlationId
-        ),
-
-        UsernamePasswordMismatchException authMismatch => CreateResponse(
-            authMismatch.StatusCode,
-            ex.Message, //Custom message
-            nameof(UsernamePasswordMismatchException),
-            correlationId
-        ),
-
-        BadRequestException badRequest => CreateResponse(
-            badRequest.StatusCode,
-            ex.Message, //Custom message
-            nameof(BadRequestException),
-            correlationId
-        ),
-
-        // NotFound Exceptions (404)
-        GenericNotFoundException genericNotFound => CreateResponse(
-            genericNotFound.StatusCode,
-            ex.Message, //Custom message with details
-            nameof(GenericNotFoundException),
-            correlationId
-        ),
-
-        NotFoundException notFound => CreateResponse(
-            notFound.StatusCode,
-            ex.Message, //Custom message
-            nameof(NotFoundException),
-            correlationId
-        ),
-
-        // Unauthorized Exceptions (401)
-        GenericUnauthorizedException genericUnauthorized => CreateResponse(
-            genericUnauthorized.StatusCode,
-            ex.Message, //Custom message
-            nameof(GenericUnauthorizedException),
-            correlationId
-        ),
+      // Unauthorized Exceptions (401)
+      GenericUnauthorizedException genericUnauthorized => CreateResponse(
+          genericUnauthorized.StatusCode,
+          ex.Message, //Custom message
+          nameof(GenericUnauthorizedException),
+          correlationId
+      ),
 
       //  UsernamePasswordMismatchException authMismatch => CreateResponse(
       //    authMismatch.StatusCode,
@@ -201,236 +217,236 @@ public class ExceptionMiddleware
             correlationId
         ),
 
-        // Forbidden Exceptions (403)
-        ForbiddenAccessException forbidden => CreateResponse(
-            forbidden.StatusCode,
-            ex.Message, //Custom message
-            nameof(ForbiddenAccessException),
-            correlationId
-        ),
+      // Forbidden Exceptions (403)
+      ForbiddenAccessException forbidden => CreateResponse(
+          forbidden.StatusCode,
+          ex.Message, //Custom message
+          nameof(ForbiddenAccessException),
+          correlationId
+      ),
 
-        // ServiceUnavailable Exceptions (503)
-        ServiceUnavailableException serviceUnavailable => CreateResponse(
-            serviceUnavailable.StatusCode,
-            ex.Message, //Custom message
-            nameof(ServiceUnavailableException),
-            correlationId
-        ),
+      // ServiceUnavailable Exceptions (503)
+      ServiceUnavailableException serviceUnavailable => CreateResponse(
+          serviceUnavailable.StatusCode,
+          ex.Message, //Custom message
+          nameof(ServiceUnavailableException),
+          correlationId
+      ),
 
-        // ==========================================
-        // 🟡 AUTHENTICATION & AUTHORIZATION EXCEPTIONS
-        // ==========================================
+      // ==========================================
+      // 🟡 AUTHENTICATION & AUTHORIZATION EXCEPTIONS
+      // ==========================================
 
-        // JWT Token Exceptions (401)
-        SecurityTokenExpiredException tokenExpired => CreateResponse(
-            401,
-            "Your authentication token has expired. Please log in again.",
-            "TokenExpired",
-            correlationId
-        ),
+      // JWT Token Exceptions (401)
+      SecurityTokenExpiredException tokenExpired => CreateResponse(
+          401,
+          "Your authentication token has expired. Please log in again.",
+          "TokenExpired",
+          correlationId
+      ),
 
-        SecurityTokenException or SecurityTokenValidationException => CreateResponse(
-            401,
-            "Invalid authentication token. Please log in again.",
-            "InvalidToken",
-            correlationId
-        ),
+      SecurityTokenException or SecurityTokenValidationException => CreateResponse(
+          401,
+          "Invalid authentication token. Please log in again.",
+          "InvalidToken",
+          correlationId
+      ),
 
-        System.UnauthorizedAccessException => CreateResponse(
-            401,
-            "You are not authorized to perform this action.",
-            "UnauthorizedAccess",
-            correlationId
-        ),
+      System.UnauthorizedAccessException => CreateResponse(
+          401,
+          "You are not authorized to perform this action.",
+          "UnauthorizedAccess",
+          correlationId
+      ),
 
-        // ==========================================
-        // 🟢 FRAMEWORK & SYSTEM EXCEPTIONS
-        // ==========================================
+      // ==========================================
+      // 🟢 FRAMEWORK & SYSTEM EXCEPTIONS
+      // ==========================================
 
-        // Validation Exceptions (400)
-        ValidationException validation => CreateResponse(
-            400,
-            "One or more validation errors occurred.",
-            "Validation",
-            correlationId
-        ),
+      // Validation Exceptions (400)
+      ValidationException validation => CreateResponse(
+          400,
+          "One or more validation errors occurred.",
+          "Validation",
+          correlationId
+      ),
 
-        ArgumentNullException argNull => CreateResponse(
-            400,
-            $"Required parameter '{argNull.ParamName}' is missing.",
-            "ArgumentNull",
-            correlationId
-        ),
+      ArgumentNullException argNull => CreateResponse(
+          400,
+          $"Required parameter '{argNull.ParamName}' is missing.",
+          "ArgumentNull",
+          correlationId
+      ),
 
-        ArgumentException argument => CreateResponse(
-            400,
-            ex.Message, //Framework message
-            "ArgumentError",
-            correlationId
-        ),
+      ArgumentException argument => CreateResponse(
+          400,
+          ex.Message, //Framework message
+          "ArgumentError",
+          correlationId
+      ),
 
-        KeyNotFoundException => CreateResponse(
-            404,
-            "The requested resource was not found.",
-            "KeyNotFound",
-            correlationId
-        ),
+      KeyNotFoundException => CreateResponse(
+          404,
+          "The requested resource was not found.",
+          "KeyNotFound",
+          correlationId
+      ),
 
-        // ==========================================
-        // 🔵 DATABASE EXCEPTIONS
-        // ==========================================
+      // ==========================================
+      // 🔵 DATABASE EXCEPTIONS
+      // ==========================================
 
-        DbUpdateException dbUpdate => CreateResponse(
-            500,
-            SanitizeDatabaseErrorMessage(ex), //Safe database message
-            "DatabaseError",
-            correlationId,
-            includeStackTrace: true
-        ),
+      DbUpdateException dbUpdate => CreateResponse(
+          500,
+          SanitizeDatabaseErrorMessage(ex), //Safe database message
+          "DatabaseError",
+          correlationId,
+          includeStackTrace: true
+      ),
 
-        // ==========================================
-        // ⚫ GENERIC FALLBACK
-        // ==========================================
+      // ==========================================
+      // ⚫ GENERIC FALLBACK
+      // ==========================================
 
-        _ => CreateResponse(
-            500,
-            _env.IsDevelopment()
-                ? GetMostRelevantMessage(ex) // Development: Show actual error
-                : "An unexpected error occurred. Please try again later.", // Production: Generic message
-            ex.GetType().Name,
-            correlationId,
-            includeStackTrace: _env.IsDevelopment()
-        ),
-        };
-    }
+      _ => CreateResponse(
+          500,
+          _env.IsDevelopment()
+              ? GetMostRelevantMessage(ex) // Development: Show actual error
+              : "An unexpected error occurred. Please try again later.", // Production: Generic message
+          ex.GetType().Name,
+          correlationId,
+          includeStackTrace: _env.IsDevelopment()
+      ),
+    };
+  }
 
-    /// <summary>
-    /// Creates response from BaseCustomException with ErrorCode and AdditionalData
-    /// </summary>
-    private ApiException CreateResponseFromCustomException(BaseCustomException customEx, string correlationId)
+  /// <summary>
+  /// Creates response from BaseCustomException with ErrorCode and AdditionalData
+  /// </summary>
+  private ApiException CreateResponseFromCustomException(BaseCustomException customEx, string correlationId)
+  {
+    var response = new ApiException(customEx.StatusCode, customEx.UserFriendlyMessage ?? customEx.Message)
     {
-        var response = new ApiException(customEx.StatusCode, customEx.UserFriendlyMessage ?? customEx.Message)
-        {
-            ErrorType = customEx.ErrorCode, // Use ErrorCode instead of class name
-            CorrelationId = correlationId,
-        };
+      ErrorType = customEx.ErrorCode, // Use ErrorCode instead of class name
+      CorrelationId = correlationId,
+    };
 
-        // Add AdditionalData to response details if available and in development
-        if (customEx.AdditionalData.Any() && _env.IsDevelopment())
-        {
-            var additionalDataJson = JsonSerializer.Serialize(customEx.AdditionalData, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
-
-            response.Details = $"Additional Context:\n{additionalDataJson}";
-        }
-
-        // Include stack trace in development mode
-        if (_env.IsDevelopment() && !string.IsNullOrEmpty(customEx.StackTrace))
-        {
-            if (!string.IsNullOrEmpty(response.Details))
-            {
-                response.Details += $"\n\nStack Trace:\n{customEx.StackTrace}";
-            }
-            else
-            {
-                response.Details = $"Stack Trace:\n{customEx.StackTrace}";
-            }
-        }
-
-        return response;
-    }
-
-    /// <summary>
-    /// Creates structured API exception response
-    /// </summary>
-    private ApiException CreateResponse(
-        int statusCode,
-        string message,
-        string errorType,
-        string correlationId,
-        bool includeStackTrace = false)
+    // Add AdditionalData to response details if available and in development
+    if (customEx.AdditionalData.Any() && _env.IsDevelopment())
     {
-        var response = new ApiException(statusCode, message)
-        {
-            ErrorType = errorType,
-            CorrelationId = correlationId,
-        };
+      var additionalDataJson = JsonSerializer.Serialize(customEx.AdditionalData, new JsonSerializerOptions
+      {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+      });
 
-
-        if (includeStackTrace && _env.IsDevelopment())
-        {
-            // Option 1: Use Environment.StackTrace (Simple)
-            response.Details = Environment.StackTrace;
-
-            // Option 2: Use new StackTrace() instance (Better control)
-            // var stackTrace = new System.Diagnostics.StackTrace(true);
-            // response.Details = stackTrace.ToString();
-        }
-
-        return response;
+      response.Details = $"Additional Context:\n{additionalDataJson}";
     }
 
-    /// <summary>
-    /// Extracts the most relevant error message from exception chain
-    /// </summary>
-    private string GetMostRelevantMessage(Exception exception)
+    // Include stack trace in development mode
+    if (_env.IsDevelopment() && !string.IsNullOrEmpty(customEx.StackTrace))
     {
-        // Check innermost exception first
-        if (exception.InnerException?.InnerException != null)
-            return exception.InnerException.InnerException.Message;
-
-        if (exception.InnerException != null)
-            return exception.InnerException.Message;
-
-        return exception.Message;
+      if (!string.IsNullOrEmpty(response.Details))
+      {
+        response.Details += $"\n\nStack Trace:\n{customEx.StackTrace}";
+      }
+      else
+      {
+        response.Details = $"Stack Trace:\n{customEx.StackTrace}";
+      }
     }
 
-    /// <summary>
-    /// Extracts the most relevant stack trace from exception chain
-    /// </summary>
-    private string GetMostRelevantStackTrace(Exception exception)
+    return response;
+  }
+
+  /// <summary>
+  /// Creates structured API exception response
+  /// </summary>
+  private ApiException CreateResponse(
+      int statusCode,
+      string message,
+      string errorType,
+      string correlationId,
+      bool includeStackTrace = false)
+  {
+    var response = new ApiException(statusCode, message)
     {
-        if (exception.InnerException?.InnerException != null)
-            return exception.InnerException.InnerException.StackTrace;
+      ErrorType = errorType,
+      CorrelationId = correlationId,
+    };
 
-        if (exception.InnerException != null)
-            return exception.InnerException.StackTrace;
 
-        return exception.StackTrace;
-    }
-
-    /// <summary>
-    /// Sanitizes database error messages to prevent sensitive data exposure
-    /// </summary>
-    private string SanitizeDatabaseErrorMessage(Exception exception)
+    if (includeStackTrace && _env.IsDevelopment())
     {
-        string message = GetMostRelevantMessage(exception);
+      // Option 1: Use Environment.StackTrace (Simple)
+      response.Details = Environment.StackTrace;
 
-        // Foreign key constraint violation
-        if (message.Contains("foreign key", StringComparison.OrdinalIgnoreCase))
-            return "Cannot delete this record because it is referenced by other data. Please remove related records first.";
-
-        // Unique constraint violation
-        if (message.Contains("unique", StringComparison.OrdinalIgnoreCase) ||
-            message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
-            return "This data already exists. Please use a different value.";
-
-        // Null constraint violation
-        if (message.Contains("null", StringComparison.OrdinalIgnoreCase) ||
-            message.Contains("required", StringComparison.OrdinalIgnoreCase))
-            return "Required field is missing. Please provide all necessary information.";
-
-        // Connection or timeout issues
-        if (message.Contains("timeout", StringComparison.OrdinalIgnoreCase) ||
-            message.Contains("connection", StringComparison.OrdinalIgnoreCase))
-            return "Database connection issue. Please try again later.";
-
-        // Generic database error (don't expose internal details)
-        return "A database error occurred. Please verify your input and try again.";
+      // Option 2: Use new StackTrace() instance (Better control)
+      // var stackTrace = new System.Diagnostics.StackTrace(true);
+      // response.Details = stackTrace.ToString();
     }
+
+    return response;
+  }
+
+  /// <summary>
+  /// Extracts the most relevant error message from exception chain
+  /// </summary>
+  private string GetMostRelevantMessage(Exception exception)
+  {
+    // Check innermost exception first
+    if (exception.InnerException?.InnerException != null)
+      return exception.InnerException.InnerException.Message;
+
+    if (exception.InnerException != null)
+      return exception.InnerException.Message;
+
+    return exception.Message;
+  }
+
+  /// <summary>
+  /// Extracts the most relevant stack trace from exception chain
+  /// </summary>
+  private string GetMostRelevantStackTrace(Exception exception)
+  {
+    if (exception.InnerException?.InnerException != null)
+      return exception.InnerException.InnerException.StackTrace;
+
+    if (exception.InnerException != null)
+      return exception.InnerException.StackTrace;
+
+    return exception.StackTrace;
+  }
+
+  /// <summary>
+  /// Sanitizes database error messages to prevent sensitive data exposure
+  /// </summary>
+  private string SanitizeDatabaseErrorMessage(Exception exception)
+  {
+    string message = GetMostRelevantMessage(exception);
+
+    // Foreign key constraint violation
+    if (message.Contains("foreign key", StringComparison.OrdinalIgnoreCase))
+      return "Cannot delete this record because it is referenced by other data. Please remove related records first.";
+
+    // Unique constraint violation
+    if (message.Contains("unique", StringComparison.OrdinalIgnoreCase) ||
+        message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+      return "This data already exists. Please use a different value.";
+
+    // Null constraint violation
+    if (message.Contains("null", StringComparison.OrdinalIgnoreCase) ||
+        message.Contains("required", StringComparison.OrdinalIgnoreCase))
+      return "Required field is missing. Please provide all necessary information.";
+
+    // Connection or timeout issues
+    if (message.Contains("timeout", StringComparison.OrdinalIgnoreCase) ||
+        message.Contains("connection", StringComparison.OrdinalIgnoreCase))
+      return "Database connection issue. Please try again later.";
+
+    // Generic database error (don't expose internal details)
+    return "A database error occurred. Please verify your input and try again.";
+  }
 }
 
 /// <summary>
@@ -438,68 +454,68 @@ public class ExceptionMiddleware
 /// </summary>
 public static class ExceptionToApiResponseMapper
 {
-    public static ApiException Map(Exception ex, IHostEnvironment env, out int statusCode)
+  public static ApiException Map(Exception ex, IHostEnvironment env, out int statusCode)
+  {
+    string message = ex.Message;
+    string errorType = ex.GetType().Name;
+    string details = env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null;
+
+    (statusCode, message, errorType) = ex switch
     {
-        string message = ex.Message;
-        string errorType = ex.GetType().Name;
-        string details = env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null;
+      // Custom exceptions - Always use custom message
+      BadRequestException badReq => (badReq.StatusCode, ex.Message, nameof(BadRequestException)),
+      UnauthorizedException unauth => (unauth.StatusCode, ex.Message, nameof(UnauthorizedException)),
+      ForbiddenAccessException forbidden => (forbidden.StatusCode, ex.Message, nameof(ForbiddenAccessException)),
+      NotFoundException notFound => (notFound.StatusCode, ex.Message, nameof(NotFoundException)),
+      ConflictException conflict => (conflict.StatusCode, ex.Message, nameof(ConflictException)),
+      ServiceUnavailableException service => (service.StatusCode, ex.Message, nameof(ServiceUnavailableException)),
 
-        (statusCode, message, errorType) = ex switch
-        {
-            // Custom exceptions - Always use custom message
-            BadRequestException badReq => (badReq.StatusCode, ex.Message, nameof(BadRequestException)),
-            UnauthorizedException unauth => (unauth.StatusCode, ex.Message, nameof(UnauthorizedException)),
-            ForbiddenAccessException forbidden => (forbidden.StatusCode, ex.Message, nameof(ForbiddenAccessException)),
-            NotFoundException notFound => (notFound.StatusCode, ex.Message, nameof(NotFoundException)),
-            ConflictException conflict => (conflict.StatusCode, ex.Message, nameof(ConflictException)),
-            ServiceUnavailableException service => (service.StatusCode, ex.Message, nameof(ServiceUnavailableException)),
+      // JWT Token issues
+      SecurityTokenExpiredException => (401, "Your authentication token has expired. Please log in again.", "TokenExpired"),
+      SecurityTokenValidationException => (401, "Invalid authentication token. Please log in again.", "InvalidToken"),
 
-            // JWT Token issues
-            SecurityTokenExpiredException => (401, "Your authentication token has expired. Please log in again.", "TokenExpired"),
-            SecurityTokenValidationException => (401, "Invalid authentication token. Please log in again.", "InvalidToken"),
+      // Framework exceptions
+      KeyNotFoundException => (404, "The requested resource was not found.", "KeyNotFound"),
+      UnauthorizedAccessException => (401, "You are not authorized to perform this action.", "UnauthorizedAccess"),
+      ValidationException => (400, "One or more validation errors occurred.", "Validation"),
 
-            // Framework exceptions
-            KeyNotFoundException => (404, "The requested resource was not found.", "KeyNotFound"),
-            UnauthorizedAccessException => (401, "You are not authorized to perform this action.", "UnauthorizedAccess"),
-            ValidationException => (400, "One or more validation errors occurred.", "Validation"),
+      // Database exceptions
+      DbUpdateException => (500, SanitizeDatabaseErrorMessage(ex), "DatabaseError"),
 
-            // Database exceptions
-            DbUpdateException => (500, SanitizeDatabaseErrorMessage(ex), "DatabaseError"),
+      // Generic fallback
+      _ => (500, env.IsDevelopment() ? GetMostRelevantMessage(ex) : "An unexpected error occurred.", errorType),
+    };
 
-            // Generic fallback
-            _ => (500, env.IsDevelopment() ? GetMostRelevantMessage(ex) : "An unexpected error occurred.", errorType),
-        };
+    return new ApiException(statusCode, message) { ErrorType = errorType, Details = details };
+  }
 
-        return new ApiException(statusCode, message) { ErrorType = errorType, Details = details };
-    }
+  private static string GetMostRelevantMessage(Exception exception)
+  {
+    if (exception.InnerException?.InnerException != null)
+      return exception.InnerException.InnerException.Message;
+    if (exception.InnerException != null)
+      return exception.InnerException.Message;
+    return exception.Message;
+  }
 
-    private static string GetMostRelevantMessage(Exception exception)
-    {
-        if (exception.InnerException?.InnerException != null)
-            return exception.InnerException.InnerException.Message;
-        if (exception.InnerException != null)
-            return exception.InnerException.Message;
-        return exception.Message;
-    }
+  private static string GetMostRelevantStackTrace(Exception exception)
+  {
+    if (exception.InnerException?.InnerException != null)
+      return exception.InnerException.InnerException.StackTrace;
+    if (exception.InnerException != null)
+      return exception.InnerException.StackTrace;
+    return exception.StackTrace;
+  }
 
-    private static string GetMostRelevantStackTrace(Exception exception)
-    {
-        if (exception.InnerException?.InnerException != null)
-            return exception.InnerException.InnerException.StackTrace;
-        if (exception.InnerException != null)
-            return exception.InnerException.StackTrace;
-        return exception.StackTrace;
-    }
+  private static string SanitizeDatabaseErrorMessage(Exception exception)
+  {
+    string message = GetMostRelevantMessage(exception);
 
-    private static string SanitizeDatabaseErrorMessage(Exception exception)
-    {
-        string message = GetMostRelevantMessage(exception);
-
-        if (message.Contains("foreign key", StringComparison.OrdinalIgnoreCase))
-            return "A database relation constraint has been violated. The related record cannot be deleted.";
-        if (message.Contains("unique", StringComparison.OrdinalIgnoreCase) ||
-            message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
-            return "This data already exists. Please use a different value.";
-        return "A database error occurred. Please verify your input.";
-    }
+    if (message.Contains("foreign key", StringComparison.OrdinalIgnoreCase))
+      return "A database relation constraint has been violated. The related record cannot be deleted.";
+    if (message.Contains("unique", StringComparison.OrdinalIgnoreCase) ||
+        message.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+      return "This data already exists. Please use a different value.";
+    return "A database error occurred. Please verify your input.";
+  }
 }

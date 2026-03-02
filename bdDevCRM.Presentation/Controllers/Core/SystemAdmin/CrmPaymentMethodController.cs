@@ -128,7 +128,6 @@ public class CrmPaymentMethodController : BaseApiController
     /// <param name="options">Grid options for pagination, sorting, and filtering</param>
     /// <returns>Paginated grid of payment methods</returns>
     [HttpPost(RouteConstants.PaymentMethodSummary)]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> GetSummaryGrid([FromBody] CRMGridOptions options)
     {
         //Get authenticated user from HttpContext
@@ -162,7 +161,6 @@ public class CrmPaymentMethodController : BaseApiController
     /// <returns>Created payment method record</returns>
     [HttpPost(RouteConstants.CreatePaymentMethod)]
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> CreatePaymentMethod(
         [FromBody] CrmPaymentMethodDto paymentMethodDto)
     {
@@ -200,7 +198,6 @@ public class CrmPaymentMethodController : BaseApiController
     /// <returns>Operation result message</returns>
     [HttpPost(RouteConstants.CreateOrUpdatePaymentMethod)]
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> SaveOrUpdate(
         int key, 
         [FromBody] CrmPaymentMethodDto paymentMethodDto)
@@ -233,7 +230,6 @@ public class CrmPaymentMethodController : BaseApiController
     /// <returns>Operation result message</returns>
     [HttpPut(RouteConstants.UpdatePaymentMethod)]
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> UpdatePaymentMethod(
         int key, 
         [FromBody] CrmPaymentMethodDto paymentMethodDto)
@@ -269,7 +265,6 @@ public class CrmPaymentMethodController : BaseApiController
     /// <param name="key">Payment method ID to delete</param>
     /// <returns>Operation result message</returns>
     [HttpDelete(RouteConstants.DeletePaymentMethod)]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> DeletePaymentMethod(int key)
     {
         //Get authenticated user from HttpContext
