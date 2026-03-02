@@ -15,6 +15,9 @@ using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.GetConnectionString("DbLocation");
+var jwtSecret = builder.Configuration["Jwt:SecretKey"];
+
 
 // Add services to the container
 builder.Services.AddHttpContextAccessor();
@@ -161,8 +164,19 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-Log.Information("bdDevCRM Backend API started successfully");
-app.Run();
+try
+{
+	Log.Information("bdDevCRM Backend API started successfully");
+	app.Run();
+}
+catch (Exception ex)
+{
+	Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+	Log.CloseAndFlush();
+}
 
 
 // Helper method to get NewtonsoftJsonPatchInputFormatter
