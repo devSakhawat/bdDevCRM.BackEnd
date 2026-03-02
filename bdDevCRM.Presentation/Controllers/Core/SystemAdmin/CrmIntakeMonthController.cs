@@ -93,7 +93,7 @@ public class CrmIntakeMonthController : BaseApiController
   //}
 
   [HttpPost(RouteConstants.IntakeMonthSummary)]
-  [ServiceFilter(typeof(LogActionAttribute))]
+  
   public async Task<IActionResult> GetSummaryGrid([FromBody] CRMGridOptions options)
   {
     //Get authenticated user from HttpContext
@@ -119,7 +119,7 @@ public class CrmIntakeMonthController : BaseApiController
 
   [HttpPost(RouteConstants.CreateIntakeMonth)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  [ServiceFilter(typeof(LogActionAttribute))]
+  
   public async Task<IActionResult> CreateIntakeMonth([FromBody] CrmIntakeMonthDto intakeMonthDto)
   {
     //Get authenticated user from HttpContext
@@ -145,7 +145,7 @@ public class CrmIntakeMonthController : BaseApiController
 
   [HttpPost(RouteConstants.CreateOrUpdateIntakeMonth)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  [ServiceFilter(typeof(LogActionAttribute))]
+  
   public async Task<IActionResult> SaveOrUpdate(int key, [FromBody] CrmIntakeMonthDto intakeMonthDto)
   {
     //Get authenticated user from HttpContext
@@ -167,7 +167,7 @@ public class CrmIntakeMonthController : BaseApiController
 
   [HttpPut(RouteConstants.UpdateIntakeMonth)]
   [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  [ServiceFilter(typeof(LogActionAttribute))]
+  
   public async Task<IActionResult> UpdateIntakeMonth(int key, [FromBody] CrmIntakeMonthDto intakeMonthDto)
   {
     if (key <= 0)
@@ -191,7 +191,7 @@ public class CrmIntakeMonthController : BaseApiController
   }
 
   [HttpDelete(RouteConstants.DeleteIntakeMonth)]
-  [ServiceFilter(typeof(LogActionAttribute))]
+  
   public async Task<IActionResult> DeleteIntakeMonth(int key)
   {
     if (key <= 0)

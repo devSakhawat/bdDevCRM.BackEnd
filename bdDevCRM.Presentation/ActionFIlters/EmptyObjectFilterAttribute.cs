@@ -3,121 +3,81 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace bdDevCRM.Presentation.ActionFIlters;
 
-//public class EmptyObjectFilterAttribute : IActionFilter
-//{
-//  public EmptyObjectFilterAttribute()
-//  {
-//  }
-
-//  public void OnActionExecuting(ActionExecutingContext context)
-//  {
-//    var action = context.RouteData.Values["action"];
-//    var controller = context.RouteData.Values["controller"];
-//    var param = context.ActionArguments.SingleOrDefault(x => x.Value.ToString().Contains("Dto")).Value;
-//    if (param is null)
-//    {
-//      context.Result = new BadRequestObjectResult($"Object is null. Controller: {controller}, action: {action}");
-//      return;
-//    }
-//    if (!context.ModelState.IsValid) context.Result = new UnprocessableEntityObjectResult(context.ModelState);
-//  }
-
-//  public void OnActionExecuted(ActionExecutedContext context) { }
-//}
-
+/// <summary>
+/// Request body DTO null check ও ModelState validation।
+/// 
+/// </summary>
 public class EmptyObjectFilterAttribute : IActionFilter
 {
   public void OnActionExecuting(ActionExecutingContext context)
   {
     var action = context.RouteData.Values["action"]?.ToString();
     var controller = context.RouteData.Values["controller"]?.ToString();
+    var method = context.HttpContext.Request.Method;
 
-    // Check if any argument contains "Dto" in its type name
-    var dtoArgument = context.ActionArguments
-        .FirstOrDefault(arg => arg.Value != null && arg.Value.GetType().Name.Contains("Dto"));
-
-    if (dtoArgument.Value == null) // Null check
+    if (method is "GET" or "DELETE" or "HEAD" or "OPTIONS")
     {
-      context.Result = new BadRequestObjectResult(
-          $"Object is null. Controller: {controller}, Action: {action}"
-      );
+      if (!context.ModelState.IsValid)
+      {
+        context.Result = new UnprocessableEntityObjectResult(
+            CreateValidationError(context));
+      }
       return;
     }
 
-    // Get the DTO object
-    var model = dtoArgument.Value;
+    // POST/PUT/PATCH — body DTO check করো
+    var bodyParam = context.ActionArguments
+        .FirstOrDefault(arg =>
+            arg.Value == null ||                                        // null value
+            IsComplexType(arg.Value?.GetType()));                       // complex type (DTO/Model)
 
-    // If ModelState is invalid, return detailed errors
-    if (!context.ModelState.IsValid)
+    if (bodyParam.Key != null && bodyParam.Value == null)
     {
-      var errors = context.ModelState
-          .Where(e => e.Value.Errors.Count > 0)
-          .ToDictionary(
-              kvp => kvp.Key,
-              kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-          );
-
       context.Result = new BadRequestObjectResult(new
       {
-        Message = "Validation failed",
-        Errors = errors
+        Message = $"Request body is null. Controller: {controller}, Action: {action}",
+        ErrorCode = "NULL_REQUEST_BODY"
       });
+      return;
+    }
+
+    // ModelState validation
+    if (!context.ModelState.IsValid)
+    {
+      context.Result = new UnprocessableEntityObjectResult(
+          CreateValidationError(context));
     }
   }
 
-  public void OnActionExecuted(ActionExecutedContext context)
+  public void OnActionExecuted(ActionExecutedContext context) { }
+
+  private static bool IsComplexType(Type? type)
   {
-    // You can log or modify result here if needed
+    if (type == null) return false;
+
+    // Primitive types, strings, value types → no complex type 
+    return !type.IsPrimitive
+           && type != typeof(string)
+           && type != typeof(decimal)
+           && type != typeof(DateTime)
+           && type != typeof(DateTimeOffset)
+           && type != typeof(Guid)
+           && !type.IsEnum;
+  }
+
+  private static object CreateValidationError(ActionExecutingContext context)
+  {
+    var errors = context.ModelState
+        .Where(e => e.Value?.Errors.Count > 0)
+        .ToDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+
+    return new
+    {
+      Message = "Validation failed",
+      ErrorCode = "VALIDATION_FAILED",
+      Errors = errors
+    };
   }
 }
-
-
-//public class EmptyObjectFilterAttribute2 : IActionFilter
-//{
-//  public void OnActionExecuting(ActionExecutingContext context)
-//  {
-//    var action = context.RouteData.Values["action"]?.ToString();
-//    var controller = context.RouteData.Values["controller"]?.ToString();
-
-//    // Dto detect
-//    var dtoArgument = context.ActionArguments
-//        .FirstOrDefault(arg => arg.Key.ToLower().Contains("dto") && arg.Value != null);
-
-//    if (dtoArgument.Value == null)
-//    {
-//      context.Result = new BadRequestObjectResult(
-//          $"Object is null. Controller: {controller}, Action: {action}"
-//      );
-//      return;
-//    }
-
-//    // Check ModelState
-//    if (!context.ModelState.IsValid)
-//    {
-//      var errors = context.ModelState
-//          .Where(e => e.Value.Errors.Count > 0)
-//          .ToDictionary(
-//              kvp => kvp.Key,
-//              kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-//          );
-
-//      context.Result = new BadRequestObjectResult(new
-//      {
-//        Message = "Validation failed",
-//        Controller = controller,
-//        Action = action,
-//        Errors = errors
-//      });
-//    }
-//  }
-
-//  public void OnActionExecuted(ActionExecutedContext context)
-//  {
-//    // You can log or modify result here if needed
-//  }
-//}
-
-
-
-
-

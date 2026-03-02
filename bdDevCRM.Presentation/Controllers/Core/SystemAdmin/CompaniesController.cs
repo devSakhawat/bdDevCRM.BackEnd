@@ -1,5 +1,4 @@
-﻿using bdDevCRM.Presentation.ActionFIlters;
-using bdDevCRM.Presentation.AuthorizeAttribiutes;
+﻿using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
@@ -89,7 +88,7 @@ public class CompaniesController : BaseApiController
     var createdCompany = _serviceManager.Companies.CreateCompany(companyDto);
 
     // Return standardized response
-    return CreatedAtRoute("CompanyById", new { id = createdCompany.CompanyId }, 
+    return CreatedAtRoute("CompanyById", new { id = createdCompany.CompanyId },
       ResponseHelper.Created(createdCompany, "Company created successfully"));
   }
 
