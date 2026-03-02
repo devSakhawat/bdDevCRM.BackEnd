@@ -1,5 +1,4 @@
-﻿using bdDevCRM.Entities.CRMGrid.GRID;
-using bdDevCRM.Presentation.ActionFIlters;
+﻿using bdDevCRM.Presentation.ActionFIlters;
 using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;

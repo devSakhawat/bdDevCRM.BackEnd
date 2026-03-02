@@ -63,7 +63,7 @@ public class CrmIntakeYearController : BaseApiController
     /// <param name="options">Grid options for pagination, sorting, and filtering</param>
     /// <returns>Paginated grid of intake years</returns>
     [HttpPost(RouteConstants.IntakeYearSummary)]
-    [ServiceFilter(typeof(LogActionAttribute))]
+    
     public async Task<IActionResult> GetSummaryGrid([FromBody] CRMGridOptions options)
     {
         //Get authenticated user from HttpContext
@@ -135,7 +135,6 @@ public class CrmIntakeYearController : BaseApiController
     /// <returns>Created intake year record</returns>
     [HttpPost(RouteConstants.CreateIntakeYear)]
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> CreateIntakeYear(
         [FromBody] CrmIntakeYearDto intakeYearDto)
     {
@@ -173,7 +172,6 @@ public class CrmIntakeYearController : BaseApiController
     /// <returns>Operation result message</returns>
     [HttpPost(RouteConstants.CreateOrUpdateIntakeYear)]
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> SaveOrUpdate(
         int key, 
         [FromBody] CrmIntakeYearDto intakeYearDto)
@@ -206,7 +204,6 @@ public class CrmIntakeYearController : BaseApiController
     /// <returns>Operation result message</returns>
     [HttpPut(RouteConstants.UpdateIntakeYear)]
     [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> UpdateIntakeYear(
         int key, 
         [FromBody] CrmIntakeYearDto intakeYearDto)
@@ -242,7 +239,6 @@ public class CrmIntakeYearController : BaseApiController
     /// <param name="key">Intake year ID to delete</param>
     /// <returns>Operation result message</returns>
     [HttpDelete(RouteConstants.DeleteIntakeYear)]
-    [ServiceFilter(typeof(LogActionAttribute))]
     public async Task<IActionResult> DeleteIntakeYear(int key)
     {
         //Get authenticated user from HttpContext
