@@ -4,6 +4,10 @@ using System.Diagnostics;
 
 namespace bdDevCRM.Api.Middleware;
 
+/// <summary>
+/// Creates PipelineContext, resolves CorrelationId, starts Stopwatch.
+/// All other middleware read from PipelineContext — no duplication.
+/// </summary>
 public class CorrelationIdMiddleware
 {
 	private readonly RequestDelegate _next;
@@ -16,25 +20,24 @@ public class CorrelationIdMiddleware
 
 	public async Task InvokeAsync(HttpContext context)
 	{
-		// make PipelineContext (Stopwatch starts here)
+		// ✅ Create PipelineContext (Stopwatch starts automatically)
 		var pipelineCtx = RequestPipelineContext.GetOrCreate(context);
 
-		// Correlation ID resolve (priority order)
+		// Resolve Correlation ID: incoming header → Activity → TraceIdentifier → GUID
 		var incoming = context.Request.Headers[CorrelationIdHeader].FirstOrDefault();
-		var activityId = Activity.Current?.Id;
 		var correlationId = incoming
-							?? activityId
+							?? Activity.Current?.Id
 							?? context.TraceIdentifier
 							?? Guid.NewGuid().ToString();
 
-		// set Shared context everywhere (HTTP, custom, backward compatibility)
+		// ✅ Store in PipelineContext (single source of truth)
 		pipelineCtx.CorrelationId = correlationId;
 
-		// Backward compatibility
+		// Also store in well-known locations for compatibility
 		context.Items["CorrelationId"] = correlationId;
 		context.TraceIdentifier = correlationId;
 
-		// Activity enrichment
+		// Enrich Activity for distributed tracing
 		if (Activity.Current == null)
 		{
 			var activity = new Activity("http-request");
@@ -42,20 +45,17 @@ public class CorrelationIdMiddleware
 			Activity.Current = activity;
 		}
 
-		try
-		{
-			Activity.Current?.AddBaggage("CorrelationId", correlationId);
-		}
-		catch { /* swallow if Activity unsupported */ }
+		try { Activity.Current?.AddBaggage("CorrelationId", correlationId); }
+		catch { /* swallow */ }
 
-		// OnStarting response header set (safe)
+		// ✅ Response header — use OnStarting to avoid "headers already sent" error
 		context.Response.OnStarting(() =>
 		{
 			context.Response.Headers[CorrelationIdHeader] = correlationId;
 			return Task.CompletedTask;
 		});
 
-		// Push Serilog LogContext
+		// ✅ Serilog enrichment
 		using (LogContext.PushProperty("CorrelationId", correlationId))
 		{
 			await _next(context);
