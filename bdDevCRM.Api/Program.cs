@@ -16,27 +16,72 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ============================================================
+// P0: Load .env environment variables
+// ============================================================
+// .env File : ConnectionStrings__DbLocation=...
+// ASP.NET Core: read as ConnectionStrings:DbLocation
+// __ (double underscore) = : (colon) in configuration hierarchy
+var envFilePath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+if (File.Exists(envFilePath))
+{
+	foreach (var line in File.ReadAllLines(envFilePath))
+	{
+		// Skip empty lines and comments
+		if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith('#'))
+			continue;
+
+		var separatorIndex = line.IndexOf('=');
+		if (separatorIndex <= 0) continue;
+
+		var key = line[..separatorIndex].Trim();
+		var value = line[(separatorIndex + 1)..].Trim();
+
+		// Production এ OS environment variable will get priority 
+		if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+		{
+			Environment.SetEnvironmentVariable(key, value);
+		}
+	}
+}
+
+// Environment variables configuration
+builder.Configuration.AddEnvironmentVariables();
+
+// ============================================================
+// SERVICE REGISTRATION
+// ============================================================
+
+
+
+
+
 // Add services to the container
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureCors(builder.Configuration);
 builder.Services.Configureiisintegration();
-//builder.Services.ConfigureLoggerService();
-// Use Serilog
+// Serilog
 builder.Services.ConfigureSerilog(builder.Configuration, builder.Environment);
 builder.Host.UseSerilog();
 
+// Repository & Service
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureInterceptors();
 builder.Services.ConfigureSqlContext(builder.Configuration);
+
+// Compression
 builder.Services.ConfigureResponseCompression();
 builder.Services.ConfigureGzipCompression();
+
+// File & Cookie
 builder.Services.ConfigureFileLimit();
 builder.Services.ConfigureCookiePolicy(builder.Environment);
 
 // Configure distributed cache (Hybrid Redis + Memory)
 builder.Services.ConfigureDistributedCache(builder.Configuration);
 builder.Services.AddSingleton<IHybridCacheService, HybridCacheService>();
+
 // Configure Application Insights
 builder.Services.ConfigureApplicationInsights(builder.Configuration);
 
@@ -44,14 +89,16 @@ builder.Services.ConfigureApplicationInsights(builder.Configuration);
 builder.Services.AddSingleton<AuditLogQueue>();
 builder.Services.AddHostedService<AuditLogWriterService>();
 
-
+// API Behavior
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-  options.SuppressModelStateInvalidFilter = true;
+	options.SuppressModelStateInvalidFilter = true;
 });
 
+// action attribute	
 builder.Services.AddScoped<EmptyObjectFilterAttribute>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
+
 
 builder.Services.AddControllers(config =>
 {
@@ -78,19 +125,22 @@ builder.Services.AddMemoryCache();
 //{
 //  options.InputFormatters.Add(GetJsonPatchInputFormatter());
 //});
+// NewtonsoftJson Patch
 builder.Services.AddMvcCore(options =>
 {
   var jsonPatchInputFormatter = GetJsonPatchInputFormatter();
   options.InputFormatters.Add(jsonPatchInputFormatter);
 });
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureAddSwaggerGen();
 
-// Add Authentication/Authorization
+// Authentication & Authorization
 builder.Services.ConfigureAuthentication(builder.Configuration);
 builder.Services.ConfigureAuthorization();
 
+// Background Services
 // Add background service for token cleanup
 builder.Services.AddHostedService<TokenCleanupBackgroundService>();
 
@@ -117,6 +167,9 @@ builder.Services.AddSession(options =>
 
 
 
+// ============================================================
+// MIDDLEWARE PIPELINE
+// ============================================================
 
 
 
@@ -129,23 +182,18 @@ if (app.Environment.IsDevelopment())
   app.UseSwaggerUI();
 }
 
-// 1 Exception handler — MUST be outermost
+
+// 1️⃣ Exception handler — MUST be outermost
 app.UseMiddleware<StandardExceptionMiddleware>();
 
-// 2️ Correlation ID + PipelineContext creation + Stopwatch start
+// 2️⃣ Correlation ID + PipelineContext creation + Stopwatch start
 app.UseMiddleware<CorrelationIdMiddleware>();
 
-// 3️ Performance monitoring (reads shared stopwatch)
+// 3️⃣ Performance monitoring (reads shared stopwatch)
 app.UseMiddleware<PerformanceMonitoringMiddleware>();
 
-// 4️ Structured logging (reads shared body + stopwatch)
+// 4️⃣ Structured logging (reads shared body + stopwatch + Controller/Action name)
 app.UseMiddleware<StructuredLoggingMiddleware>();
-
-// NEW: Enhanced audit middleware
-if (builder.Configuration.GetValue<bool>("AuditLogging:EnableAuditMiddleware", true))
-{
-  app.UseMiddleware<EnhancedAuditMiddleware>();
-}
 
 // Enable compression middleware
 // Infrastructure
@@ -178,35 +226,35 @@ app.UseAuthorization();
 // 5️⃣ Audit (AFTER auth — needs context.User)
 if (builder.Configuration.GetValue<bool>("AuditLogging:EnableAuditMiddleware", true))
 {
-  app.UseMiddleware<EnhancedAuditMiddleware>();
+	app.UseMiddleware<EnhancedAuditMiddleware>();
 }
 
 app.MapControllers();
 
-// Startup with proper shutdown
+// Proper startup with shutdown handling
 try
 {
-  Log.Information("bdDevCRM Backend API started successfully");
-  app.Run();
+	Log.Information("bdDevCRM Backend API started successfully");
+	app.Run();
 }
 catch (Exception ex)
 {
-  Log.Fatal(ex, "Application terminated unexpectedly");
+	Log.Fatal(ex, "Application terminated unexpectedly");
 }
 finally
 {
-  Log.CloseAndFlush();
+	Log.CloseAndFlush();
 }
 
 
 // Helper method to get NewtonsoftJsonPatchInputFormatter
 NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() =>
-    new ServiceCollection()
-        .AddLogging()
-        .AddMvc()
-        .AddNewtonsoftJson()
-        .Services.BuildServiceProvider()
-        .GetRequiredService<IOptions<MvcOptions>>()
-        .Value.InputFormatters
-        .OfType<NewtonsoftJsonPatchInputFormatter>()
-        .First();
+	new ServiceCollection()
+		.AddLogging()
+		.AddMvc()
+		.AddNewtonsoftJson()
+		.Services.BuildServiceProvider()
+		.GetRequiredService<IOptions<MvcOptions>>()
+		.Value.InputFormatters
+		.OfType<NewtonsoftJsonPatchInputFormatter>()
+		.First();

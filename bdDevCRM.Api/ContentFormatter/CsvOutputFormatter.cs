@@ -8,116 +8,130 @@ namespace bdDevCRM.Api.ContentFormatter;
 
 public class CsvOutputFormatter : TextOutputFormatter
 {
-  public CsvOutputFormatter()
-  {
-    SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
-    SupportedEncodings.Add(Encoding.UTF8);
-    SupportedEncodings.Add(Encoding.Unicode);
-  }
+	public CsvOutputFormatter()
+	{
+		SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
+		SupportedEncodings.Add(Encoding.UTF8);
+		SupportedEncodings.Add(Encoding.Unicode);
+	}
 
-  protected override bool CanWriteType(Type? type)
-  {
-    if (type == null)
-      return false;
+	protected override bool CanWriteType(Type? type)
+	{
+		if (type == null) return false;
 
-    if (type.IsClass && type != typeof(string))
-    {
-      return true;
-    }
+		// IEnumerable<T> check properly
+		// Previously IsAssignableFrom didn't work correctly with generic type definitions
+		if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+			return true;
 
-    if (type.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()))
-    {
-      return true;
-    }
+		// Any class (single object)
+		if (type.IsClass && type != typeof(string))
+			return true;
 
-    return false;
-  }
+		return false;
+	}
 
-  public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
-  {
-    var response = context.HttpContext.Response;
-    var buffer = new StringBuilder();
-    if (context.Object == null)
-    {
-      await response.WriteAsync(string.Empty);
-      return;
-    }
+	public override async Task WriteResponseBodyAsync(
+		OutputFormatterWriteContext context, Encoding selectedEncoding)
+	{
+		var response = context.HttpContext.Response;
+		var buffer = new StringBuilder();
 
-    Type objectType = context.Object.GetType();
+		if (context.Object == null)
+		{
+			await response.WriteAsync(string.Empty);
+			return;
+		}
 
-    // Check if the object is an enumerable (not the generic definition)
-    if (typeof(IEnumerable).IsAssignableFrom(objectType) && objectType != typeof(string))
-    {
-      // Get the element type
-      Type itemType;
-      if (objectType.IsGenericType)
-      {
-        itemType = objectType.GetGenericArguments()[0];
-      }
-      else
-      {
-        // For non-generic collections, use first item's type
-        var enumerableItems = ((IEnumerable)context.Object).Cast<object>().ToList();
-        if (enumerableItems.Count > 0)
-        {
-          itemType = enumerableItems.First().GetType();
-          WriteCsv(buffer, enumerableItems, itemType);
-        }
-        else
-        {
-          // Empty collection
-          await response.WriteAsync(string.Empty);
-          return;
-        }
-      }
+		var objectType = context.Object.GetType();
 
-      if (objectType.IsGenericType)
-      {
-        WriteCsv(buffer, ((IEnumerable)context.Object).Cast<object>(), itemType);
-      }
-    }
-    else
-    {
-      WriteCsv(buffer, new List<object> { context.Object }, objectType);
-    }
+		if (context.Object is IEnumerable enumerable && objectType != typeof(string))
+		{
+			var items = enumerable.Cast<object>().ToList();
 
-    await response.WriteAsync(buffer.ToString());
-  }
+			if (items.Count == 0)
+			{
+				await response.WriteAsync(string.Empty);
+				return;
+			}
 
-  private static void WriteCsv(StringBuilder buffer, IEnumerable<object> items, Type type)
-  {
-    var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                         .Where(p => p.GetIndexParameters().Length == 0)
-                         .Where(p => p.DeclaringType == type)
-                         .ToArray();
+			// Get item type from first element (most reliable)
+			var itemType = items.First().GetType();
+			WriteCsv(buffer, items, itemType);
+		}
+		else
+		{
+			WriteCsv(buffer, new List<object> { context.Object }, objectType);
+		}
 
-    if (!properties.Any())
-      return;
+		await response.WriteAsync(buffer.ToString());
+	}
 
+	private static void WriteCsv(StringBuilder buffer, IEnumerable<object> items, Type type)
+	{
+		var properties = type
+			.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+			.Where(p => p.GetIndexParameters().Length == 0)
+			// Simple types only (no nested objects)
+			.Where(p => IsSimpleType(p.PropertyType))
+			.ToArray();
 
-    buffer.AppendLine(string.Join(",", properties.Select(p => p.Name)));
+		if (properties.Length == 0) return;
 
-    foreach (var item in items)
-    {
-      var values = properties.Select(p => GetValueAsString(p, item));
-      buffer.AppendLine(string.Join(",", values));
-    }
-  }
+		// Header row
+		buffer.AppendLine(string.Join(",", properties.Select(p => EscapeCsvValue(p.Name))));
 
+		// Data rows
+		foreach (var item in items)
+		{
+			var values = properties.Select(p => GetValueAsString(p, item));
+			buffer.AppendLine(string.Join(",", values));
+		}
+	}
 
-  private static string GetValueAsString(PropertyInfo property, object item)
-  {
-    try
-    {
-      object? value = property.GetValue(item, null);
-      if (value == null) return "";
-      if (value is string strValue) return $"\"{strValue}\""; 
-      return value.ToString() ?? "";
-    }
-    catch (Exception)
-    {
-      return "";
-    }
-  }
+	private static string GetValueAsString(PropertyInfo property, object item)
+	{
+		try
+		{
+			var value = property.GetValue(item, null);
+			if (value == null) return "";
+			return EscapeCsvValue(value.ToString() ?? "");
+		}
+		catch
+		{
+			return "";
+		}
+	}
+
+	/// <summary>
+	/// CSV value escape — handles comma, quote, and newline characters
+	/// </summary>
+	private static string EscapeCsvValue(string value)
+	{
+		if (string.IsNullOrEmpty(value)) return "";
+
+		// If value contains comma, quote, or newline, wrap it in double quotes
+		if (value.Contains(',') || value.Contains('"') || value.Contains('\n') || value.Contains('\r'))
+		{
+			// Escape double quotes by doubling them
+			value = value.Replace("\"", "\"\"");
+			return $"\"{value}\"";
+		}
+
+		return value;
+	}
+
+	private static bool IsSimpleType(Type type)
+	{
+		var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+		return underlyingType.IsPrimitive ||
+			   underlyingType.IsEnum ||
+			   underlyingType == typeof(string) ||
+			   underlyingType == typeof(decimal) ||
+			   underlyingType == typeof(DateTime) ||
+			   underlyingType == typeof(DateTimeOffset) ||
+			   underlyingType == typeof(TimeSpan) ||
+			   underlyingType == typeof(Guid);
+	}
 }
-

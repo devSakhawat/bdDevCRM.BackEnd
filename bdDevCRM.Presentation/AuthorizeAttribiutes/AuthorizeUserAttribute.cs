@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace bdDevCRM.Presentation.AuthorizeAttribiutes;
 
 /// <summary>
-/// ✅ Fix: use IAsyncAuthorizationFilter — to prevent thread block
+/// use IAsyncAuthorizationFilter — to prevent thread block
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class AuthorizeUserAttribute : Attribute, IAsyncAuthorizationFilter
@@ -60,7 +60,7 @@ public class AuthorizeUserAttribute : Attribute, IAsyncAuthorizationFilter
 
       if (!memoryCache.TryGetValue(cacheKey, out user) || user == null)
       {
-        // ✅ Fix: Async DB call — thread block হবে না
+        // Async DB call — thread block হবে না
         user = await serviceManager.Users.GetUserAsync(userId, trackChanges: false);
 
         if (user == null)
