@@ -33,7 +33,7 @@ if (File.Exists(envFilePath))
 		var key = line[..separatorIndex].Trim();
 		var value = line[(separatorIndex + 1)..].Trim();
 
-		// OS environment variable priority পায় — override করে না
+		// Getting OS environment variable priority  — don't override 
 		if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
 		{
 			Environment.SetEnvironmentVariable(key, value);
@@ -75,7 +75,7 @@ builder.Services.AddSingleton<IHybridCacheService, HybridCacheService>();
 // Application Insights
 builder.Services.ConfigureApplicationInsights(builder.Configuration);
 
-// ✅ Audit Log Queue + Background Writer (non-blocking audit)
+// Audit Log Queue + Background Writer (non-blocking audit)
 builder.Services.AddSingleton<AuditLogQueue>();
 builder.Services.AddHostedService<AuditLogWriterService>();
 
@@ -85,7 +85,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 	options.SuppressModelStateInvalidFilter = true;
 });
 
-// ✅ LogActionAttribute সরানো — StructuredLoggingMiddleware এই কাজ করে
+// Action Attribute — StructuredLoggingMiddleware 
 builder.Services.AddScoped<EmptyObjectFilterAttribute>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
@@ -158,9 +158,6 @@ app.UseMiddleware<PerformanceMonitoringMiddleware>();
 // 4️⃣ Structured logging (reads shared body + stopwatch + Controller/Action name)
 app.UseMiddleware<StructuredLoggingMiddleware>();
 
-// ❌ CacheHeaderMiddleware সরানো (পরে আলাদা সমাধান হবে)
-// ❌ LogActionAttribute সরানো (StructuredLoggingMiddleware করছে)
-
 // Infrastructure middleware
 app.UseResponseCompression();
 app.UseHttpsRedirection();
@@ -194,7 +191,7 @@ if (builder.Configuration.GetValue<bool>("AuditLogging:EnableAuditMiddleware", t
 
 app.MapControllers();
 
-// ✅ Graceful startup + shutdown
+// Graceful startup + shutdown
 try
 {
 	Log.Information("bdDevCRM Backend API started successfully");
