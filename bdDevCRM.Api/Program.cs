@@ -34,20 +34,21 @@ builder.Services.ConfigureGzipCompression();
 builder.Services.ConfigureFileLimit();
 builder.Services.ConfigureCookiePolicy(builder.Environment);
 
-// NEW: Configure distributed cache (Hybrid Redis + Memory)
+// Configure distributed cache (Hybrid Redis + Memory)
 builder.Services.ConfigureDistributedCache(builder.Configuration);
 builder.Services.AddSingleton<IHybridCacheService, HybridCacheService>();
-// NEW: Configure Application Insights
+// Configure Application Insights
 builder.Services.ConfigureApplicationInsights(builder.Configuration);
+
+// Audit Log Queue + Background Writer
+builder.Services.AddSingleton<AuditLogQueue>();
+builder.Services.AddHostedService<AuditLogWriterService>();
+
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
   options.SuppressModelStateInvalidFilter = true;
 });
-
-// Audit Log Queue + Background Writer
-builder.Services.AddSingleton<AuditLogQueue>();
-builder.Services.AddHostedService<AuditLogWriterService>();
 
 builder.Services.AddScoped<EmptyObjectFilterAttribute>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();

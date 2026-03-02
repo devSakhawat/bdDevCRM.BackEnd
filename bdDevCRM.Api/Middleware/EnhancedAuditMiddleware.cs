@@ -22,11 +22,7 @@ public class EnhancedAuditMiddleware
   private readonly AuditLogQueue _auditQueue;
   private readonly int _maxCaptureBytes;
 
-  public EnhancedAuditMiddleware(
-      RequestDelegate next,
-      ILogger<EnhancedAuditMiddleware> logger,
-      IConfiguration configuration,
-      AuditLogQueue auditQueue)          // inject here
+  public EnhancedAuditMiddleware( RequestDelegate next, ILogger<EnhancedAuditMiddleware> logger, IConfiguration configuration, AuditLogQueue auditQueue)          // inject here
   {
     _next = next;
     _logger = logger;
@@ -51,12 +47,12 @@ public class EnhancedAuditMiddleware
       return;
     }
 
-    // ✅ Get shared context (stopwatch, correlationId already set by earlier middleware)
+    // Get shared context (stopwatch, correlationId already set by earlier middleware)
     var pipelineCtx = RequestPipelineContext.GetOrCreate(context);
 
     try
     {
-      // ✅ Request body — uses cached version (will NOT read again)
+      // Request body — uses cached version (will NOT read again)
       // RequestBodyReader.ReadOnceAsync checks if body was already read
       // If StructuredLoggingMiddleware already read it, this returns cached copy instantly
       string? requestBody = null;
@@ -68,17 +64,13 @@ public class EnhancedAuditMiddleware
       // Execute next middleware / controller
       await _next(context);
 
-      // ✅ Read duration from shared stopwatch (not a new one)
+      // Read duration from shared stopwatch (not a new one)
       var durationMs = pipelineCtx.Stopwatch.ElapsedMilliseconds;
 
       // Create audit log entry
-      var auditLog = CreateAuditLog(
-          context,
-          requestBody,
-          durationMs,
-          pipelineCtx.CorrelationId);
+      var auditLog = CreateAuditLog( context, requestBody, durationMs, pipelineCtx.CorrelationId);
 
-      // ✅ Enqueue instead of Task.Run
+      // Enqueue instead of Task.Run
       // Non-blocking, thread-safe, bounded queue
       // AuditLogWriterService will batch-insert to DB in background
       if (!_auditQueue.TryEnqueue(auditLog))
@@ -107,31 +99,22 @@ public class EnhancedAuditMiddleware
   }
 
   #region Path Filtering
-
   private bool ShouldSkipAudit(PathString path)
   {
     var pathValue = path.Value?.ToLower() ?? string.Empty;
-    var skipPaths = _configuration.GetSection("AuditLogging:SkipPaths").Get<string[]>()
-                    ?? Array.Empty<string>();
+    var skipPaths = _configuration.GetSection("AuditLogging:SkipPaths").Get<string[]>() ?? Array.Empty<string>();
 
     foreach (var skipPath in skipPaths)
     {
-      if (pathValue.Contains(skipPath.ToLower()))
-        return true;
+      if (pathValue.Contains(skipPath.ToLower())) return true;
     }
 
     return false;
   }
-
   #endregion
 
   #region Audit Log Creation
-
-  private AuditLog CreateAuditLog(
-      HttpContext context,
-      string? requestBody,
-      long durationMs,
-      string correlationId)
+  private AuditLog CreateAuditLog( HttpContext context, string? requestBody, long durationMs, string correlationId)
   {
     var user = context.User;
     var request = context.Request;
@@ -179,11 +162,7 @@ public class EnhancedAuditMiddleware
     };
   }
 
-  private AuditLog CreateErrorAuditLog(
-      HttpContext context,
-      Exception ex,
-      long durationMs,
-      string correlationId)
+  private AuditLog CreateErrorAuditLog( HttpContext context, Exception ex, long durationMs, string correlationId)
   {
     var auditLog = CreateAuditLog(context, null, durationMs, correlationId);
     auditLog.Success = false;
@@ -195,7 +174,6 @@ public class EnhancedAuditMiddleware
   #endregion
 
   #region Helper Methods
-
   private int? GetUserId(ClaimsPrincipal? user)
   {
     var claim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;

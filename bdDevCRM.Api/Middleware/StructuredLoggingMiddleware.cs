@@ -17,10 +17,7 @@ public class StructuredLoggingMiddleware
   private readonly bool _logResponseBody;
   private readonly int _maxBodySize;
 
-  public StructuredLoggingMiddleware(
-      RequestDelegate next,
-      ILogger<StructuredLoggingMiddleware> logger,
-      IConfiguration configuration)
+  public StructuredLoggingMiddleware( RequestDelegate next, ILogger<StructuredLoggingMiddleware> logger, IConfiguration configuration)
   {
     _next = next;
     _logger = logger;

@@ -17,10 +17,7 @@ public class StandardExceptionMiddleware
   private readonly ILogger<StandardExceptionMiddleware> _logger;
   private const string ApiVersion = "1.0";
 
-  public StandardExceptionMiddleware(
-      RequestDelegate next,
-      IHostEnvironment env,
-      ILogger<StandardExceptionMiddleware> logger)
+  public StandardExceptionMiddleware( RequestDelegate next, IHostEnvironment env, ILogger<StandardExceptionMiddleware> logger)
   {
     _next = next;
     _env = env;
@@ -41,7 +38,7 @@ public class StandardExceptionMiddleware
 
   private async Task HandleExceptionAsync(HttpContext context, Exception ex)
   {
-    // ✅ Conflict #4 Fix: Get Correlation ID from PipelineContext
+    // Conflict #4 Fix: Get Correlation ID from PipelineContext
     // If PipelineContext doesn't exist (crash before CorrelationIdMiddleware),
     // then use fallback
     var pipelineCtx = RequestPipelineContext.Get(context);
@@ -152,9 +149,7 @@ public class StandardExceptionMiddleware
     };
   }
 
-  private StandardApiResponse<object> CreateStandardResponse(
-      int statusCode, string message, string errorCode, string errorType,
-      string? details, Dictionary<string, object>? additionalData,
+  private StandardApiResponse<object> CreateStandardResponse( int statusCode, string message, string errorCode, string errorType, string? details, Dictionary<string, object>? additionalData,
       string correlationId, string? stackTrace = null)
   {
     return new StandardApiResponse<object>
