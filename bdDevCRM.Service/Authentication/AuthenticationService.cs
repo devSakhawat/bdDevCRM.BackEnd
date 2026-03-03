@@ -18,7 +18,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using BCrypt.Net;
 
 namespace bdDevCRM.Services.Authentication;
 
@@ -46,18 +45,7 @@ public class AuthenticationService : IAuthenticationService
 
 		if (user == null) return false;
 
-		// SECURITY FIX: Verify password using BCrypt
-		// This prevents authentication bypass vulnerability
-		try
-		{
-			return BCrypt.Net.BCrypt.Verify(userForAuth.Password, user.Password);
-		}
-		catch (Exception)
-		{
-			// If BCrypt verification fails (e.g., invalid hash format),
-			// return false to prevent authentication bypass
-			return false;
-		}
+		return true; // ⚠️ CRITICAL: Replace with actual password validation
 	}
 
 	public async Task<LoginValidationResult> ValidateUserLogin(UserForAuthenticationDto userForAuth, UsersDto userDB)

@@ -185,42 +185,40 @@ public static class ServiceExtensions
 				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]))
 			};
 
-			// SECURITY FIX: Enable token blacklist validation
-			// This prevents use of revoked tokens after logout
-			options.Events = new JwtBearerEvents
-			{
-				OnTokenValidated = async context =>
-				{
-					try
-					{
+			//options.Events = new JwtBearerEvents
+			//{
+			//	OnTokenValidated = async context =>
+			//	{
+			//		try
+			//		{
 
-						var token = context.SecurityToken as JwtSecurityToken;
-						if (token == null)
-						{
-							context.Fail("Invalid token format.");
-							return;
-						}
+			//			var token = context.SecurityToken as JwtSecurityToken;
+			//			if (token == null)
+			//			{
+			//				context.Fail("Invalid token format.");
+			//				return;
+			//			}
 
-						var rawToken = token.RawData;
-						if (string.IsNullOrEmpty(rawToken))
-						{
-							context.Fail("Token data is missing.");
-							return;
-						}
+			//			var rawToken = token.RawData;
+			//			if (string.IsNullOrEmpty(rawToken))
+			//			{
+			//				context.Fail("Token data is missing.");
+			//				return;
+			//			}
 
-						var tokenBlacklistService = context.HttpContext.RequestServices.GetRequiredService<ITokenBlacklistService>();
+			//			var tokenBlacklistService = context.HttpContext.RequestServices.GetRequiredService<ITokenBlacklistService>();
 
-						if (await tokenBlacklistService.IsTokenBlacklisted(rawToken))
-						{
-							context.Fail("Token is blacklisted.");
-						}
-					}
-					catch (Exception ex)
-					{
-						context.Fail($"An error occurred during token validation: {ex.Message}");
-					}
-				}
-			};
+			//			if (await tokenBlacklistService.IsTokenBlacklisted(rawToken))
+			//			{
+			//				context.Fail("Token is blacklisted.");
+			//			}
+			//		}
+			//		catch (Exception ex)
+			//		{
+			//			context.Fail($"An error occurred during token validation: {ex.Message}");
+			//		}
+			//	}
+			//};
 		});
 	}
 

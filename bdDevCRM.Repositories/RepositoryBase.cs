@@ -1,6 +1,5 @@
 ﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Repositories.Exceptions;
-using bdDevCRM.Repositories.Security;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Sql.Context;
 using Microsoft.Data.SqlClient;
@@ -530,19 +529,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   #region grid with duplicate column name and insensative column and property name
   public async Task<GridEntity<T>> GridData<T>(string query, CRMGridOptions options, string orderBy, string condition)
   {
-    // SECURITY FIX: Validate orderBy and condition to prevent SQL injection
-    var allowedColumns = SqlInjectionValidator.GetAllowedColumns<T>();
-
-    if (!string.IsNullOrEmpty(orderBy) && !SqlInjectionValidator.IsValidOrderBy(orderBy, allowedColumns))
-    {
-      throw new ArgumentException("Invalid orderBy clause detected. Potential SQL injection attempt.", nameof(orderBy));
-    }
-
-    if (!string.IsNullOrEmpty(condition) && SqlInjectionValidator.ContainsSqlInjection(condition))
-    {
-      throw new ArgumentException("Invalid condition clause detected. Potential SQL injection attempt.", nameof(condition));
-    }
-
     var connection = _context.Database.GetDbConnection();
     var sqlCount = "SELECT COUNT(*) FROM (" + query + " ) As tbl ";
     query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, condition??"");
@@ -652,19 +638,6 @@ public class RepositoryBase<T> : IRepositoryBase<T> where T : class
   // Update Version with auto generated columns
   public async Task<GridEntity<T>> GridDataUpdated<T>(string query, CRMGridOptions options, string orderBy, string condition)
   {
-    // SECURITY FIX: Validate orderBy and condition to prevent SQL injection
-    var allowedColumns = SqlInjectionValidator.GetAllowedColumns<T>();
-
-    if (!string.IsNullOrEmpty(orderBy) && !SqlInjectionValidator.IsValidOrderBy(orderBy, allowedColumns))
-    {
-      throw new ArgumentException("Invalid orderBy clause detected. Potential SQL injection attempt.", nameof(orderBy));
-    }
-
-    if (!string.IsNullOrEmpty(condition) && SqlInjectionValidator.ContainsSqlInjection(condition))
-    {
-      throw new ArgumentException("Invalid condition clause detected. Potential SQL injection attempt.", nameof(condition));
-    }
-
     var connection = _context.Database.GetDbConnection();
     var sqlCount = "SELECT COUNT(*) FROM (" + query + " ) AS tbl";
     query = CRMGridDataSource<T>.DataSourceQuery(options, query, orderBy, condition);
