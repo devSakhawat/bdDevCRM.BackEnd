@@ -45,10 +45,7 @@ public class AuthenticationService : IAuthenticationService
 
 		if (user == null) return false;
 
-		// Password validation logic here
-		// TODO: Implement proper password validation
-		// Example: BCrypt. Verify(userForAuth.Password, user.Password)
-		return true; // Replace with actual password validation
+		return true; // ⚠️ CRITICAL: Replace with actual password validation
 	}
 
 	public async Task<LoginValidationResult> ValidateUserLogin(UserForAuthenticationDto userForAuth, UsersDto userDB)

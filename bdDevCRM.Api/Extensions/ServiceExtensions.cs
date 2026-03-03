@@ -3,6 +3,7 @@ using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Repositories;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.Services;
+using bdDevCRM.ServiceContract.Authentication;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
 using bdDevCRM.Sql.Context;
@@ -17,6 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 namespace bdDevCRM.Api.Extensions;
@@ -185,37 +187,37 @@ public static class ServiceExtensions
 
 			//options.Events = new JwtBearerEvents
 			//{
-			//  OnTokenValidated = async context =>
-			//  {
-			//    try
-			//    {
+			//	OnTokenValidated = async context =>
+			//	{
+			//		try
+			//		{
 
-			//      var token = context.SecurityToken as JwtSecurityToken;
-			//      if (token == null)
-			//      {
-			//        context.Fail("Invalid token format.");
-			//        return;
-			//      }
+			//			var token = context.SecurityToken as JwtSecurityToken;
+			//			if (token == null)
+			//			{
+			//				context.Fail("Invalid token format.");
+			//				return;
+			//			}
 
-			//      var rawToken = token.RawData;
-			//      if (string.IsNullOrEmpty(rawToken))
-			//      {
-			//        context.Fail("Token data is missing.");
-			//        return;
-			//      }
+			//			var rawToken = token.RawData;
+			//			if (string.IsNullOrEmpty(rawToken))
+			//			{
+			//				context.Fail("Token data is missing.");
+			//				return;
+			//			}
 
-			//      var tokenBlacklistService = context.HttpContext.RequestServices.GetRequiredService<ITokenBlacklistService>();
+			//			var tokenBlacklistService = context.HttpContext.RequestServices.GetRequiredService<ITokenBlacklistService>();
 
-			//      if (await tokenBlacklistService.IsTokenBlacklisted(rawToken))
-			//      {
-			//        context.Fail("Token is blacklisted.");
-			//      }
-			//    }
-			//    catch (Exception ex)
-			//    {
-			//      context.Fail($"An error occurred during token validation: {ex.Message}");
-			//    }
-			//  }
+			//			if (await tokenBlacklistService.IsTokenBlacklisted(rawToken))
+			//			{
+			//				context.Fail("Token is blacklisted.");
+			//			}
+			//		}
+			//		catch (Exception ex)
+			//		{
+			//			context.Fail($"An error occurred during token validation: {ex.Message}");
+			//		}
+			//	}
 			//};
 		});
 	}
