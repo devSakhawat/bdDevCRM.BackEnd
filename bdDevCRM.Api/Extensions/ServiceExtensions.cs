@@ -2,6 +2,9 @@
 using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Repositories;
 using bdDevCRM.RepositoriesContracts;
+using bdDevCRM.Service.Authentication.Security;
+using bdDevCRM.Service.Authentication.Settings;
+using bdDevCRM.ServiceContract.Authentication.Security;
 using bdDevCRM.Services;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
@@ -16,7 +19,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using Serilog.Events;
 using System.Text;
 
 namespace bdDevCRM.Api.Extensions;
@@ -92,28 +94,28 @@ public static class ServiceExtensions
 		{
 			options.AddPolicy("CorsPolicy", builder =>
 		{
-			  builder
-			  .WithOrigins(allowedOrigins)
-			  .AllowAnyHeader()
-			  .AllowAnyMethod();
+			builder
+			.WithOrigins(allowedOrigins)
+			.AllowAnyHeader()
+			.AllowAnyMethod();
 
-			  if (allowCredentials)
-			  {
-				  builder.AllowCredentials();
-			  }
+			if (allowCredentials)
+			{
+				builder.AllowCredentials();
+			}
 
-			  if (preflightMaxAge > 0)
-			  {
-				  builder.SetPreflightMaxAge(TimeSpan.FromSeconds(preflightMaxAge));
-			  }
-		  });
+			if (preflightMaxAge > 0)
+			{
+				builder.SetPreflightMaxAge(TimeSpan.FromSeconds(preflightMaxAge));
+			}
+		});
 		});
 	}
 
 	public static void Configureiisintegration(this IServiceCollection services) => services.Configure<IISOptions>(options =>
-	  {
-		  options.AutomaticAuthentication = false;
-	  });
+		{
+			options.AutomaticAuthentication = false;
+		});
 
 	//public static void ConfigureLoggerService(this IServiceCollection services)
 	//{
@@ -220,6 +222,25 @@ public static class ServiceExtensions
 		});
 	}
 
+	public static void PasswordSecurity(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.Configure<PasswordHashingSettings>(configuration.GetSection(PasswordHashingSettings.SectionName));
+	}
+	public static void PasswordHashingSecuritySettings(this IServiceCollection services, IConfiguration configuration)
+	{
+		// Validate settings on startup
+		services.AddOptions<PasswordHashingSettings>()
+			.Bind(configuration.GetSection(PasswordHashingSettings.SectionName))
+			.ValidateDataAnnotations()
+			.ValidateOnStart();
+	}
+
+	public static void PasswordHasher(this IServiceCollection services, IConfiguration configuration)
+	{// Register password hasher service (Scoped - thread-safe, per request)
+		services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
+	}
+
+
 	public static void ConfigureApiBehaviorOptions(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<ApiBehaviorOptions>(options =>
@@ -228,9 +249,9 @@ public static class ServiceExtensions
 			options.InvalidModelStateResponseFactory = actionContext =>
 		{
 			var errors = actionContext.ModelState
-		   .Where(e => e.Value.Errors.Count() > 0)
-		   .SelectMany(x => x.Value.Errors)
-		   .Select(y => y.ErrorMessage).ToArray();
+			 .Where(e => e.Value.Errors.Count() > 0)
+			 .SelectMany(x => x.Value.Errors)
+			 .Select(y => y.ErrorMessage).ToArray();
 
 			var errorResponse = new ApiValidationErrorResponse
 			{
@@ -249,13 +270,13 @@ public static class ServiceExtensions
 	public static void ConfigureResponseCompression(this IServiceCollection services)
 	{
 		services.AddResponseCompression(options =>
-		  {
-			  options.EnableForHttps = true;
-			  options.Providers.Add<GzipCompressionProvider>();
-			  options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-			  new[] { "application/json" }
-		  );
-		  }
+			{
+				options.EnableForHttps = true;
+				options.Providers.Add<GzipCompressionProvider>();
+				options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+				new[] { "application/json" }
+			);
+			}
 		);
 	}
 
@@ -318,15 +339,15 @@ public static class ServiceExtensions
 			options.AddSecurityRequirement(new OpenApiSecurityRequirement
 			{
 				{
-				  new OpenApiSecurityScheme
-				  {
+					new OpenApiSecurityScheme
+					{
 					Reference = new OpenApiReference
 					{
-					  Type = ReferenceType.SecurityScheme,
-					  Id = "Bearer"
+						Type = ReferenceType.SecurityScheme,
+						Id = "Bearer"
 					}
-				  },
-				  Array.Empty<string>()
+					},
+					Array.Empty<string>()
 				}
 			});
 		});

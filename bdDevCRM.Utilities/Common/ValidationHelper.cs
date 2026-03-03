@@ -220,29 +220,6 @@ public class ValidationHelper
 		return (encryptPass == dbPassword);
 	}
 
-	public static bool ValidateLoginPassword_Old(string inputPassword, string dbPassword, bool encryption)
-	{
-		string encryptPass = "";
-		if (encryption)
-		{
-			encryptPass = EncryptDecryptHelper.Encrypt(inputPassword);
-		}
-		else
-		{
-			encryptPass = inputPassword;
-		}
-
-
-		if (encryptPass == dbPassword)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
 	public string GetEncryptedPassword(string password)
 	{
 		return EncryptDecryptHelper.Encrypt(password);

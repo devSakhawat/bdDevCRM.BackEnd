@@ -5,6 +5,7 @@ using bdDevCRM.Service.Core.SystemAdmin;
 using bdDevCRM.Service.CRM;
 using bdDevCRM.Service.DMS;
 using bdDevCRM.ServiceContract.Authentication;
+using bdDevCRM.ServiceContract.Authentication.Security;
 using bdDevCRM.ServiceContract.Core.HR;
 using bdDevCRM.ServiceContract.Core.SystemAdmin;
 using bdDevCRM.ServiceContract.CRM;
@@ -25,8 +26,9 @@ namespace bdDevCRM.Services;
 public sealed class ServiceManager : IServiceManager
 {
   private readonly IMemoryCache _cache;
+	private readonly IPasswordHasher _passwordHasher;
 
-  private readonly Lazy<ITokenBlacklistService> _tokenBlackListService;
+	private readonly Lazy<ITokenBlacklistService> _tokenBlackListService;
   private readonly Lazy<ICrmCountryService> _countryService;
   private readonly Lazy<ICurrencyService> _currencyService;
   private readonly Lazy<ICompanyService> _companyService;
@@ -39,7 +41,8 @@ public sealed class ServiceManager : IServiceManager
   private readonly Lazy<IQueryAnalyzerService> _queryAnalyzerService;
   private readonly Lazy<IStatusService> _statusService;
   private readonly Lazy<IAccessControlService> _accessControlService;
-  private readonly Lazy<IPropertyInspectorService> _propertyInspectorService;
+  private readonly Lazy<IPropertyInspectorService> _propertyInspectorService; 
+
 
   #region HR Area
   private readonly Lazy<IEmployeeService> _employeeService;
@@ -91,18 +94,19 @@ public sealed class ServiceManager : IServiceManager
 	#endregion
 
 	// Note: replaced ILoggerManager with ILoggerFactory to create typed ILogger<T> for each service.
-	public ServiceManager(IRepositoryManager repository, ILoggerFactory loggerFactory, IConfiguration configuration, IMemoryCache cache, IHttpContextAccessor httpContextAccessor)
+	public ServiceManager(IRepositoryManager repository, ILoggerFactory loggerFactory, IConfiguration configuration, IMemoryCache cache, IHttpContextAccessor httpContextAccessor , IPasswordHasher passwordHasher)
   {
     _cache = cache;
+		_passwordHasher = passwordHasher;
 
-    _propertyInspectorService = new Lazy<IPropertyInspectorService>(() => new PropertyInspectorService(configuration, loggerFactory.CreateLogger<PropertyInspectorService>(), httpContextAccessor));
+		_propertyInspectorService = new Lazy<IPropertyInspectorService>(() => new PropertyInspectorService(configuration, loggerFactory.CreateLogger<PropertyInspectorService>(), httpContextAccessor));
     _tokenBlackListService = new Lazy<ITokenBlacklistService>(() => new TokenBlacklistService(configuration, repository, loggerFactory.CreateLogger<TokenBlacklistService>()));
     _countryService = new Lazy<ICrmCountryService>(() => new CrmCountryService(repository, loggerFactory.CreateLogger<CrmCountryService>(), configuration));
     _currencyService = new Lazy<ICurrencyService>(() => new CurrencyService(repository, loggerFactory.CreateLogger<CurrencyService>(), configuration));
     _companyService = new Lazy<ICompanyService>(() => new CompanyService(repository, loggerFactory.CreateLogger<CompanyService>(), configuration));
     _systemSettingsService = new Lazy<ISystemSettingsService>(() => new SystemSettingsService(repository, loggerFactory.CreateLogger<SystemSettingsService>(), configuration));
     _userService = new Lazy<IUsersService>(() => new UsersService(repository, loggerFactory.CreateLogger<UsersService>(), configuration));
-    _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(repository, loggerFactory.CreateLogger<AuthenticationService>(), configuration , httpContextAccessor));
+    _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(repository, loggerFactory.CreateLogger<AuthenticationService>(), configuration , httpContextAccessor , _passwordHasher));
     _menuService = new Lazy<IMenuService>(() => new MenuService(repository, loggerFactory.CreateLogger<MenuService>(), configuration));
     _moduleService = new Lazy<IModuleService>(() => new ModuleService(repository, loggerFactory.CreateLogger<ModuleService>(), configuration));
     _groupService = new Lazy<IGroupService>(() => new GroupService(repository, loggerFactory.CreateLogger<GroupService>(), configuration));
