@@ -1,13 +1,12 @@
-﻿using Azure;
-using bdDevCRM.Entities.Entities.System;
+﻿using bdDevCRM.Entities.Entities.System;
 using bdDevCRM.Entities.Entities.Token;
 using bdDevCRM.RepositoriesContracts;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServiceContract.Authentication;
+using bdDevCRM.ServiceContract.Authentication.Security;
 using bdDevCRM.Shared.DataTransferObjects.Authentication;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Shared.Exceptions.BaseException;
-using bdDevCRM.Utilities.Common;
 using bdDevCRM.Utilities.OthersLibrary;
 using bdDevs.Security;
 using Microsoft.AspNetCore.Http;
@@ -27,13 +26,15 @@ public class AuthenticationService : IAuthenticationService
 	private readonly IConfiguration _configuration;
 	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly ILogger<AuthenticationService> _logger;
+	private readonly IPasswordHasher _passwordHasher;
 
-	public AuthenticationService(IRepositoryManager repository, ILogger<AuthenticationService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+	public AuthenticationService(IRepositoryManager repository, ILogger<AuthenticationService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IPasswordHasher passwordHasher)
 	{
 		_repository = repository;
 		_configuration = configuration;
 		_httpContextAccessor = httpContextAccessor;
 		_logger = logger;
+		_passwordHasher = passwordHasher;
 	}
 
 	/// <summary>
@@ -85,7 +86,6 @@ public class AuthenticationService : IAuthenticationService
 		// ============================================================================
 		// STEP 3: Check if User is Expired
 		// ============================================================================
-
 		if (userDB.IsExpired.GetValueOrDefault())
 		{
 			return new LoginValidationResult
@@ -99,8 +99,62 @@ public class AuthenticationService : IAuthenticationService
 		// ============================================================================
 		// STEP 4: Validate Password
 		// ============================================================================
+		//var isValidPassword = ValidationHelper.ValidateLoginPassword(userForAuth.Password, userDB.Password, true);
 
-		var isValidPassword = ValidationHelper.ValidateLoginPassword(userForAuth.Password, userDB.Password, true);
+		bool isValidPassword;
+		try
+		{
+			// Validate inputs
+			if (string.IsNullOrWhiteSpace(userForAuth?.Password))
+			{
+				_logger.LogWarning("Login attempt with null/empty password for {LoginId}", userForAuth?.LoginId);
+				return new LoginValidationResult
+				{
+					IsSuccess = false,
+					Status = LoginValidationStatus.Failed,
+					Message = "Invalid credentials"
+				};
+			}
+
+			if (string.IsNullOrWhiteSpace(userDB?.Password))
+			{
+				_logger.LogError("User {UserId} has null/empty password hash in database", userDB?.UserId);
+				return new LoginValidationResult
+				{
+					IsSuccess = false,
+					Status = LoginValidationStatus.Failed,
+					Message = "Account configuration error. Contact administrator."
+				};
+			}
+
+			// Password verification with error handling
+			isValidPassword = _passwordHasher.VerifyPassword(userForAuth.Password, userDB.Password);
+		}
+		catch (ArgumentException ex)
+		{
+			// Invalid input (e.g., password too long)
+			_logger.LogWarning(ex, "Invalid password input for {LoginId}", userForAuth.LoginId);
+
+			return new LoginValidationResult
+			{
+				IsSuccess = false,
+				Status = LoginValidationStatus.Failed,
+				Message = "Invalid credentials" // Don't leak why it failed
+			};
+		}
+		catch (Exception ex)
+		{
+			// Unexpected error - fail securely
+			_logger.LogError(ex, "Unexpected error during password verification for {LoginId}", userForAuth.LoginId);
+
+			return new LoginValidationResult
+			{
+				IsSuccess = false,
+				Status = LoginValidationStatus.Failed,
+				Message = "An error occurred. Please try again."
+			};
+		}
+
 
 		if (!isValidPassword)
 		{
@@ -425,7 +479,7 @@ public class AuthenticationService : IAuthenticationService
 
 		// Check if password change required on first login
 		//if (systemSettings.ChangePassFirstLogin && user.IsFirstLoginEnable) --5.6.c
-		if ((bool)systemSettings.ChangePassFirstLogin )
+		if ((bool)systemSettings.ChangePassFirstLogin)
 		{
 			return (false, "Password change required on first login");
 		}

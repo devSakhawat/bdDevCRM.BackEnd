@@ -17,7 +17,7 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 // ============================================================
-// ✅ P0: Load .env file → Environment Variables
+// P0: Load .env file → Environment Variables
 // ============================================================
 var envFilePath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
 if (File.Exists(envFilePath))
@@ -33,7 +33,7 @@ if (File.Exists(envFilePath))
 		var key = line[..separatorIndex].Trim();
 		var value = line[(separatorIndex + 1)..].Trim();
 
-		// Getting OS environment variable priority  — don't override 
+		// OS environment variable priority — don't override existing variables
 		if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
 		{
 			Environment.SetEnvironmentVariable(key, value);
@@ -53,6 +53,12 @@ builder.Services.Configureiisintegration();
 // Serilog
 builder.Services.ConfigureSerilog(builder.Configuration, builder.Environment);
 builder.Host.UseSerilog();
+
+// Password Hasher
+builder.Services.PasswordSecurity(builder.Configuration);
+builder.Services.PasswordHashingSecuritySettings(builder.Configuration);
+builder.Services.PasswordHasher(builder.Configuration);
+
 
 // Repository & Service
 builder.Services.ConfigureRepositoryManager();
@@ -85,7 +91,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 	options.SuppressModelStateInvalidFilter = true;
 });
 
-// Action Attribute — StructuredLoggingMiddleware 
+// ActionAttributes
 builder.Services.AddScoped<EmptyObjectFilterAttribute>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
