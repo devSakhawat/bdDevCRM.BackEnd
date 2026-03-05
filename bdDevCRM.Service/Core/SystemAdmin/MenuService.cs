@@ -49,11 +49,7 @@ internal sealed class MenuService : IMenuService
 
         _logger.LogInformation("Fetching menu permissions for user {UserId}", userid);
 
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var menuRepositoryDtos = await _repository.Menus.SelectMenuByUserPermission(userid, trackChanges);
-        stopwatch.Stop();
-
-        _logger.LogInformation("Menu query execution time: {ElapsedMilliseconds}ms for user {UserId}", stopwatch.ElapsedMilliseconds, userid);
 
         if (!menuRepositoryDtos.Any())
         {
