@@ -410,6 +410,18 @@ public static class ServiceExtensions
 		services.AddSingleton<Serilog.ILogger>(Log.Logger);
 	}
 
+	/// <summary>
+	/// Register infrastructure services for cross-cutting concerns.
+	/// These services provide abstraction over HTTP, caching, and cookie operations.
+	/// </summary>
+	public static void ConfigureInfrastructureServices(this IServiceCollection services)
+	{
+		services.AddScoped<ServiceContract.Core.Infrastructure.ICookieManagementService, Service.Core.Infrastructure.CookieManagementService>();
+		services.AddScoped<ServiceContract.Core.Infrastructure.IHttpContextService, Service.Core.Infrastructure.HttpContextService>();
+		services.AddScoped<ServiceContract.Core.Infrastructure.ICacheManagementService, Service.Core.Infrastructure.CacheManagementService>();
+	}
+
+
 	// A tiny local fallback for environment when null — won't be used in real Program.cs, but keeps null-safety for unit tests.
 	private class WebHostEnvironmentMock : IWebHostEnvironment
 	{

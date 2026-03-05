@@ -1,6 +1,6 @@
 ﻿using bdDevCRM.Utilities.CRMGrid.GRID;
 using bdDevCRM.Entities.Entities.System;
-using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.ActionFilters;
 using bdDevCRM.Presentation.Controllers.BaseController;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.RepositoriesContracts.Core.SystemAdmin;
@@ -14,7 +14,7 @@ using bdDevCRM.Shared.Exceptions.BaseException;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using bdDevCRM.Presentation.AuthorizeAttribiutes;
+using bdDevCRM.Presentation.AuthorizeAttributes;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
