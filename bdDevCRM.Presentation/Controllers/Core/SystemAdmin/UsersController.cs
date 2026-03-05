@@ -13,6 +13,15 @@ using Microsoft.Extensions.Caching.Memory;
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 
+/// <summary>
+/// Users management endpoints.
+///
+/// [AuthorizeUser] at class-level ensures:
+///    - Every request validates user via attribute
+///    - CurrentUser / CurrentUserId available from BaseApiController
+///    - No auth checks needed in controller methods
+///    - Exceptions handled by StandardExceptionMiddleware
+/// </summary>
 [AuthorizeUser]
 public class UsersController : BaseApiController
 {
@@ -26,21 +35,14 @@ public class UsersController : BaseApiController
 	[HttpPost(RouteConstants.UserSummary)]
 	public async Task<IActionResult> UserSummary([FromBody] CRMGridOptions options, [FromQuery] int companyId)
 	{
-		//Get authenticated user from HttpContext
-		var currentUser = HttpContext.GetCurrentUser();
-		var userId = HttpContext.GetUserId();
-
-		// Validate user data
-		if (currentUser == null)
-			return Unauthorized("User not found in cache.");
+		// CurrentUser is guaranteed to be available by [AuthorizeUser]
+		var currentUser = CurrentUser;
 
 		if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
 			throw new IdParametersBadRequestException();
 
-		// Execute business logic
 		var summaryGrid = await _serviceManager.Users.UsersSummary(companyId, trackChanges: false, options, currentUser);
 
-		// Return standardized response
 		if (summaryGrid == null || !summaryGrid.Items.Any())
 			return Ok(ApiResponseHelper.NoContent<GridEntity<UsersDto>>("No data found"));
 
@@ -51,36 +53,19 @@ public class UsersController : BaseApiController
 	[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
 	public async Task<IActionResult> SaveUser([FromBody] UsersDto usersDto)
 	{
-		//Get authenticated user from HttpContext
-		var currentUser = HttpContext.GetCurrentUser();
-		var userId = HttpContext.GetUserId();
-
-		// Validate user data
-		if (currentUser == null)
-			return Unauthorized("User not found in cache.");
+		// CurrentUser is guaranteed to be available by [AuthorizeUser]
+		var currentUser = CurrentUser;
 
 		if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
 			throw new IdParametersBadRequestException();
 
-		// Validate input parameters
-		if (usersDto == null)
-			throw new NullModelBadRequestException("User data cannot be null");
-
-		// Execute business logic
+		// EmptyObjectFilterAttribute already validates null, but service will do business validation
 		UsersDto res = await _serviceManager.Users.SaveUser(usersDto);
 
-		////Audittail
-		//var shortDescription = userId == 0 ? "User Information try to Inserted" : "User Information try to Updated";
-		//var actionType = userId == 0 ? "Insert" : "Update";
-		//var audit = hendler.CreateAuditObject(users, shortDescription, actionType, res);
-		//aService.SendAudit(audit);
-
-		// Validate result
 		if (res.UserId <= 0)
-			throw new InvalidUpdateOperationException("Failed to save user record.");
+			throw new InvalidCreateOperationException("Failed to save user record.");
 
-		// Return success response
-		return Ok(ApiResponseHelper.Success(res, "User saved successfully"));
+		return Ok(ApiResponseHelper.Created(res, "User saved successfully"));
 	}
 
 
@@ -88,40 +73,21 @@ public class UsersController : BaseApiController
 	[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
 	public async Task<IActionResult> UpdateUser([FromRoute] int key, [FromBody] UsersDto usersDto)
 	{
-		//Get authenticated user from HttpContext
-		var currentUser = HttpContext.GetCurrentUser();
-		var userId = HttpContext.GetUserId();
-
-		// Validate user data
-		if (currentUser == null)
-			return Unauthorized("User not found in cache.");
+		// CurrentUser is guaranteed to be available by [AuthorizeUser]
+		var currentUser = CurrentUser;
 
 		if (currentUser.HrRecordId == 0 || currentUser.HrRecordId == null)
 			throw new IdParametersBadRequestException();
 
-		// Validate input parameters
 		if (key <= 0)
 			throw new GenericBadRequestException("Invalid user ID. ID must be greater than 0.");
 
-		if (usersDto == null)
-			throw new NullModelBadRequestException("User data cannot be null");
-
-		// Execute business logic
+		// EmptyObjectFilterAttribute already validates null
 		UsersDto res = await _serviceManager.Users.SaveUser(usersDto);
 
-		////Audittail
-		//var shortDescription = userId == 0 ? "User Information try to Inserted" : "User Information try to Updated";
-		//var actionType = userId == 0 ? "Insert" : "Update";
-		//var audit = hendler.CreateAuditObject(users, shortDescription, actionType, res);
-		//aService.SendAudit(audit);
-
-		// Validate result
 		if (res.UserId <= 0)
 			throw new InvalidUpdateOperationException("Failed to update user record.");
 
-		// Return success response
-		return Ok(ApiResponseHelper.Success(res, "User updated successfully"));
+		return Ok(ApiResponseHelper.Updated(res, "User updated successfully"));
 	}
-
-
 }

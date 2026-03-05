@@ -24,263 +24,216 @@ using System.Text;
 
 namespace bdDevCRM.Presentation.Controllers.Authentication;
 
-//[Route("api/[controller]")]
-//[ApiController]
-//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+/// <summary>
+/// Authentication endpoints for login, logout, token refresh, and revocation.
+/// Mix of [AllowAnonymous] and [AuthorizeUser] endpoints.
+/// </summary>
 public class AuthenticationController : BaseApiController
 {
-  //private readonly IServiceManager _serviceManager;
-  private readonly IMemoryCache _memoryCache;
-  private readonly IWebHostEnvironment _environment;
+	private readonly IMemoryCache _memoryCache;
+	private readonly IWebHostEnvironment _environment;
 
-  public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache, IWebHostEnvironment environment) : base(serviceManager)
-  {
-    //_serviceManager = serviceManager;
-    _memoryCache = memoryCache;
-    _environment = environment;
-  }
+	public AuthenticationController(IServiceManager serviceManager, IMemoryCache memoryCache, IWebHostEnvironment environment) : base(serviceManager)
+	{
+		_memoryCache = memoryCache;
+		_environment = environment;
+	}
 
-  [HttpPost(RouteConstants.Login)]
-  [ServiceFilter(typeof(EmptyObjectFilterAttribute))]
-  [AllowAnonymous]
-  [IgnoreMediaTypeValidation]
-  [Produces("application/json")]
-  public async Task<IActionResult> Authenticate([FromBody] UserForAuthenticationDto user)
-  {
-    // ============================================================================
-    // STEP 1: Get User Data
-    // ============================================================================
+	[HttpPost(RouteConstants.Login)]
+	[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
+	[AllowAnonymous]
+	[IgnoreMediaTypeValidation]
+	[Produces("application/json")]
+	public async Task<IActionResult> Authenticate([FromBody] UserForAuthenticationDto user)
+	{
+		// ============================================================================
+		// STEP 1: Get User Data
+		// ============================================================================
 
-    var userDto = _serviceManager.Users.GetUserByLoginIdRaw(user.LoginId.Trim(), false);
-    if (userDto == null)
-    {
-      return Unauthorized(ApiResponseHelper.Unauthorized<object>("Invalid username or password"));
-    }
+		var userDto = _serviceManager.Users.GetUserByLoginIdRaw(user.LoginId.Trim(), false);
 
-    // ============================================================================
-    // STEP 2: Validate Login
-    // ============================================================================
-    LoginValidationResult validationResult = await _serviceManager.CustomAuthentication.ValidateUserLogin(user, userDto);
+		if (userDto == null)
+			return Unauthorized(ApiResponseHelper.Unauthorized<object>("Invalid username or password"));
 
-    if (!validationResult.IsSuccess)
-    {
-      return validationResult.Status switch
-      {
-        LoginValidationStatus.Inactive =>
-          Unauthorized(ApiResponseHelper.Unauthorized<object>("Account is inactive")),
+		// ============================================================================
+		// STEP 2: Validate Login
+		// ============================================================================
+		LoginValidationResult validationResult = await _serviceManager.CustomAuthentication.ValidateUserLogin(user, userDto);
 
-        LoginValidationStatus.Expired => Unauthorized(ApiResponseHelper.Unauthorized<object>("Account has expired")),
+		if (!validationResult.IsSuccess)
+		{
+			return validationResult.Status switch
+			{
+				LoginValidationStatus.Inactive =>
+					Unauthorized(ApiResponseHelper.Unauthorized<object>("Account is inactive")),
 
-        LoginValidationStatus.AccountLocked =>
-          Unauthorized(ApiResponseHelper.Unauthorized<object>("Account is locked due to too many failed attempts")),
+				LoginValidationStatus.Expired =>
+					Unauthorized(ApiResponseHelper.Unauthorized<object>("Account has expired")),
 
-        LoginValidationStatus.PasswordChangeRequired =>
-          Ok(ApiResponseHelper.Success(new { requirePasswordChange = true }, validationResult.Message)),
+				LoginValidationStatus.AccountLocked =>
+					Unauthorized(ApiResponseHelper.Unauthorized<object>("Account is locked due to too many failed attempts")),
 
-        _ => Unauthorized(ApiResponseHelper.Unauthorized<object>("Invalid username or password"))
-      };
-    }
+				LoginValidationStatus.PasswordChangeRequired =>
+					Ok(ApiResponseHelper.Success(new { requirePasswordChange = true }, validationResult.Message)),
 
-    // ============================================================================
-    // STEP 3: Generate Tokens
-    // ============================================================================
+				_ => Unauthorized(ApiResponseHelper.Unauthorized<object>("Invalid username or password"))
+			};
+		}
 
-    var tokenResponse = await _serviceManager.CustomAuthentication.CreateToken(user);
+		// ============================================================================
+		// STEP 3: Generate Tokens
+		// ============================================================================
 
-    // Set refresh token in HTTP-only cookie
-    SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
-    // ============================================================================
-    // STEP 4: Cache User Data
-    // ============================================================================
-    userDto.Password = "";
-    userDto.HrRecordId = userDto.EmployeeId;
+		var tokenResponse = await _serviceManager.CustomAuthentication.CreateToken(user);
 
-    var cacheKey = $"User_{userDto.UserId}";
-    var cacheOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromHours(5)).SetAbsoluteExpiration(TimeSpan.FromHours(5));
+		// Set refresh token in HTTP-only cookie
+		SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
 
-    if (_memoryCache.TryGetValue(cacheKey, out _))
-    {
-      _memoryCache.Remove(cacheKey);
-    }
+		// ============================================================================
+		// STEP 4: Cache User Data
+		// ============================================================================
+		userDto.Password = "";
+		userDto.HrRecordId = userDto.EmployeeId;
 
-    _memoryCache.Set(cacheKey, userDto, cacheOptions);
+		var cacheKey = $"User_{userDto.UserId}";
+		var cacheOptions = new MemoryCacheEntryOptions()
+			.SetSlidingExpiration(TimeSpan.FromHours(5))
+			.SetAbsoluteExpiration(TimeSpan.FromHours(5));
 
-    // ============================================================================
-    // STEP 5: Build Response
-    // ============================================================================
+		if (_memoryCache.TryGetValue(cacheKey, out _))
+			_memoryCache.Remove(cacheKey);
 
-    var response = new TokenResponseDto
-    {
-      AccessToken = tokenResponse.AccessToken,
-      //RefreshToken = tokenResponse.RefreshToken,
-      AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
-      RefreshTokenExpiry = tokenResponse.RefreshTokenExpiry,
-      TokenType = tokenResponse.TokenType,
-      ExpiresIn = tokenResponse.ExpiresIn,
-      UserSession = validationResult.UserSession,
-      Status = validationResult.Status.ToString(),
-      IsSuccess = validationResult.IsSuccess,
-      //IsSuccess = true
-    };
+		_memoryCache.Set(cacheKey, userDto, cacheOptions);
 
-    return Ok(ApiResponseHelper.Success(response, validationResult.Message));
-  }
+		// ============================================================================
+		// STEP 5: Build Response
+		// ============================================================================
 
-  [HttpGet(RouteConstants.GetUserInfo)]
-  [AuthorizeUser]
-  public IActionResult GetUserInfo()
-  {
-    var currentUser = HttpContext.GetCurrentUser();
+		var response = new TokenResponseDto
+		{
+			AccessToken = tokenResponse.AccessToken,
+			AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+			RefreshTokenExpiry = tokenResponse.RefreshTokenExpiry,
+			TokenType = tokenResponse.TokenType,
+			ExpiresIn = tokenResponse.ExpiresIn,
+			UserSession = validationResult.UserSession,
+			Status = validationResult.Status.ToString(),
+			IsSuccess = validationResult.IsSuccess,
+		};
 
-    if (currentUser == null)
-    {
-      var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-      var loginId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-      if (string.IsNullOrEmpty(loginId)) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "User ID not found in token." });
+		return Ok(ApiResponseHelper.Success(response, validationResult.Message));
+	}
 
-      // UsersDto
-      UsersDto? userDto = _serviceManager.Users.GetUserByLoginIdRaw(loginId, false);
-      if (userDto == null) return StatusCode(StatusCodes.Status404NotFound, new { message = "User not found." });
-      userDto.Password = "";
-      userDto.HrRecordId = userDto.EmployeeId;
-      var UserId = User.FindFirst("UserId")?.Value;
-      var cacheKey = $"User_{userDto.UserId}";
-      // Check if the user is already in the cache then destroy the cache
-      if (_memoryCache.TryGetValue(cacheKey, out _)) _memoryCache.Remove(cacheKey);
+	[HttpGet(RouteConstants.GetUserInfo)]
+	[AuthorizeUser]
+	public IActionResult GetUserInfo()
+	{
+		// CurrentUser is guaranteed by [AuthorizeUser] attribute
+		var currentUser = CurrentUser;
 
-      // Set the user in the cache with a 5-hours expiration
-      var cacheEntryOptions = new MemoryCacheEntryOptions()
-        .SetSlidingExpiration(TimeSpan.FromHours(5))
-        .SetAbsoluteExpiration(TimeSpan.FromHours(5));
-      _memoryCache.Set(cacheKey, userDto, cacheEntryOptions);
-      //_memoryCache.Set(cacheKey, user, new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(5) });
+		// Ensure HrRecordId is set
+		if (currentUser.HrRecordId == null || currentUser.HrRecordId == 0)
+			currentUser.HrRecordId = currentUser.EmployeeId;
+
+		// Clear password for security
+		currentUser.Password = "";
+
+		return Ok(ApiResponseHelper.Success(currentUser, "User info retrieved"));
+	}
 
 
-      userDto.Password = "";
-      return Ok(ApiResponseHelper.Success(currentUser, "User info retrieved"));
-    }
-    if (currentUser.HrRecordId == null || currentUser.HrRecordId == 0) currentUser.HrRecordId = currentUser.EmployeeId;
+	[HttpPost(RouteConstants.RefreshToken)]
+	[AllowAnonymous]
+	[IgnoreMediaTypeValidation]
+	public async Task<IActionResult> RefreshToken()
+	{
+		// Get refresh token from cookie
+		if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+		{
+			ClearRefreshTokenCookie(); // Ensure cleanup on missing/corrupted cookie
+			return Unauthorized(ApiResponseHelper.Unauthorized<object>("Refresh token not found"));
+		}
 
-    // Password clear (security)
-    currentUser.Password = "";
+		var ipAddress = GetClientIpAddress();
 
-    return Ok(ApiResponseHelper.Success(currentUser, "User info retrieved"));
-  }
+		try
+		{
+			var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(refreshToken, ipAddress);
 
+			// Set new refresh token in cookie
+			SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
 
-  [HttpPost(RouteConstants.RefreshToken)]
-  //[AllowAnonymous]
-  [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> RefreshToken()
-  {
-    // Get refresh token from cookie
-    if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
-    {
-      ClearRefreshTokenCookie(); // Ensure cleanup on missing/corrupted cookie
-      return Unauthorized(ApiResponseHelper.Unauthorized<object>("Refresh token not found"));
-    }
+			var response = new TokenResponseDto
+			{
+				AccessToken = tokenResponse.AccessToken,
+				AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
+				RefreshTokenExpiry = tokenResponse.RefreshTokenExpiry,
+				TokenType = tokenResponse.TokenType,
+				ExpiresIn = tokenResponse.ExpiresIn,
+				IsSuccess = true,
+			};
 
-    var ipAddress = GetClientIpAddress();
+			return Ok(ApiResponseHelper.Success(response, "Token refreshed successfully"));
+		}
+		catch (UnauthorizedException)
+		{
+			ClearRefreshTokenCookie(); // Clear cookie on any auth failure
+			throw;
+		}
+	}
 
-    try
-    {
-      var tokenResponse = await _serviceManager.CustomAuthentication.RefreshTokenAsync(refreshToken, ipAddress);
-      // Set new refresh token in cookie
-      SetRefreshTokenCookie(tokenResponse.RefreshToken, tokenResponse.RefreshTokenExpiry);
+	[HttpPost(RouteConstants.RevokeToken)]
+	[AllowAnonymous]
+	[IgnoreMediaTypeValidation]
+	public async Task<IActionResult> RevokeToken()
+	{
+		if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+			return BadRequest(ApiResponseHelper.BadRequest<object>("No refresh token found"));
 
-      var response = new TokenResponseDto
-      {
-        AccessToken = tokenResponse.AccessToken,
-        //RefreshToken = tokenResponse.RefreshToken,
-        AccessTokenExpiry = tokenResponse.AccessTokenExpiry,
-        RefreshTokenExpiry = tokenResponse.RefreshTokenExpiry,
-        TokenType = tokenResponse.TokenType,
-        ExpiresIn = tokenResponse.ExpiresIn,
-        IsSuccess = true,
-      };
+		var ipAddress = GetClientIpAddress();
 
-      return Ok(ApiResponseHelper.Success(response, "Token refreshed successfully"));
-    }
-    catch (UnauthorizedException)
-    {
-      ClearRefreshTokenCookie(); // Clear cookie on any auth failure
-      throw;
-    }
-  }
+		var result = await _serviceManager.CustomAuthentication.RevokeTokenAsync(refreshToken, ipAddress);
 
-  [HttpPost(RouteConstants.RevokeToken)]
-  [AllowAnonymous]
-  [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> RevokeToken()
-  {
-    if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
-      return BadRequest(ApiResponseHelper.BadRequest<object>("No refresh token found"));
+		if (!result)
+			return BadRequest(ApiResponseHelper.BadRequest<object>("Invalid or already revoked token"));
 
-    var ipAddress = GetClientIpAddress();
+		ClearRefreshTokenCookie();
 
-    var result = await _serviceManager.CustomAuthentication.RevokeTokenAsync(refreshToken, ipAddress);
+		return Ok(ApiResponseHelper.Success(result, "Token revoked successfully"));
+	}
 
-    if (!result)
-      return BadRequest(ApiResponseHelper.BadRequest<object>("Invalid or already revoked token"));
-
-    ClearRefreshTokenCookie();
-
-    return Ok(ApiResponseHelper.Success(result, "Token revoked successfully"));
-  }
-
-  [AuthorizeUser]
-  //[HttpPost("logout")]
-  [HttpPost(RouteConstants.Logout)]
-  [AllowAnonymous]
-  [IgnoreMediaTypeValidation]
-  public async Task<IActionResult> Logout()
-  {
-    try
-    {
-      var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
-			//// Only blacklist if token is provided
-			//if (!string.IsNullOrEmpty(token))
-			//{
-			//	await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
-			//}
-			//var currentUser = HttpContext.GetCurrentUser();
-			//var userId = HttpContext.GetUserId();
-
+	[AuthorizeUser]
+	[HttpPost(RouteConstants.Logout)]
+	[AllowAnonymous]
+	[IgnoreMediaTypeValidation]
+	public async Task<IActionResult> Logout()
+	{
+		try
+		{
 			var userId = CurrentUserId;
+
 			if (userId != 0)
-      {
-        var ipAddress = GetClientIpAddress();
-        await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
+			{
+				var ipAddress = GetClientIpAddress();
+				await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
+			}
 
-        //// Revoke all user tokens
-        //try
-        //{
-        //	await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
-        //}
-        //catch (Exception ex)
-        //{
-        //	// Log error but continue with logout process
-        //	// Note: Access token is already blacklisted, so partial failure is acceptable
-        //	Console.WriteLine($"Failed to revoke refresh tokens during logout: {ex.Message}");
-        //}
-      }
+			// Clear user cache
+			AuthorizeUserAttribute.ClearUserCache(_memoryCache, userId);
 
-      // Clear user cache
-      AuthorizeUserAttribute.ClearUserCache(_memoryCache, userId);
+			// Clear the entire memory cache
+			ClearMemoryCache();
 
-      // Clear the entire memory cache
-      ClearMemoryCache();
+			ClearRefreshTokenCookie();
 
-      ClearRefreshTokenCookie();
-
-      return Ok(ApiResponseHelper.Success<object>(null, "Logged out successfully"));
-    }
-    catch (Exception ex)
-    {
-      return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred during logout." });
-    }
-  }
+			return Ok(ApiResponseHelper.Success<object>(null, "Logged out successfully"));
+		}
+		catch (Exception ex)
+		{
+			// Let middleware handle the exception
+			throw new InvalidOperationException("An error occurred during logout.", ex);
+		}
+	}
 
   [HttpGet("test-token")]
   [AllowAnonymous]
