@@ -14,6 +14,10 @@ using Microsoft.Extensions.Logging;
 namespace bdDevCRM.Services.Core.SystemAdmin;
 
 
+/// <summary>
+/// Menu service implementing business logic for menu management.
+/// Follows enterprise patterns with structured logging and exception handling.
+/// </summary>
 internal sealed class MenuService : IMenuService
 {
     private readonly IRepositoryManager _repository;
@@ -39,9 +43,11 @@ internal sealed class MenuService : IMenuService
     {
         if (userid <= 0)
         {
-            _logger.LogWarning("SelectMenuByUserPermission called with invalid userId: {userid}", userid);
+            _logger.LogWarning("SelectMenuByUserPermission called with invalid userId: {UserId}", userid);
             return Enumerable.Empty<MenuDto>();
         }
+
+        _logger.LogInformation("Fetching menu permissions for user {UserId}", userid);
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var menuRepositoryDtos = await _repository.Menus.SelectMenuByUserPermission(userid, trackChanges);
@@ -127,13 +133,25 @@ internal sealed class MenuService : IMenuService
 
     public async Task<MenuDto> CreateAsync(MenuDto modelDto)
     {
-        if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
-        bool ismenuExists = await _repository.Menus.ExistsAsync(m => m.MenuName.Trim().ToLower() == modelDto.MenuName.Trim().ToLower());
-        if (ismenuExists) throw new DuplicateRecordException("Menu", "MenuName");
+        if (modelDto == null)
+            throw new NullModelBadRequestException(nameof(MenuDto));
 
+        _logger.LogInformation("Creating new menu: {MenuName}", modelDto.MenuName);
+
+        // Check for duplicate menu name
+        bool menuExists = await _repository.Menus.ExistsAsync(
+            m => m.MenuName.Trim().ToLower() == modelDto.MenuName.Trim().ToLower());
+
+        if (menuExists)
+            throw new DuplicateRecordException("Menu", "MenuName");
+
+        // Map and create
         Menu entity = MyMapper.JsonClone<MenuDto, Menu>(modelDto);
         modelDto.MenuId = await _repository.Menus.CreateAndGetIdAsync(entity);
         await _repository.SaveAsync();
+
+        _logger.LogInformation("Menu created successfully with ID: {MenuId}", modelDto.MenuId);
+
         return modelDto;
     }
 
@@ -211,33 +229,47 @@ internal sealed class MenuService : IMenuService
 
     public async Task<MenuDto> UpdateAsync(int key, MenuDto modelDto)
     {
-        if (modelDto == null) throw new NullModelBadRequestException(new MenuDto().GetType().Name.ToString());
-        if (key != modelDto.MenuId) throw new IdMismatchBadRequestException(key.ToString(), new MenuDto().GetType().Name.ToString());
+        if (modelDto == null)
+            throw new NullModelBadRequestException(nameof(MenuDto));
 
-        Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == modelDto.MenuId, trackChanges: false);
-        //if (entity.MenuName == modelDto.MenuName) throw new DuplicateRecordException();
+        if (key != modelDto.MenuId)
+            throw new IdMismatchBadRequestException(key.ToString(), nameof(MenuDto));
 
+        _logger.LogInformation("Updating menu with ID: {MenuId}", key);
+
+        // Check if menu exists
+        Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == key, trackChanges: false);
+
+        if (entity == null)
+            throw new GenericNotFoundException("Menu", "MenuId", key.ToString());
+
+        // Map and update
         entity = MyMapper.JsonClone<MenuDto, Menu>(modelDto);
         _repository.Menus.UpdateByState(entity);
         await _repository.SaveAsync();
-        modelDto = MyMapper.JsonClone<Menu, MenuDto>(entity);
-        return modelDto;
+
+        _logger.LogInformation("Menu updated successfully: {MenuId}", key);
+
+        return MyMapper.JsonClone<Menu, MenuDto>(entity);
     }
 
     public async Task DeleteAsync(int key)
     {
         if (key <= 0)
-            throw new ArgumentOutOfRangeException(nameof(key), "Menu ID must be a positive integer.");
+            throw new IdParametersBadRequestException();
+
+        _logger.LogInformation("Deleting menu with ID: {MenuId}", key);
 
         Menu entity = await _repository.Menus.GetByIdAsync(m => m.MenuId == key, trackChanges: false);
+
         if (entity == null)
             throw new GenericNotFoundException("Menu", "MenuId", key.ToString());
 
-        // Soft delete - set IsActive to 0
-        //entity.IsActive = 0;
-
-        await _repository.Menus.DeleteAsync(x => x.MenuId == entity.MenuId, trackChanges: false);
+        // Physical delete
+        await _repository.Menus.DeleteAsync(x => x.MenuId == key, trackChanges: false);
         await _repository.SaveAsync();
+
+        _logger.LogInformation("Menu deleted successfully: {MenuId}", key);
     }
 
     public async Task<IEnumerable<MenuForDDLDto>> MenuForDDL()
