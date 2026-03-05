@@ -47,10 +47,10 @@ public class DmsDocumentController : BaseApiController
 
         // Return standardized response
         if (list == null || !list.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<object>>(
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<object>>(
                 "No documents found"));
 
-        return Ok(ResponseHelper.Success(list, 
+        return Ok(ApiResponseHelper.Success(list, 
             "Documents retrieved successfully"));
     }
 
@@ -68,17 +68,17 @@ public class DmsDocumentController : BaseApiController
 
         // Validate input parameters
         if (opt == null)
-            return BadRequest(ResponseHelper.BadRequest("Grid options cannot be null"));
+            return BadRequest(ApiResponseHelper.BadRequest<GridEntity<DmsDocumentDto>>("Grid options cannot be null"));
 
         // Execute business logic
         var grid = await _serviceManager.DmsDocuments.SummaryGrid(opt);
 
         // Return standardized response
         if (grid == null || !grid.Items.Any())
-            return Ok(ResponseHelper.NoContent<GridEntity<DmsDocumentDto>>(
+            return Ok(ApiResponseHelper.NoContent<GridEntity<DmsDocumentDto>>(
                 "No documents found"));
 
-        return Ok(ResponseHelper.Success(grid, 
+        return Ok(ApiResponseHelper.Success(grid, 
             "Documents grid retrieved successfully"));
     }
 
@@ -107,10 +107,10 @@ public class DmsDocumentController : BaseApiController
 
         // Return standardized response
         if (res == OperationMessage.Success)
-            return Ok(ResponseHelper.Success(res, 
+            return Ok(ApiResponseHelper.Success(res, 
                 "Document created successfully"));
         else
-            return Conflict(ResponseHelper.Conflict(res));
+            return Conflict(ApiResponseHelper.Conflict<DmsDocumentDto>(res));
     }
 
     /// <summary>
@@ -141,10 +141,10 @@ public class DmsDocumentController : BaseApiController
 
         // Return standardized response
         if (res == OperationMessage.Success)
-            return Ok(ResponseHelper.Updated(res, 
+            return Ok(ApiResponseHelper.Updated(res, 
                 "Document updated successfully"));
         else
-            return Conflict(ResponseHelper.Conflict(res));
+            return Conflict(ApiResponseHelper.Conflict<DmsDocumentDto>(res));
     }
 
     /// <summary>
@@ -173,9 +173,9 @@ public class DmsDocumentController : BaseApiController
 
         // Return standardized response
         if (res == OperationMessage.Success)
-            return Ok(ResponseHelper.Success(res, 
+            return Ok(ApiResponseHelper.Success(res, 
                 "Document deleted successfully"));
         else
-            return Conflict(ResponseHelper.Conflict(res));
+            return Conflict(ApiResponseHelper.Conflict<DmsDocumentDto>(res));
     }
 }

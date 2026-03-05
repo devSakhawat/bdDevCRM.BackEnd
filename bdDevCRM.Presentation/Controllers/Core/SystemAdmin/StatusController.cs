@@ -55,10 +55,10 @@ public class StatusController : BaseApiController
 
         // Return standardized response
         if (groupPermissions == null || !groupPermissions.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<WfStateDto>>(
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<WfStateDto>>(
                 "No statuses found for this menu"));
 
-        return Ok(ResponseHelper.Success(groupPermissions, 
+        return Ok(ApiResponseHelper.Success(groupPermissions, 
             "Statuses retrieved successfully"));
     }
 
@@ -84,11 +84,9 @@ public class StatusController : BaseApiController
 
         // Return standardized response
         if (groupPermissions == null || !groupPermissions.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<WfActionDto>>(
-                "No actions found for this status"));
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<WfActionDto>>("No actions found for this status"));
 
-        return Ok(ResponseHelper.Success(groupPermissions, 
-            "Actions retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(groupPermissions, "Actions retrieved successfully"));
     }
 
     #region WorkFlow Management
@@ -119,10 +117,10 @@ public class StatusController : BaseApiController
 
         // Return standardized response
         if (summaryGrid == null || !summaryGrid.Items.Any())
-            return Ok(ResponseHelper.NoContent<GridEntity<WfStateDto>>(
+            return Ok(ApiResponseHelper.NoContent<GridEntity<WfStateDto>>(
                 "No workflow data found"));
 
-        return Ok(ResponseHelper.Success(summaryGrid, 
+        return Ok(ApiResponseHelper.Success(summaryGrid, 
             "Workflow data retrieved successfully"));
     }
 
@@ -142,26 +140,23 @@ public class StatusController : BaseApiController
 
         // Validate input parameters
         if (modelDto == null)
-            return BadRequest(ResponseHelper.BadRequest("Status data is required"));
+            return BadRequest(ApiResponseHelper.BadRequest<WfStateDto>("Status data is required"));
 
         try
         {
             // Execute business logic
-            WfStateDto res = await _serviceManager.WfState
-                .CreateNewRecordAsync(modelDto, currentUser);
+            WfStateDto res = await _serviceManager.WfState.CreateNewRecordAsync(modelDto, currentUser);
 
             // Return standardized response
             if (res.WfStateId > 0)
-                return Ok(ResponseHelper.Created(res, 
+                return Ok(ApiResponseHelper.Created(res, 
                     "Workflow status created successfully"));
             else
-                return StatusCode(500, ResponseHelper.InternalServerError(
-                    "Failed to create workflow status"));
+                return StatusCode(500, ApiResponseHelper.InternalServerError<WfStateDto>("Failed to create workflow status"));
         }
         catch (System.Text.Json.JsonException)
         {
-            return BadRequest(ResponseHelper.BadRequest(
-                "Invalid JSON format in workflow data"));
+            return BadRequest(ApiResponseHelper.BadRequest<WfStateDto>("Invalid JSON format in workflow data"));
         }
     }
 
@@ -194,10 +189,10 @@ public class StatusController : BaseApiController
 
         // Return standardized response
         if (res == OperationMessage.Success)
-            return Ok(ResponseHelper.Success(res, 
+            return Ok(ApiResponseHelper.Success(res, 
                 "Workflow status updated successfully"));
         else
-            return Conflict(ResponseHelper.Conflict(res));
+            return Conflict(ApiResponseHelper.Conflict<WfStateDto>(res));
     }
 
     /// <summary>
@@ -223,7 +218,7 @@ public class StatusController : BaseApiController
         string result = await _serviceManager.WfState.DeleteWorkflow(key);
 
         // Return standardized response
-        return Ok(ResponseHelper.Success(result, 
+        return Ok(ApiResponseHelper.Success(result, 
             "Workflow status deleted successfully"));
     }
 
@@ -256,7 +251,7 @@ public class StatusController : BaseApiController
             .CreateWfActionNewRecordAsync(modelDto, currentUser, false);
 
         // Return standardized response
-        return Ok(ResponseHelper.Created(result, 
+        return Ok(ApiResponseHelper.Created(result, 
             "Workflow action created successfully"));
     }
 
@@ -291,7 +286,7 @@ public class StatusController : BaseApiController
 
         // Return standardized response
         if (result == OperationMessage.Success)
-            return Ok(ResponseHelper.Updated(result, 
+            return Ok(ApiResponseHelper.Updated(result, 
                 "Workflow action updated successfully"));
         else
             throw new GenericConflictException(result);
@@ -326,7 +321,7 @@ public class StatusController : BaseApiController
         string result = await _serviceManager.WfState.DeleteAction(key, modelDto);
 
         // Return standardized response
-        return Ok(ResponseHelper.Success(result, 
+        return Ok(ApiResponseHelper.Success(result, 
             "Workflow action deleted successfully"));
     }
 
@@ -347,20 +342,20 @@ public class StatusController : BaseApiController
 
         // Validate input parameters
         if (stateId <= 0)
-            return BadRequest(ResponseHelper.BadRequest("Valid state ID is required"));
+            return BadRequest(ApiResponseHelper.BadRequest<GridEntity<WfStateDto>>("Valid state ID is required"));
 
         if (options == null)
-            return BadRequest(ResponseHelper.BadRequest("Grid options are required"));
+            return BadRequest(ApiResponseHelper.BadRequest<GridEntity<WfStateDto>>("Grid options are required"));
 
         // Execute business logic
         var res = await _serviceManager.WfState.GetActionByStatusId(stateId, options);
 
         // Return standardized response
         if (res != null && res.Items.Any())
-            return Ok(ResponseHelper.Success(res, 
+            return Ok(ApiResponseHelper.Success(res, 
                 "Workflow actions retrieved successfully"));
         else
-            return Ok(ResponseHelper.NoContent<GridEntity<WfActionDto>>(
+            return Ok(ApiResponseHelper.NoContent<GridEntity<WfActionDto>>(
                 "No actions found for this status"));
     }
 
@@ -382,18 +377,16 @@ public class StatusController : BaseApiController
 
         // Validate input parameters
         if (menuId <= 0)
-            return BadRequest(ResponseHelper.BadRequest("Valid menu ID is required"));
+            return BadRequest(ApiResponseHelper.BadRequest<IEnumerable<WfStateDto>>("Valid menu ID is required"));
 
         // Execute business logic
         var res = await _serviceManager.WfState.GetNextStatesByMenu(menuId);
 
         // Return standardized response
         if (res != null && res.Any())
-            return Ok(ResponseHelper.Success(res, 
-                "Next states retrieved successfully"));
+            return Ok(ApiResponseHelper.Success(res, "Next states retrieved successfully"));
         else
-            return Ok(ResponseHelper.NoContent<IEnumerable<WfStateDto>>(
-                "No next states found for this menu"));
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<WfStateDto>>("No next states found for this menu"));
     }
 
     #endregion Next States
@@ -428,10 +421,10 @@ public class StatusController : BaseApiController
 
         // Return standardized response
         if (res == null || !res.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>(
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<GetApplicationDto>>(
                 "No workflow statuses found for this menu and user"));
 
-        return Ok(ResponseHelper.Success(res, 
+        return Ok(ApiResponseHelper.Success(res, 
             "Workflow statuses retrieved successfully"));
     }
 
@@ -468,10 +461,10 @@ public class StatusController : BaseApiController
 
         // Return standardized response
         if (res == null || !res.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>(
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<GetApplicationDto>>(
                 "No workflow statuses found for this menu"));
 
-        return Ok(ResponseHelper.Success(res, 
+        return Ok(ApiResponseHelper.Success(res, 
             "Workflow statuses retrieved successfully"));
     }
 

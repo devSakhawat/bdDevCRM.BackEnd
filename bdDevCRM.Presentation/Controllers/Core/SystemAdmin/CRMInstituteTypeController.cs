@@ -45,9 +45,9 @@ public class CRMInstituteTypeController : BaseApiController
 
     // Return standardized response
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CRMInstituteTypeDto>>("No institute type found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CRMInstituteTypeDto>>("No institute type found"));
 
-    return Ok(ResponseHelper.Success(res, "Institute type retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Institute type retrieved successfully"));
   }
 
   // 2️⃣ Summary Grid --------------------------------------------------
@@ -72,9 +72,9 @@ public class CRMInstituteTypeController : BaseApiController
 
     // Return standardized response
     if (summary == null || !summary.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<CRMInstituteTypeDto>>("No data found"));
+      return Ok(ApiResponseHelper.NoContent<GridEntity<CRMInstituteTypeDto>>("No data found"));
 
-    return Ok(ResponseHelper.Success(summary, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summary, "Data retrieved successfully"));
   }
 
   // 3️⃣ Create --------------------------------------------------------
@@ -100,9 +100,9 @@ public class CRMInstituteTypeController : BaseApiController
 
     // Return standardized response
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Created(res, "Institute type created successfully"));
+      return Ok(ApiResponseHelper.Created(res, "Institute type created successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<CRMInstituteTypeDto>(res));
   }
 
   // 4️⃣ Update --------------------------------------------------------
@@ -132,9 +132,9 @@ public class CRMInstituteTypeController : BaseApiController
 
     // Return standardized response
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Updated(res, "Institute type updated successfully"));
+      return Ok(ApiResponseHelper.Updated(res, "Institute type updated successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<CRMInstituteTypeDto>(res));
   }
 
   // 5️⃣ Delete --------------------------------------------------------
@@ -164,9 +164,9 @@ public class CRMInstituteTypeController : BaseApiController
 
     // Return standardized response
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "Institute type deleted successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Institute type deleted successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<CRMInstituteTypeDto>(res));
   }
 
   // 6️⃣ SaveOrUpdate --------------------------------------------------
@@ -194,8 +194,8 @@ public class CRMInstituteTypeController : BaseApiController
 
     // Return standardized response
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "Institute type saved successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Institute type saved successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<CRMInstituteTypeDto>(res));
   }
 }

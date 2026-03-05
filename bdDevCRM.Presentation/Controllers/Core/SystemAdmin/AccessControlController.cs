@@ -51,7 +51,7 @@ public class AccessControlController : BaseApiController
       throw new InvalidCreateOperationException("Failed to create new record.");
 
     // Return standardized response
-    return Ok(ResponseHelper.Created(model, "New record created successfully."));
+    return Ok(ApiResponseHelper.Created(model, "New record created successfully."));
   }
 
   /// <summary>
@@ -82,7 +82,7 @@ public class AccessControlController : BaseApiController
       throw new InvalidUpdateOperationException("Failed to update record.");
 
     // Return standardized response
-    return Ok(ResponseHelper.Updated(returnData, "Record updated successfully."));
+    return Ok(ApiResponseHelper.Updated(returnData, "Record updated successfully."));
   }
 
   /// <summary>
@@ -110,9 +110,9 @@ public class AccessControlController : BaseApiController
 
     // Return standardized response
     if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<AccessControlDto>>("No data found"));
+      return Ok(ApiResponseHelper.NoContent<GridEntity<AccessControlDto>>("No data found"));
 
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 5. Delete ----------------------------------------------
@@ -134,16 +134,16 @@ public class AccessControlController : BaseApiController
 
       // Validate input parameters
       if (key <= 0)
-        return BadRequest(ResponseHelper.BadRequest("Invalid course ID. Course ID must be greater than 0."));
+        return BadRequest(ApiResponseHelper.BadRequest<object>("Invalid course ID. Course ID must be greater than 0."));
 
       // Execute business logic
       var res = await _serviceManager.AccessControl.DeleteRecordAsync(key);
 
       // Return standardized response
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Course deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Course deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<object>(res));
     }
     catch (Exception)
     {

@@ -40,9 +40,9 @@ public class GmatInformationController : BaseApiController
 
     var res = await _serviceManager.GMATInformations.GetGmatinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<GMATInformationDto>>("No GMAT information found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<GMATInformationDto>>("No GMAT information found"));
 
-    return Ok(ResponseHelper.Success(res, "GMAT information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "GMAT information retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.GmatInformationByApplicantId)]
@@ -60,7 +60,7 @@ public class GmatInformationController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.GMATInformations.GetGmatinformationByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "GMAT information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "GMAT information retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.GmatInformationSummary)]
@@ -68,15 +68,15 @@ public class GmatInformationController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GMATInformationDto>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GMATInformationDto>("User not found in cache"));
 
     var summaryGrid = await _serviceManager.GMATInformations.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.CreateGmatInformation)]
@@ -84,14 +84,13 @@ public class GmatInformationController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GMATInformationDto>("User authentication required"));
 
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(Convert.ToInt32(userIdClaim));
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
+      return Unauthorized(ApiResponseHelper.Unauthorized<GMATInformationDto>("User session expired"));
     GMATInformationDto res = await _serviceManager.GMATInformations.CreateNewRecordAsync(modelDto, currentUser);
-    return Ok(ResponseHelper.Created(res, "GMAT information created successfully"));
+    return Ok(ApiResponseHelper.Created(res, "GMAT information created successfully"));
   }
 
   [HttpPut(RouteConstants.UpdateGmatInformation)]
@@ -100,9 +99,9 @@ public class GmatInformationController : BaseApiController
   {
     var res = await _serviceManager.GMATInformations.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "GMAT information updated successfully"));
+      return Ok(ApiResponseHelper.Success(res, "GMAT information updated successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<GMATInformationDto>(res));
   }
 
   [HttpDelete(RouteConstants.DeleteGmatInformation)]
@@ -111,15 +110,15 @@ public class GmatInformationController : BaseApiController
   {
     var res = await _serviceManager.GMATInformations.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "GMAT information deleted successfully"));
+      return Ok(ApiResponseHelper.Success(res, "GMAT information deleted successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<GMATInformationDto>(res));
   }
 
   [HttpGet(RouteConstants.UpdateGmatInformation)]
   public async Task<IActionResult> GetGmatInformation([FromRoute] int key)
   {
     var res = await _serviceManager.GMATInformations.GetGmatinformationAsync(key, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "GMAT information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "GMAT information retrieved successfully"));
   }
 }

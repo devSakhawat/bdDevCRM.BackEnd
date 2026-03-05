@@ -29,9 +29,6 @@ public class CRMApplicationController : BaseApiController
     _environment = environment;
   }
 
-
-
-
   [HttpGet(RouteConstants.CRMApplicationStatus)]
   public async Task<IActionResult> StatusByMenuNUserId()
   {
@@ -59,9 +56,9 @@ public class CRMApplicationController : BaseApiController
     // menu.MenuId and currentUser.UserId are nullable so we use .Value after checking HasValue
     var res = await _serviceManager.WfState.GetWFStateByMenuNUserPermission(rawUrl, currentUser.UserId.Value);
     if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
 
-    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Application retrieved successfully"));
   }
 
 
@@ -86,9 +83,9 @@ public class CRMApplicationController : BaseApiController
 
     var res = await _serviceManager.CrmApplications.GetApplication(applicationId, trackChanges: false);
     if (res == null)
-      return Ok(ResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<GetApplicationDto>>("No institutes found for the specified country"));
 
-    return Ok(ResponseHelper.Success(res, "Application retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Application retrieved successfully"));
   }
 
   // --------- Summary Grid ----------------------------------------
@@ -122,9 +119,9 @@ public class CRMApplicationController : BaseApiController
 
     var summaryGrid = await _serviceManager.CrmApplications.SummaryGrid(options, statusId, currentUser ,menuDto );
     if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<CrmApplicationGridDto>>("No data found"));
+      return Ok(ApiResponseHelper.NoContent<GridEntity<CrmApplicationGridDto>>("No data found"));
 
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
 
@@ -238,7 +235,7 @@ public class CRMApplicationController : BaseApiController
     if (savedDto.ApplicationId <= 0)
       throw new InvalidCreateOperationException("Failed to create application record.");
 
-    return Ok(ResponseHelper.Created(savedDto, "Application created successfully."));
+    return Ok(ApiResponseHelper.Created(savedDto, "Application created successfully."));
   }
 
 
@@ -354,7 +351,7 @@ public class CRMApplicationController : BaseApiController
     if (savedDto.ApplicationId <= 0)
       throw new InvalidCreateOperationException("Failed to create application record.");
 
-    return Ok(ResponseHelper.Created(savedDto, "Application created successfully."));
+    return Ok(ApiResponseHelper.Created(savedDto, "Application created successfully."));
   }
 
   [HttpDelete("{id}")]

@@ -36,9 +36,9 @@ public class BranchController : BaseApiController
     //return Ok(branchList);
 
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<BranchDto>>("No Branch found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<BranchDto>>("No Branch found"));
 
-    return Ok(ResponseHelper.Success(res, "Branches retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Branches retrieved successfully"));
   }
 
 

@@ -40,9 +40,9 @@ public class PTEInformationController : BaseApiController
 
     var res = await _serviceManager.PTEInformations.GetPTEInformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<PTEInformationDto>>("No PTE information found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<PTEInformationDto>>("No PTE information found"));
 
-    return Ok(ResponseHelper.Success(res, "PTE information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "PTE information retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.PTEInformationByApplicantId)]
@@ -60,7 +60,7 @@ public class PTEInformationController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.PTEInformations.GetPTEInformationByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "PTE information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "PTE information retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.PTEInformationSummary)]
@@ -68,15 +68,15 @@ public class PTEInformationController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<PTEInformationDto>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<PTEInformationDto>("User not found in cache"));
 
     var summaryGrid = await _serviceManager.PTEInformations.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.CreatePTEInformation)]
@@ -84,14 +84,13 @@ public class PTEInformationController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<PTEInformationDto>("User authentication required"));
 
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(Convert.ToInt32(userIdClaim));
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
+      return Unauthorized(ApiResponseHelper.Unauthorized<PTEInformationDto>("User session expired")); 
     PTEInformationDto res = await _serviceManager.PTEInformations.CreateNewRecordAsync(modelDto, currentUser);
-    return Ok(ResponseHelper.Created(res, "PTE information created successfully"));
+    return Ok(ApiResponseHelper.Created(res, "PTE information created successfully"));
   }
 
   [HttpPut(RouteConstants.UpdatePTEInformation)]
@@ -100,9 +99,9 @@ public class PTEInformationController : BaseApiController
   {
     var res = await _serviceManager.PTEInformations.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "PTE information updated successfully"));
+      return Ok(ApiResponseHelper.Success(res, "PTE information updated successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<PTEInformationDto>(res));
   }
 
   [HttpDelete(RouteConstants.DeletePTEInformation)]
@@ -111,15 +110,15 @@ public class PTEInformationController : BaseApiController
   {
     var res = await _serviceManager.PTEInformations.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "PTE information deleted successfully"));
+      return Ok(ApiResponseHelper.Success(res, "PTE information deleted successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<PTEInformationDto>(res));
   }
 
   [HttpGet(RouteConstants.UpdatePTEInformation)]
   public async Task<IActionResult> GetPTEInformation([FromRoute] int key)
   {
     var res = await _serviceManager.PTEInformations.GetPTEInformationAsync(key, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "PTE information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "PTE information retrieved successfully"));
   }
 }

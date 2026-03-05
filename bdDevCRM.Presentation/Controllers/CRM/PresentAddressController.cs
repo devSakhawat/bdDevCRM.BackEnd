@@ -41,9 +41,9 @@ public class PresentAddressController : BaseApiController
 
     var res = await _serviceManager.PresentAddresses.GetPresentAddressesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<PresentAddressDto>>("No present addresses found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<PresentAddressDto>>("No present addresses found"));
 
-    return Ok(ResponseHelper.Success(res, "Present addresses retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Present addresses retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.PresentAddressByApplicantId)]
@@ -64,7 +64,7 @@ public class PresentAddressController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.PresentAddresses.GetPresentAddressByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Present address retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Present address retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
@@ -73,18 +73,18 @@ public class PresentAddressController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<PresentAddressDto>>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<PresentAddressDto>>("User not found in cache"));
 
     if (options == null)
-      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+      return BadRequest(ApiResponseHelper.BadRequest<GridEntity<PresentAddressDto>>("CRMGridOptions cannot be null"));
 
     var summaryGrid = await _serviceManager.PresentAddresses.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
@@ -96,26 +96,25 @@ public class PresentAddressController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<PresentAddressDto>("User authentication required"));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
+        return Unauthorized(ApiResponseHelper.Unauthorized<PresentAddressDto>("User session expired"));
       if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Present address data is required"));
+        return BadRequest(ApiResponseHelper.BadRequest<PresentAddressDto>("Present address data is required"));
 
       PresentAddressDto res = await _serviceManager.PresentAddresses.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.PresentAddressId > 0)
-        return Ok(ResponseHelper.Created(res, "Present address created successfully"));
+        return Ok(ApiResponseHelper.Created(res, "Present address created successfully"));
       else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create present address"));
+        return StatusCode(500, ApiResponseHelper.InternalServerError<PresentAddressDto>("Failed to create present address"));
     }
     catch (System.Text.Json.JsonException)
     {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in present address data"));
+      return BadRequest(ApiResponseHelper.BadRequest<PresentAddressDto>("Invalid JSON format in present address data"));
     }
   }
 
@@ -128,19 +127,19 @@ public class PresentAddressController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<PresentAddressDto>("UserId not found in token."));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<PresentAddressDto>("User not found in cache."));
 
       var res = await _serviceManager.PresentAddresses.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Present address updated successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Present address updated successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<PresentAddressDto>(res));
     }
     catch (Exception)
     {
@@ -161,9 +160,9 @@ public class PresentAddressController : BaseApiController
       var res = await _serviceManager.PresentAddresses.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Present address deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Present address deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<PresentAddressDto>(res));
     }
     catch (Exception)
     {
@@ -179,10 +178,10 @@ public class PresentAddressController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<PresentAddressDto>("User authentication required"));
 
       var res = await _serviceManager.PresentAddresses.GetPresentAddressAsync(key, trackChanges: false);
-      return Ok(ResponseHelper.Success(res, "Present address retrieved successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Present address retrieved successfully"));
     }
     catch (Exception)
     {

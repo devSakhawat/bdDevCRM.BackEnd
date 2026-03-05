@@ -41,9 +41,9 @@ public class ApplicantCourseController : BaseApiController
 
     var res = await _serviceManager.ApplicantCourses.GetApplicantCoursesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<ApplicantCourseDto>>("No applicant courses found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<ApplicantCourseDto>>("No applicant courses found"));
 
-    return Ok(ResponseHelper.Success(res, "Applicant courses retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Applicant courses retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.ApplicantCoursesByApplicantId)]
@@ -65,9 +65,9 @@ public class ApplicantCourseController : BaseApiController
 
     var res = await _serviceManager.ApplicantCourses.GetApplicantCoursesByApplicantIdAsync(applicantId, trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<ApplicantCourseDto>>("No applicant courses found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<ApplicantCourseDto>>("No applicant courses found"));
 
-    return Ok(ResponseHelper.Success(res, "Applicant courses retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Applicant courses retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
@@ -76,18 +76,18 @@ public class ApplicantCourseController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<ApplicantCourseDto>>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<ApplicantCourseDto>>("User not found in cache"));
 
     if (options == null)
-      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+      return BadRequest(ApiResponseHelper.BadRequest<GridEntity<ApplicantCourseDto>>("CRMGridOptions cannot be null"));
 
     var summaryGrid = await _serviceManager.ApplicantCourses.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
@@ -99,26 +99,26 @@ public class ApplicantCourseController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantCourseDto>("User authentication required"));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantCourseDto>("User session expired"));
 
       if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Applicant course data is required"));
+        return BadRequest(ApiResponseHelper.BadRequest<ApplicantCourseDto>("Applicant course data is required"));
 
       ApplicantCourseDto res = await _serviceManager.ApplicantCourses.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.ApplicantCourseId > 0)
-        return Ok(ResponseHelper.Created(res, "Applicant course created successfully"));
+        return Ok(ApiResponseHelper.Created(res, "Applicant course created successfully"));
       else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create applicant course"));
+        return StatusCode(500, ApiResponseHelper.InternalServerError<ApplicantCourseDto>("Failed to create applicant course"));
     }
     catch (System.Text.Json.JsonException)
     {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in applicant course data"));
+      return BadRequest(ApiResponseHelper.BadRequest<ApplicantCourseDto>("Invalid JSON format in applicant course data"));
     }
   }
 
@@ -131,19 +131,19 @@ public class ApplicantCourseController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantCourseDto>("UserId not found in token."));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantCourseDto>("User not found in cache."));
 
       var res = await _serviceManager.ApplicantCourses.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Applicant course updated successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Applicant course updated successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<ApplicantCourseDto>(res));
     }
     catch (Exception)
     {
@@ -164,9 +164,9 @@ public class ApplicantCourseController : BaseApiController
       var res = await _serviceManager.ApplicantCourses.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Applicant course deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Applicant course deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<ApplicantCourseDto>(res));
     }
     catch (Exception)
     {
@@ -182,10 +182,10 @@ public class ApplicantCourseController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantCourseDto>("User authentication required"));
 
       var res = await _serviceManager.ApplicantCourses.GetApplicantCourseAsync(key, trackChanges: false);
-      return Ok(ResponseHelper.Success(res, "Applicant course retrieved successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Applicant course retrieved successfully"));
     }
     catch (Exception)
     {

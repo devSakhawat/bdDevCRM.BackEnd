@@ -47,7 +47,7 @@ public class StandardExceptionMiddleware
                            ?? context.TraceIdentifier
                            ?? Guid.NewGuid().ToString();
 
-    // ✅ Structured logging (no $ interpolation)
+    // Structured logging (no $ interpolation)
     _logger.LogError(ex,
         "[{CorrelationId}] {ExceptionType}: {ExceptionMessage}",
         correlationId, ex.GetType().Name, ex.Message);
@@ -71,7 +71,7 @@ public class StandardExceptionMiddleware
   //     GetMostRelevantMessage, SanitizeDatabaseErrorMessage
   //     methods remain the same as before (provided in previous response)
 
-  private StandardApiResponse<object> MapExceptionToStandardResponse(Exception ex, string correlationId)
+  private ApiResponse<object> MapExceptionToStandardResponse(Exception ex, string correlationId)
   {
     if (ex is BaseCustomException customEx)
     {
@@ -88,15 +88,37 @@ public class StandardExceptionMiddleware
 
     return ex switch
     {
-      GenericConflictException or DuplicateRecordException or ConflictException =>
-          CreateStandardResponse(409, ex.Message, "CONFLICT", ex.GetType().Name, null, null, correlationId),
+			// ==================== 409 CONFLICT ====================
+			GenericConflictException or
+			DuplicateRecordException or
+			ConflictException =>
+					CreateStandardResponse(
+							statusCode: 409,
+							message: ex.Message,
+							errorCode: "CONFLICT",
+							errorType: ex.GetType().Name,
+							details: null,
+							additionalData: null,
+							correlationId: correlationId),
 
-      InvalidCreateOperationException or InvalidUpdateOperationException or
-      IdMismatchBadRequestException or NullModelBadRequestException or
-      GenericBadRequestException or UsernamePasswordMismatchException or BadRequestException =>
-          CreateStandardResponse(400, ex.Message, "BAD_REQUEST", ex.GetType().Name, null, null, correlationId),
+			// ==================== 400 BAD REQUEST ====================
+			InvalidCreateOperationException or
+			InvalidUpdateOperationException or
+			IdMismatchBadRequestException or
+			NullModelBadRequestException or
+			GenericBadRequestException or
+			UsernamePasswordMismatchException or
+			BadRequestException =>
+					CreateStandardResponse(
+							statusCode: 400,
+							message: ex.Message,
+							errorCode: "BAD_REQUEST",
+							errorType: ex.GetType().Name,
+							details: null,
+							additionalData: null,
+							correlationId: correlationId),
 
-      GenericNotFoundException or NotFoundException =>
+			GenericNotFoundException or NotFoundException =>
           CreateStandardResponse(404, ex.Message, "NOT_FOUND", ex.GetType().Name, null, null, correlationId),
 
       GenericUnauthorizedException or UnauthorizedException =>
@@ -105,8 +127,8 @@ public class StandardExceptionMiddleware
       ForbiddenAccessException =>
           CreateStandardResponse(403, ex.Message, "FORBIDDEN", ex.GetType().Name, null, null, correlationId),
 
-      ServiceUnavailableException =>
-          CreateStandardResponse(503, ex.Message, "SERVICE_UNAVAILABLE", ex.GetType().Name, null, null, correlationId),
+      //ServiceUnavailableException =>
+      //    CreateStandardResponse(503, ex.Message, "SERVICE_UNAVAILABLE", ex.GetType().Name, null, null, correlationId),
 
       SecurityTokenExpiredException =>
           CreateStandardResponse(401, "Your authentication token has expired. Please log in again.",
@@ -140,7 +162,217 @@ public class StandardExceptionMiddleware
               "DATABASE_ERROR", "DatabaseError", null, null, correlationId,
               _env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null),
 
-      _ => CreateStandardResponse(500,
+
+			//// 400 BAD REQUEST ====================
+			////CollectionByIdsBadRequestException or
+			////CommonBadReuqestException or
+			////IdParametersBadRequestException or
+			////NullModelBadRequestException or
+			////IdMismatchBadRequestException =>
+			//		CreateStandardResponse(
+			//				statusCode: 400,
+			//				message: ex.Message,
+			//				errorCode: "BAD_REQUEST",
+			//				errorType: ex.GetType().Name,
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 400 FILE SIZE ====================
+			//FileSizeExceededException =>
+			//		CreateStandardResponse(
+			//				statusCode: 400,
+			//				message: ex.Message,
+			//				errorCode: "FILE_TOO_LARGE",
+			//				errorType: ex.GetType().Name,
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 404 NOT FOUND ====================
+			//GenericNotFoundException or
+			//NotFoundException =>
+			//		CreateStandardResponse(
+			//				statusCode: 404,
+			//				message: ex.Message,
+			//				errorCode: "NOT_FOUND",
+			//				errorType: ex.GetType().Name,
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 401 UNAUTHORIZED ====================
+			//GenericUnauthorizedException or
+			//UnauthorizedException =>
+			//		CreateStandardResponse(
+			//				statusCode: 401,
+			//				message: ex.Message,
+			//				errorCode: "UNAUTHORIZED",
+			//				errorType: ex.GetType().Name,
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 401 UNAUTHORIZED ====================
+			//UnauthorizedAccessCRMException =>
+			//		CreateStandardResponse(
+			//				statusCode: 401,
+			//				message: ex.Message,
+			//				errorCode: "UNAUTHORIZED",
+			//				errorType: ex.GetType().Name,
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 403 FORBIDDEN ====================
+			//ForbiddenAccessException =>
+			//		CreateStandardResponse(
+			//				statusCode: 403,
+			//				message: ex.Message,
+			//				errorCode: "FORBIDDEN",
+			//				errorType: ex.GetType().Name,
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 403 FORBIDDEN ====================
+			//AccessDeniedException =>
+			//		CreateStandardResponse(
+			//				statusCode: 403,
+			//				message: ex.Message,
+			//				errorCode: "FORBIDDEN",
+			//				errorType: ex.GetType().Name,
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			// ==================== 503 SERVICE UNAVAILABLE ====================
+			ServiceUnavailableException =>
+					CreateStandardResponse(
+							statusCode: 503,
+							message: ex.Message,
+							errorCode: "SERVICE_UNAVAILABLE",
+							errorType: ex.GetType().Name,
+							details: null,
+							additionalData: null,
+							correlationId: correlationId),
+
+			// ==================== 408 REQUEST TIMEOUT ====================
+			RequestTimeoutException =>
+					CreateStandardResponse(
+							statusCode: 408,
+							message: ex.Message,
+							errorCode: "REQUEST_TIMEOUT",
+							errorType: ex.GetType().Name,
+							details: null,
+							additionalData: null,
+							correlationId: correlationId),
+
+			// ==================== 500 DATA MAPPING ====================
+			DataMappingException =>
+					CreateStandardResponse(
+							statusCode: 500,
+							message: "Data mapping failed",
+							errorCode: "DATA_MAPPING_ERROR",
+							errorType: ex.GetType().Name,
+							details: _env.IsDevelopment() ? GetMostRelevantMessage(ex) : null,
+							additionalData: new Dictionary<string, object>
+							{
+								["ColumnName"] = (ex as DataMappingException)?.ColumnName,
+								["PropertyName"] = (ex as DataMappingException)?.PropertyName,
+								["PropertyType"] = (ex as DataMappingException)?.PropertyType,
+								["EntityType"] = (ex as DataMappingException)?.EntityType,
+								["RawValue"] = (ex as DataMappingException)?.RawValue
+							},
+							correlationId: correlationId,
+							stackTrace: _env.IsDevelopment() ? ex.StackTrace : null),
+
+			//// ==================== 401 SECURITY TOKEN ====================
+			//SecurityTokenExpiredException =>
+			//		CreateStandardResponse(
+			//				statusCode: 401,
+			//				message: "Your authentication token has expired. Please log in again.",
+			//				errorCode: "TOKEN_EXPIRED",
+			//				errorType: "SecurityTokenExpired",
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			////SecurityTokenException or
+			//SecurityTokenValidationException =>
+			//		CreateStandardResponse(
+			//				statusCode: 401,
+			//				message: "Invalid authentication token. Please log in again.",
+			//				errorCode: "INVALID_TOKEN",
+			//				errorType: "SecurityTokenInvalid",
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 401 UNAUTHORIZED ACCESS ====================
+			//UnauthorizedAccessException =>
+			//		CreateStandardResponse(
+			//				statusCode: 401,
+			//				message: "You are not authorized to perform this action.",
+			//				errorCode: "UNAUTHORIZED_ACCESS",
+			//				errorType: "UnauthorizedAccess",
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 400 VALIDATION ====================
+			//ValidationException =>
+			//		CreateStandardResponse(
+			//				statusCode: 400,
+			//				message: "One or more validation errors occurred.",
+			//				errorCode: "VALIDATION_ERROR",
+			//				errorType: "Validation",
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 400 ARGUMENT NULL ====================
+			//ArgumentNullException argNull =>
+			//		CreateStandardResponse(
+			//				statusCode: 400,
+			//				message: $"Required parameter '{argNull.ParamName}' is missing.",
+			//				errorCode: "ARGUMENT_NULL",
+			//				errorType: "ArgumentNull",
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 404 KEY NOT FOUND ====================
+			//KeyNotFoundException =>
+			//		CreateStandardResponse(
+			//				statusCode: 404,
+			//				message: "The requested resource was not found.",
+			//				errorCode: "KEY_NOT_FOUND",
+			//				errorType: "KeyNotFound",
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId),
+
+			//// ==================== 500 DATABASE ERROR ====================
+			//DbUpdateException =>
+			//		CreateStandardResponse(
+			//				statusCode: 500,
+			//				message: SanitizeDatabaseErrorMessage(ex),
+			//				errorCode: "DATABASE_ERROR",
+			//				errorType: "DatabaseError",
+			//				details: null,
+			//				additionalData: null,
+			//				correlationId: correlationId,
+			//				stackTrace: _env.IsDevelopment() ? GetMostRelevantStackTrace(ex) : null),
+
+
+			////New case for DataMappingException
+			//DataMappingException =>
+			//	CreateStandardResponse(500, "Data mapping failed", "DATA_MAPPING_ERROR", "DataMapping", null, null, correlationId),
+
+
+			// Generic fallback for unhandled exceptions
+			_ => CreateStandardResponse(500,
           _env.IsDevelopment() ? GetMostRelevantMessage(ex) : "An unexpected error occurred. Please try again later.",
           "INTERNAL_ERROR", ex.GetType().Name,
           _env.IsDevelopment() ? GetMostRelevantMessage(ex) : null,
@@ -149,10 +381,10 @@ public class StandardExceptionMiddleware
     };
   }
 
-  private StandardApiResponse<object> CreateStandardResponse( int statusCode, string message, string errorCode, string errorType, string? details, Dictionary<string, object>? additionalData,
+  private ApiResponse<object> CreateStandardResponse( int statusCode, string message, string errorCode, string errorType, string? details, Dictionary<string, object>? additionalData,
       string correlationId, string? stackTrace = null)
   {
-    return new StandardApiResponse<object>
+    return new ApiResponse<object>
     {
       StatusCode = statusCode,
       Success = false,
@@ -275,7 +507,7 @@ public class StandardExceptionMiddleware
 //        await context.Response.WriteAsync(json);
 //    }
 
-//    private StandardApiResponse<object> MapExceptionToStandardResponse(Exception ex, string correlationId)
+//    private ApiResponse<object> MapExceptionToStandardResponse(Exception ex, string correlationId)
 //    {
 //        // Handle BaseCustomException first (highest priority)
 //        if (ex is BaseCustomException customEx)
@@ -370,7 +602,7 @@ public class StandardExceptionMiddleware
 //        };
 //    }
 
-//    private StandardApiResponse<object> CreateStandardResponse(
+//    private ApiResponse<object> CreateStandardResponse(
 //        int statusCode,
 //        string message,
 //        string errorCode,
@@ -380,7 +612,7 @@ public class StandardExceptionMiddleware
 //        string correlationId,
 //        string stackTrace = null)
 //    {
-//        return new StandardApiResponse<object>
+//        return new ApiResponse<object>
 //        {
 //            StatusCode = statusCode,
 //            Success = false,

@@ -50,9 +50,9 @@ public class CRMInstituteController : BaseApiController
 
     var res = await _serviceManager.CrmInstitutes.GetInstitutesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found"));
 
-    return Ok(ResponseHelper.Success(res, "Institutes retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Institutes retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.InstituteDDLByCountryId)]
@@ -75,9 +75,9 @@ public class CRMInstituteController : BaseApiController
 
     var res = await _serviceManager.CrmInstitutes.GetInstitutesByCountryIdDDLAsync(countryId, trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found for the specified country"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found for the specified country"));
 
-    return Ok(ResponseHelper.Success(res, "Institutes retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Institutes retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
@@ -100,9 +100,9 @@ public class CRMInstituteController : BaseApiController
 
     var summaryGrid = await _serviceManager.CrmInstitutes.SummaryGrid(options);
     if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
+      return Ok(ApiResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
 
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   /* --------------------------------------------- */
@@ -138,7 +138,7 @@ public class CRMInstituteController : BaseApiController
     if (savedDto.InstituteId <= 0)
       throw new InvalidCreateOperationException("Failed to create institute record.");
 
-    return Ok(ResponseHelper.Created(savedDto, "Institute created successfully."));
+    return Ok(ApiResponseHelper.Created(savedDto, "Institute created successfully."));
   }
 
   //public async Task<IActionResult> CreateNewRecord(IFormCollection form)
@@ -147,16 +147,16 @@ public class CRMInstituteController : BaseApiController
   //  {
   //    var userIdClaim = User.FindFirst("UserId")?.Value;
   //    if (string.IsNullOrEmpty(userIdClaim))
-  //      return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+  //      return Unauthorized(ApiResponseHelper.Unauthorized("User authentication required"));
 
   //    int userId = Convert.ToInt32(userIdClaim);
   //    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
   //    if (currentUser == null)
-  //      return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+  //      return Unauthorized(ApiResponseHelper.Unauthorized("User session expired"));
 
   //    var modelDto = form["modelDto"];
   //    if (string.IsNullOrEmpty(modelDto))
-  //      return BadRequest(ResponseHelper.BadRequest("Institute data is required"));
+  //      return BadRequest(ApiResponseHelper.BadRequest("Institute data is required"));
 
   //    var logoFile = form.Files["InstitutionLogoFile"];
   //    var prospectusFile = form.Files["InstitutionProspectusFile"];
@@ -169,13 +169,13 @@ public class CRMInstituteController : BaseApiController
   //    await SaveInstituteFilesAsync(res, currentUser);
 
   //    if (res.InstituteId > 0)
-  //      return Ok(ResponseHelper.Created(res, "Institute created successfully"));
+  //      return Ok(ApiResponseHelper.Created(res, "Institute created successfully"));
   //    else
-  //      return StatusCode(500, ResponseHelper.InternalServerError("Failed to create institute"));
+  //      return StatusCode(500, ApiResponseHelper.InternalServerError("Failed to create institute"));
   //  }
   //  catch (JsonException)
   //  {
-  //    return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in institute data"));
+  //    return BadRequest(ApiResponseHelper.BadRequest("Invalid JSON format in institute data"));
   //  }
   //}
 
@@ -214,7 +214,7 @@ public class CRMInstituteController : BaseApiController
       throw new InvalidUpdateOperationException("Failed to update institute record.");
 
     // Return success response
-    return Ok(ResponseHelper.Success(res, "Institute updated successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Institute updated successfully"));
   }
 
 
@@ -230,9 +230,9 @@ public class CRMInstituteController : BaseApiController
       var res = await _serviceManager.CrmInstitutes.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Institute deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Institute deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<CrmInstituteDto>(res));
     }
     catch (Exception ex)
     {

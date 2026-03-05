@@ -42,7 +42,7 @@ public class CrmIntakeMonthController : BaseApiController
     try
     {
       var intakeMonth = await _serviceManager.CrmIntakeMonths.GetIntakeMonthAsync(key, trackChanges: false);
-      return Ok(ResponseHelper.Success(intakeMonth, "Intake month retrieved successfully"));
+      return Ok(ApiResponseHelper.Success(intakeMonth, "Intake month retrieved successfully"));
     }
     catch (GenericNotFoundException)
     {
@@ -66,9 +66,9 @@ public class CrmIntakeMonthController : BaseApiController
     var intakeMonths = await _serviceManager.CrmIntakeMonths.GetIntakeMonthsDDLAsync(trackChanges: false);
 
     if (intakeMonths == null || !intakeMonths.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CrmIntakeMonthDDL>>("No intake months found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmIntakeMonthDDL>>("No intake months found"));
 
-    return Ok(ResponseHelper.Success(intakeMonths, "Intake months retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(intakeMonths, "Intake months retrieved successfully"));
   }
 
   //[HttpGet(RouteConstants.IntakeMonthDDL)]
@@ -87,9 +87,9 @@ public class CrmIntakeMonthController : BaseApiController
   //  var intakeMonths = await _serviceManager.CrmIntakeMonths.GetIntakeMonthsAsync(trackChanges: false);
   //
   //  if (intakeMonths == null || !intakeMonths.Any())
-  //    return Ok(ResponseHelper.NoContent<IEnumerable<CrmIntakeMonthDto>>("No intake months found"));
+  //    return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmIntakeMonthDto>>("No intake months found"));
   //
-  //  return Ok(ResponseHelper.Success(intakeMonths, "Intake months retrieved successfully"));
+  //  return Ok(ApiResponseHelper.Success(intakeMonths, "Intake months retrieved successfully"));
   //}
 
   [HttpPost(RouteConstants.IntakeMonthSummary)]
@@ -112,9 +112,9 @@ public class CrmIntakeMonthController : BaseApiController
     var grid = await _serviceManager.CrmIntakeMonths.SummaryGrid(options);
 
     if (grid == null || !grid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<CrmIntakeMonthDto>>("No data found"));
+      return Ok(ApiResponseHelper.NoContent<GridEntity<CrmIntakeMonthDto>>("No data found"));
 
-    return Ok(ResponseHelper.Success(grid, "Intake months grid retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(grid, "Intake months grid retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.CreateIntakeMonth)]
@@ -140,7 +140,7 @@ public class CrmIntakeMonthController : BaseApiController
     if (createdIntakeMonth.IntakeMonthId <= 0)
       throw new InvalidCreateOperationException("Failed to create intake month record.");
 
-    return Ok(ResponseHelper.Success(createdIntakeMonth, "Intake month created successfully"));
+    return Ok(ApiResponseHelper.Success(createdIntakeMonth, "Intake month created successfully"));
   }
 
   [HttpPost(RouteConstants.CreateOrUpdateIntakeMonth)]
@@ -162,7 +162,7 @@ public class CrmIntakeMonthController : BaseApiController
       throw new NullModelBadRequestException("Intake month data cannot be null");
 
     var result = await _serviceManager.CrmIntakeMonths.SaveOrUpdate(key, intakeMonthDto);
-    return Ok(ResponseHelper.Success(intakeMonthDto, result));
+    return Ok(ApiResponseHelper.Success(intakeMonthDto, result));
   }
 
   [HttpPut(RouteConstants.UpdateIntakeMonth)]
@@ -187,7 +187,7 @@ public class CrmIntakeMonthController : BaseApiController
       throw new NullModelBadRequestException("Intake month data cannot be null");
 
     var result = await _serviceManager.CrmIntakeMonths.UpdateNewRecordAsync(key, intakeMonthDto, trackChanges: true);
-    return Ok(ResponseHelper.Success(intakeMonthDto, result));
+    return Ok(ApiResponseHelper.Success(intakeMonthDto, result));
   }
 
   [HttpDelete(RouteConstants.DeleteIntakeMonth)]
@@ -211,7 +211,7 @@ public class CrmIntakeMonthController : BaseApiController
     {
       var intakeMonth = await _serviceManager.CrmIntakeMonths.GetIntakeMonthAsync(key, trackChanges: false);
       var result = await _serviceManager.CrmIntakeMonths.DeleteRecordAsync(key, intakeMonth);
-      return Ok(ResponseHelper.Success<string?>(null, result));
+      return Ok(ApiResponseHelper.Success<string?>(null, result));
     }
     catch (GenericNotFoundException)
     {

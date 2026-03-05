@@ -181,12 +181,9 @@ INNER JOIN MODULE ON MENU.ModuleId = MODULE.ModuleId
 
       if (!isDefaultExist)
       {
-
-
         WfState wfstate = MyMapper.JsonClone<WfStateDto, WfState>(modelDto);
         _repository.WfStates.Update(wfstate);
         await _repository.SaveAsync();
-
         return OperationMessage.Success;
       }
       else

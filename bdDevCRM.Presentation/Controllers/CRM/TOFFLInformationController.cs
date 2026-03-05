@@ -40,9 +40,9 @@ public class TOFFLInformationController : BaseApiController
 
         var res = await _serviceManager.TOEFLInformations.GetToeflinformationsDDLAsync(trackChanges: false);
         if (res == null || !res.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<TOEFLInformationDto>>("No TOEFL information found"));
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<TOEFLInformationDto>>("No TOEFL information found"));
 
-        return Ok(ResponseHelper.Success(res, "TOEFL information retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(res, "TOEFL information retrieved successfully"));
     }
 
     [HttpGet(RouteConstants.ToeflInformationByApplicantId)]
@@ -63,7 +63,7 @@ public class TOFFLInformationController : BaseApiController
             throw new GenericUnauthorizedException("User session expired.");
 
         var res = await _serviceManager.TOEFLInformations.GetToeflinformationByApplicantIdAsync(applicantId, trackChanges: false);
-        return Ok(ResponseHelper.Success(res, "TOEFL information retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(res, "TOEFL information retrieved successfully"));
     }
 
     // --------- 2. Summary Grid ----------------------------------------
@@ -72,18 +72,18 @@ public class TOFFLInformationController : BaseApiController
     {
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (string.IsNullOrEmpty(userIdClaim))
-            return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+            return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("UserId not found in token"));
 
         int userId = Convert.ToInt32(userIdClaim);
         UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
         if (currentUser == null)
-            return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+            return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("User not found in cache"));
 
         if (options == null)
-            return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+            return BadRequest(ApiResponseHelper.BadRequest<StatementOfPurposeDto>("CRMGridOptions cannot be null"));
 
         var summaryGrid = await _serviceManager.TOEFLInformations.SummaryGrid(options);
-        return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
     }
 
     // --------- 3. Create ----------------------------------------------
@@ -95,26 +95,26 @@ public class TOFFLInformationController : BaseApiController
         {
             var userIdClaim = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
-                return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+                return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("User authentication required"));
 
             int userId = Convert.ToInt32(userIdClaim);
             UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
             if (currentUser == null)
-                return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+                return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("User session expired"));
 
             if (modelDto == null)
-                return BadRequest(ResponseHelper.BadRequest("TOEFL information data is required"));
+                return BadRequest(ApiResponseHelper.BadRequest<TOEFLInformationDto>("TOEFL information data is required"));
 
             TOEFLInformationDto res = await _serviceManager.TOEFLInformations.CreateNewRecordAsync(modelDto, currentUser);
 
             if (res.TOEFLInformationId > 0)
-                return Ok(ResponseHelper.Created(res, "TOEFL information created successfully"));
+                return Ok(ApiResponseHelper.Created(res, "TOEFL information created successfully"));
             else
-                return StatusCode(500, ResponseHelper.InternalServerError("Failed to create TOEFL information"));
+                return StatusCode(500, ApiResponseHelper.InternalServerError<TOEFLInformationDto>("Failed to create TOEFL information"));
         }
         catch (System.Text.Json.JsonException)
         {
-            return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in TOEFL information data"));
+            return BadRequest(ApiResponseHelper.BadRequest<TOEFLInformationDto>("Invalid JSON format in TOEFL information data"));
         }
     }
 
@@ -127,19 +127,19 @@ public class TOFFLInformationController : BaseApiController
         {
             var userIdClaim = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
-                return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+                return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("UserId not found in token."));
 
             int userId = Convert.ToInt32(userIdClaim);
             UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
             if (currentUser == null)
-                return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+                return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("User not found in cache."));
 
             var res = await _serviceManager.TOEFLInformations.UpdateRecordAsync(key, modelDto, false);
 
             if (res == OperationMessage.Success)
-                return Ok(ResponseHelper.Success(res, "TOEFL information updated successfully"));
+                return Ok(ApiResponseHelper.Success(res, "TOEFL information updated successfully"));
             else
-                return Conflict(ResponseHelper.Conflict(res));
+                return Conflict(ApiResponseHelper.Conflict<TOEFLInformationDto>(res));
         }
         catch (Exception)
         {
@@ -160,9 +160,9 @@ public class TOFFLInformationController : BaseApiController
             var res = await _serviceManager.TOEFLInformations.DeleteRecordAsync(key, modelDto);
 
             if (res == OperationMessage.Success)
-                return Ok(ResponseHelper.Success(res, "TOEFL information deleted successfully"));
+                return Ok(ApiResponseHelper.Success(res, "TOEFL information deleted successfully"));
             else
-                return Conflict(ResponseHelper.Conflict(res));
+                return Conflict(ApiResponseHelper.Conflict<TOEFLInformationDto>(res));
         }
         catch (Exception)
         {
@@ -178,10 +178,10 @@ public class TOFFLInformationController : BaseApiController
         {
             var userIdClaim = User.FindFirst("UserId")?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
-                return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+                return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("User authentication required"));
 
             var res = await _serviceManager.TOEFLInformations.GetToeflinformationAsync(key, trackChanges: false);
-            return Ok(ResponseHelper.Success(res, "TOEFL information retrieved successfully"));
+            return Ok(ApiResponseHelper.Success(res, "TOEFL information retrieved successfully"));
         }
         catch (Exception)
         {

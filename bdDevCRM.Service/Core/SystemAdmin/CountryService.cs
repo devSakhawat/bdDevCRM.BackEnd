@@ -92,7 +92,7 @@ internal sealed class CrmCountryService : ICrmCountryService
     {
       Expression<Func<CrmCountry, bool>> expression = e => e.CountryId == key;
       bool exists = await _repository.Countries.ExistsAsync(expression);
-      if (exists)
+      if (!exists)
       {
         CrmCountry countryObj = MyMapper.JsonClone<CrmCountryDto, CrmCountry>(modelDto);
         _repository.Countries.Update(countryObj);

@@ -50,10 +50,10 @@ public class CrmIntakeYearController : BaseApiController
 
         // Return standardized response
         if (intakeYears == null || !intakeYears.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<CrmIntakeYearDDL>>(
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmIntakeYearDDL>>(
                 "No intake years found"));
 
-        return Ok(ResponseHelper.Success(intakeYears, 
+        return Ok(ApiResponseHelper.Success(intakeYears, 
             "Intake years retrieved successfully"));
     }
 
@@ -84,10 +84,10 @@ public class CrmIntakeYearController : BaseApiController
 
         // Return standardized response
         if (grid == null || !grid.Items.Any())
-            return Ok(ResponseHelper.NoContent<GridEntity<CrmIntakeYearDto>>(
+            return Ok(ApiResponseHelper.NoContent<GridEntity<CrmIntakeYearDto>>(
                 "No intake years found"));
 
-        return Ok(ResponseHelper.Success(grid, 
+        return Ok(ApiResponseHelper.Success(grid, 
             "Intake years grid retrieved successfully"));
     }
 
@@ -119,7 +119,7 @@ public class CrmIntakeYearController : BaseApiController
                 .GetIntakeYearAsync(key, trackChanges: false);
 
             // Return standardized response
-            return Ok(ResponseHelper.Success(intakeYear, 
+            return Ok(ApiResponseHelper.Success(intakeYear, 
                 "Intake year retrieved successfully"));
         }
         catch (GenericNotFoundException)
@@ -160,7 +160,7 @@ public class CrmIntakeYearController : BaseApiController
                 "Failed to create intake year record.");
 
         // Return standardized response
-        return Ok(ResponseHelper.Created(createdIntakeYear, 
+        return Ok(ApiResponseHelper.Created(createdIntakeYear, 
             "Intake year created successfully"));
     }
 
@@ -193,7 +193,7 @@ public class CrmIntakeYearController : BaseApiController
             .SaveOrUpdate(key, intakeYearDto);
 
         // Return standardized response
-        return Ok(ResponseHelper.Success(intakeYearDto, result));
+        return Ok(ApiResponseHelper.Success(intakeYearDto, result));
     }
 
     /// <summary>
@@ -230,7 +230,7 @@ public class CrmIntakeYearController : BaseApiController
             .UpdateNewRecordAsync(key, intakeYearDto, trackChanges: true);
 
         // Return standardized response
-        return Ok(ResponseHelper.Updated(intakeYearDto, result));
+        return Ok(ApiResponseHelper.Updated(intakeYearDto, result));
     }
 
     /// <summary>
@@ -265,7 +265,7 @@ public class CrmIntakeYearController : BaseApiController
                 .DeleteRecordAsync(key, intakeYear);
 
             // Return standardized response
-            return Ok(ResponseHelper.Success<string?>(null, result));
+            return Ok(ApiResponseHelper.Success<string?>(null, result));
         }
         catch (GenericNotFoundException)
         {

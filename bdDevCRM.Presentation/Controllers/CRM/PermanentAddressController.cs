@@ -41,9 +41,9 @@ public class PermanentAddressController : BaseApiController
 
     var res = await _serviceManager.PermanentAddresses.GetPermanentAddressesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<PermanentAddressDto>>("No permanent addresses found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<PermanentAddressDto>>("No permanent addresses found"));
 
-    return Ok(ResponseHelper.Success(res, "Permanent addresses retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Permanent addresses retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.PermanentAddressByApplicantId)]
@@ -64,7 +64,7 @@ public class PermanentAddressController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.PermanentAddresses.GetPermanentAddressByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Permanent address retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Permanent address retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
@@ -73,18 +73,18 @@ public class PermanentAddressController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("User not found in cache"));
 
     if (options == null)
-      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+      return BadRequest(ApiResponseHelper.BadRequest<PermanentAddressDto>("CRMGridOptions cannot be null"));
 
     var summaryGrid = await _serviceManager.PermanentAddresses.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
@@ -96,26 +96,26 @@ public class PermanentAddressController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("User authentication required"));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("User session expired"));
 
       if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Permanent address data is required"));
+        return BadRequest(ApiResponseHelper.BadRequest<PermanentAddressDto>("Permanent address data is required"));
 
       PermanentAddressDto res = await _serviceManager.PermanentAddresses.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.PermanentAddressId > 0)
-        return Ok(ResponseHelper.Created(res, "Permanent address created successfully"));
+        return Ok(ApiResponseHelper.Created(res, "Permanent address created successfully"));
       else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create permanent address"));
+        return StatusCode(500, ApiResponseHelper.InternalServerError<PermanentAddressDto>("Failed to create permanent address"));
     }
     catch (System.Text.Json.JsonException)
     {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in permanent address data"));
+      return BadRequest(ApiResponseHelper.BadRequest<PermanentAddressDto>("Invalid JSON format in permanent address data"));
     }
   }
 
@@ -128,19 +128,19 @@ public class PermanentAddressController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("UserId not found in token."));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("User not found in cache."));
 
       var res = await _serviceManager.PermanentAddresses.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Permanent address updated successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Permanent address updated successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<PermanentAddressDto>(res));
     }
     catch (Exception)
     {
@@ -161,9 +161,9 @@ public class PermanentAddressController : BaseApiController
       var res = await _serviceManager.PermanentAddresses.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Permanent address deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Permanent address deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<PermanentAddressDto>(res));
     }
     catch (Exception)
     {
@@ -179,10 +179,10 @@ public class PermanentAddressController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("User authentication required"));
 
       var res = await _serviceManager.PermanentAddresses.GetPermanentAddressAsync(key, trackChanges: false);
-      return Ok(ResponseHelper.Success(res, "Permanent address retrieved successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Permanent address retrieved successfully"));
     }
     catch (Exception)
     {

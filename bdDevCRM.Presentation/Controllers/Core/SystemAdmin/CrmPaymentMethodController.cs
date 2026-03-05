@@ -57,7 +57,7 @@ public class CrmPaymentMethodController : BaseApiController
                 .GetPaymentMethodAsync(key, trackChanges: false);
 
             // Return standardized response
-            return Ok(ResponseHelper.Success(paymentMethod, 
+            return Ok(ApiResponseHelper.Success(paymentMethod, 
                 "Payment method retrieved successfully"));
         }
         catch (GenericNotFoundException)
@@ -87,10 +87,10 @@ public class CrmPaymentMethodController : BaseApiController
 
         // Return standardized response
         if (paymentMethods == null || !paymentMethods.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<CrmPaymentMethodDDL>>(
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmPaymentMethodDDL>>(
                 "No payment methods found"));
 
-        return Ok(ResponseHelper.Success(paymentMethods, 
+        return Ok(ApiResponseHelper.Success(paymentMethods, 
             "Payment methods retrieved successfully"));
     }
 
@@ -115,10 +115,10 @@ public class CrmPaymentMethodController : BaseApiController
 
         // Return standardized response
         if (paymentMethods == null || !paymentMethods.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<CrmPaymentMethodDDL>>(
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmPaymentMethodDDL>>(
                 "No online payment methods found"));
 
-        return Ok(ResponseHelper.Success(paymentMethods, 
+        return Ok(ApiResponseHelper.Success(paymentMethods, 
             "Online payment methods retrieved successfully"));
     }
 
@@ -147,10 +147,10 @@ public class CrmPaymentMethodController : BaseApiController
 
         // Return standardized response
         if (grid == null || !grid.Items.Any())
-            return Ok(ResponseHelper.NoContent<GridEntity<CrmPaymentMethodDto>>(
+            return Ok(ApiResponseHelper.NoContent<GridEntity<CrmPaymentMethodDto>>(
                 "No payment methods found"));
 
-        return Ok(ResponseHelper.Success(grid, 
+        return Ok(ApiResponseHelper.Success(grid, 
             "Payment methods grid retrieved successfully"));
     }
 
@@ -186,7 +186,7 @@ public class CrmPaymentMethodController : BaseApiController
                 "Failed to create payment method record.");
 
         // Return standardized response
-        return Ok(ResponseHelper.Created(createdPaymentMethod, 
+        return Ok(ApiResponseHelper.Created(createdPaymentMethod, 
             "Payment method created successfully"));
     }
 
@@ -219,7 +219,7 @@ public class CrmPaymentMethodController : BaseApiController
             .SaveOrUpdate(key, paymentMethodDto);
 
         // Return standardized response
-        return Ok(ResponseHelper.Success(paymentMethodDto, result));
+        return Ok(ApiResponseHelper.Success(paymentMethodDto, result));
     }
 
     /// <summary>
@@ -256,7 +256,7 @@ public class CrmPaymentMethodController : BaseApiController
             .UpdateNewRecordAsync(key, paymentMethodDto, trackChanges: true);
 
         // Return standardized response
-        return Ok(ResponseHelper.Updated(paymentMethodDto, result));
+        return Ok(ApiResponseHelper.Updated(paymentMethodDto, result));
     }
 
     /// <summary>
@@ -291,7 +291,7 @@ public class CrmPaymentMethodController : BaseApiController
                 .DeleteRecordAsync(key, paymentMethod);
 
             // Return standardized response
-            return Ok(ResponseHelper.Success<string?>(null, result));
+            return Ok(ApiResponseHelper.Success<string?>(null, result));
         }
         catch (GenericNotFoundException)
         {
