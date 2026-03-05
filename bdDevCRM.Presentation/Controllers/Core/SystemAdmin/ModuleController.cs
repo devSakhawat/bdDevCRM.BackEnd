@@ -1,6 +1,6 @@
 ﻿
 //using bdDevCRM.Entities.CRMGrid;
-using bdDevCRM.Presentation.AuthorizeAttribiutes;
+using bdDevCRM.Presentation.AuthorizeAttributes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;

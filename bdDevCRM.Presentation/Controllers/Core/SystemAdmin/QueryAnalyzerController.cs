@@ -1,6 +1,6 @@
 ﻿using bdDevCRM.Entities.CRMGrid;
-using bdDevCRM.Presentation.ActionFIlters;
-using bdDevCRM.Presentation.AuthorizeAttribiutes;
+using bdDevCRM.Presentation.ActionFilters;
+using bdDevCRM.Presentation.AuthorizeAttributes;
 using bdDevCRM.RepositoryDtos.Core.SystemAdmin;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;

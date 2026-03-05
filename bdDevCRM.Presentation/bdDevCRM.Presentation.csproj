@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="ActionFIlters\ApiResponse\**" />
-    <EmbeddedResource Remove="ActionFIlters\ApiResponse\**" />
-    <None Remove="ActionFIlters\ApiResponse\**" />
+    <Compile Remove="ActionFilters\ApiResponse\**" />
+    <EmbeddedResource Remove="ActionFilters\ApiResponse\**" />
+    <None Remove="ActionFilters\ApiResponse\**" />
   </ItemGroup>
 
   <ItemGroup>

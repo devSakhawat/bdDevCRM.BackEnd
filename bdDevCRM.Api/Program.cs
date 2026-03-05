@@ -4,7 +4,7 @@ using bdDevCRM.Api.ContentFormatter;
 using bdDevCRM.Api.Extensions;
 using bdDevCRM.Api.Middleware;
 using bdDevCRM.Presentation;
-using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.ActionFilters;
 using bdDevCRM.Service.Caching;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -63,6 +63,7 @@ builder.Services.PasswordHasher(builder.Configuration);
 // Repository & Service
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
+builder.Services.ConfigureInfrastructureServices();
 builder.Services.ConfigureInterceptors();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 
@@ -235,7 +236,7 @@ NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() =>
 //using bdDevCRM.Api.Extensions;
 //using bdDevCRM.Api.Middleware;
 //using bdDevCRM.Presentation;
-//using bdDevCRM.Presentation.ActionFIlters;
+//using bdDevCRM.Presentation.ActionFilters;
 //using bdDevCRM.Service.Caching;
 //using Microsoft.AspNetCore.HttpOverrides;
 //using Microsoft.AspNetCore.Mvc;

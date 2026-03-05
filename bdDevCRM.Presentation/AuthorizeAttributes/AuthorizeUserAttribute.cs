@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace bdDevCRM.Presentation.AuthorizeAttribiutes;
+namespace bdDevCRM.Presentation.AuthorizeAttributes;
 
 /// <summary>
 /// use IAsyncAuthorizationFilter — to prevent thread block
@@ -136,7 +136,7 @@ public class AuthorizeUserAttribute : Attribute, IAsyncAuthorizationFilter
 //using Microsoft.Extensions.Logging;
 //using System.Diagnostics;
 
-//namespace bdDevCRM.Presentation.AuthorizeAttribiutes;
+//namespace bdDevCRM.Presentation.AuthorizeAttributes;
 
 ///// <summary>
 ///// Optimized authorization filter with cache-first strategy and DB fallback

@@ -2,15 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 
-namespace bdDevCRM.Presentation.ActionFIlters;
+namespace bdDevCRM.Presentation.ActionFilters;
 
 public class ValidateMediaTypeAttribute : IActionFilter
 {
   public void OnActionExecuting(ActionExecutingContext context)
   {
-    // ✅ IgnoreMediaTypeValidation attribute check
-    var hasIgnoreAttribute = context.ActionDescriptor.EndpointMetadata
-        .Any(meta => meta is IgnoreMediaTypeValidationAttribute);
+    // IgnoreMediaTypeValidation attribute check
+    var hasIgnoreAttribute = context.ActionDescriptor.EndpointMetadata.Any(meta => meta is IgnoreMediaTypeValidationAttribute);
 
     if (hasIgnoreAttribute) return;
 

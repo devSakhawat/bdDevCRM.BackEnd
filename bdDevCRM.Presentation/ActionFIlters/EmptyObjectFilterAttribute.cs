@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace bdDevCRM.Presentation.ActionFIlters;
+namespace bdDevCRM.Presentation.ActionFilters;
 
 /// <summary>
 /// Action filter — Returns BadRequest when a complex object is null in POST/PUT requests.
@@ -96,7 +96,7 @@ public class EmptyObjectFilterAttribute : IActionFilter
 //using Microsoft.AspNetCore.Mvc;
 //using Microsoft.AspNetCore.Mvc.Filters;
 
-//namespace bdDevCRM.Presentation.ActionFIlters;
+//namespace bdDevCRM.Presentation.ActionFilters;
 
 ///// <summary>
 ///// Request body DTO null check ও ModelState validation।

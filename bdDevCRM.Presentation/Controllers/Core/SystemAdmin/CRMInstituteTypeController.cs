@@ -1,5 +1,5 @@
 ﻿using bdDevCRM.Utilities.CRMGrid.GRID;
-using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.ActionFilters;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
@@ -8,7 +8,7 @@ using bdDevCRM.Shared.Exceptions;
 using bdDevCRM.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using bdDevCRM.Presentation.AuthorizeAttribiutes;
+using bdDevCRM.Presentation.AuthorizeAttributes;
 
 namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
