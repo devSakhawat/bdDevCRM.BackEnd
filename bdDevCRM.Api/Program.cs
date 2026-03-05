@@ -63,6 +63,7 @@ builder.Services.PasswordHasher(builder.Configuration);
 // Repository & Service
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
+builder.Services.ConfigureInfrastructureServices();
 builder.Services.ConfigureInterceptors();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 

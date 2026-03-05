@@ -1,4 +1,5 @@
-﻿using bdDevCRM.Presentation.AuthorizeAttribiutes;
+﻿using bdDevCRM.Presentation.ActionFIlters;
+using bdDevCRM.Presentation.AuthorizeAttribiutes;
 using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.ApiResponse;
@@ -17,42 +18,40 @@ namespace bdDevCRM.Presentation.Controllers.Core.SystemAdmin;
 
 /// <summary>
 /// Menu management endpoints.
-/// 
-/// [AuthorizeUser] in class-level- So:
-///    - every request- user are validate by attribute
-///    - CurrentUser / CurrentUserId from BaseApiController
-///    - No Auth check in Controller method
-///    - Exception handled by StandardExceptionMiddleware
+///
+/// [AuthorizeUser] at class-level ensures:
+///    - Every request validates user via attribute
+///    - CurrentUser / CurrentUserId available from BaseApiController
+///    - No auth checks needed in controller methods
+///    - Exceptions handled by StandardExceptionMiddleware
 /// </summary>
 [AuthorizeUser]
 public class MenuController : BaseApiController
 {
-	//private readonly IServiceManager _serviceManager;
 	private readonly IMemoryCache _cache;
 
 	public MenuController(IServiceManager serviceManager, IMemoryCache cache) : base(serviceManager)
 	{
-		//_serviceManager = serviceManager;
 		_cache = cache;
 	}
 
 
 	[HttpGet(RouteConstants.SelectMenuByUserPermission)]
-	//[Produces("application/json")]
 	[ResponseCache(Duration = 300)] // Browser caching for 5 minutes
-									//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 	public async Task<IActionResult> SelectMenuByUserPermission()
 	{
 		var userId = CurrentUserId;
 
-		if (string.IsNullOrEmpty(userId.ToString()) || !int.TryParse(userId.ToString(), out int userIdValue) || userIdValue <= 0)
+		if (userId <= 0)
 			throw new GenericUnauthorizedException("User authentication required. Please log in again.");
 
 		string cacheKey = $"menu_permissions_{userId}";
+
 		if (_cache.TryGetValue(cacheKey, out IEnumerable<MenuDto> cachedMenus))
 			return Ok(ApiResponseHelper.Success(cachedMenus, "Menus retrieved from cache"));
 
 		var menusDtoTask = _serviceManager.Menus.SelectMenuByUserPermission(userId, trackChanges: false);
+
 		// Add timeout to prevent long-running queries
 		var completedTask = await Task.WhenAny(menusDtoTask, Task.Delay(5000));
 
@@ -60,17 +59,17 @@ public class MenuController : BaseApiController
 			throw new RequestTimeoutException("Request timeout while retrieving menu data");
 
 		var menusDto = await menusDtoTask;
+
 		if (!menusDto.Any())
 			return Ok(ApiResponseHelper.Success(Enumerable.Empty<MenuDto>(), "No menus found for this user."));
 
-		//// Cache the result
-		//var cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(5)).SetPriority(CacheItemPriority.High);
-		//_cache.Set(cacheKey, menusDto, cacheOptions);
+		// Cache the result
+		var cacheOptions = new MemoryCacheEntryOptions()
+			.SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
+			.SetPriority(CacheItemPriority.High);
 
-		var cacheOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(5)).SetPriority(CacheItemPriority.High);
 		_cache.Set(cacheKey, menusDto, cacheOptions);
 
-		//return Ok(ApiResponseHelper.Success(menusDto, "Menus retrieved successfully"));
 		return Ok(ApiResponseHelper.Success(menusDto, "Menus retrieved successfully"));
 	}
 
@@ -96,20 +95,10 @@ public class MenuController : BaseApiController
 
 	[HttpGet(RouteConstants.MenusByModuleId)]
 	[ResponseCache(Duration = 60)]
-	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 	public async Task<IActionResult> MenusByModuleId([FromRoute] int moduleId)
 	{
-		var currentUser = HttpContext.GetCurrentUser();
-		var userId = HttpContext.GetUserId();
-
-		if (string.IsNullOrEmpty(userId.ToString()))
-			throw new GenericUnauthorizedException("User authentication required.");
-		if (currentUser == null)
-			throw new GenericUnauthorizedException("User session expired.");
-
-		//UsersDto currentUser2 = _serviceManager.GetCache<UsersDto>(userId);
-		//if (currentUser2 == null)
-		//	throw new GenericUnauthorizedException("User session expired.");
+		// No need for manual auth checks - [AuthorizeUser] at class level handles it
+		// CurrentUser and CurrentUserId are available from BaseApiController
 
 		var res = await _serviceManager.Menus.MenusByModuleId(moduleId, trackChanges: false);
 
@@ -121,21 +110,11 @@ public class MenuController : BaseApiController
 
 
 	/// <summary>
-	/// After login to system
+	/// Get menu summary with pagination
 	/// </summary>
-	/// <param name="options"></param>
-	/// <returns></returns>
 	[HttpPost(RouteConstants.MenuSummary)]
 	public async Task<IActionResult> GetMenuSummary([FromBody] CRMGridOptions options)
 	{
-		//var currentUser = HttpContext.GetCurrentUser();
-		//var userId = HttpContext.GetUserId();
-
-		//if (string.IsNullOrEmpty(userId.ToString()))
-		//	throw new GenericUnauthorizedException("User authentication required.");
-		//if (currentUser == null)
-		//	throw new GenericUnauthorizedException("User session expired.");
-
 		var res = await _serviceManager.Menus.MenuSummary(trackChanges: false, options);
 
 		if (res == null || !res.Items.Any())
@@ -159,76 +138,46 @@ public class MenuController : BaseApiController
 
 
 	[HttpPost(RouteConstants.CreateMenu)]
-	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+	[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
 	public async Task<IActionResult> CreateMenu([FromBody] MenuDto modelDto)
 	{
-		//var currentUser = HttpContext.GetCurrentUser();
-		//var userId = HttpContext.GetUserId();
-
-		//if (string.IsNullOrEmpty(userId.ToString()))
-		//	throw new GenericUnauthorizedException("User authentication required.");
-		//if (currentUser == null)
-		//	throw new GenericUnauthorizedException("User session expired.");
-
 		var model = await _serviceManager.Menus.CreateAsync(modelDto);
+
 		if (model.MenuId <= 0)
-			throw new InvalidCreateOperationException("Failed to create record.");
+			throw new InvalidCreateOperationException("Failed to create menu record.");
 
 		return Ok(ApiResponseHelper.Created(model, "Menu created successfully."));
 	}
 
 
 	[HttpPut(RouteConstants.UpdateMenu)]
+	[ServiceFilter(typeof(EmptyObjectFilterAttribute))]
 	public async Task<IActionResult> UpdateMenu([FromRoute] int key, [FromBody] MenuDto modelDto)
 	{
-		//var currentUser = HttpContext.GetCurrentUser();
-		//var userId = HttpContext.GetUserId();
-
-		//if (string.IsNullOrEmpty(userId.ToString()))
-		//	throw new GenericUnauthorizedException("User authentication required.");
-		//if (currentUser == null)
-		//	throw new GenericUnauthorizedException("User session expired.");
-
 		MenuDto returnData = await _serviceManager.Menus.UpdateAsync(key, modelDto);
 
 		if (returnData.MenuId <= 0)
-			throw new InvalidCreateOperationException("Failed to update record.");
+			throw new InvalidUpdateOperationException("Failed to update menu record.");
 
 		return Ok(ApiResponseHelper.Updated(returnData, "Menu updated successfully."));
 	}
 
 	[HttpDelete(RouteConstants.DeleteMenu)]
-	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 	public async Task<IActionResult> DeleteMenu([FromRoute] int key)
 	{
-		//var currentUser = HttpContext.GetCurrentUser();
-		//var userId = HttpContext.GetUserId();
-
-		//if (string.IsNullOrEmpty(userId.ToString()))
-		//	throw new GenericUnauthorizedException("User authentication required.");
-		//if (currentUser == null)
-		//	throw new GenericUnauthorizedException("User session expired.");
-
 		await _serviceManager.Menus.DeleteAsync(key);
-		return Ok(ApiResponseHelper.Success("Menu deleted successfully.", null));
+		return Ok(ApiResponseHelper.NoContent<object>("Menu deleted successfully"));
 	}
 
 
 	/// <summary>
-	/// menus for Dropdown list
+	/// Get menus for dropdown list
 	/// </summary>
 	[HttpGet(RouteConstants.MenuForDDL)]
 	public async Task<IActionResult> MenuForDDL()
 	{
-		//var currentUser = HttpContext.GetCurrentUser();
-		//var userId = HttpContext.GetUserId();
-
-		//if (string.IsNullOrEmpty(userId.ToString()))
-		//	throw new GenericUnauthorizedException("User authentication required.");
-		//if (currentUser == null)
-		//	throw new GenericUnauthorizedException("User session expired.");
-
 		var menusDto = await _serviceManager.Menus.MenuForDDL();
+
 		if (!menusDto.Any())
 			return Ok(ApiResponseHelper.Success(Enumerable.Empty<MenuForDDLDto>(), "No menus found."));
 

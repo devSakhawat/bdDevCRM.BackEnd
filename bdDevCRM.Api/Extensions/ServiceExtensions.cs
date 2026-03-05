@@ -126,6 +126,17 @@ public static class ServiceExtensions
 
 	public static void ConfigureServiceManager(this IServiceCollection services) => services.AddScoped<IServiceManager, ServiceManager>();
 
+	/// <summary>
+	/// Register infrastructure services for cross-cutting concerns.
+	/// These services provide abstraction over HTTP, caching, and cookie operations.
+	/// </summary>
+	public static void ConfigureInfrastructureServices(this IServiceCollection services)
+	{
+		services.AddScoped<bdDevCRM.ServiceContract.Infrastructure.ICookieManagementService, bdDevCRM.Service.Infrastructure.CookieManagementService>();
+		services.AddScoped<bdDevCRM.ServiceContract.Infrastructure.IHttpContextService, bdDevCRM.Service.Infrastructure.HttpContextService>();
+		services.AddScoped<bdDevCRM.ServiceContract.Infrastructure.ICacheManagementService, bdDevCRM.Service.Infrastructure.CacheManagementService>();
+	}
+
 	//public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) => services.AddDbContext<CRMContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbLocation")));
 
 	// Add inside your existing ServiceExtensions class
