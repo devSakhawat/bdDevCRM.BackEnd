@@ -48,9 +48,9 @@ public class CRMCourseController : BaseApiController
 
     // Return standardized response
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmCourseDto>>("No courses found"));
 
-    return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Courses retrieved successfully"));
   }
 
   /// <summary>
@@ -74,9 +74,9 @@ public class CRMCourseController : BaseApiController
 
     // Return standardized response
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CRMCourseDDLDto>>("No course found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CRMCourseDDLDto>>("No course found"));
 
-    return Ok(ResponseHelper.Success(res, "Courses retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Courses retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
@@ -101,9 +101,9 @@ public class CRMCourseController : BaseApiController
 
     // Return standardized response
     if (summaryGrid == null || !summaryGrid.Items.Any())
-      return Ok(ResponseHelper.NoContent<GridEntity<CrmCourseDto>>("No data found"));
+      return Ok(ApiResponseHelper.NoContent<GridEntity<CrmCourseDto>>("No data found"));
 
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
@@ -124,20 +124,20 @@ public class CRMCourseController : BaseApiController
 
       // Validate input parameters
       if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Course data is required"));
+        return BadRequest(ApiResponseHelper.BadRequest<CrmCourseDto>("Course data is required"));
 
       // Execute business logic
       CrmCourseDto res = await _serviceManager.CrmCourses.CreateNewRecordAsync(modelDto, currentUser);
 
       // Validate result
       if (res.CourseId > 0)
-        return Ok(ResponseHelper.Created(res, "Course created successfully"));
+        return Ok(ApiResponseHelper.Created(res, "Course created successfully"));
       else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create course"));
+        return StatusCode(500, ApiResponseHelper.InternalServerError<CrmCourseDto>("Failed to create course"));
     }
     catch (System.Text.Json.JsonException)
     {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in course data"));
+      return BadRequest(ApiResponseHelper.BadRequest<CrmCourseDto>("Invalid JSON format in course data"));
     }
   }
 
@@ -170,9 +170,9 @@ public class CRMCourseController : BaseApiController
 
       // Return standardized response
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Course updated successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Course updated successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<CrmCourseDto>(res));
     }
     catch (Exception)
     {
@@ -199,19 +199,19 @@ public class CRMCourseController : BaseApiController
 
       // Validate input parameters
       if (key <= 0)
-        return BadRequest(ResponseHelper.BadRequest("Invalid course ID. Course ID must be greater than 0."));
+        return BadRequest(ApiResponseHelper.BadRequest<CrmCourseDto>("Invalid course ID. Course ID must be greater than 0."));
 
       if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Course data is required"));
+        return BadRequest(ApiResponseHelper.BadRequest<CrmCourseDto>("Course data is required"));
 
       // Execute business logic
       var res = await _serviceManager.CrmCourses.DeleteRecordAsync(key, modelDto);
 
       // Return standardized response
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Course deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Course deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<CrmCourseDto>(res));
     }
     catch (Exception)
     {

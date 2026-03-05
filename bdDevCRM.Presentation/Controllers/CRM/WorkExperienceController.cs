@@ -40,9 +40,9 @@ public class WorkExperienceController : BaseApiController
 
     var res = await _serviceManager.WorkExperiences.GetWorkExperiencesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<WorkExperienceHistoryDto>>("No work experience found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<WorkExperienceHistoryDto>>("No work experience found"));
 
-    return Ok(ResponseHelper.Success(res, "Work experience retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Work experience retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.WorkExperienceByApplicantId)]
@@ -60,7 +60,7 @@ public class WorkExperienceController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.WorkExperiences.GetWorkExperiencesByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Work experience retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Work experience retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.WorkExperienceSummary)]
@@ -68,15 +68,15 @@ public class WorkExperienceController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<WorkExperienceHistoryDto>>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<WorkExperienceHistoryDto>>("User not found in cache"));
 
     var summaryGrid = await _serviceManager.WorkExperiences.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.CreateWorkExperience)]
@@ -84,14 +84,14 @@ public class WorkExperienceController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<WorkExperienceHistoryDto>("User authentication required"));
 
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(Convert.ToInt32(userIdClaim));
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<WorkExperienceHistoryDto>("User session expired"));
 
     WorkExperienceHistoryDto res = await _serviceManager.WorkExperiences.CreateNewRecordAsync(modelDto, currentUser);
-    return Ok(ResponseHelper.Created(res, "Work experience created successfully"));
+    return Ok(ApiResponseHelper.Created(res, "Work experience created successfully"));
   }
 
   [HttpPut(RouteConstants.UpdateWorkExperience)]
@@ -100,9 +100,9 @@ public class WorkExperienceController : BaseApiController
   {
     var res = await _serviceManager.WorkExperiences.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "Work experience updated successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Work experience updated successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<WorkExperienceHistoryDto>(res));
   }
 
   [HttpDelete(RouteConstants.DeleteWorkExperience)]
@@ -111,15 +111,15 @@ public class WorkExperienceController : BaseApiController
   {
     var res = await _serviceManager.WorkExperiences.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "Work experience deleted successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Work experience deleted successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<WorkExperienceHistoryDto>(res));
   }
 
   [HttpGet(RouteConstants.UpdateWorkExperience)]
   public async Task<IActionResult> GetWorkExperience([FromRoute] int key)
   {
     var res = await _serviceManager.WorkExperiences.GetWorkExperienceAsync(key, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Work experience retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Work experience retrieved successfully"));
   }
 }

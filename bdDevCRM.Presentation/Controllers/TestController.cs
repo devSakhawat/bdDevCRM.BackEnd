@@ -33,7 +33,7 @@ namespace bdDevCRM.Presentation.Controllers;
 
 //  // --------- 1. DDL --------------------------------------------------
 
-//  // GitHub Copilot: generate the code by using ResponseHelper for this method InstituteDDL.
+//  // GitHub Copilot: generate the code by using ApiResponseHelper for this method InstituteDDL.
 //  [HttpGet(RouteConstants.TestDDL)]
 // [Produces("text/csv")] // CSV format
 //  public async Task<IActionResult> TestDDL()
@@ -43,9 +43,9 @@ namespace bdDevCRM.Presentation.Controllers;
 
 //    var res = await _serviceManager.CrmInstitutes.GetInstitutesDDLAsync(trackChanges: false);
 //    if (res == null || !res.Any())
-//      return Ok(ResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found"));
+//      return Ok(ApiResponseHelper.NoContent<IEnumerable<CrmInstituteDto>>("No institutes found"));
 
-//    return Ok(ResponseHelper.Success(res, "Institutes retrieved successfully"));
+//    return Ok(ApiResponseHelper.Success(res, "Institutes retrieved successfully"));
 //  }
 
 //  // --------- 2. Summary Grid ----------------------------------------
@@ -54,23 +54,23 @@ namespace bdDevCRM.Presentation.Controllers;
 //  {
 //    var userIdClaim = User.FindFirst("UserId")?.Value;
 //    if (string.IsNullOrEmpty(userIdClaim))
-//      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+//      return Unauthorized(ApiResponseHelper.Unauthorized("UserId not found in token"));
 
 //    int userId = Convert.ToInt32(userIdClaim);
 //    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
 //    if (currentUser == null)
-//      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+//      return Unauthorized(ApiResponseHelper.Unauthorized("User not found in cache"));
 
 //    if (options == null)
-//      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+//      return BadRequest(ApiResponseHelper.BadRequest("CRMGridOptions cannot be null"));
 
 
 //    var summaryGrid = await _serviceManager.CrmInstitutes.SummaryGrid(options);
 //    //return (summaryGrid != null) ? Ok(summaryGrid) : NoContent();
 //    if (summaryGrid == null || !summaryGrid.Items.Any())
-//      return Ok(ResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
+//      return Ok(ApiResponseHelper.NoContent<GridEntity<CrmInstituteDto>>("No data found"));
 
-//    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+//    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
 //  }
 
 
@@ -102,9 +102,9 @@ namespace bdDevCRM.Presentation.Controllers;
 //    // DMS call
 
 //    if (res.InstituteId > 0)
-//      return Ok(ResponseHelper.Created(res, "Institute created successfully"));
+//      return Ok(ApiResponseHelper.Created(res, "Institute created successfully"));
 //    else
-//      return StatusCode(500 ,ResponseHelper.InternalServerError("Operation failed!"));
+//      return StatusCode(500 ,ApiResponseHelper.InternalServerError("Operation failed!"));
 //  }
 
 //  // --------- 4. Update ----------------------------------------------
@@ -116,16 +116,16 @@ namespace bdDevCRM.Presentation.Controllers;
 //    {
 //      var userIdClaim = User.FindFirst("UserId")?.Value;
 //      if (string.IsNullOrEmpty(userIdClaim))
-//        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+//        return Unauthorized(ApiResponseHelper.Unauthorized("UserId not found in token."));
 
 //      int userId = Convert.ToInt32(userIdClaim);
 //      UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
 //      if (currentUser == null)
-//        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+//        return Unauthorized(ApiResponseHelper.Unauthorized("User not found in cache."));
 
 //      var res = await _serviceManager.CrmInstitutes.UpdateRecordAsync(key, modelDto, false);
 
-//      return Ok(ResponseHelper.Success(res, "Institute updated successfully"));
+//      return Ok(ApiResponseHelper.Success(res, "Institute updated successfully"));
 //    }
 //    catch (Exception ex)
 //    {
@@ -145,7 +145,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //      var currentUser = HttpContext.GetCurrentUser();
 
 //      var res = await _serviceManager.CrmInstitutes.DeleteRecordAsync(key, modelDto);
-//      return Ok(ResponseHelper.Success("Institute deleted successfully"));
+//      return Ok(ApiResponseHelper.Success("Institute deleted successfully"));
 //    }
 //    catch (Exception ex)
 //    {
@@ -159,9 +159,9 @@ namespace bdDevCRM.Presentation.Controllers;
 //  {
 //    var results = await _serviceManager.CrmInstitutes.GetInstitutesDDLAsync();
 //    if (!results.Any())
-//      return Ok(ResponseHelper.NoContent<List<CrmInstituteDto>>("No institutes found"));
+//      return Ok(ApiResponseHelper.NoContent<List<CrmInstituteDto>>("No institutes found"));
 
-//    return Ok(ResponseHelper.Success(results));
+//    return Ok(ApiResponseHelper.Success(results));
 //  }
 
 //  //[HttpDelete("{id}")]
@@ -171,7 +171,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //  //  var institute = await _service.GetByIdAsync(id);
 
 //  //  if (institute.CreatedBy != currentUser.Id && !currentUser.IsAdmin)
-//  //    return Forbid(ResponseHelper.Forbidden("You don't have permission to delete this institute"));
+//  //    return Forbid(ApiResponseHelper.Forbidden("You don't have permission to delete this institute"));
 
 //  //  // Process...
 //  //}
@@ -181,9 +181,9 @@ namespace bdDevCRM.Presentation.Controllers;
 //  //{
 //  //  var institute = await _service.GetByIdAsync(id);
 //  //  if (institute == null)
-//  //    return NotFound(ResponseHelper.NotFound("Institute not found"));
+//  //    return NotFound(ApiResponseHelper.NotFound("Institute not found"));
 
-//  //  return Ok(ResponseHelper.Success(institute));
+//  //  return Ok(ApiResponseHelper.Success(institute));
 //  //}
 
 //  //[HttpPost]
@@ -198,7 +198,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //  //            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
 //  //        );
 
-//  //    return UnprocessableEntity(ResponseHelper.ValidationError("Validation failed", errors));
+//  //    return UnprocessableEntity(ApiResponseHelper.ValidationError("Validation failed", errors));
 //  //  }
 
 //  //  // Process...
@@ -216,7 +216,7 @@ namespace bdDevCRM.Presentation.Controllers;
 //  //            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
 //  //        );
 
-//  //    return UnprocessableEntity(ResponseHelper.ValidationError("Validation failed", errors));
+//  //    return UnprocessableEntity(ApiResponseHelper.ValidationError("Validation failed", errors));
 //  //  }
 
 //  //  // Process...
@@ -229,12 +229,12 @@ namespace bdDevCRM.Presentation.Controllers;
 //  //  {
 //  //    var result = await _service.CreateAsync(dto);
 //  //    return Created($"/api/institutes/{result.Id}",
-//  //                   ResponseHelper.Created(result, "Institute created successfully"));
+//  //                   ApiResponseHelper.Created(result, "Institute created successfully"));
 //  //  }
 //  //  catch (Exception ex)
 //  //  {
 //  //    _logger.LogError(ex, "Error creating institute");
-//  //    return StatusCode(500, ResponseHelper.InternalServerError("An error occurred while creating the institute"));
+//  //    return StatusCode(500, ApiResponseHelper.InternalServerError("An error occurred while creating the institute"));
 //  //  }
 //  //}
 

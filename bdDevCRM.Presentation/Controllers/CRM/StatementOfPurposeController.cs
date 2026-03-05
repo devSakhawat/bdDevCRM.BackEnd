@@ -40,9 +40,9 @@ public class StatementOfPurposeController : BaseApiController
 
     var res = await _serviceManager.StatementOfPurposes.GetStatementOfPurposesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<StatementOfPurposeDto>>("No statement of purpose found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<StatementOfPurposeDto>>("No statement of purpose found"));
 
-    return Ok(ResponseHelper.Success(res, "Statement of purpose retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Statement of purpose retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.StatementOfPurposeByApplicantId)]
@@ -60,7 +60,7 @@ public class StatementOfPurposeController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.StatementOfPurposes.GetStatementOfPurposeByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Statement of purpose retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Statement of purpose retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.StatementOfPurposeSummary)]
@@ -68,15 +68,15 @@ public class StatementOfPurposeController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<PTEInformationDto>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<PTEInformationDto>("User not found in cache"));
 
     var summaryGrid = await _serviceManager.StatementOfPurposes.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.CreateStatementOfPurpose)]
@@ -84,14 +84,14 @@ public class StatementOfPurposeController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("User authentication required"));
 
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(Convert.ToInt32(userIdClaim));
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<StatementOfPurposeDto>("User session expired"));
 
     StatementOfPurposeDto res = await _serviceManager.StatementOfPurposes.CreateNewRecordAsync(modelDto, currentUser);
-    return Ok(ResponseHelper.Created(res, "Statement of purpose created successfully"));
+    return Ok(ApiResponseHelper.Created(res, "Statement of purpose created successfully"));
   }
 
   [HttpPut(RouteConstants.UpdateStatementOfPurpose)]
@@ -100,9 +100,9 @@ public class StatementOfPurposeController : BaseApiController
   {
     var res = await _serviceManager.StatementOfPurposes.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "Statement of purpose updated successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Statement of purpose updated successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<StatementOfPurposeDto>(res));
   }
 
   [HttpDelete(RouteConstants.DeleteStatementOfPurpose)]
@@ -111,15 +111,15 @@ public class StatementOfPurposeController : BaseApiController
   {
     var res = await _serviceManager.StatementOfPurposes.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "Statement of purpose deleted successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Statement of purpose deleted successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<StatementOfPurposeDto>(res));
   }
 
   [HttpGet(RouteConstants.UpdateStatementOfPurpose)]
   public async Task<IActionResult> GetStatementOfPurpose([FromRoute] int key)
   {
     var res = await _serviceManager.StatementOfPurposes.GetStatementOfPurposeAsync(key, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Statement of purpose retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Statement of purpose retrieved successfully"));
   }
 }

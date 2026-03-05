@@ -41,9 +41,9 @@ public class IELTSInformationController : BaseApiController
 
     var res = await _serviceManager.IELTSInformations.GetIELTSinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<IELTSInformationDto>>("No IELTS information found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<IELTSInformationDto>>("No IELTS information found"));
 
-    return Ok(ResponseHelper.Success(res, "IELTS information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "IELTS information retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.IELTSInformationByApplicantId)]
@@ -64,7 +64,7 @@ public class IELTSInformationController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.IELTSInformations.GetIELTSinformationByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "IELTS information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "IELTS information retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
@@ -73,18 +73,18 @@ public class IELTSInformationController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<IELTSInformationDto>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<IELTSInformationDto>("User not found in cache"));
 
     if (options == null)
-      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+      return BadRequest(ApiResponseHelper.BadRequest<IELTSInformationDto>("CRMGridOptions cannot be null"));
 
     var summaryGrid = await _serviceManager.IELTSInformations.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
@@ -96,26 +96,26 @@ public class IELTSInformationController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<IELTSInformationDto>("User authentication required"));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<IELTSInformationDto>("User session expired"));
 
       if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("IELTS information data is required"));
+        return BadRequest(ApiResponseHelper.BadRequest<IELTSInformationDto>("IELTS information data is required"));
 
       IELTSInformationDto res = await _serviceManager.IELTSInformations.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.IELTSInformationId > 0)
-        return Ok(ResponseHelper.Created(res, "IELTS information created successfully"));
+        return Ok(ApiResponseHelper.Created(res, "IELTS information created successfully"));
       else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create IELTS information"));
+        return StatusCode(500, ApiResponseHelper.InternalServerError<IELTSInformationDto>("Failed to create IELTS information"));
     }
     catch (System.Text.Json.JsonException)
     {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in IELTS information data"));
+      return BadRequest(ApiResponseHelper.BadRequest<IELTSInformationDto>("Invalid JSON format in IELTS information data"));
     }
   }
 
@@ -128,19 +128,19 @@ public class IELTSInformationController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<IELTSInformationDto>("UserId not found in token."));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<IELTSInformationDto>("User not found in cache."));
 
       var res = await _serviceManager.IELTSInformations.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "IELTS information updated successfully"));
+        return Ok(ApiResponseHelper.Success(res, "IELTS information updated successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<IELTSInformationDto>(res));
     }
     catch (Exception)
     {
@@ -161,9 +161,9 @@ public class IELTSInformationController : BaseApiController
       var res = await _serviceManager.IELTSInformations.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "IELTS information deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "IELTS information deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<IELTSInformationDto>(res));
     }
     catch (Exception)
     {
@@ -179,10 +179,10 @@ public class IELTSInformationController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<IELTSInformationDto>("User authentication required"));
 
       var res = await _serviceManager.IELTSInformations.GetIELTSinformationAsync(key, trackChanges: false);
-      return Ok(ResponseHelper.Success(res, "IELTS information retrieved successfully"));
+      return Ok(ApiResponseHelper.Success(res, "IELTS information retrieved successfully"));
     }
     catch (Exception)
     {

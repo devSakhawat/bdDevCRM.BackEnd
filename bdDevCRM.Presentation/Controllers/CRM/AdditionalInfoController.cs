@@ -37,9 +37,9 @@ public class AdditionalInfoController : BaseApiController
 
         var res = await _serviceManager.AdditionalInfos.GetAdditionalInfosDDLAsync(trackChanges: false);
         if (res == null || !res.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<AdditionalInfoDto>>("No additional info found"));
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<AdditionalInfoDto>>("No additional info found"));
 
-        return Ok(ResponseHelper.Success(res, "Additional info retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Additional info retrieved successfully"));
     }
 
     [HttpGet(RouteConstants.AdditionalInfoByApplicantId)]
@@ -57,7 +57,7 @@ public class AdditionalInfoController : BaseApiController
             throw new GenericUnauthorizedException("User session expired.");
 
         var res = await _serviceManager.AdditionalInfos.GetAdditionalInfosByApplicantIdAsync(applicantId, trackChanges: false);
-        return Ok(ResponseHelper.Success(res, "Additional info retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Additional info retrieved successfully"));
     }
 
     [HttpPost(RouteConstants.AdditionalInfoSummary)]
@@ -65,15 +65,15 @@ public class AdditionalInfoController : BaseApiController
     {
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (string.IsNullOrEmpty(userIdClaim))
-            return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+            return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<AdditionalInfoDto>>("UserId not found in token"));
 
         int userId = Convert.ToInt32(userIdClaim);
         UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
         if (currentUser == null)
-            return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+            return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<AdditionalInfoDto>>("User not found in cache"));
 
         var summaryGrid = await _serviceManager.AdditionalInfos.SummaryGrid(options);
-        return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
     }
 
     [HttpPost(RouteConstants.CreateAdditionalInfo)]
@@ -81,14 +81,13 @@ public class AdditionalInfoController : BaseApiController
     {
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (string.IsNullOrEmpty(userIdClaim))
-            return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+            return Unauthorized(ApiResponseHelper.Unauthorized<AdditionalInfoDto>("User authentication required"));
 
         UsersDto currentUser = _serviceManager.GetCache<UsersDto>(Convert.ToInt32(userIdClaim));
         if (currentUser == null)
-            return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
+            return Unauthorized(ApiResponseHelper.Unauthorized<AdditionalInfoDto>("User session expired"));
         AdditionalInfoDto res = await _serviceManager.AdditionalInfos.CreateNewRecordAsync(modelDto, currentUser);
-        return Ok(ResponseHelper.Created(res, "Additional info created successfully"));
+        return Ok(ApiResponseHelper.Created(res, "Additional info created successfully"));
     }
 
     [HttpPut(RouteConstants.UpdateAdditionalInfo)]
@@ -97,9 +96,9 @@ public class AdditionalInfoController : BaseApiController
     {
         var res = await _serviceManager.AdditionalInfos.UpdateRecordAsync(key, modelDto, false);
         if (res == OperationMessage.Success)
-            return Ok(ResponseHelper.Success(res, "Additional info updated successfully"));
+            return Ok(ApiResponseHelper.Success(res, "Additional info updated successfully"));
         else
-            return Conflict(ResponseHelper.Conflict(res));
+            return Conflict(ApiResponseHelper.Conflict<AdditionalInfoDto>(res));
     }
 
     [HttpDelete(RouteConstants.DeleteAdditionalInfo)]
@@ -108,15 +107,15 @@ public class AdditionalInfoController : BaseApiController
     {
         var res = await _serviceManager.AdditionalInfos.DeleteRecordAsync(key, modelDto);
         if (res == OperationMessage.Success)
-            return Ok(ResponseHelper.Success(res, "Additional info deleted successfully"));
+            return Ok(ApiResponseHelper.Success(res, "Additional info deleted successfully"));
         else
-            return Conflict(ResponseHelper.Conflict(res));
+            return Conflict(ApiResponseHelper.Conflict<AdditionalInfoDto>(res));
     }
 
     [HttpGet(RouteConstants.UpdateAdditionalInfo)]
     public async Task<IActionResult> GetAdditionalInfo([FromRoute] int key)
     {
         var res = await _serviceManager.AdditionalInfos.GetAdditionalInfoAsync(key, trackChanges: false);
-        return Ok(ResponseHelper.Success(res, "Additional info retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Additional info retrieved successfully"));
     }
 }

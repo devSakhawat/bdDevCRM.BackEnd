@@ -40,9 +40,9 @@ public class CompaniesController : BaseApiController
 
     // Return standardized response
     if (companies == null || !companies.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CompanyDto>>("No companies found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CompanyDto>>("No companies found"));
 
-    return Ok(ResponseHelper.Success(companies, "Companies retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(companies, "Companies retrieved successfully"));
   }
 
   /// <summary>
@@ -65,7 +65,7 @@ public class CompaniesController : BaseApiController
     var company = _serviceManager.Companies.GetCompany(id, trackChanges: false);
 
     // Return standardized response
-    return Ok(ResponseHelper.Success(company, "Company retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(company, "Company retrieved successfully"));
   }
 
   /// <summary>
@@ -89,7 +89,7 @@ public class CompaniesController : BaseApiController
 
     // Return standardized response
     return CreatedAtRoute("CompanyById", new { id = createdCompany.CompanyId },
-      ResponseHelper.Created(createdCompany, "Company created successfully"));
+      ApiResponseHelper.Created(createdCompany, "Company created successfully"));
   }
 
   /// <summary>
@@ -113,9 +113,9 @@ public class CompaniesController : BaseApiController
 
     // Return standardized response
     if (companyEntities == null || !companyEntities.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CompanyDto>>("No companies found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CompanyDto>>("No companies found"));
 
-    return Ok(ResponseHelper.Success(companyEntities, "Companies retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(companyEntities, "Companies retrieved successfully"));
   }
 
   /// <summary>
@@ -141,9 +141,9 @@ public class CompaniesController : BaseApiController
 
     // Return standardized response
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<CompanyDto>>("No Company found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<CompanyDto>>("No Company found"));
 
-    return Ok(ResponseHelper.Success(res, "Companies retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Companies retrieved successfully"));
   }
 }
 

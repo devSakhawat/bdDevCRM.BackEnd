@@ -50,9 +50,9 @@ public class QueryAnalyzerController : BaseApiController
     //return Ok(queryAnalyzers);
 
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<QueryAnalyzerDto>>("No reports found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<QueryAnalyzerDto>>("No reports found"));
 
-    return Ok(ResponseHelper.Success(res, "reports retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "reports retrieved successfully"));
   }
 
 

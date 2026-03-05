@@ -48,9 +48,9 @@ public class EmployeeController : BaseApiController
     IEnumerable<EmployeesByCompanyBranchDepartmentDto> res = await _serviceManager.Employees.GetEmployeeByCompanyIdAndBranchIdAndDepartmentId(companyid, branchId, departmentId);
 
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<EmployeesByCompanyBranchDepartmentDto>>("No Data found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<EmployeesByCompanyBranchDepartmentDto>>("No Data found"));
 
-    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Data retrieved successfully"));
   }
 
 

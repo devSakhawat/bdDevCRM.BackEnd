@@ -38,9 +38,9 @@ public class DepartmentController : BaseApiController
     //return Ok(branchList);
 
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<DepartmentDto>>("No Data found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<DepartmentDto>>("No Data found"));
 
-    return Ok(ResponseHelper.Success(res, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Data retrieved successfully"));
   }
 
 

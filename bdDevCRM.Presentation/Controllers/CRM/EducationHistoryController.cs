@@ -41,9 +41,9 @@ public class EducationHistoryController : BaseApiController
 
     var res = await _serviceManager.EducationHistories.GetEducationHistoriesDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<EducationHistoryDto>>("No education histories found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<EducationHistoryDto>>("No education histories found"));
 
-    return Ok(ResponseHelper.Success(res, "Education histories retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Education histories retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.EducationHistoryByApplicantId)]
@@ -64,7 +64,7 @@ public class EducationHistoryController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.EducationHistories.GetEducationHistoriesByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Education histories retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Education histories retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
@@ -73,18 +73,18 @@ public class EducationHistoryController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<EducationHistoryDto>>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<GridEntity<EducationHistoryDto>>("User not found in cache"));
 
     if (options == null)
-      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+      return BadRequest(ApiResponseHelper.BadRequest<GridEntity<EducationHistoryDto>>("CRMGridOptions cannot be null"));
 
     var summaryGrid = await _serviceManager.EducationHistories.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
@@ -96,26 +96,26 @@ public class EducationHistoryController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<EducationHistoryDto>("User authentication required"));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<EducationHistoryDto>("User session expired"));
 
       if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Education history data is required"));
+        return BadRequest(ApiResponseHelper.BadRequest<EducationHistoryDto>("Education history data is required"));
 
       EducationHistoryDto res = await _serviceManager.EducationHistories.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.EducationHistoryId > 0)
-        return Ok(ResponseHelper.Created(res, "Education history created successfully"));
+        return Ok(ApiResponseHelper.Created(res, "Education history created successfully"));
       else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create education history"));
+        return StatusCode(500, ApiResponseHelper.InternalServerError<EducationHistoryDto>("Failed to create education history"));
     }
     catch (System.Text.Json.JsonException)
     {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in education history data"));
+      return BadRequest(ApiResponseHelper.BadRequest<EducationHistoryDto>("Invalid JSON format in education history data"));
     }
   }
 
@@ -128,19 +128,19 @@ public class EducationHistoryController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<EducationHistoryDto>("UserId not found in token."));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<EducationHistoryDto>("User not found in cache."));
 
       var res = await _serviceManager.EducationHistories.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Education history updated successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Education history updated successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<EducationHistoryDto>(res));
     }
     catch (Exception)
     {
@@ -161,9 +161,9 @@ public class EducationHistoryController : BaseApiController
       var res = await _serviceManager.EducationHistories.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Education history deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Education history deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<EducationHistoryDto>(res));
     }
     catch (Exception)
     {
@@ -179,10 +179,10 @@ public class EducationHistoryController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<EducationHistoryDto>("User authentication required"));
 
       var res = await _serviceManager.EducationHistories.GetEducationHistoryAsync(key, trackChanges: false);
-      return Ok(ResponseHelper.Success(res, "Education history retrieved successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Education history retrieved successfully"));
     }
     catch (Exception)
     {

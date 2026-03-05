@@ -1,10 +1,10 @@
 ﻿
 // CRM.Solution.Presentation/Controllers/BaseApiController.cs (or wherever your BaseApiController is located)
 
+using bdDevCRM.Presentation.Extensions;
 using bdDevCRM.ServicesContract;
 using bdDevCRM.Shared.DataTransferObjects.Core.SystemAdmin;
 using bdDevCRM.Utilities.Constants; // Add this using directive if IServiceManager depends on IMemoryCache directly
-using bdDevCRM.Shared.Exceptions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -20,59 +20,72 @@ using Microsoft.AspNetCore.Mvc;
 // [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
 public class BaseApiController : ControllerBase
 {
-    protected readonly IServiceManager _serviceManager;
+	protected readonly IServiceManager _serviceManager;
 
-    public BaseApiController(IServiceManager serviceManager)
-    {
-        _serviceManager = serviceManager;
-    }
+	public BaseApiController(IServiceManager serviceManager)
+	{
+		_serviceManager = serviceManager;
+	}
 
-    // Centralized method to get authenticated user
-    protected UsersDto GetAuthenticatedUser()
-    {
-        var userIdClaim = User.FindFirst("UserId")?.Value;
+	/// <summary>
+	/// User from set nu AuthorizeUserAttribute set 
+	/// if there are [AuthorizeUser] attribute it should not be null because AuthorizeUserAttribute sets the user in HttpContext.
+	/// </summary>
+	protected UsersDto CurrentUser => HttpContext.GetCurrentUser()!;
 
-        if (string.IsNullOrEmpty(userIdClaim))
-            throw new GenericUnauthorizedException("User authentication required.");
+	/// <summary>
+	/// UserId from set nu AuthorizeUserAttribute set 
+	/// if there are [AuthorizeUser] attribute it should not be 0 because AuthorizeUserAttribute sets the user in HttpContext.
+	/// </summary>
+	protected int CurrentUserId => HttpContext.GetUserId();
 
-        if (!int.TryParse(userIdClaim, out int userId))
-            throw new GenericBadRequestException("Invalid user ID format.");
 
-        UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
+	//// Centralized method to get authenticated user
+	//protected UsersDto GetAuthenticatedUser()
+	//{
+	//    var userIdClaim = User.FindFirst("UserId")?.Value;
 
-        if (currentUser == null)
-            throw new GenericUnauthorizedException("User session expired.");
+	//    if (string.IsNullOrEmpty(userIdClaim))
+	//        throw new GenericUnauthorizedException("User authentication required.");
 
-        return currentUser;
-    }
+	//    if (!int.TryParse(userIdClaim, out int userId))
+	//        throw new GenericBadRequestException("Invalid user ID format.");
 
-    // OPTIONAL: Get User ID only (without full user object)
-    protected int GetAuthenticatedUserId()
-    {
-        var userIdClaim = User.FindFirst("UserId")?.Value;
+	//    UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
 
-        if (string.IsNullOrEmpty(userIdClaim))
-            throw new GenericUnauthorizedException("User authentication required.");
+	//    if (currentUser == null)
+	//        throw new GenericUnauthorizedException("User session expired.");
 
-        if (!int.TryParse(userIdClaim, out int userId))
-            throw new GenericBadRequestException("Invalid user ID format.");
+	//    return currentUser;
+	//}
 
-        return userId;
-    }
+	//// OPTIONAL: Get User ID only (without full user object)
+	//protected int GetAuthenticatedUserId()
+	//{
+	//    var userIdClaim = User.FindFirst("UserId")?.Value;
 
-    // OPTIONAL: Try-pattern for scenarios where user might not exist
-    protected bool TryGetAuthenticatedUser(out UsersDto? currentUser)
-    {
-        currentUser = null;
+	//    if (string.IsNullOrEmpty(userIdClaim))
+	//        throw new GenericUnauthorizedException("User authentication required.");
 
-        var userIdClaim = User.FindFirst("UserId")?.Value;
-        if (string.IsNullOrEmpty(userIdClaim))
-            return false;
+	//    if (!int.TryParse(userIdClaim, out int userId))
+	//        throw new GenericBadRequestException("Invalid user ID format.");
 
-        if (!int.TryParse(userIdClaim, out int userId))
-            return false;
+	//    return userId;
+	//}
 
-        currentUser = _serviceManager.GetCache<UsersDto>(userId);
-        return currentUser != null;
-    }
+	//// OPTIONAL: Try-pattern for scenarios where user might not exist
+	//protected bool TryGetAuthenticatedUser(out UsersDto? currentUser)
+	//{
+	//    currentUser = null;
+
+	//    var userIdClaim = User.FindFirst("UserId")?.Value;
+	//    if (string.IsNullOrEmpty(userIdClaim))
+	//        return false;
+
+	//    if (!int.TryParse(userIdClaim, out int userId))
+	//        return false;
+
+	//    currentUser = _serviceManager.GetCache<UsersDto>(userId);
+	//    return currentUser != null;
+	//}
 }

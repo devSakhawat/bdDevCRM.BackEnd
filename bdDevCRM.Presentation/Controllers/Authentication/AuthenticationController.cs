@@ -54,7 +54,7 @@ public class AuthenticationController : BaseApiController
     var userDto = _serviceManager.Users.GetUserByLoginIdRaw(user.LoginId.Trim(), false);
     if (userDto == null)
     {
-      return Unauthorized(ResponseHelper.Unauthorized("Invalid username or password"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<object>("Invalid username or password"));
     }
 
     // ============================================================================
@@ -67,19 +67,17 @@ public class AuthenticationController : BaseApiController
       return validationResult.Status switch
       {
         LoginValidationStatus.Inactive =>
-          Unauthorized(ResponseHelper.Unauthorized("Account is inactive")),
+          Unauthorized(ApiResponseHelper.Unauthorized<object>("Account is inactive")),
 
-        LoginValidationStatus.Expired =>
-          Unauthorized(ResponseHelper.Unauthorized("Account has expired")),
+        LoginValidationStatus.Expired => Unauthorized(ApiResponseHelper.Unauthorized<object>("Account has expired")),
 
         LoginValidationStatus.AccountLocked =>
-          Unauthorized(ResponseHelper.Unauthorized("Account is locked due to too many failed attempts")),
+          Unauthorized(ApiResponseHelper.Unauthorized<object>("Account is locked due to too many failed attempts")),
 
         LoginValidationStatus.PasswordChangeRequired =>
-          Ok(ResponseHelper.Success(new { requirePasswordChange = true }, validationResult.Message)),
+          Ok(ApiResponseHelper.Success(new { requirePasswordChange = true }, validationResult.Message)),
 
-        _ =>
-          Unauthorized(ResponseHelper.Unauthorized("Invalid username or password"))
+        _ => Unauthorized(ApiResponseHelper.Unauthorized<object>("Invalid username or password"))
       };
     }
 
@@ -125,7 +123,7 @@ public class AuthenticationController : BaseApiController
       //IsSuccess = true
     };
 
-    return Ok(ResponseHelper.Success(response, validationResult.Message));
+    return Ok(ApiResponseHelper.Success(response, validationResult.Message));
   }
 
   [HttpGet(RouteConstants.GetUserInfo)]
@@ -159,14 +157,14 @@ public class AuthenticationController : BaseApiController
 
 
       userDto.Password = "";
-      return Ok(ResponseHelper.Success(currentUser, "User info retrieved"));
+      return Ok(ApiResponseHelper.Success(currentUser, "User info retrieved"));
     }
     if (currentUser.HrRecordId == null || currentUser.HrRecordId == 0) currentUser.HrRecordId = currentUser.EmployeeId;
 
     // Password clear (security)
     currentUser.Password = "";
 
-    return Ok(ResponseHelper.Success(currentUser, "User info retrieved"));
+    return Ok(ApiResponseHelper.Success(currentUser, "User info retrieved"));
   }
 
 
@@ -179,7 +177,7 @@ public class AuthenticationController : BaseApiController
     if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
     {
       ClearRefreshTokenCookie(); // Ensure cleanup on missing/corrupted cookie
-      return Unauthorized(ResponseHelper.Unauthorized("Refresh token not found"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<object>("Refresh token not found"));
     }
 
     var ipAddress = GetClientIpAddress();
@@ -201,7 +199,7 @@ public class AuthenticationController : BaseApiController
         IsSuccess = true,
       };
 
-      return Ok(ResponseHelper.Success(response, "Token refreshed successfully"));
+      return Ok(ApiResponseHelper.Success(response, "Token refreshed successfully"));
     }
     catch (UnauthorizedException)
     {
@@ -216,18 +214,18 @@ public class AuthenticationController : BaseApiController
   public async Task<IActionResult> RevokeToken()
   {
     if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
-      return BadRequest(ResponseHelper.BadRequest("No refresh token found"));
+      return BadRequest(ApiResponseHelper.BadRequest<object>("No refresh token found"));
 
     var ipAddress = GetClientIpAddress();
 
     var result = await _serviceManager.CustomAuthentication.RevokeTokenAsync(refreshToken, ipAddress);
 
     if (!result)
-      return BadRequest(ResponseHelper.BadRequest("Invalid or already revoked token"));
+      return BadRequest(ApiResponseHelper.BadRequest<object>("Invalid or already revoked token"));
 
     ClearRefreshTokenCookie();
 
-    return Ok(ResponseHelper.Success<object>(null, "Token revoked successfully"));
+    return Ok(ApiResponseHelper.Success(result, "Token revoked successfully"));
   }
 
   [AuthorizeUser]
@@ -241,16 +239,16 @@ public class AuthenticationController : BaseApiController
     {
       var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-      //// Only blacklist if token is provided
-      //if (!string.IsNullOrEmpty(token))
-      //{
-      //	await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
-      //}
+			//// Only blacklist if token is provided
+			//if (!string.IsNullOrEmpty(token))
+			//{
+			//	await _serviceManager.TokenBlacklist.AddToBlacklistAsync(token);
+			//}
+			//var currentUser = HttpContext.GetCurrentUser();
+			//var userId = HttpContext.GetUserId();
 
-      var currentUser = HttpContext.GetCurrentUser();
-      var userId = HttpContext.GetUserId();
-
-      if (userId != 0)
+			var userId = CurrentUserId;
+			if (userId != 0)
       {
         var ipAddress = GetClientIpAddress();
         await _serviceManager.CustomAuthentication.RevokeAllUserTokensAsync(userId, ipAddress);
@@ -276,7 +274,7 @@ public class AuthenticationController : BaseApiController
 
       ClearRefreshTokenCookie();
 
-      return Ok(ResponseHelper.Success<object>(null, "Logged out successfully"));
+      return Ok(ApiResponseHelper.Success<object>(null, "Logged out successfully"));
     }
     catch (Exception ex)
     {

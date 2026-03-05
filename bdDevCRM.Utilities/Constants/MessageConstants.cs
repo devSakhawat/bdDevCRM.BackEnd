@@ -24,11 +24,12 @@ public static class MessageConstants
   public const string IfNotCountryCode = "Invalid counrty code!";
   public const string IfFutureDateSelected = "Please select valid date. Your can't select future date!";
 
-  public const string RecordSaved = "Record successfully saved";
+	public const string AlreadyExists = "Record already exists";
+	public const string RecordSaved = "Record successfully saved";
+	public const string RecordUpdated = "Record successfully updated";
   public const string RecordDeleted = "Record successfully deleted";
   public const string IfDeleteReffereceRecord = "Foreign key refference in other table";
   public const string IfInvalidUserPassword = "Invalid Username or password";
-  public const string RecordUpdated = "Record updated successfully";
   public const string SaveFailed = "Record save failed";
   public const string UpdateFailed = "Record updated failed";
   public const string DeleteFailed = "Record deleted failed";
@@ -43,7 +44,6 @@ public static class MessageConstants
 public static class OperationMessage
 {
   public const string Success = "Success";
-  public const string CreatedSuccessfully = "Record created successfully";
 }
 
 public enum HttpStatusCode

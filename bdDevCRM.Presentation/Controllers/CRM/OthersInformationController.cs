@@ -40,9 +40,9 @@ public class OthersInformationController : BaseApiController
 
     var res = await _serviceManager.OTHERSInformations.GetOthersinformationsDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<OTHERSInformationDto>>("No others information found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<OTHERSInformationDto>>("No others information found"));
 
-    return Ok(ResponseHelper.Success(res, "Others information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Others information retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.OthersInformationByApplicantId)]
@@ -60,7 +60,7 @@ public class OthersInformationController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.OTHERSInformations.GetOthersinformationByApplicantIdAsync(applicantId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Others information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Others information retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.OthersInformationSummary)]
@@ -68,15 +68,15 @@ public class OthersInformationController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("User not found in cache"));
 
     var summaryGrid = await _serviceManager.OTHERSInformations.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   [HttpPost(RouteConstants.CreateOthersInformation)]
@@ -84,14 +84,13 @@ public class OthersInformationController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("User authentication required"));
 
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(Convert.ToInt32(userIdClaim));
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
+      return Unauthorized(ApiResponseHelper.Unauthorized<OTHERSInformationDto>("User session expired"));
     OTHERSInformationDto res = await _serviceManager.OTHERSInformations.CreateNewRecordAsync(modelDto, currentUser);
-    return Ok(ResponseHelper.Created(res, "Others information created successfully"));
+    return Ok(ApiResponseHelper.Created(res, "Others information created successfully"));
   }
 
   [HttpPut(RouteConstants.UpdateOthersInformation)]
@@ -100,9 +99,9 @@ public class OthersInformationController : BaseApiController
   {
     var res = await _serviceManager.OTHERSInformations.UpdateRecordAsync(key, modelDto, false);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "Others information updated successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Others information updated successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<OTHERSInformationDto>(res));
   }
 
   [HttpDelete(RouteConstants.DeleteOthersInformation)]
@@ -111,15 +110,15 @@ public class OthersInformationController : BaseApiController
   {
     var res = await _serviceManager.OTHERSInformations.DeleteRecordAsync(key, modelDto);
     if (res == OperationMessage.Success)
-      return Ok(ResponseHelper.Success(res, "Others information deleted successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Others information deleted successfully"));
     else
-      return Conflict(ResponseHelper.Conflict(res));
+      return Conflict(ApiResponseHelper.Conflict<OTHERSInformationDto>(res));
   }
 
   [HttpGet(RouteConstants.UpdateOthersInformation)]
   public async Task<IActionResult> GetOthersInformation([FromRoute] int key)
   {
     var res = await _serviceManager.OTHERSInformations.GetOthersinformationAsync(key, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Others information retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Others information retrieved successfully"));
   }
 }

@@ -44,9 +44,9 @@ public class CurrencyController : BaseApiController
 
         // Return standardized response
         if (res == null || !res.Any())
-            return Ok(ResponseHelper.NoContent<IEnumerable<CurrencyDDL>>("No currency found"));
+            return Ok(ApiResponseHelper.NoContent<IEnumerable<CurrencyDDL>>("No currency found"));
 
-        return Ok(ResponseHelper.Success(res, "Currency retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Currency retrieved successfully"));
     }
 
     /// <summary>
@@ -70,9 +70,9 @@ public class CurrencyController : BaseApiController
 
         // Return standardized response
         if (currencySummary == null || !currencySummary.Items.Any())
-            return Ok(ResponseHelper.NoContent<GridEntity<CurrencyDto>>("No data found"));
+            return Ok(ApiResponseHelper.NoContent<GridEntity<CurrencyDto>>("No data found"));
 
-        return Ok(ResponseHelper.Success(currencySummary, "Data retrieved successfully"));
+        return Ok(ApiResponseHelper.Success(currencySummary, "Data retrieved successfully"));
     }
 
     /// <summary>
@@ -98,9 +98,9 @@ public class CurrencyController : BaseApiController
 
         // Return standardized response
         if (res == OperationMessage.Success)
-            return Ok(ResponseHelper.Success(res, "Currency saved successfully"));
+            return Ok(ApiResponseHelper.Success(res, "Currency saved successfully"));
         else
-            return Conflict(ResponseHelper.Conflict(res));
+            return Conflict(ApiResponseHelper.Conflict<CurrencyDto>(res));
     }
 
     /// <summary>
@@ -129,8 +129,8 @@ public class CurrencyController : BaseApiController
 
         // Return standardized response
         if (res == OperationMessage.Success)
-            return Ok(ResponseHelper.Success(res, "Currency deleted successfully"));
+            return Ok(ApiResponseHelper.Success(res, "Currency deleted successfully"));
         else
-            return Conflict(ResponseHelper.Conflict(res));
+            return Conflict(ApiResponseHelper.Conflict<CurrencyDto>(res));
     }
 }

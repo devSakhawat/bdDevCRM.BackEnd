@@ -41,9 +41,9 @@ public class ApplicantInfoController : BaseApiController
 
     var res = await _serviceManager.ApplicantInfos.GetApplicantInfosDDLAsync(trackChanges: false);
     if (res == null || !res.Any())
-      return Ok(ResponseHelper.NoContent<IEnumerable<ApplicantInfoDto>>("No applicant info found"));
+      return Ok(ApiResponseHelper.NoContent<IEnumerable<ApplicantInfoDto>>("No applicant info found"));
 
-    return Ok(ResponseHelper.Success(res, "Applicant info retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Applicant info retrieved successfully"));
   }
 
   [HttpGet(RouteConstants.ApplicantInfoByApplicationId)]
@@ -64,7 +64,7 @@ public class ApplicantInfoController : BaseApiController
       throw new GenericUnauthorizedException("User session expired.");
 
     var res = await _serviceManager.ApplicantInfos.GetApplicantInfoByApplicationIdAsync(applicationId, trackChanges: false);
-    return Ok(ResponseHelper.Success(res, "Applicant info retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(res, "Applicant info retrieved successfully"));
   }
 
   // --------- 2. Summary Grid ----------------------------------------
@@ -73,18 +73,18 @@ public class ApplicantInfoController : BaseApiController
   {
     var userIdClaim = User.FindFirst("UserId")?.Value;
     if (string.IsNullOrEmpty(userIdClaim))
-      return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<CRMGridOptions>("UserId not found in token"));
 
     int userId = Convert.ToInt32(userIdClaim);
     UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
     if (currentUser == null)
-      return Unauthorized(ResponseHelper.Unauthorized("User not found in cache"));
+      return Unauthorized(ApiResponseHelper.Unauthorized<CRMGridOptions>("User not found in cache"));
 
     if (options == null)
-      return BadRequest(ResponseHelper.BadRequest("CRMGridOptions cannot be null"));
+      return BadRequest(ApiResponseHelper.BadRequest<CRMGridOptions>("CRMGridOptions cannot be null"));
 
     var summaryGrid = await _serviceManager.ApplicantInfos.SummaryGrid(options);
-    return Ok(ResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
+    return Ok(ApiResponseHelper.Success(summaryGrid, "Data retrieved successfully"));
   }
 
   // --------- 3. Create ----------------------------------------------
@@ -96,26 +96,25 @@ public class ApplicantInfoController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantInfoDto>("User authentication required"));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User session expired"));
-
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantInfoDto>("User session expired"));
       if (modelDto == null)
-        return BadRequest(ResponseHelper.BadRequest("Applicant info data is required"));
+        return BadRequest(ApiResponseHelper.BadRequest<ApplicantInfoDto>("Applicant info data is required"));
 
       ApplicantInfoDto res = await _serviceManager.ApplicantInfos.CreateNewRecordAsync(modelDto, currentUser);
 
       if (res.ApplicantId > 0)
-        return Ok(ResponseHelper.Created(res, "Applicant info created successfully"));
+        return Ok(ApiResponseHelper.Created(res, "Applicant info created successfully"));
       else
-        return StatusCode(500, ResponseHelper.InternalServerError("Failed to create applicant info"));
+        return StatusCode(500, ApiResponseHelper.InternalServerError<ApplicantInfoDto>("Failed to create applicant info"));
     }
     catch (System.Text.Json.JsonException)
     {
-      return BadRequest(ResponseHelper.BadRequest("Invalid JSON format in applicant info data"));
+      return BadRequest(ApiResponseHelper.BadRequest<ApplicantInfoDto>("Invalid JSON format in applicant info data"));
     }
   }
 
@@ -128,19 +127,19 @@ public class ApplicantInfoController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("UserId not found in token."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantInfoDto>("UserId not found in token."));
 
       int userId = Convert.ToInt32(userIdClaim);
       UsersDto currentUser = _serviceManager.GetCache<UsersDto>(userId);
       if (currentUser == null)
-        return Unauthorized(ResponseHelper.Unauthorized("User not found in cache."));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantInfoDto>("User not found in cache."));
 
       var res = await _serviceManager.ApplicantInfos.UpdateRecordAsync(key, modelDto, false);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Applicant info updated successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Applicant info updated successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<ApplicantInfoDto>(res));
     }
     catch (Exception)
     {
@@ -161,9 +160,9 @@ public class ApplicantInfoController : BaseApiController
       var res = await _serviceManager.ApplicantInfos.DeleteRecordAsync(key, modelDto);
 
       if (res == OperationMessage.Success)
-        return Ok(ResponseHelper.Success(res, "Applicant info deleted successfully"));
+        return Ok(ApiResponseHelper.Success(res, "Applicant info deleted successfully"));
       else
-        return Conflict(ResponseHelper.Conflict(res));
+        return Conflict(ApiResponseHelper.Conflict<ApplicantInfoDto>(res));
     }
     catch (Exception)
     {
@@ -179,10 +178,10 @@ public class ApplicantInfoController : BaseApiController
     {
       var userIdClaim = User.FindFirst("UserId")?.Value;
       if (string.IsNullOrEmpty(userIdClaim))
-        return Unauthorized(ResponseHelper.Unauthorized("User authentication required"));
+        return Unauthorized(ApiResponseHelper.Unauthorized<ApplicantInfoDto>("User authentication required"));
 
       var res = await _serviceManager.ApplicantInfos.GetApplicantInfoAsync(key, trackChanges: false);
-      return Ok(ResponseHelper.Success(res, "Applicant info retrieved successfully"));
+      return Ok(ApiResponseHelper.Success(res, "Applicant info retrieved successfully"));
     }
     catch (Exception)
     {
