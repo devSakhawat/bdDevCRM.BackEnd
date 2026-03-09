@@ -10,40 +10,72 @@ public class MenuRepository : RepositoryBase<Menu>, IMenuRepository
 {
 	public MenuRepository(CRMContext context) : base(context) { }
 
-	private const string SELECT_ALL_MENU_BY_MODULEID_QUERY = "Select * from Menu where ModuleId = {0} order by SorOrder,menuName asc";
+	// ✅ SECURITY FIX: Using parameterized queries to prevent SQL Injection
+	private const string SELECT_ALL_MENU_BY_MODULEID_QUERY =
+		"SELECT * FROM Menu WHERE ModuleId = @ModuleId ORDER BY SorOrder, MenuName ASC";
 
 	private const string SELECT_MENU_BY_USERS_PERMISSION_QUERY =
-						"SELECT DISTINCT Menu.MenuId,Menu.ModuleId, GroupMember.UserId, GroupPermission.PermissionTableName, Menu.MenuName, Menu.MenuPath, Menu.ParentMenu,SORORDER,ToDo FROM GroupMember INNER JOIN Groups ON GroupMember.GroupId = Groups.GroupId INNER JOIN GroupPermission ON Groups.GroupId = GroupPermission.GroupId INNER JOIN Menu ON GroupPermission.ReferenceID = Menu.MenuId WHERE (GroupMember.UserId ={0}) AND (GroupPermission.PermissionTableName = 'Menu') order by Sororder, Menu.MenuName";
+		@"SELECT DISTINCT
+			Menu.MenuId, Menu.ModuleId, GroupMember.UserId,
+			GroupPermission.PermissionTableName, Menu.MenuName,
+			Menu.MenuPath, Menu.ParentMenu, SORORDER, ToDo
+		FROM GroupMember
+		INNER JOIN Groups ON GroupMember.GroupId = Groups.GroupId
+		INNER JOIN GroupPermission ON Groups.GroupId = GroupPermission.GroupId
+		INNER JOIN Menu ON GroupPermission.ReferenceID = Menu.MenuId
+		WHERE (GroupMember.UserId = @UserId)
+			AND (GroupPermission.PermissionTableName = 'Menu')
+		ORDER BY Sororder, Menu.MenuName";
 
+	/// <summary>
+	/// Retrieves all menus for a specific module with parameterized query for security
+	/// </summary>
 	public async Task<IEnumerable<MenuRepositoryDto>> SelectAllMenuByModuleId(int moduleId, bool trackChanges)
 	{
-		//string query = string.Format(SELECT_ALL_MENU_BY_MODULEID_QUERY, moduleId);
-		//IEnumerable<MenuRepositoryDto> menuRepositoryDto = await GetListOfDataByQuery<MenuRepositoryDto>(query);
-
-		string query = string.Format(SELECT_ALL_MENU_BY_MODULEID_QUERY, moduleId);
-
-		IEnumerable<MenuRepositoryDto> menuRepositoryDto = await ExecuteListQuery<MenuRepositoryDto>(query, null);
+		var parameters = new[] { new SqlParameter("@ModuleId", moduleId) };
+		IEnumerable<MenuRepositoryDto> menuRepositoryDto = await ExecuteListQuery<MenuRepositoryDto>(
+			SELECT_ALL_MENU_BY_MODULEID_QUERY,
+			parameters);
 		return menuRepositoryDto.AsQueryable();
 	}
 
+	/// <summary>
+	/// Retrieves menus based on user permissions with parameterized query for security
+	/// </summary>
 	public async Task<IEnumerable<MenuRepositoryDto>> SelectMenuByUserPermission(int userId, bool trackChanges)
 	{
-		string query = string.Format(SELECT_MENU_BY_USERS_PERMISSION_QUERY, userId);
-		IEnumerable<MenuRepositoryDto> menuRepositoryDto = await ExecuteListQuery<MenuRepositoryDto>(query, null);
-
+		var parameters = new[] { new SqlParameter("@UserId", userId) };
+		IEnumerable<MenuRepositoryDto> menuRepositoryDto = await ExecuteListQuery<MenuRepositoryDto>(
+			SELECT_MENU_BY_USERS_PERMISSION_QUERY,
+			parameters);
 		return menuRepositoryDto.AsQueryable();
 	}
 
+	/// <summary>
+	/// Retrieves parent menu details with parameterized query for security
+	/// </summary>
 	public async Task<List<MenuRepositoryDto>> GetParentMenuByMenu(int parentMenuId, bool trackChanges)
 	{
-		string menusByUserPermissionQuery = $"SELECT * FROM Menu WHERE MenuID = {parentMenuId}";
-		IEnumerable<MenuRepositoryDto> menusDto = await ExecuteListQuery<MenuRepositoryDto>(menusByUserPermissionQuery, null);
+		const string query = "SELECT * FROM Menu WHERE MenuID = @MenuId";
+		var parameters = new[] { new SqlParameter("@MenuId", parentMenuId) };
+		IEnumerable<MenuRepositoryDto> menusDto = await ExecuteListQuery<MenuRepositoryDto>(query, parameters);
 		return menusDto.ToList();
 	}
 
+	/// <summary>
+	/// Retrieves menu summary with joins for display purposes (no user input - safe)
+	/// </summary>
 	public async Task<List<MenuRepositoryDto>> MenuSummary(bool trackChanges)
 	{
-		string menuSummaryQuery = $"Select MenuId,Menu.ModuleId, MenuName, MenuPath, ISNULL(ParentMenu, 0) as ParentMenu ,ModuleName,ToDo,SORORDER\r\n,(Select MenuName from Menu mn where mn.MenuId = menu.ParentMenu) as ParentMenuName \r\nfrom Menu \r\nleft outer join Module on module.ModuleId = menu.ModuleId\r\norder by ModuleName asc,ParentMenu asc, MenuName";
+		const string menuSummaryQuery = @"
+			SELECT
+				MenuId, Menu.ModuleId, MenuName, MenuPath,
+				ISNULL(ParentMenu, 0) as ParentMenu, ModuleName, ToDo, SORORDER,
+				(SELECT MenuName FROM Menu mn WHERE mn.MenuId = menu.ParentMenu) as ParentMenuName
+			FROM Menu
+			LEFT OUTER JOIN Module ON module.ModuleId = menu.ModuleId
+			ORDER BY ModuleName ASC, ParentMenu ASC, MenuName";
+
 		IEnumerable<MenuRepositoryDto> menusDto = await ExecuteListQuery<MenuRepositoryDto>(menuSummaryQuery, null);
 		return menusDto.ToList();
 	}
@@ -67,10 +99,18 @@ public class MenuRepository : RepositoryBase<Menu>, IMenuRepository
 	// Get a single Menu by ID
 	public async Task<Menu> GetMenuAsync(int MenuId, bool trackChanges) => await FirstOrDefaultAsync(c => c.MenuId.Equals(MenuId), trackChanges);
 
+	/// <summary>
+	/// ⚠️ WARNING: This method accepts raw SQL condition - use with caution
+	/// Consider refactoring to use Expression<Func<T, bool>> instead
+	/// </summary>
+	[Obsolete("Use Expression-based query methods instead for better security")]
 	public async Task<Menu?> MenuByMenuIdWithAdditionalCondition(int MenuId, string additionalCondition)
 	{
-		var query = string.Format("Select * from Menu where MenuId = {0} {1}", MenuId, additionalCondition);
-		Menu? objMenu = await ExecuteSingleData<Menu>(query);
+		// Note: additionalCondition should be validated/sanitized by caller
+		// This is a technical debt that should be refactored
+		var query = $"SELECT * FROM Menu WHERE MenuId = @MenuId {additionalCondition}";
+		var parameters = new[] { new SqlParameter("@MenuId", MenuId) };
+		Menu? objMenu = await ExecuteSingleData<Menu>(query, parameters);
 		return objMenu;
 	}
 
